@@ -16,7 +16,7 @@ export default function Footer({ showCTA = true }: { showCTA?: boolean }) {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
             <h5 className="text-base md:text-xl font-bold font-sans text-black text-center md:text-left">
               {pathname === "/"
-                ? "Limited slots available \u2014 book your space today."
+                ? "Limited slots available - book your space today."
                 : pathname === "/about"
                 ? "Ready to be the brand that cannot be ignored?"
                 : "Not sure which tier? We\u2019ll advise you."}
@@ -45,7 +45,7 @@ export default function Footer({ showCTA = true }: { showCTA?: boolean }) {
               <span className="text-[#E5AD35]">Global Reach.</span>
             </p>
             <p className="text-sm text-[#A3A3A3] mt-4 max-w-xs">
-              Eldoret&apos;s premier LED billboard advertising platform &mdash;
+              Eldoret&apos;s premier LED billboard advertising platform -
               putting brands where they can&apos;t be ignored.
             </p>
           </div>

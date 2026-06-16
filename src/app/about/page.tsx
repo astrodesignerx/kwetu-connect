@@ -6,7 +6,7 @@ export default function AboutPage() {
   return (
     <>
       <section className="relative py-28 lg:py-36 bg-black text-white overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: "url('/landing-page.png')" }} />
+        <div className="absolute inset-0 bg-cover bg-center hero-bg" style={{ backgroundImage: "url('/landing-page.png')" }} />
         <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
@@ -164,7 +164,7 @@ export default function AboutPage() {
                 your brand?
               </h2>
               <p className="text-sm text-gray-500 leading-relaxed mt-4 max-w-xl">
-                We target high-value audiences every day &mdash; across multiple
+                We target high-value audiences every day - across multiple
                 touchpoints and demographics.
               </p>
             </div>

@@ -7,7 +7,7 @@ export default function BillboardPage() {
   return (
     <>
       <section className="relative py-28 lg:py-36 bg-black text-white overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: "url('/images/billboard-landing.png')" }} />
+        <div className="absolute inset-0 bg-cover bg-center hero-bg" style={{ backgroundImage: "url('/images/billboard-landing.png')" }} />
         <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-0">
@@ -19,7 +19,7 @@ export default function BillboardPage() {
               <span className="italic text-[#EDB347]">Strategically</span> placed.
             </h1>
             <p className="text-sm sm:text-base text-gray-300 leading-relaxed max-w-2xl">
-              Positioned in the heart of Eldoret&apos;s busiest corridor &mdash;
+              Positioned in the heart of Eldoret&apos;s busiest corridor -
               capturing traffic inbound to the CBD, outbound to Eldoret
               International Airport, and the Langas residential hub.
             </p>
@@ -50,7 +50,7 @@ export default function BillboardPage() {
                 <div className="flex flex-wrap gap-3">
                   <Link
                     href="/contact"
-                    className="group btn-sweep inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#EDB347] text-black text-sm font-semibold transition-all duration-200 no-underline"
+                    className="group btn-sweep btn-sweep-dark inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#EDB347] text-black hover:text-white text-sm font-semibold transition-all duration-200 no-underline"
                   >
                     Check Availability
                     <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -69,18 +69,20 @@ export default function BillboardPage() {
                 {[
                   { label: "Format", value: "LED Digital Billboard" },
                   { label: "Dimensions", value: "492cm x 379cm" },
-                  { label: "Location", value: "Eldoret Town \u2014 Kisumu Ndogo Road" },
+                  { label: "Location", value: "Eldoret Town - Kisumu Ndogo Road" },
                   { label: "Visibility", value: "Inbound CBD | Outbound Airport | Langas" },
                   { label: "Daily Reach", value: "35,000 \u2013 55,000+ impressions" },
-                  { label: "Availability", value: "Slots Available \u2014 Contact Us" },
+                  { label: "Availability", value: "Slots Available - Contact Us" },
                 ].map((spec) => (
-                  <div key={spec.label} className="p-4 sm:p-6 flex flex-col justify-center min-h-[90px] sm:min-h-[120px]">
-                    <span className="text-[0.55rem] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                      {spec.label}
-                    </span>
-                    <span className="text-xs sm:text-base font-semibold font-sans text-black leading-snug">
-                      {spec.value}
-                    </span>
+                  <div key={spec.label} className="mission-vision-card relative p-5 sm:p-6 flex flex-col justify-center min-h-[90px] sm:min-h-[120px]">
+                    <div className="relative z-10">
+                      <span className="block text-xs sm:text-sm font-bold text-[#A97316] uppercase tracking-wider mb-1.5">
+                        {spec.label}
+                      </span>
+                      <span className="block text-xs sm:text-base font-semibold font-sans text-black leading-snug">
+                        {spec.value}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -146,7 +148,7 @@ export default function BillboardPage() {
               </div>
               <div className="lg:text-right">
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  0.4813&deg; N, 35.2649&deg; E &mdash; Kisumu Ndogo Road,
+                  0.4813&deg; N, 35.2649&deg; E - Kisumu Ndogo Road,
                   Eldoret Town. <span className="text-black font-semibold">Near Langas Junction.</span>
                 </p>
               </div>

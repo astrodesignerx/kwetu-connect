@@ -38,7 +38,7 @@ export default function ServicesPage() {
   return (
     <>
       <section className="relative py-28 lg:py-36 bg-black text-white overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: "url('/images/hero-city.jpg')" }} />
+        <div className="absolute inset-0 bg-cover bg-center hero-bg" style={{ backgroundImage: "url('/images/hero-city.jpg')" }} />
         <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
@@ -53,7 +53,7 @@ export default function ServicesPage() {
             </h1>
             <p className="text-sm sm:text-base text-gray-300 leading-relaxed max-w-2xl">
               We offer flexible advertising packages designed for businesses of
-              every size &mdash; from local shops making their first impression to
+              every size - from local shops making their first impression to
               national brands amplifying their presence in the North Rift.
             </p>
           </div>
@@ -74,7 +74,7 @@ export default function ServicesPage() {
             <div className="lg:text-right">
               <p className="text-sm text-gray-500 leading-relaxed max-w-md lg:ml-auto">
                 All tiers include creative review, scheduling, and
-                performance reporting. No hidden fees &mdash; just clear,
+                performance reporting. No hidden fees - just clear,
                 transparent advertising that delivers.
               </p>
             </div>
@@ -130,7 +130,7 @@ export default function ServicesPage() {
                       href="/contact"
                        className={`group inline-flex items-center justify-center w-full px-6 py-[11px] rounded-full font-semibold text-sm tracking-wide transition-all duration-200 active:scale-[0.97] no-underline ${
                         tier.isFeatured
-                          ? "bg-black text-white hover:bg-gray-900"
+                          ? "btn-sweep bg-black text-white hover:text-black"
                           : "bg-white text-black hover:bg-[#EDB347] hover:text-black"
                       }`}
                     >
@@ -175,7 +175,7 @@ Custom Packages
                     <p className="text-base text-gray-400 leading-relaxed mb-6 flex-1">
                       Have a unique campaign requirement? We&apos;ll build a package
                       around your goals, timeline, and budget. Multi-month,
-                      geo-targeted bursts, product launches &mdash; all welcome.
+                      geo-targeted bursts, product launches - all welcome.
                     </p>
                     <Link
                       href="/contact"
@@ -199,7 +199,7 @@ Custom Packages
                     </h3>
                     <p className="text-base text-gray-400 leading-relaxed mb-6 flex-1">
                       Need your creative done? Our team offers motion and still ad
-                      design services to get your campaign live fast &mdash; bold,
+                      design services to get your campaign live fast - bold,
                       on-screen-ready, optimised for LED.
                     </p>
                     <Link

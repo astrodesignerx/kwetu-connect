@@ -9,6 +9,7 @@ import HeroAccessories from "@/components/HeroAccessories";
 import SpotlightHover from "@/components/SpotlightHover";
 
 export default function HomePage() {
+  const [mounted, setMounted] = useState(false);
   const video1Ref = useRef<HTMLVideoElement>(null);
   const video2Ref = useRef<HTMLVideoElement>(null);
   const [activeVideo, setActiveVideo] = useState<1 | 2>(1);
@@ -16,6 +17,7 @@ export default function HomePage() {
   activeRef.current = activeVideo;
 
   useEffect(() => {
+    setMounted(true);
     const v1 = video1Ref.current;
     const v2 = video2Ref.current;
     if (!v1 || !v2) return;
@@ -50,7 +52,7 @@ export default function HomePage() {
           muted
           loop
           playsInline
-                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-600 ease-linear ${activeVideo === 1 ? "opacity-40" : "opacity-0 pointer-events-none"}`}
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-600 ease-linear ${mounted ? (activeVideo === 1 ? "opacity-40" : "opacity-0 pointer-events-none") : "opacity-0"}`}
         >
           <source src="/videos/hero-loop.mp4" type="video/mp4" />
         </video>
@@ -60,11 +62,25 @@ export default function HomePage() {
           muted
           loop
           playsInline
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${activeVideo === 2 ? "opacity-40" : "opacity-0"}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-600 ease-linear ${mounted ? (activeVideo === 2 ? "opacity-40" : "opacity-0 pointer-events-none") : "opacity-0"}`}
         >
           <source src="/videos/hero-loop-2.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent" />
+        {/* ── Hero overlay effects ── */}
+        <div className="absolute inset-0 scan-lines pointer-events-none" />
+        <div className="absolute inset-0 glow-breathe pointer-events-none" />
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="particle" style={{ left: "10%", bottom: "5%", width: "3px", height: "3px", animationDelay: "0s", animationDuration: "9s" }} />
+          <div className="particle" style={{ left: "25%", bottom: "15%", width: "2px", height: "2px", animationDelay: "2s", animationDuration: "11s" }} />
+          <div className="particle" style={{ left: "40%", bottom: "8%", width: "4px", height: "4px", animationDelay: "4s", animationDuration: "10s" }} />
+          <div className="particle" style={{ left: "55%", bottom: "20%", width: "2px", height: "2px", animationDelay: "1s", animationDuration: "12s" }} />
+          <div className="particle" style={{ left: "70%", bottom: "3%", width: "3px", height: "3px", animationDelay: "6s", animationDuration: "8s" }} />
+          <div className="particle" style={{ left: "85%", bottom: "12%", width: "2px", height: "2px", animationDelay: "3s", animationDuration: "10.5s" }} />
+          <div className="particle" style={{ left: "15%", bottom: "25%", width: "5px", height: "5px", animationDelay: "5s", animationDuration: "13s" }} />
+          <div className="particle" style={{ left: "60%", bottom: "18%", width: "3px", height: "3px", animationDelay: "7s", animationDuration: "9.5s" }} />
+          <div className="particle" style={{ left: "92%", bottom: "10%", width: "2px", height: "2px", animationDelay: "0.5s", animationDuration: "11.5s" }} />
+        </div>
         <div className="flex-1 flex items-center">
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 w-full">
             <div className="max-w-2xl">
