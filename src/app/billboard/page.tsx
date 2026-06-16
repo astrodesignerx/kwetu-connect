@@ -14,10 +14,8 @@ export default function BillboardPage() {
             <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5">
               Our Billboard
             </span>
-            <h1 className="text-[2rem] xs:text-[2.5rem] sm:text-5xl lg:text-3xl font-extrabold leading-tight tracking-[-0.02em] mb-2">
-              One screen.
-            </h1>
             <h1 className="text-[2rem] xs:text-[2.5rem] sm:text-5xl lg:text-3xl font-extrabold leading-tight tracking-[-0.02em] mb-6">
+              One screen.<br />
               <span className="italic text-[#EDB347]">Strategically</span> placed.
             </h1>
             <p className="text-sm sm:text-base text-gray-300 leading-relaxed max-w-2xl">
@@ -52,7 +50,7 @@ export default function BillboardPage() {
                 <div className="flex flex-wrap gap-3">
                   <Link
                     href="/contact"
-                    className="group inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#EDB347] text-black text-sm font-semibold hover:bg-[#f5c84d] transition-colors no-underline"
+                    className="group btn-sweep inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#EDB347] text-black text-sm font-semibold transition-all duration-200 no-underline"
                   >
                     Check Availability
                     <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -61,7 +59,7 @@ export default function BillboardPage() {
                   </Link>
                   <Link
                     href="/services"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-100 transition-colors no-underline"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-100 transition-all active:scale-[0.97] no-underline"
                   >
                     See Packages
                   </Link>
@@ -70,7 +68,7 @@ export default function BillboardPage() {
               <div className="grid grid-cols-2 divide-x divide-y divide-gray-200">
                 {[
                   { label: "Format", value: "LED Digital Billboard" },
-                  { label: "Dimensions", value: "492cm &times; 379cm" },
+                  { label: "Dimensions", value: "492cm x 379cm" },
                   { label: "Location", value: "Eldoret Town \u2014 Kisumu Ndogo Road" },
                   { label: "Visibility", value: "Inbound CBD | Outbound Airport | Langas" },
                   { label: "Daily Reach", value: "35,000 \u2013 55,000+ impressions" },
@@ -95,9 +93,6 @@ export default function BillboardPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <AnimatedItem delay={1}>
             <div className="mb-14">
-              <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5">
-                Mockups
-              </span>
               <h2 className="text-3xl sm:text-4xl lg:text-2xl font-bold leading-tight tracking-[-0.02em] text-white mb-2">
                 See your brand
               </h2>
@@ -142,9 +137,6 @@ export default function BillboardPage() {
           <AnimatedItem delay={1}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-end mb-14">
               <div>
-                <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5">
-                  Find Us
-                </span>
                 <h2 className="text-3xl sm:text-4xl lg:text-2xl font-bold leading-tight tracking-[-0.02em] text-black mb-2">
                   Billboard
                 </h2>
@@ -194,9 +186,6 @@ export default function BillboardPage() {
         <div className="absolute inset-0 bg-black/80" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
           <AnimatedItem delay={1}>
-            <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5">
-              The Opportunity
-            </span>
             <h2 className="text-3xl sm:text-4xl lg:text-2xl font-bold leading-tight tracking-[-0.02em] text-white mb-2">
               Let&apos;s put your brand
             </h2>
@@ -207,7 +196,7 @@ export default function BillboardPage() {
           <AnimatedItem delay={5}>
             <Link
               href="/contact"
-              className="group inline-flex items-center justify-center px-10 py-4 rounded-full bg-[#EDB347] text-black font-bold text-sm tracking-wide hover:bg-[#f5c84d] transition-all duration-200 no-underline"
+              className="group btn-sweep inline-flex items-center justify-center px-10 py-4 rounded-full bg-[#EDB347] text-black font-bold text-sm tracking-wide transition-all duration-200 no-underline"
             >
               Book a Slot
               <svg className="w-4 h-4 ml-1.5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>

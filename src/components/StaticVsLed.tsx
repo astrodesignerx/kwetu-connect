@@ -11,13 +11,10 @@ export default function StaticVsLed() {
         <div className="max-w-[720px] mb-16 lg:mb-20 flex flex-col justify-between min-h-[170px]">
           <div>
             <span
-              className={`section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5 ${
+              className={`${
                 inView ? "animate-fade-up" : "opacity-0"
               }`}
-            >
-              Static vs. LED
-            </span>
-
+            />
             <h2
               className={`text-4xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] tracking-[-0.02em] mb-4 ${
                 inView ? "animate-fade-up delay-1" : "opacity-0"
@@ -35,7 +32,7 @@ export default function StaticVsLed() {
             }`}
           >
             Printed billboards fade into the background. An LED screen commands
-            attention day and night — with motion, repetition, and real-time
+            attention day and night - with motion, repetition, and real-time
             updates that static can never match.
           </p>
         </div>
@@ -51,7 +48,7 @@ export default function StaticVsLed() {
                 Static Billboard
               </span>
               <span className="text-[11px] text-gray-400 italic">
-                — the old way
+                - the old way
               </span>
             </div>
 
@@ -61,10 +58,10 @@ export default function StaticVsLed() {
 
             <ul className="space-y-3">
               {[
-                "Single impression — no repetition",
+                "Single impression - no repetition",
                 "Easily ignored in cluttered environments",
                 "No visibility after dark",
-                "Static content — no updates",
+                "Static content - no updates",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3 text-sm text-gray-600">
                   <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -86,7 +83,7 @@ export default function StaticVsLed() {
                 LED Billboard
               </span>
               <span className="text-[11px] text-white/70 italic">
-                — the Kwetu way
+                - the Kwetu way
               </span>
             </div>
 
@@ -100,7 +97,7 @@ export default function StaticVsLed() {
                 "Motion captures attention instantly",
                 "Multiple exposures every hour",
                 "Real-time content updates",
-                "Visible 24/7 — day and night",
+                "Visible 24/7 - day and night",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3 text-sm text-white/80 font-medium">
                   <svg className="w-4 h-4 text-white/60 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>

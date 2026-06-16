@@ -38,20 +38,18 @@ export default function ServicesPage() {
   return (
     <>
       <section className="relative py-28 lg:py-36 bg-black text-white overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1/2 bg-cover bg-center opacity-20 blur-sm" style={{ backgroundImage: "url('/images/hero-services.jpg')" }} />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/95 to-black" />
+        <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: "url('/images/hero-city.jpg')" }} />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5">
               Services &amp; Packages
             </span>
-            <h1 className="text-[2rem] xs:text-[2.5rem] sm:text-5xl lg:text-3xl font-extrabold leading-tight tracking-[-0.02em] mb-2">
-              High-impact LED
-            </h1>
             <h1 className="text-[2rem] xs:text-[2.5rem] sm:text-5xl lg:text-3xl font-extrabold leading-tight tracking-[-0.02em] mb-6">
-              in{" "}
+              High-impact LED<br />
+              in a{" "}
               <span className="italic text-[#EDB347]">strategic</span>
-              {" "}locations.
+              {" "}location.
             </h1>
             <p className="text-sm sm:text-base text-gray-300 leading-relaxed max-w-2xl">
               We offer flexible advertising packages designed for businesses of
@@ -66,9 +64,6 @@ export default function ServicesPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-end mb-16">
             <div>
-              <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5">
-                Choose Your Tier
-              </span>
               <h2 className="text-3xl sm:text-4xl lg:text-2xl font-extrabold leading-tight tracking-[-0.02em] text-black">
                 Four ways to be
               </h2>
@@ -133,7 +128,7 @@ export default function ServicesPage() {
                     </div>
                     <Link
                       href="/contact"
-                       className={`group inline-flex items-center justify-center w-full px-6 py-[11px] rounded-full font-semibold text-sm tracking-wide transition-all duration-200 no-underline ${
+                       className={`group inline-flex items-center justify-center w-full px-6 py-[11px] rounded-full font-semibold text-sm tracking-wide transition-all duration-200 active:scale-[0.97] no-underline ${
                         tier.isFeatured
                           ? "bg-black text-white hover:bg-gray-900"
                           : "bg-white text-black hover:bg-[#EDB347] hover:text-black"
@@ -158,9 +153,6 @@ export default function ServicesPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <AnimatedItem delay={1}>
             <div className="mb-14">
-              <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5">
-                Beyond Packages
-              </span>
               <h2 className="text-3xl sm:text-4xl lg:text-2xl font-extrabold leading-tight tracking-[-0.02em] text-white">
                 Custom builds &amp;
               </h2>
@@ -178,7 +170,7 @@ export default function ServicesPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
                     <h3 className="text-xl font-bold font-display text-white mb-3">
-                      Custom packages
+Custom Packages
                     </h3>
                     <p className="text-base text-gray-400 leading-relaxed mb-6 flex-1">
                       Have a unique campaign requirement? We&apos;ll build a package
@@ -203,7 +195,7 @@ export default function ServicesPage() {
                       <path d="M8 5v14l11-7z" />
                     </svg>
                     <h3 className="text-xl font-bold font-display text-white mb-3">
-                      Motion &amp; still ad design
+                      Motion &amp; Still Ad Design Services
                     </h3>
                     <p className="text-base text-gray-400 leading-relaxed mb-6 flex-1">
                       Need your creative done? Our team offers motion and still ad

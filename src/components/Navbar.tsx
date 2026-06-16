@@ -8,15 +8,36 @@ const navItems = ["Home", "About", "Services", "Billboard", "Contact"];
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const isHome = pathname === "/";
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
+  useEffect(() => {
+    if (!isHome) {
+      setScrolled(true);
+      return;
+    }
+    const handleScroll = () => {
+      setScrolled(window.scrollY > window.innerHeight);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isHome]);
+
   return (
-    <header className="sticky top-0 z-50 w-full bg-black/95 backdrop-blur-sm border-b border-white/10">
+    <header
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+        scrolled
+          ? "bg-black/95 backdrop-blur-sm border-b border-white/10"
+          : "bg-transparent backdrop-blur-none border-b border-transparent"
+      }`}
+    >
       <div className="mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6 lg:px-8 h-[78px]">
         <Link
           href="/"
@@ -46,7 +67,7 @@ export default function Navbar() {
         <div className="hidden md:block">
           <Link
             href="/contact"
-            className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#EDB347] text-black font-semibold text-sm tracking-wide hover:bg-[#f5c84d] transition-all duration-200 no-underline"
+            className="group btn-sweep inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#EDB347] text-black font-semibold text-sm tracking-wide transition-all duration-200 no-underline"
           >
             Book a Slot
             <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -114,7 +135,7 @@ export default function Navbar() {
             <Link
               href="/contact"
               onClick={() => setMobileOpen(false)}
-              className="group inline-flex items-center justify-center w-full px-5 py-3 rounded-full bg-[#EDB347] text-black font-semibold text-sm tracking-wide hover:bg-[#f5c84d] transition-colors no-underline mt-3"
+              className="group btn-sweep inline-flex items-center justify-center w-full px-5 py-3 rounded-full bg-[#EDB347] text-black font-semibold text-sm tracking-wide transition-all duration-200 no-underline mt-3"
             >
               Book a Slot
               <svg className="w-3.5 h-3.5 ml-1.5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>

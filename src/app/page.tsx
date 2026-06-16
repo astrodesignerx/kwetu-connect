@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import StaticVsLed from "@/components/StaticVsLed";
 import AnimatedSection from "@/components/AnimatedSection";
@@ -8,15 +9,61 @@ import HeroAccessories from "@/components/HeroAccessories";
 import SpotlightHover from "@/components/SpotlightHover";
 
 export default function HomePage() {
+  const video1Ref = useRef<HTMLVideoElement>(null);
+  const video2Ref = useRef<HTMLVideoElement>(null);
+  const [activeVideo, setActiveVideo] = useState<1 | 2>(1);
+  const activeRef = useRef(activeVideo);
+  activeRef.current = activeVideo;
+
+  useEffect(() => {
+    const v1 = video1Ref.current;
+    const v2 = video2Ref.current;
+    if (!v1 || !v2) return;
+    v1.playbackRate = 0.6;
+    v2.playbackRate = 0.6;
+
+    const handleV1 = () => {
+      if (v1.duration - v1.currentTime < 0.6 && activeRef.current === 1) {
+        setActiveVideo(2);
+      }
+    };
+    const handleV2 = () => {
+      if (v2.duration - v2.currentTime < 0.6 && activeRef.current === 2) {
+        setActiveVideo(1);
+      }
+    };
+
+    v1.addEventListener("timeupdate", handleV1);
+    v2.addEventListener("timeupdate", handleV2);
+    return () => {
+      v1.removeEventListener("timeupdate", handleV1);
+      v2.removeEventListener("timeupdate", handleV2);
+    };
+  }, []);
+
   return (
     <>
       <AnimatedSection className="relative min-h-[94vh] flex flex-col bg-black">
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-40"
-          style={{
-            backgroundImage: "url('/landing-page.png')",
-          }}
-        />
+        <video
+          ref={video1Ref}
+          autoPlay
+          muted
+          loop
+          playsInline
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-600 ease-linear ${activeVideo === 1 ? "opacity-40" : "opacity-0 pointer-events-none"}`}
+        >
+          <source src="/videos/hero-loop.mp4" type="video/mp4" />
+        </video>
+        <video
+          ref={video2Ref}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${activeVideo === 2 ? "opacity-40" : "opacity-0"}`}
+        >
+          <source src="/videos/hero-loop-2.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent" />
         <div className="flex-1 flex items-center">
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 w-full">
@@ -43,7 +90,7 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
                   href="/contact"
-                  className="group inline-flex items-center justify-center px-6 py-3 rounded-full bg-[#EDB347] text-black font-semibold text-sm tracking-wide hover:bg-[#f5c84d] transition-all duration-200 no-underline"
+                   className="group btn-sweep inline-flex items-center justify-center px-6 py-3 rounded-full bg-[#EDB347] text-black font-semibold text-sm tracking-wide transition-all duration-200 no-underline"
                 >
                   Book a Slot
                   <svg className="w-3.5 h-3.5 ml-1.5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -52,7 +99,7 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/billboard"
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-full border border-white/30 text-white font-semibold text-sm tracking-wide hover:bg-white/10 transition-all duration-200 no-underline"
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-full border border-white/30 text-white font-semibold text-sm tracking-wide hover:bg-white/10 active:scale-[0.97] transition-all duration-200 no-underline"
                 >
                   View Our Billboard
                 </Link>
@@ -91,18 +138,12 @@ export default function HomePage() {
           <AnimatedItem delay={1}>
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-14">
               <div>
-                <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5">
-                  Daily Impact
-                </span>
                 <h2 className="text-3xl sm:text-4xl lg:text-2xl font-bold leading-tight tracking-[-0.02em] text-white">
                   Numbers that{" "}
                   <span className="italic text-[#EDB347]">deliver</span> results.
                 </h2>
               </div>
               <div className="mt-4 lg:mt-0 lg:text-right">
-                <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em]">
-                  Measured Weekly
-                </span>
               </div>
             </div>
           </AnimatedItem>
@@ -138,9 +179,6 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-14">
             <AnimatedItem delay={1}>
-              <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5">
-                Our Partners
-              </span>
               <h2 className="text-3xl sm:text-4xl lg:text-2xl font-bold leading-tight tracking-[-0.02em] text-black">
                 Who we{" "}
                 <span className="italic text-[#EDB347]">work</span> with.
@@ -162,7 +200,7 @@ export default function HomePage() {
             ].map((category, i) => (
               <AnimatedItem key={category.label} delay={Math.min(i + 2, 5)}>
                 <div className="relative rounded-2xl overflow-hidden min-h-[240px] md:h-96 group transition-all duration-200">
-                  <div className="absolute inset-0 bg-cover bg-center grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110" style={{ backgroundImage: `url('${category.image}')` }} />
+                  <div className="absolute inset-0 bg-cover bg-center md:grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110" style={{ backgroundImage: `url('${category.image}')` }} />
                   <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/95 to-transparent" />
                   <div className="relative h-full flex flex-col items-center justify-end p-6 text-center">
                     <svg className="w-10 h-10 text-[#EDB347] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>

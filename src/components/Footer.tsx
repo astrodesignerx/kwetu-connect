@@ -23,7 +23,7 @@ export default function Footer({ showCTA = true }: { showCTA?: boolean }) {
             </h5>
             <Link
               href="/contact"
-              className="group flex-shrink-0 inline-flex items-center gap-2 px-8 py-4 rounded-full bg-black text-white text-sm font-semibold whitespace-nowrap hover:bg-gray-900 transition-colors no-underline"
+              className="group btn-sweep flex-shrink-0 inline-flex items-center gap-2 px-8 py-4 rounded-full bg-black text-white text-sm font-semibold whitespace-nowrap hover:text-black transition-all duration-200 no-underline"
             >
               {pathname === "/about" ? "Talk To Us" : pathname === "/services" ? "Request A Quote" : "Get In Touch"}
               <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -72,7 +72,7 @@ export default function Footer({ showCTA = true }: { showCTA?: boolean }) {
             </nav>
           </div>
 
-          <div className="lg:col-span-2 lg:col-start-6" style={{ transform: 'translateX(-40px)' }}>
+          <div className="lg:col-span-2 lg:col-start-6 lg:translate-x-[-40px]">
             <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5">
               Contact
             </span>

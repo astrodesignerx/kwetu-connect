@@ -39,17 +39,16 @@ export default function ContactPage() {
   return (
     <>
       <section className="relative py-28 lg:py-36 bg-black text-white overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1/2 bg-[radial-gradient(ellipse_at_50%_-20%,rgba(169,115,22,0.15),transparent_60%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: "url('/images/hero-city.jpg')" }} />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5">
               Get In Touch
             </span>
-            <h1 className="text-[2rem] xs:text-[2.5rem] sm:text-5xl lg:text-3xl font-extrabold leading-tight tracking-[-0.02em] mb-2">
-              Let&apos;s put your brand
-            </h1>
-            <h1 className="text-[2rem] xs:text-[2.5rem] sm:text-5xl lg:text-3xl font-extrabold leading-tight tracking-[-0.02em] mb-6 italic text-[#EDB347]">
-              on the map.
+            <h1 className="text-[2rem] xs:text-[2.5rem] sm:text-5xl lg:text-3xl font-extrabold leading-tight tracking-[-0.02em] mb-6">
+              Let&apos;s put your brand<br />
+              <span className="italic text-[#EDB347]">on the map.</span>
             </h1>
             <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
               Ready to advertise? Fill in the form and the Kwetu Connect team
@@ -90,9 +89,6 @@ export default function ContactPage() {
                 <div className="rounded-2xl border border-gray-200 bg-white shadow-sm p-8 lg:p-10 h-full flex flex-col">
                   <div className="flex items-start justify-between mb-8">
                     <div>
-                      <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-1">
-                        Inquiry Form
-                      </span>
                       <h3 className="text-xl font-bold font-sans text-black">
                         Tell us about your campaign.
                       </h3>
@@ -211,7 +207,7 @@ export default function ContactPage() {
 
                     <button
                       type="submit"
-                      className="group w-full px-8 py-3.5 rounded-full bg-[#EDB347] text-black font-bold text-sm tracking-wide hover:bg-[#f5c84d] transition-all duration-200"
+                      className="group btn-sweep w-full px-8 py-3.5 rounded-full bg-[#EDB347] text-black font-bold text-sm tracking-wide transition-all duration-200"
                     >
                       Send Inquiry
                       <svg className="w-3.5 h-3.5 ml-1.5 inline group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -229,45 +225,42 @@ export default function ContactPage() {
 
             <AnimatedItem delay={2} className="lg:col-span-2 flex flex-col gap-6 h-full">
               <div className="rounded-2xl bg-[#EDB347] p-8">
-                <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-4">
-                  Direct Contact
-                </span>
                 <h3 className="text-xl font-semibold font-sans text-black mb-6">
                   Prefer to call or write?
                 </h3>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <span className="text-[0.55rem] font-semibold text-[#A97316] uppercase tracking-wider flex-shrink-0 w-12">
+                <div className="grid grid-cols-2 gap-3">
+                  <a
+                    href="tel:+254739857576"
+                                        className="rounded-xl bg-black/[0.08] p-4 no-underline hover:bg-white transition-colors duration-500"
+                  >
+                    <span className="text-[0.55rem] font-semibold text-[#A97316] uppercase tracking-wider block mb-1">
                       Phone
                     </span>
-                    <a
-                      href="tel:+254757642224"
-                      className="text-sm font-semibold font-sans text-black hover:underline no-underline"
-                    >
+                    <span className="text-sm font-semibold font-sans text-black">
                       +254 739 857 576
-                    </a>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <span className="text-[0.55rem] font-semibold text-[#A97316] uppercase tracking-wider flex-shrink-0 w-12">
+                    </span>
+                  </a>
+                  <a
+                    href="mailto:info@kwetuconnectadvertising.co.ke"
+                                        className="rounded-xl bg-black/[0.08] p-4 no-underline hover:bg-white transition-colors duration-500"
+                  >
+                    <span className="text-[0.55rem] font-semibold text-[#A97316] uppercase tracking-wider block mb-1">
                       Email
                     </span>
-                    <a
-                      href="mailto:info@kwetuconnectadvertising.co.ke"
-                      className="text-sm font-semibold font-sans text-black hover:underline no-underline break-all"
-                    >
+                    <span className="text-sm font-semibold font-sans text-black break-all">
                       info@kwetuconnectadvertising.co.ke
-                    </a>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <span className="text-[0.55rem] font-semibold text-[#A97316] uppercase tracking-wider flex-shrink-0 w-12">
+                    </span>
+                  </a>
+                  <div className="rounded-xl bg-black/[0.08] p-4 hover:bg-white transition-colors duration-500">
+                    <span className="text-[0.55rem] font-semibold text-[#A97316] uppercase tracking-wider block mb-1">
                       Location
                     </span>
                     <span className="text-sm font-semibold font-sans text-black">
                       Eldoret, Kenya
                     </span>
                   </div>
-                  <div className="flex items-start gap-4">
-                    <span className="text-[0.55rem] font-semibold text-[#A97316] uppercase tracking-wider flex-shrink-0 w-12">
+                  <div className="rounded-xl bg-black/[0.08] p-4 hover:bg-white transition-colors duration-500">
+                    <span className="text-[0.55rem] font-semibold text-[#A97316] uppercase tracking-wider block mb-1">
                       P.O Box
                     </span>
                     <span className="text-sm font-semibold font-sans text-black">
@@ -299,9 +292,6 @@ export default function ContactPage() {
               </div>
 
               <div className="rounded-2xl border border-gray-200 bg-white shadow-sm p-6">
-                <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-4">
-                  Hours
-                </span>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500">Mon &mdash; Fri</span>

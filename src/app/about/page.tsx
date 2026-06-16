@@ -6,7 +6,7 @@ export default function AboutPage() {
   return (
     <>
       <section className="relative py-28 lg:py-36 bg-black text-white overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: "url('/images/about-landing.png')" }} />
+        <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: "url('/landing-page.png')" }} />
         <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
@@ -20,7 +20,7 @@ export default function AboutPage() {
               {" "}is not.
             </h1>
             <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
-              Eldoret is transforming into a regional economic hub — with rapid
+              Eldoret is transforming into a regional economic hub - with rapid
               urban expansion, increasing vehicle and foot traffic, and a
               critical gap in quality digital advertising. Brands are competing,
               but not standing out.{" "}
@@ -73,7 +73,7 @@ export default function AboutPage() {
                     To become the most{" "}
                     <span className="italic text-[#EDB347]">trusted</span> outdoor
                     advertising partner in the North Rift region, enabling every
-                    brand — local or national — to command attention.
+                    brand - local or national - to command attention.
                   </p>
                 </div>
               </div>
@@ -86,9 +86,6 @@ export default function AboutPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <AnimatedItem delay={1}>
             <div className="mb-12">
-              <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5">
-                Why Kwetu
-              </span>
               <h2 className="text-3xl sm:text-4xl lg:text-2xl font-bold leading-tight tracking-[-0.02em] text-white">
                 Five reasons brands
               </h2>
@@ -107,7 +104,7 @@ export default function AboutPage() {
               {
                 num: "02",
                 title: "Strategic Premium Locations",
-                body: "Our billboard sits at one of Eldoret's busiest corridors — capturing CBD-bound traffic, airport travelers, and Langas residents.",
+                body: "Our billboard sits at one of Eldoret's busiest corridors - capturing CBD-bound traffic, airport travelers, and Langas residents.",
               },
               {
                 num: "03",
@@ -117,7 +114,7 @@ export default function AboutPage() {
               {
                 num: "04",
                 title: "Affordable & Flexible Packages",
-                body: "From local shops to national brands — we have a package that fits your budget. No long-term lock-ins required.",
+                body: "From local shops to national brands - we have a package that fits your budget. No long-term lock-ins required.",
               },
               {
                 num: "05",
@@ -160,9 +157,6 @@ export default function AboutPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <AnimatedItem delay={1}>
             <div className="mb-12">
-              <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5">
-                Audience Reach
-              </span>
               <h2 className="text-3xl sm:text-4xl lg:text-2xl font-bold leading-tight tracking-[-0.02em] text-black">
                 Who sees
               </h2>
@@ -185,7 +179,7 @@ export default function AboutPage() {
             ].map((audience, i) => (
               <AnimatedItem key={audience.label} delay={Math.min(i + 2, 5)}>
                 <div className="relative rounded-2xl overflow-hidden min-h-[180px] sm:min-h-[220px] md:h-80 group">
-                  <div className="absolute inset-0 bg-cover bg-center grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110" style={{ backgroundImage: `url('${audience.image}')` }} />
+                  <div className="absolute inset-0 bg-cover bg-center md:grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110" style={{ backgroundImage: `url('${audience.image}')` }} />
                   <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/95 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-5">
                     <h3 className="text-xs sm:text-sm font-bold text-white mb-0.5 font-serif">
