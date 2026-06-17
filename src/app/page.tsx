@@ -7,6 +7,7 @@ import AnimatedSection from "@/components/AnimatedSection";
 import AnimatedItem from "@/components/AnimatedItem";
 import HeroAccessories from "@/components/HeroAccessories";
 import SpotlightHover from "@/components/SpotlightHover";
+import { getLenis } from "@/components/SmoothScroll";
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
@@ -14,6 +15,8 @@ export default function HomePage() {
   const video2Ref = useRef<HTMLVideoElement>(null);
   const [activeVideo, setActiveVideo] = useState<1 | 2>(1);
   const activeRef = useRef(activeVideo);
+  activeRef.current = activeVideo;
+
   activeRef.current = activeVideo;
 
   useEffect(() => {
@@ -25,12 +28,12 @@ export default function HomePage() {
     v2.playbackRate = 0.6;
 
     const handleV1 = () => {
-      if (v1.duration - v1.currentTime < 0.6 && activeRef.current === 1) {
+      if (v1.duration - v1.currentTime < 1.0 && activeRef.current === 1) {
         setActiveVideo(2);
       }
     };
     const handleV2 = () => {
-      if (v2.duration - v2.currentTime < 0.6 && activeRef.current === 2) {
+      if (v2.duration - v2.currentTime < 1.0 && activeRef.current === 2) {
         setActiveVideo(1);
       }
     };
@@ -45,14 +48,14 @@ export default function HomePage() {
 
   return (
     <>
-      <AnimatedSection className="relative min-h-[94vh] flex flex-col bg-black">
+      <AnimatedSection className="relative min-h-[calc(94vh+55px)] flex flex-col bg-black">
         <video
           ref={video1Ref}
           autoPlay
           muted
           loop
           playsInline
-                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-600 ease-linear ${mounted ? (activeVideo === 1 ? "opacity-40" : "opacity-0 pointer-events-none") : "opacity-0"}`}
+                    className={`absolute -top-[88px] left-0 right-0 w-full h-[calc(100%+88px)] object-cover transition-opacity ease-linear ${mounted ? (activeVideo === 1 ? "opacity-40 duration-800" : "opacity-0 pointer-events-none duration-1000 delay-[300ms]") : "opacity-0"}`}
         >
           <source src="/videos/hero-loop.mp4" type="video/mp4" />
         </video>
@@ -62,14 +65,13 @@ export default function HomePage() {
           muted
           loop
           playsInline
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-600 ease-linear ${mounted ? (activeVideo === 2 ? "opacity-40" : "opacity-0 pointer-events-none") : "opacity-0"}`}
+          className={`absolute -top-[88px] left-0 right-0 w-full h-[calc(100%+88px)] object-cover transition-opacity ease-linear ${mounted ? (activeVideo === 2 ? "opacity-40 duration-800" : "opacity-0 pointer-events-none duration-1000 delay-[300ms]") : "opacity-0"}`}
         >
           <source src="/videos/hero-loop-2.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent" />
+        <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent" />
         {/* ── Hero overlay effects ── */}
         <div className="absolute inset-0 scan-lines pointer-events-none" />
-        <div className="absolute inset-0 glow-breathe pointer-events-none" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="particle" style={{ left: "10%", bottom: "5%", width: "3px", height: "3px", animationDelay: "0s", animationDuration: "9s" }} />
           <div className="particle" style={{ left: "25%", bottom: "15%", width: "2px", height: "2px", animationDelay: "2s", animationDuration: "11s" }} />
@@ -98,8 +100,8 @@ export default function HomePage() {
             </AnimatedItem>
             <AnimatedItem delay={3}>
               <p className="text-sm sm:text-base text-gray-300 leading-relaxed mb-10 max-w-xl">
-                Eldoret&apos;s premier LED billboard advertising platform. Put
-                your brand where it can&apos;t be ignored.
+                Eldoret&apos;s premier LED billboard advertising platform.<br />
+                Put your brand where it can&apos;t be ignored.
               </p>
             </AnimatedItem>
             <AnimatedItem delay={4}>
@@ -128,8 +130,13 @@ export default function HomePage() {
         <div className="absolute bottom-0 left-0 right-0 flex justify-center pointer-events-none animate-fade-in-delayed">
         <button
           type="button"
-          onClick={() => {
-            document.getElementById("static-vs-led")?.scrollIntoView({ behavior: "smooth" });
+                    onClick={() => {
+            const lenis = getLenis();
+            if (lenis) {
+              lenis.scrollTo("#static-vs-led", { duration: 1.5 });
+            } else {
+              document.getElementById("static-vs-led")?.scrollIntoView({ behavior: "smooth" });
+            }
           }}
           className="flex flex-col items-center gap-1 pb-8 pointer-events-auto animate-float cursor-pointer bg-transparent border-none"
         >

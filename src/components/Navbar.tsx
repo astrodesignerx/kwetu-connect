@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { getLenis } from "@/components/SmoothScroll";
 
 const navItems = ["Home", "About", "Services", "Billboard", "Contact"];
 
@@ -10,7 +11,6 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const isHome = pathname === "/";
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
@@ -18,27 +18,29 @@ export default function Navbar() {
   }, [mobileOpen]);
 
   useEffect(() => {
-    if (!isHome) {
-      setScrolled(true);
-      return;
-    }
-    const handleScroll = () => {
-      setScrolled(window.scrollY > window.innerHeight);
+    const lenis = getLenis();
+    if (!lenis) return;
+
+    const handleScroll = ({ scroll }: { scroll: number }) => {
+      setScrolled(scroll > 50);
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [isHome]);
+    lenis.on("scroll", handleScroll);
+    handleScroll({ scroll: window.scrollY });
+
+    return () => {
+      lenis.off("scroll", handleScroll);
+    };
+  }, []);
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+      className={`sticky top-0 z-50 w-full transition-all duration-500 ${
         scrolled
           ? "bg-black/95 backdrop-blur-sm border-b border-white/10"
           : "bg-transparent backdrop-blur-none border-b border-transparent"
       }`}
     >
-      <div className="mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6 lg:px-8 h-[78px]">
+      <div className="mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6 lg:px-8 h-[88px]">
         <Link
           href="/"
           className="flex items-center gap-2 text-white no-underline"
@@ -112,7 +114,7 @@ export default function Navbar() {
       )}
 
       {mobileOpen && (
-        <nav className="md:hidden border-t border-white/10 bg-black/98 fixed top-16 left-0 right-0 z-50">
+        <nav className="md:hidden border-t border-white/10 bg-black/98 fixed top-[88px] left-0 right-0 z-50">
           <div className="px-4 py-4 space-y-2">
             {navItems.map((item) => {
               const href = item === "Home" ? "/" : `/${item.toLowerCase()}`;

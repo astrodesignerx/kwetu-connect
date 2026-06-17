@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 html {
-  scroll-behavior: smooth;
 }
 
 @custom-media --breakpoint-xs (width >= 480px);
@@ -332,7 +331,8 @@ html {
   background: var(--sweep-color-ripple, rgba(255, 255, 255, 0.35));
   z-index: -1;
   border-radius: inherit;
-  transform: translateX(-101%);
+  transform-origin: center;
+  transform: scaleX(0);
   opacity: 0;
   transition:
     opacity 250ms ease,
@@ -341,7 +341,7 @@ html {
 
 .btn-sweep:hover::after {
   opacity: 0.35;
-  transform: translateX(0);
+  transform: scaleX(1);
   transition:
     opacity 0ms ease,
     transform 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 0ms;
@@ -359,7 +359,8 @@ html {
   background: var(--sweep-color, white);
   z-index: -1;
   border-radius: inherit;
-  transform: translateX(-101%);
+  transform-origin: center;
+  transform: scaleX(0);
   opacity: 0;
   transition:
     opacity 250ms ease,
@@ -368,7 +369,7 @@ html {
 
 .btn-sweep:hover::before {
   opacity: 1;
-  transform: translateX(0);
+  transform: scaleX(1);
   transition:
     opacity 0ms ease,
     transform 450ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 100ms;

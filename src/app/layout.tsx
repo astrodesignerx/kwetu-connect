@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingButtons from "@/components/FloatingButtons";
+import SmoothScroll from "@/components/SmoothScroll";
 import "./globals.css";
 
 const inter = Inter({
@@ -39,10 +40,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable} h-full scroll-smooth`}>
-      <body className="min-h-full flex flex-col font-sans">
+    <html lang="en" className={`${inter.variable} ${playfair.variable} h-full`}>
+      <body className="bg-black min-h-full flex flex-col font-sans">
+        <SmoothScroll />
         <Navbar />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 -mt-[88px]">{children}</main>
         <Footer />
         <FloatingButtons />
       </body>

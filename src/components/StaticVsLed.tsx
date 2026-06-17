@@ -6,7 +6,7 @@ export default function StaticVsLed() {
   const { ref, inView } = useInView(0.5);
 
   return (
-    <section id="static-vs-led" className="relative py-24 lg:py-32 bg-white overflow-hidden scroll-mt-[78px]">
+    <section id="static-vs-led" className="relative py-24 lg:py-32 bg-white overflow-hidden scroll-mt-[88px]">
       <div ref={ref} className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="max-w-[720px] mb-16 lg:mb-20 flex flex-col justify-between min-h-[170px]">
           <div>

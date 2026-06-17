@@ -84,10 +84,10 @@ export default function Footer({ showCTA = true }: { showCTA?: boolean }) {
                 +254 739 857 576
               </a>
               <a
-                href="mailto:info@kwetuconnectadvertising.co.ke"
+                href="mailto:info@kwetuconnectads.co.ke"
                 className="text-white text-sm hover:text-[#E5AD35] transition-colors no-underline"
               >
-                info@kwetuconnectadvertising.co.ke
+                info@kwetuconnectads.co.ke
               </a>
               <span className="text-white text-sm">Eldoret, Kenya</span>
               <span className="text-white text-sm">P.O Box 8698-30100</span>

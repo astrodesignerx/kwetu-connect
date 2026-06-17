@@ -38,9 +38,9 @@ export default function ContactPage() {
 
   return (
     <>
-      <section className="relative py-28 lg:py-36 bg-black text-white overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center hero-bg" style={{ backgroundImage: "url('/images/hero-city.jpg')" }} />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent" />
+      <section className="relative py-[calc(7rem+30px)] lg:py-[calc(9rem+30px)] bg-black text-white overflow-hidden">
+        <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-cover bg-center hero-bg" style={{ backgroundImage: "url('/images/hero-city.jpg')" }} />
+        <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5">
@@ -228,45 +228,45 @@ export default function ContactPage() {
                 <span className="section-label inline-block text-xs font-semibold text-[#EDB347] uppercase tracking-[0.15em] mb-4">
                   Direct Contact
                 </span>
-                <h3 className="text-xl font-semibold font-sans text-white mb-6">
+                <h3 className="text-xl font-semibold font-sans text-white group-hover:text-black mb-6">
                   Prefer to call or write?
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                   <a
                     href="tel:+254739857576"
-                                        className="rounded-xl bg-white/[0.08] p-4 no-underline hover:bg-white hover:shadow-[0_0_12px_rgba(237,179,71,0.4)] transition-all duration-500"
+                                        className="rounded-xl bg-white/[0.08] p-4 no-underline hover:bg-[#EDB347] hover:shadow-[0_0_12px_rgba(237,179,71,0.4)] transition-all duration-500 group"
                   >
-                    <span className="text-[0.55rem] font-semibold text-[#EDB347] uppercase tracking-wider block mb-1">
+                    <span className="text-[0.55rem] font-semibold text-[#EDB347] group-hover:text-white uppercase tracking-wider block mb-1">
                       Phone
                     </span>
-                    <span className="text-sm font-semibold font-sans text-white">
+                    <span className="text-sm font-semibold font-sans text-white group-hover:text-black">
                       +254 739 857 576
                     </span>
                   </a>
                   <a
                     href="mailto:info@kwetuconnectads.co.ke"
-                                        className="rounded-xl bg-white/[0.08] p-4 no-underline hover:bg-white hover:shadow-[0_0_12px_rgba(237,179,71,0.4)] transition-all duration-500"
+                                        className="rounded-xl bg-white/[0.08] p-4 no-underline hover:bg-[#EDB347] hover:shadow-[0_0_12px_rgba(237,179,71,0.4)] transition-all duration-500 group"
                   >
-                    <span className="text-[0.55rem] font-semibold text-[#EDB347] uppercase tracking-wider block mb-1">
+                    <span className="text-[0.55rem] font-semibold text-[#EDB347] group-hover:text-white uppercase tracking-wider block mb-1">
                       Email
                     </span>
-                    <span className="text-sm font-semibold font-sans text-white break-all">
+                    <span className="text-sm font-semibold font-sans text-white group-hover:text-black break-all">
                       info@kwetuconnectads.co.ke
                     </span>
                   </a>
-                  <div className="rounded-xl bg-white/[0.08] p-4 hover:bg-white hover:shadow-[0_0_12px_rgba(237,179,71,0.4)] transition-all duration-500">
-                    <span className="text-[0.55rem] font-semibold text-[#EDB347] uppercase tracking-wider block mb-1">
+                  <div className="rounded-xl bg-white/[0.08] p-4 hover:bg-[#EDB347] hover:shadow-[0_0_12px_rgba(237,179,71,0.4)] transition-all duration-500 group">
+                    <span className="text-[0.55rem] font-semibold text-[#EDB347] group-hover:text-white uppercase tracking-wider block mb-1">
                       Location
                     </span>
-                    <span className="text-sm font-semibold font-sans text-white">
+                    <span className="text-sm font-semibold font-sans text-white group-hover:text-black">
                       Eldoret, Kenya
                     </span>
                   </div>
-                  <div className="rounded-xl bg-white/[0.08] p-4 hover:bg-white hover:shadow-[0_0_12px_rgba(237,179,71,0.4)] transition-all duration-500">
-                    <span className="text-[0.55rem] font-semibold text-[#EDB347] uppercase tracking-wider block mb-1">
+                  <div className="rounded-xl bg-white/[0.08] p-4 hover:bg-[#EDB347] hover:shadow-[0_0_12px_rgba(237,179,71,0.4)] transition-all duration-500 group">
+                    <span className="text-[0.55rem] font-semibold text-[#EDB347] group-hover:text-white uppercase tracking-wider block mb-1">
                       P.O Box
                     </span>
-                    <span className="text-sm font-semibold font-sans text-white">
+                    <span className="text-sm font-semibold font-sans text-white group-hover:text-black">
                       8698-30100, Eldoret
                     </span>
                   </div>
