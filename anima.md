@@ -1,10 +1,12 @@
-# Effects & Animations
+# anima
 
-Collected animation and effect implementations for the Kwetu Connect site.
+A portable collection of reusable animation patterns for React + Tailwind projects. Copy any recipe below directly into your project.
+
+**How to use**: Each entry includes the full code, required dependencies, and configuration. Drop the component or CSS into your project, install any listed library, and use as shown.
 
 ---
 
-## scroll anima
+## Lenis scroll anima
 
 Global smooth scroll with inertia — page glides to a gentle stop instead of halting instantly.
 
