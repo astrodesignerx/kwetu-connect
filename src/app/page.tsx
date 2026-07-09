@@ -11,77 +11,76 @@ import { getLenis } from "@/components/SmoothScroll";
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
-  const video1Ref = useRef<HTMLVideoElement>(null);
-  const video2Ref = useRef<HTMLVideoElement>(null);
-  const [activeVideo, setActiveVideo] = useState<1 | 2>(1);
-  const activeRef = useRef(activeVideo);
-  activeRef.current = activeVideo;
-
-  activeRef.current = activeVideo;
 
   useEffect(() => {
     setMounted(true);
-    const v1 = video1Ref.current;
-    const v2 = video2Ref.current;
-    if (!v1 || !v2) return;
-    v1.playbackRate = 0.6;
-    v2.playbackRate = 0.6;
-
-    const handleV1 = () => {
-      if (v1.duration - v1.currentTime < 1.0 && activeRef.current === 1) {
-        setActiveVideo(2);
-      }
-    };
-    const handleV2 = () => {
-      if (v2.duration - v2.currentTime < 1.0 && activeRef.current === 2) {
-        setActiveVideo(1);
-      }
-    };
-
-    v1.addEventListener("timeupdate", handleV1);
-    v2.addEventListener("timeupdate", handleV2);
-    return () => {
-      v1.removeEventListener("timeupdate", handleV1);
-      v2.removeEventListener("timeupdate", handleV2);
-    };
   }, []);
 
   return (
     <>
       <AnimatedSection className="relative min-h-[calc(94vh+55px)] flex flex-col bg-black">
-        <video
-          ref={video1Ref}
-          autoPlay
-          muted
-          loop
-          playsInline
-                    className={`absolute -top-[88px] left-0 right-0 w-full h-[calc(100%+88px)] object-cover transition-opacity ease-linear ${mounted ? (activeVideo === 1 ? "opacity-40 duration-800" : "opacity-0 pointer-events-none duration-1000 delay-[300ms]") : "opacity-0"}`}
+        <div
+          className={`absolute -top-[88px] left-0 right-0 w-full h-[calc(100%+88px)] overflow-hidden ${mounted ? "opacity-40" : "opacity-0"} transition-opacity duration-1000 ease-linear`}
         >
-          <source src="/videos/hero-loop.mp4" type="video/mp4" />
-        </video>
-        <video
-          ref={video2Ref}
-          autoPlay
-          muted
-          loop
-          playsInline
-          className={`absolute -top-[88px] left-0 right-0 w-full h-[calc(100%+88px)] object-cover transition-opacity ease-linear ${mounted ? (activeVideo === 2 ? "opacity-40 duration-800" : "opacity-0 pointer-events-none duration-1000 delay-[300ms]") : "opacity-0"}`}
-        >
-          <source src="/videos/hero-loop-2.mp4" type="video/mp4" />
-        </video>
+          <div
+            className="ken-burns absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: "url('/images/hero-kenburns-day.webp')" }}
+          />
+          <div
+            className="ken-burns night-layer absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: "url('/images/hero-kenburns-ii.webp')" }}
+          />
+          <div
+            className="ken-burns crossfade-layer absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: "url('/images/hero-kenburns.webp')" }}
+          />
+        </div>
         <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent" />
         {/* ── Hero overlay effects ── */}
-        <div className="absolute inset-0 scan-lines pointer-events-none" />
+        <div className="absolute inset-0 scan-lines paused-scan pointer-events-none" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="particle" style={{ left: "10%", bottom: "5%", width: "3px", height: "3px", animationDelay: "0s", animationDuration: "9s" }} />
-          <div className="particle" style={{ left: "25%", bottom: "15%", width: "2px", height: "2px", animationDelay: "2s", animationDuration: "11s" }} />
-          <div className="particle" style={{ left: "40%", bottom: "8%", width: "4px", height: "4px", animationDelay: "4s", animationDuration: "10s" }} />
-          <div className="particle" style={{ left: "55%", bottom: "20%", width: "2px", height: "2px", animationDelay: "1s", animationDuration: "12s" }} />
-          <div className="particle" style={{ left: "70%", bottom: "3%", width: "3px", height: "3px", animationDelay: "6s", animationDuration: "8s" }} />
-          <div className="particle" style={{ left: "85%", bottom: "12%", width: "2px", height: "2px", animationDelay: "3s", animationDuration: "10.5s" }} />
-          <div className="particle" style={{ left: "15%", bottom: "25%", width: "5px", height: "5px", animationDelay: "5s", animationDuration: "13s" }} />
-          <div className="particle" style={{ left: "60%", bottom: "18%", width: "3px", height: "3px", animationDelay: "7s", animationDuration: "9.5s" }} />
-          <div className="particle" style={{ left: "92%", bottom: "10%", width: "2px", height: "2px", animationDelay: "0.5s", animationDuration: "11.5s" }} />
+          {[
+            { left: 4, bottom: 6, size: 3, delay: 0.2, dur: 9.0 },
+            { left: 11, bottom: 18, size: 2, delay: 3.4, dur: 11.2 },
+            { left: 17, bottom: 4, size: 4, delay: 1.1, dur: 10.4 },
+            { left: 23, bottom: 22, size: 2, delay: 5.7, dur: 8.6 },
+            { left: 29, bottom: 9, size: 5, delay: 2.3, dur: 12.8 },
+            { left: 35, bottom: 14, size: 3, delay: 6.9, dur: 9.7 },
+            { left: 41, bottom: 3, size: 2, delay: 0.8, dur: 10.1 },
+            { left: 47, bottom: 19, size: 4, delay: 4.5, dur: 11.9 },
+            { left: 53, bottom: 7, size: 3, delay: 7.6, dur: 8.3 },
+            { left: 59, bottom: 24, size: 2, delay: 1.9, dur: 13.1 },
+            { left: 65, bottom: 11, size: 5, delay: 3.8, dur: 9.9 },
+            { left: 71, bottom: 5, size: 3, delay: 5.2, dur: 10.6 },
+            { left: 77, bottom: 16, size: 2, delay: 0.4, dur: 12.2 },
+            { left: 83, bottom: 8, size: 4, delay: 6.1, dur: 8.9 },
+            { left: 89, bottom: 21, size: 3, delay: 2.7, dur: 11.4 },
+            { left: 95, bottom: 13, size: 2, delay: 4.9, dur: 9.3 },
+            { left: 8, bottom: 27, size: 3, delay: 7.1, dur: 10.8 },
+            { left: 14, bottom: 33, size: 2, delay: 1.5, dur: 12.6 },
+            { left: 26, bottom: 30, size: 4, delay: 3.2, dur: 8.7 },
+            { left: 38, bottom: 28, size: 3, delay: 5.4, dur: 11.1 },
+            { left: 50, bottom: 32, size: 2, delay: 0.9, dur: 9.5 },
+            { left: 62, bottom: 29, size: 5, delay: 6.4, dur: 13.4 },
+            { left: 74, bottom: 31, size: 3, delay: 2.0, dur: 10.2 },
+            { left: 86, bottom: 27, size: 2, delay: 4.1, dur: 8.4 },
+            { left: 92, bottom: 34, size: 4, delay: 7.9, dur: 12.0 },
+            { left: 20, bottom: 38, size: 3, delay: 3.6, dur: 9.8 },
+            { left: 68, bottom: 37, size: 2, delay: 1.3, dur: 11.6 },
+          ].map((p, i) => (
+            <div
+              key={i}
+              className="particle"
+              style={{
+                left: `${p.left}%`,
+                bottom: `${p.bottom}%`,
+                width: `${p.size}px`,
+                height: `${p.size}px`,
+                animationDelay: `${p.delay}s`,
+                animationDuration: `${p.dur}s`,
+              }}
+            />
+          ))}
         </div>
         <div className="flex-1 flex items-center">
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 w-full">

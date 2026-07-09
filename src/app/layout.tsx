@@ -32,6 +32,9 @@ export const metadata: Metadata = {
     "outdoor advertising",
     "Kenya",
   ],
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }, { url: "/favicon.ico" }],
+  },
 };
 
 export default function RootLayout({

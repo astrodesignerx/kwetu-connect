@@ -393,6 +393,183 @@ html {
   animation: scan-lines 0.6s linear infinite;
 }
 
+.scan-lines.paused-scan {
+  animation-play-state: paused;
+}
+
+/* ── Hero Ken Burns effect ──
+   Both layers share the EXACT same zoom so the two aligned images
+   stay pixel-locked; a smooth randomized crossfade switches between
+   the two billboard screens. */
+
+:root {
+  --ken-burns-duration: 40s;
+}
+
+@keyframes ken-burns-zoom {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.ken-burns {
+  transform-origin: center center;
+  animation: ken-burns-zoom var(--ken-burns-duration) ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Top layer does a glitch cut + opacity flicker on irregular beats,
+   revealing the aligned layer beneath (same zoom => seamless flip).
+   NOTE: both effects animate opacity, so they MUST live in one keyframe
+   — two separate animations on the same property make the last one win. */
+.crossfade-layer {
+  animation:
+    ken-burns-zoom var(--ken-burns-duration) ease-in-out infinite,
+    glitch-cut 16s steps(1, end) infinite;
+}
+
+/* Night layer fades out at the zoom-out turnarounds (0%/100%) to reveal the
+   day layer beneath, and in at the peak zoom-in (50%). Its zoom transform is
+   unchanged, so the top/this-layer sync stays pixel-perfect. */
+.night-layer {
+  animation:
+    ken-burns-zoom var(--ken-burns-duration) ease-in-out infinite,
+    day-night-fade var(--ken-burns-duration) ease-in-out infinite;
+}
+
+@keyframes day-night-fade {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+/* Hard cuts (opacity 0) in single / double / triple bursts, plus softer
+   flicker dips (opacity ~0.35), all at uneven moments. */
+@keyframes glitch-cut {
+  0%, 7%    { opacity: 1; }
+  8%        { opacity: 0; }
+  9%        { opacity: 1; }
+  11%       { opacity: 0.35; }
+  12%       { opacity: 1; }
+  19%       { opacity: 0; }
+  20%       { opacity: 1; }
+  21%       { opacity: 0; }
+  22%       { opacity: 1; }
+  28%       { opacity: 0.4; }
+  29%       { opacity: 1; }
+  43%       { opacity: 0; }
+  44%       { opacity: 1; }
+  55%       { opacity: 0; }
+  56%       { opacity: 1; }
+  57%       { opacity: 0; }
+  58%       { opacity: 1; }
+  59%       { opacity: 0; }
+  60%, 76%  { opacity: 1; }
+  77%       { opacity: 0.45; }
+  78%       { opacity: 1; }
+  78%       { opacity: 1; }
+  82%       { opacity: 0; }
+  83%       { opacity: 1; }
+  84%       { opacity: 0; }
+  85%       { opacity: 1; }
+  91%       { opacity: 0; }
+  92%       { opacity: 1; }
+  95%       { opacity: 0.35; }
+  96%, 100% { opacity: 1; }
+}
+
+/* RGB-split glitch via pseudo-elements, flashing only during the cut
+   beats (same 16s period as glitch-cut) so the chromatic tear reinforces
+   the screen flip rather than competing with it. */
+.crossfade-layer::before,
+.crossfade-layer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: inherit;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+.crossfade-layer::before {
+  animation: rgb-split-r 8s steps(1, end) infinite;
+}
+
+.crossfade-layer::after {
+  animation: rgb-split-b 8s steps(1, end) infinite;
+}
+
+@keyframes rgb-split-r {
+  0%, 3%   { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  4%       { opacity: 0.85; transform: translate(-5px, 0); clip-path: inset(6% 0 70% 0); }
+  5%, 9%   { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  10%      { opacity: 0.85; transform: translate(-6px, 0); clip-path: inset(30% 0 44% 0); }
+  11%      { opacity: 0.85; transform: translate(-4px, 0); clip-path: inset(40% 0 38% 0); }
+  13%, 19% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  20%      { opacity: 0.85; transform: translate(-5px, 0); clip-path: inset(58% 0 22% 0); }
+  21%, 27% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  28%      { opacity: 0.85; transform: translate(-6px, 0); clip-path: inset(12% 0 64% 0); }
+  29%      { opacity: 0.85; transform: translate(-4px, 0); clip-path: inset(46% 0 30% 0); }
+  31%, 37% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  38%      { opacity: 0.85; transform: translate(-5px, 0); clip-path: inset(20% 0 56% 0); }
+  39%      { opacity: 0.85; transform: translate(-3px, 0); clip-path: inset(66% 0 14% 0); }
+  41%, 47% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  48%      { opacity: 0.85; transform: translate(-6px, 0); clip-path: inset(8% 0 68% 0); }
+  49%      { opacity: 0.85; transform: translate(-4px, 0); clip-path: inset(52% 0 26% 0); }
+  51%, 57% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  58%      { opacity: 0.85; transform: translate(-5px, 0); clip-path: inset(34% 0 40% 0); }
+  59%      { opacity: 0.85; transform: translate(-3px, 0); clip-path: inset(72% 0 10% 0); }
+  61%, 67% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  68%      { opacity: 0.85; transform: translate(-6px, 0); clip-path: inset(18% 0 60% 0); }
+  69%      { opacity: 0.85; transform: translate(-4px, 0); clip-path: inset(48% 0 28% 0); }
+  71%, 77% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  78%      { opacity: 0.85; transform: translate(-5px, 0); clip-path: inset(26% 0 52% 0); }
+  79%      { opacity: 0.85; transform: translate(-3px, 0); clip-path: inset(64% 0 16% 0); }
+  81%, 87% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  88%      { opacity: 0.85; transform: translate(-6px, 0); clip-path: inset(10% 0 66% 0); }
+  89%      { opacity: 0.85; transform: translate(-4px, 0); clip-path: inset(54% 0 24% 0); }
+  91%, 97% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  98%      { opacity: 0.85; transform: translate(-5px, 0); clip-path: inset(38% 0 36% 0); }
+  99%, 100% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+}
+
+@keyframes rgb-split-b {
+  0%, 3%   { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  4%       { opacity: 0.85; transform: translate(5px, 0); clip-path: inset(10% 0 66% 0); }
+  5%, 9%   { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  10%      { opacity: 0.85; transform: translate(6px, 0); clip-path: inset(34% 0 40% 0); }
+  11%      { opacity: 0.85; transform: translate(4px, 0); clip-path: inset(44% 0 34% 0); }
+  13%, 19% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  20%      { opacity: 0.85; transform: translate(5px, 0); clip-path: inset(62% 0 18% 0); }
+  21%, 27% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  28%      { opacity: 0.85; transform: translate(6px, 0); clip-path: inset(16% 0 60% 0); }
+  29%      { opacity: 0.85; transform: translate(4px, 0); clip-path: inset(50% 0 26% 0); }
+  31%, 37% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  38%      { opacity: 0.85; transform: translate(5px, 0); clip-path: inset(24% 0 52% 0); }
+  39%      { opacity: 0.85; transform: translate(3px, 0); clip-path: inset(70% 0 10% 0); }
+  41%, 47% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  48%      { opacity: 0.85; transform: translate(6px, 0); clip-path: inset(12% 0 64% 0); }
+  49%      { opacity: 0.85; transform: translate(4px, 0); clip-path: inset(56% 0 22% 0); }
+  51%, 57% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  58%      { opacity: 0.85; transform: translate(5px, 0); clip-path: inset(38% 0 36% 0); }
+  59%      { opacity: 0.85; transform: translate(3px, 0); clip-path: inset(76% 0 6% 0); }
+  61%, 67% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  68%      { opacity: 0.85; transform: translate(6px, 0); clip-path: inset(22% 0 56% 0); }
+  69%      { opacity: 0.85; transform: translate(4px, 0); clip-path: inset(52% 0 24% 0); }
+  71%, 77% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  78%      { opacity: 0.85; transform: translate(5px, 0); clip-path: inset(28% 0 50% 0); }
+  79%      { opacity: 0.85; transform: translate(3px, 0); clip-path: inset(68% 0 12% 0); }
+  81%, 87% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  88%      { opacity: 0.85; transform: translate(6px, 0); clip-path: inset(14% 0 62% 0); }
+  89%      { opacity: 0.85; transform: translate(4px, 0); clip-path: inset(58% 0 20% 0); }
+  91%, 97% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  98%      { opacity: 0.85; transform: translate(5px, 0); clip-path: inset(42% 0 32% 0); }
+  99%, 100% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+}
+
 @keyframes glow-breathe {
   0%, 100% { opacity: 0.25; }
   50% { opacity: 0.7; }
