@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getLenis } from "@/components/SmoothScroll";
 
 const navItems = ["Home", "About", "Services", "Billboard", "Contact"];
 
@@ -18,18 +18,12 @@ export default function Navbar() {
   }, [mobileOpen]);
 
   useEffect(() => {
-    const lenis = getLenis();
-    if (!lenis) return;
-
-    const handleScroll = ({ scroll }: { scroll: number }) => {
-      setScrolled(scroll > 50);
-    };
-    lenis.on("scroll", handleScroll);
-    handleScroll({ scroll: window.scrollY });
-
-    return () => {
-      lenis.off("scroll", handleScroll);
-    };
+    // Lenis scrolls the window, so the native scroll event covers both the
+    // smooth-scroll path and the fallback when Lenis isn't available.
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
@@ -45,7 +39,7 @@ export default function Navbar() {
           href="/"
           className="flex items-center gap-2 text-white no-underline"
         >
-          <img src="/logo-main.svg" alt="Kwetu Connect" className="h-[41px] w-auto" />
+          <Image src="/logo-main.svg" alt="Kwetu Connect" width={109} height={41} className="h-[41px] w-auto" />
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
@@ -56,7 +50,8 @@ export default function Navbar() {
               <Link
                 key={item}
                 href={href}
-                className={`text-sm font-medium transition-colors duration-200 no-underline ${
+                data-active={isActive}
+                className={`link-underline text-sm font-medium transition-colors duration-200 no-underline ${
                   isActive ? "text-[#EDB347]" : "text-gray-300 hover:text-[#EDB347]"
                 }`}
               >

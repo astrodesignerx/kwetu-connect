@@ -22,7 +22,8 @@ export default function ContactPage() {
     campaignBrief: "",
     preferredPackage: "",
   });
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -31,15 +32,65 @@ export default function ContactPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+
+    // Honeypot: a hidden field real users never see. If it's filled, a bot
+    // completed the form — silently accept without sending anything.
+    const honeypot = (
+      e.currentTarget.elements.namedItem("botcheck") as HTMLInputElement | null
+    )?.value;
+    if (honeypot) {
+      setStatus("sent");
+      return;
+    }
+
+    const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_KEY;
+    if (!accessKey) {
+      setStatus("error");
+      setErrorMessage(
+        "The inquiry form isn't available right now. Please email info@kwetuconnectads.co.ke or call +254 729 911 021."
+      );
+      return;
+    }
+
+    setStatus("sending");
+    setErrorMessage("");
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: accessKey,
+          botcheck: "",
+          subject: `Website inquiry from ${formData.fullName} (${formData.company})`,
+          from_name: "Kwetu Connect Website",
+          name: formData.fullName,
+          company: formData.company,
+          phone: formData.phone,
+          email: formData.email,
+          preferred_package: formData.preferredPackage || "Not specified",
+          message: formData.campaignBrief,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatus("sent");
+      } else {
+        throw new Error(data.message || "Submission failed");
+      }
+    } catch {
+      setStatus("error");
+      setErrorMessage(
+        "Something went wrong sending your inquiry. Please try again, or email info@kwetuconnectads.co.ke."
+      );
+    }
   };
 
   return (
     <>
       <section className="relative py-[calc(7rem+30px)] lg:py-[calc(9rem+30px)] bg-black text-white overflow-hidden">
-        <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-cover bg-center hero-bg" style={{ backgroundImage: "url('/images/hero-city.jpg')" }} />
+        <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-cover bg-center hero-bg" style={{ backgroundImage: "url('/images/hero-city.webp')" }} />
         <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
@@ -62,7 +113,7 @@ export default function ContactPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-16">
             <AnimatedItem delay={1} className="lg:col-span-3 h-full">
-              {submitted ? (
+              {status === "sent" ? (
                 <div className="rounded-2xl border border-green-200 bg-green-50 p-8 text-center h-full">
                   <svg
                     className="w-12 h-12 text-green-600 mx-auto mb-4"
@@ -94,7 +145,7 @@ export default function ContactPage() {
                       </h3>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <span className="text-[0.55rem] font-semibold text-gray-500 uppercase tracking-wider block">
+                      <span className="text-[0.65rem] font-semibold text-gray-500 uppercase tracking-wider block">
                         Avg. Reply
                       </span>
                       <span className="text-xs font-bold text-[#EDB347]">
@@ -103,10 +154,19 @@ export default function ContactPage() {
                     </div>
                   </div>
 
-                  <form onSubmit={handleSubmit} noValidate className="flex-1 flex flex-col">
+                  <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
+                    {/* Honeypot — hidden from real users, catches spam bots. */}
+                    <input
+                      type="text"
+                      name="botcheck"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      aria-hidden="true"
+                      className="hidden"
+                    />
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
                       <div>
-                        <label htmlFor="fullName" className="block text-[0.6rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                        <label htmlFor="fullName" className="block text-[0.7rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                           Full Name <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -121,7 +181,7 @@ export default function ContactPage() {
                         />
                       </div>
                       <div>
-                        <label htmlFor="company" className="block text-[0.6rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                        <label htmlFor="company" className="block text-[0.7rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                           Company / Business <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -136,7 +196,7 @@ export default function ContactPage() {
                         />
                       </div>
                       <div>
-                        <label htmlFor="phone" className="block text-[0.6rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                        <label htmlFor="phone" className="block text-[0.7rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                           Phone Number <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -151,7 +211,7 @@ export default function ContactPage() {
                         />
                       </div>
                       <div>
-                        <label htmlFor="email" className="block text-[0.6rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                        <label htmlFor="email" className="block text-[0.7rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                           Email Address <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -168,14 +228,15 @@ export default function ContactPage() {
                     </div>
 
                     <div className="mb-5">
-                      <span className="block text-[0.6rem] font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                      <span id="package-label" className="block text-[0.7rem] font-semibold text-gray-500 uppercase tracking-wider mb-2">
                         Preferred Package
                       </span>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2" role="group" aria-labelledby="package-label">
                         {packages.map((pkg) => (
                           <button
                             key={pkg}
                             type="button"
+                            aria-pressed={formData.preferredPackage === pkg}
                             onClick={() => setFormData((prev) => ({ ...prev, preferredPackage: pkg }))}
                             className={`px-4 py-2 rounded-full text-xs font-semibold transition-colors border ${
                               formData.preferredPackage === pkg
@@ -190,7 +251,7 @@ export default function ContactPage() {
                     </div>
 
                     <div className="mb-6 flex-1">
-                      <label htmlFor="campaignBrief" className="block text-[0.6rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label htmlFor="campaignBrief" className="block text-[0.7rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                         Campaign Brief <span className="text-red-500">*</span>
                       </label>
                       <textarea
@@ -205,18 +266,33 @@ export default function ContactPage() {
                       />
                     </div>
 
+                    {status === "error" && (
+                      <p role="alert" className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4">
+                        {errorMessage}
+                      </p>
+                    )}
+
                     <button
                       type="submit"
-                      className="group btn-sweep btn-sweep-dark w-full px-8 py-3.5 rounded-full bg-[#EDB347] text-black hover:text-white font-bold text-sm tracking-wide transition-all duration-200"
+                      disabled={status === "sending"}
+                      className="group btn-sweep w-full px-8 py-3.5 rounded-full bg-[#EDB347] text-black font-bold text-sm tracking-wide transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                      Send Inquiry
+                      {status === "sending" ? "Sending…" : "Send Inquiry"}
                       <svg className="w-3.5 h-3.5 ml-1.5 inline group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                       </svg>
                     </button>
 
-                    <p className="text-[0.6rem] text-gray-500 mt-3 text-center">
-                      By submitting, you agree to our privacy policy and terms of service.
+                    <p className="text-[0.7rem] text-gray-500 mt-3 text-center">
+                      By submitting, you agree to our{" "}
+                      <Link href="/privacy" className="text-[#8a5e12] font-semibold hover:text-[#A97316]">
+                        privacy policy
+                      </Link>{" "}
+                      and{" "}
+                      <Link href="/terms" className="text-[#8a5e12] font-semibold hover:text-[#A97316]">
+                        terms of service
+                      </Link>
+                      .
                     </p>
                   </form>
                 </div>
@@ -233,21 +309,21 @@ export default function ContactPage() {
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                   <a
-                    href="tel:+254739857576"
+                    href="tel:+254729911021"
                                         className="rounded-xl bg-white/[0.08] p-4 no-underline hover:bg-[#EDB347] hover:shadow-[0_0_12px_rgba(237,179,71,0.4)] transition-all duration-500 group"
                   >
-                    <span className="text-[0.55rem] font-semibold text-[#EDB347] group-hover:text-white uppercase tracking-wider block mb-1">
+                    <span className="text-[0.65rem] font-semibold text-[#EDB347] group-hover:text-white uppercase tracking-wider block mb-1">
                       Phone
                     </span>
                     <span className="text-sm font-semibold font-sans text-white group-hover:text-black">
-                      +254 739 857 576
+                      +254 729 911 021
                     </span>
                   </a>
                   <a
                     href="mailto:info@kwetuconnectads.co.ke"
                                         className="rounded-xl bg-white/[0.08] p-4 no-underline hover:bg-[#EDB347] hover:shadow-[0_0_12px_rgba(237,179,71,0.4)] transition-all duration-500 group"
                   >
-                    <span className="text-[0.55rem] font-semibold text-[#EDB347] group-hover:text-white uppercase tracking-wider block mb-1">
+                    <span className="text-[0.65rem] font-semibold text-[#EDB347] group-hover:text-white uppercase tracking-wider block mb-1">
                       Email
                     </span>
                     <span className="text-sm font-semibold font-sans text-white group-hover:text-black break-all">
@@ -255,7 +331,7 @@ export default function ContactPage() {
                     </span>
                   </a>
                   <div className="rounded-xl bg-white/[0.08] p-4 hover:bg-[#EDB347] hover:shadow-[0_0_12px_rgba(237,179,71,0.4)] transition-all duration-500 group">
-                    <span className="text-[0.55rem] font-semibold text-[#EDB347] group-hover:text-white uppercase tracking-wider block mb-1">
+                    <span className="text-[0.65rem] font-semibold text-[#EDB347] group-hover:text-white uppercase tracking-wider block mb-1">
                       Location
                     </span>
                     <span className="text-sm font-semibold font-sans text-white group-hover:text-black">
@@ -263,7 +339,7 @@ export default function ContactPage() {
                     </span>
                   </div>
                   <div className="rounded-xl bg-white/[0.08] p-4 hover:bg-[#EDB347] hover:shadow-[0_0_12px_rgba(237,179,71,0.4)] transition-all duration-500 group">
-                    <span className="text-[0.55rem] font-semibold text-[#EDB347] group-hover:text-white uppercase tracking-wider block mb-1">
+                    <span className="text-[0.65rem] font-semibold text-[#EDB347] group-hover:text-white uppercase tracking-wider block mb-1">
                       P.O Box
                     </span>
                     <span className="text-sm font-semibold font-sans text-white group-hover:text-black">
@@ -285,7 +361,7 @@ export default function ContactPage() {
                   allowFullScreen
                 />
                 <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 border border-gray-200 shadow-sm">
-                  <span className="text-[0.5rem] font-semibold text-[#A97316] uppercase tracking-wider block">
+                  <span className="text-[0.5rem] font-semibold text-[#8a5e12] uppercase tracking-wider block">
                     Find Us
                   </span>
                   <span className="text-[0.65rem] text-gray-700 font-medium">

@@ -1,12 +1,21 @@
+import type { Metadata } from "next";
+import Image from "next/image";
 import AnimatedSection from "@/components/AnimatedSection";
 import AnimatedItem from "@/components/AnimatedItem";
 import SpotlightHover from "@/components/SpotlightHover";
+
+export const metadata: Metadata = {
+  title: "About Us — LED Advertising in Eldoret",
+  description:
+    "Kwetu Connect Advertising connects businesses and communities through high-impact LED billboard advertising in Eldoret and the North Rift region.",
+  alternates: { canonical: "/about" },
+};
 
 export default function AboutPage() {
   return (
     <>
       <section className="relative py-[calc(7rem+30px)] lg:py-[calc(9rem+30px)] bg-black text-white overflow-hidden">
-        <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-cover bg-center hero-bg" style={{ backgroundImage: "url('/landing-page.png')" }} />
+        <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-cover bg-center hero-bg" style={{ backgroundImage: "url('/images/about-hero.webp')" }} />
         <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
@@ -39,7 +48,7 @@ export default function AboutPage() {
               <div className="mission-vision-card relative rounded-2xl border border-gray-200 bg-white shadow-sm h-full">
                 <div className="relative z-[2] p-10 h-full">
                   <div className="flex items-start justify-between mb-4">
-                    <span className="text-xs font-semibold text-[#A97316] uppercase tracking-wider">
+                    <span className="text-xs font-semibold text-[#8a5e12] uppercase tracking-wider">
                       Our Mission
                     </span>
                     <div className="rounded-full border border-[#EDB347]/40 p-1.5">
@@ -60,7 +69,7 @@ export default function AboutPage() {
               <div className="mission-vision-card relative rounded-2xl border border-gray-200 bg-white shadow-sm h-full">
                 <div className="relative z-[2] p-10 h-full">
                   <div className="flex items-start justify-between mb-4">
-                    <span className="text-xs font-semibold text-[#A97316] uppercase tracking-wider">
+                    <span className="text-xs font-semibold text-[#8a5e12] uppercase tracking-wider">
                       Our Vision
                     </span>
                     <div className="rounded-full border border-[#EDB347]/40 p-1.5">
@@ -87,10 +96,9 @@ export default function AboutPage() {
           <AnimatedItem delay={1}>
             <div className="mb-12">
               <h2 className="text-3xl sm:text-4xl lg:text-2xl font-bold leading-tight tracking-[-0.02em] text-white">
-                Five reasons brands
-              </h2>
-              <h2 className="text-3xl sm:text-4xl lg:text-2xl font-bold leading-tight tracking-[-0.02em] italic text-[#EDB347]">
-                choose us.
+                Six reasons brands
+                <br />
+                <span className="italic text-[#EDB347]">choose us.</span>
               </h2>
             </div>
           </AnimatedItem>
@@ -159,9 +167,8 @@ export default function AboutPage() {
             <div className="mb-12">
               <h2 className="text-3xl sm:text-4xl lg:text-2xl font-bold leading-tight tracking-[-0.02em] text-black">
                 Who sees
-              </h2>
-              <h2 className="text-3xl sm:text-4xl lg:text-2xl font-bold leading-tight tracking-[-0.02em] italic text-[#EDB347]">
-                your brand?
+                <br />
+                <span className="italic text-[#EDB347]">your brand?</span>
               </h2>
               <p className="text-sm text-gray-500 leading-relaxed mt-4 max-w-xl">
                 We target high-value audiences every day - across multiple
@@ -171,15 +178,21 @@ export default function AboutPage() {
           </AnimatedItem>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
             {[
-              { label: "Local Residents", sublabel: "CBD & Estates", image: "/images/about-landing.png" },
-              { label: "Peri-Urban", sublabel: "Outbound County Residents", image: "/images/real-estate.jpg" },
-              { label: "Transit Traffic", sublabel: "Highway & Commuters", image: "/images/traffic-transit.jpg" },
-              { label: "Active Farmers", sublabel: "Bread Basket of Kenya", image: "/images/retail.jpg" },
-              { label: "Airport Travelers", sublabel: "Eldoret Intl. Airport", image: "/images/hero-billboard.jpg" },
+              { label: "Local Residents", sublabel: "CBD & Estates", image: "/images/about-landing.webp" },
+              { label: "Peri-Urban", sublabel: "Outbound County Residents", image: "/images/real-estate.webp" },
+              { label: "Transit Traffic", sublabel: "Highway & Commuters", image: "/images/traffic-transit.webp" },
+              { label: "Active Farmers", sublabel: "Bread Basket of Kenya", image: "/images/retail.webp" },
+              { label: "Airport Travelers", sublabel: "Eldoret Intl. Airport", image: "/images/hero-billboard.webp" },
             ].map((audience, i) => (
               <AnimatedItem key={audience.label} delay={Math.min(i + 2, 5)}>
                 <div className="relative rounded-2xl overflow-hidden min-h-[180px] sm:min-h-[220px] md:h-80 group">
-                  <div className="absolute inset-0 bg-cover bg-center md:grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110" style={{ backgroundImage: `url('${audience.image}')` }} />
+                  <Image
+                    src={audience.image}
+                    alt={`${audience.label} — ${audience.sublabel}`}
+                    fill
+                    sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
+                    className="object-cover md:grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110"
+                  />
                   <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/95 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-5">
                     <h3 className="text-xs sm:text-sm font-bold text-white mb-0.5 font-serif">

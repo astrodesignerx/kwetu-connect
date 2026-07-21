@@ -10,14 +10,9 @@ export default function StaticVsLed() {
       <div ref={ref} className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="max-w-[720px] mb-16 lg:mb-20 flex flex-col justify-between min-h-[170px]">
           <div>
-            <span
-              className={`${
-                inView ? "animate-fade-up" : "opacity-0"
-              }`}
-            />
             <h2
               className={`text-4xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] tracking-[-0.02em] mb-4 ${
-                inView ? "animate-fade-up delay-1" : "opacity-0"
+                inView ? "animate-fade-up delay-1" : "anim-pending"
               }`}
             >
               <span className="text-black">Static is seen.</span>
@@ -28,7 +23,7 @@ export default function StaticVsLed() {
 
           <p
             className={`text-sm sm:text-base text-gray-500 leading-relaxed max-w-[600px] ${
-              inView ? "animate-fade-up delay-2" : "opacity-0"
+              inView ? "animate-fade-up delay-2" : "anim-pending"
             }`}
           >
             Printed billboards fade into the background. An LED screen commands
@@ -40,7 +35,7 @@ export default function StaticVsLed() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           <div
             className={`mission-vision-card static-card-hover relative rounded-[24px] bg-gray-100 border border-gray-200 p-8 sm:p-10 shadow-xl transition-all duration-500 ${
-              inView ? "animate-fade-up delay-3" : "opacity-0"
+              inView ? "animate-fade-up delay-3" : "anim-pending"
             }`}
           >
             <div className="flex items-center justify-between mb-6">
@@ -52,9 +47,9 @@ export default function StaticVsLed() {
               </span>
             </div>
 
-            <h5 className="text-xl font-bold text-gray-400 mb-6 line-through decoration-gray-300">
+            <h3 className="text-xl font-bold text-gray-400 mb-6 line-through decoration-gray-300">
               Seen once.<br />Easily forgotten.
-            </h5>
+            </h3>
 
             <ul className="space-y-3">
               {[
@@ -75,7 +70,7 @@ export default function StaticVsLed() {
 
           <div
             className={`mission-vision-card relative rounded-[24px] bg-gradient-to-br from-[#A97316] to-[#EDB347] p-8 sm:p-10 shadow-xl shadow-[#A97316]/15 transition-all duration-500 ${
-              inView ? "animate-fade-up delay-4" : "opacity-0"
+              inView ? "animate-fade-up delay-4" : "anim-pending"
             }`}
           >
             <div className="flex items-center justify-between mb-6">
@@ -87,10 +82,10 @@ export default function StaticVsLed() {
               </span>
             </div>
 
-            <h5 className="text-xl font-bold text-white mb-6">
+            <h3 className="text-xl font-bold text-white mb-6">
               Dynamic. Bright.<br />
               <span className="italic">Impossible to ignore.</span>
-            </h5>
+            </h3>
 
             <ul className="space-y-3">
               {[

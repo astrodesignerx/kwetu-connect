@@ -22,7 +22,7 @@ export default function FloatingButtons() {
     <>
       {/* WhatsApp button - left */}
       <a
-        href="https://wa.me/+254739857576"
+        href="https://wa.me/254729911021?text=Hi%20Kwetu%20Connect%2C%20I%27d%20like%20to%20ask%20about%20advertising%20on%20your%20LED%20billboard."
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat on WhatsApp"

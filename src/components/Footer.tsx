@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -14,16 +15,16 @@ export default function Footer({ showCTA = true }: { showCTA?: boolean }) {
       {shouldShowCTA && (
         <section className="bg-[#E5AD35] py-6">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-            <h5 className="text-base md:text-xl font-bold font-sans text-black text-center md:text-left">
+            <p className="text-base md:text-xl font-bold font-sans text-black text-center md:text-left">
               {pathname === "/"
                 ? "Limited slots available - book your space today."
                 : pathname === "/about"
                 ? "Ready to be the brand that cannot be ignored?"
                 : "Not sure which tier? We\u2019ll advise you."}
-            </h5>
+            </p>
             <Link
               href="/contact"
-              className="group btn-sweep flex-shrink-0 inline-flex items-center gap-2 px-8 py-4 rounded-full bg-black text-white text-sm font-semibold whitespace-nowrap hover:text-black transition-all duration-200 no-underline"
+              className="group btn-sweep flex-shrink-0 inline-flex items-center gap-2 px-8 py-4 rounded-full bg-black text-white text-sm font-semibold whitespace-nowrap transition-all duration-200 no-underline"
             >
               {pathname === "/about" ? "Talk To Us" : pathname === "/services" ? "Request A Quote" : "Get In Touch"}
               <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -38,7 +39,7 @@ export default function Footer({ showCTA = true }: { showCTA?: boolean }) {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-9 gap-8 lg:gap-12 items-start">
           <div className="lg:col-span-3 lg:col-start-1">
             <div className="flex items-start gap-3">
-              <img src="/logo-secondary.svg" alt="Kwetu Connect Advertising" className="h-[47.25px] w-auto" />
+              <Image src="/logo-secondary.svg" alt="Kwetu Connect Advertising" width={125} height={47} className="h-[47.25px] w-auto" />
             </div>
             <p className="text-base md:text-lg font-bold text-white mt-6 leading-[1.15] tracking-tight font-sans">
               Local Focus.{" "}
@@ -64,7 +65,7 @@ export default function Footer({ showCTA = true }: { showCTA?: boolean }) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-white text-sm hover:text-[#E5AD35] transition-colors no-underline"
+                  className="link-underline w-fit text-white text-sm hover:text-[#E5AD35] transition-colors no-underline"
                 >
                   {link.label}
                 </Link>
@@ -78,14 +79,14 @@ export default function Footer({ showCTA = true }: { showCTA?: boolean }) {
             </span>
             <div className="flex flex-col gap-4">
               <a
-                href="tel:+254739857576"
-                className="text-white text-sm hover:text-[#E5AD35] transition-colors no-underline"
+                href="tel:+254729911021"
+                className="link-underline w-fit text-white text-sm hover:text-[#E5AD35] transition-colors no-underline"
               >
-                +254 739 857 576
+                +254 729 911 021
               </a>
               <a
                 href="mailto:info@kwetuconnectads.co.ke"
-                className="text-white text-sm hover:text-[#E5AD35] transition-colors no-underline"
+                className="link-underline w-fit text-white text-sm hover:text-[#E5AD35] transition-colors no-underline"
               >
                 info@kwetuconnectads.co.ke
               </a>
@@ -112,9 +113,14 @@ export default function Footer({ showCTA = true }: { showCTA?: boolean }) {
           <p className="text-[0.6rem] sm:text-xs text-[#A3A3A3] uppercase tracking-wider text-center sm:text-left">
             &copy; {year} Kwetu Connect Advertising.
           </p>
-          <p className="text-[0.55rem] sm:text-xs text-[#A3A3A3] uppercase tracking-wider text-center sm:text-left">
-            All Rights Reserved.
-          </p>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="link-underline text-[0.65rem] sm:text-xs text-[#A3A3A3] hover:text-[#E5AD35] uppercase tracking-wider no-underline transition-colors">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="link-underline text-[0.65rem] sm:text-xs text-[#A3A3A3] hover:text-[#E5AD35] uppercase tracking-wider no-underline transition-colors">
+              Terms of Service
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

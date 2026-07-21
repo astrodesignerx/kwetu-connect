@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { preload } from "react-dom";
+import Image from "next/image";
 import Link from "next/link";
 import StaticVsLed from "@/components/StaticVsLed";
 import AnimatedSection from "@/components/AnimatedSection";
@@ -10,17 +11,17 @@ import SpotlightHover from "@/components/SpotlightHover";
 import { getLenis } from "@/components/SmoothScroll";
 
 export default function HomePage() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // The Ken Burns layers are CSS backgrounds (the glitch pseudo-elements
+  // inherit background-image), so hint the browser to fetch them early.
+  preload("/images/hero-kenburns-day.webp", { as: "image" });
+  preload("/images/hero-kenburns-ii.webp", { as: "image" });
+  preload("/images/hero-kenburns.webp", { as: "image" });
 
   return (
     <>
       <AnimatedSection className="relative min-h-[calc(94vh+55px)] flex flex-col bg-black">
         <div
-          className={`absolute -top-[88px] left-0 right-0 w-full h-[calc(100%+88px)] overflow-hidden ${mounted ? "opacity-40" : "opacity-0"} transition-opacity duration-1000 ease-linear`}
+          className="hero-kenburns-enter absolute -top-[88px] left-0 right-0 w-full h-[calc(100%+88px)] overflow-hidden"
         >
           <div
             className="ken-burns absolute inset-0 bg-cover bg-center"
@@ -116,7 +117,7 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/billboard"
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-full border border-white/30 text-white font-semibold text-sm tracking-wide hover:bg-white/10 active:scale-[0.97] transition-all duration-200 no-underline"
+                  className="btn-outline inline-flex items-center justify-center px-6 py-3 rounded-full border border-white/30 text-white font-semibold text-sm tracking-wide hover:bg-white/10 hover:text-[#EDB347] no-underline"
                 >
                   View Our Billboard
                 </Link>
@@ -142,7 +143,7 @@ export default function HomePage() {
           <span className="text-xs uppercase tracking-[0.3em] text-[#8A8A8A]">
             SCROLL
           </span>
-          <svg className="w-4 h-4 text-[#2A2A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+          <svg className="w-4 h-4 text-[#8A8A8A]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 9l7 7 7-7" />
           </svg>
         </button>
@@ -154,7 +155,7 @@ export default function HomePage() {
       <StaticVsLed />
 
       <AnimatedSection className="relative py-20 lg:py-24 bg-black text-white overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center opacity-20 blur-sm" style={{ backgroundImage: "url('/images/stats-traffic.jpg')" }} />
+        <div className="absolute inset-0 bg-cover bg-center opacity-20 blur-sm" style={{ backgroundImage: "url('/images/stats-traffic.webp')" }} />
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/95 to-black" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <AnimatedItem delay={1}>
@@ -164,8 +165,6 @@ export default function HomePage() {
                   Numbers that{" "}
                   <span className="italic text-[#EDB347]">deliver</span> results.
                 </h2>
-              </div>
-              <div className="mt-4 lg:mt-0 lg:text-right">
               </div>
             </div>
           </AnimatedItem>
@@ -177,7 +176,7 @@ export default function HomePage() {
                   { highlight: "35K\u201350K+", title: "Daily Traffic Reached", desc: "Vehicles and pedestrians passing our Eldoret screen every day." },
                   { highlight: "HIGH", title: "Brand Recall Through Repetition", desc: "Multiple exposures per visit drive recognition that static can\u2019t match." },
                   { highlight: "PRIME", title: "Commuter & Foot Traffic Exposure", desc: "Capturing CBD-bound, airport-bound, and Langas corridor traffic." },
-                ].map((col, i) => (
+                ].map((col) => (
                   <div key={col.title} className="p-8 lg:p-10 flex flex-col">
                     <span className="text-3xl sm:text-4xl font-extrabold font-sans text-white mb-2">{col.highlight}</span>
                     <span className="text-base font-bold font-sans text-white mb-3">{col.title}</span>
@@ -215,14 +214,20 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { image: "/images/retail.jpg", label: "Retail & Supermarkets", svg: "M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" },
-              { image: "/images/real-estate.jpg", label: "Real Estate Developers", svg: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
-              { image: "/images/schools.jpg", label: "Schools & Colleges", svg: "M12 14l9-5-9-5-9 5 9 5zm0 7l-9-5 9-5 9 5-9 5z" },
-              { image: "/images/events.jpg", label: "Events & Promotions", svg: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
+              { image: "/images/retail.webp", label: "Retail & Supermarkets", svg: "M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" },
+              { image: "/images/real-estate.webp", label: "Real Estate Developers", svg: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
+              { image: "/images/schools.webp", label: "Schools & Colleges", svg: "M12 14l9-5-9-5-9 5 9 5zm0 7l-9-5 9-5 9 5-9 5z" },
+              { image: "/images/events.webp", label: "Events & Promotions", svg: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
             ].map((category, i) => (
               <AnimatedItem key={category.label} delay={Math.min(i + 2, 5)}>
                 <div className="relative rounded-2xl overflow-hidden min-h-[240px] md:h-96 group transition-all duration-200">
-                  <div className="absolute inset-0 bg-cover bg-center md:grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110" style={{ backgroundImage: `url('${category.image}')` }} />
+                  <Image
+                    src={category.image}
+                    alt={category.label}
+                    fill
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                    className="object-cover md:grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110"
+                  />
                   <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/95 to-transparent" />
                   <div className="relative h-full flex flex-col items-center justify-end p-6 text-center">
                     <svg className="w-10 h-10 text-[#EDB347] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>

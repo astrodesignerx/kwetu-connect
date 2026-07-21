@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import AnimatedSection from "@/components/AnimatedSection";
 import AnimatedItem from "@/components/AnimatedItem";
 import SpotlightHover from "@/components/SpotlightHover";
+
+export const metadata: Metadata = {
+  title: "Services & Packages — LED Billboard Advertising Tiers",
+  description:
+    "Flexible LED billboard advertising packages in Eldoret: Basic, Standard, Premium, and Platinum tiers, plus custom campaigns and creative design services.",
+  alternates: { canonical: "/services" },
+};
 
 const tiers = [
   {
@@ -38,7 +46,7 @@ export default function ServicesPage() {
   return (
     <>
       <section className="relative py-[calc(7rem+30px)] lg:py-[calc(9rem+30px)] bg-black text-white overflow-hidden">
-        <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-cover bg-center hero-bg" style={{ backgroundImage: "url('/images/hero-city.jpg')" }} />
+        <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-cover bg-center hero-bg" style={{ backgroundImage: "url('/images/hero-city.webp')" }} />
         <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
@@ -66,9 +74,8 @@ export default function ServicesPage() {
             <div>
               <h2 className="text-3xl sm:text-4xl lg:text-2xl font-extrabold leading-tight tracking-[-0.02em] text-black">
                 Four ways to be
-              </h2>
-              <h2 className="text-3xl sm:text-4xl lg:text-2xl font-extrabold leading-tight tracking-[-0.02em] italic text-[#EDB347]">
-                on screen.
+                <br />
+                <span className="italic text-[#EDB347]">on screen.</span>
               </h2>
             </div>
             <div className="lg:text-right">
@@ -90,18 +97,18 @@ export default function ServicesPage() {
                     }`}
                   >
                     {tier.isFeatured && (
-                      <span className="top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 w-fit py-1 px-3 bg-black text-white text-[0.6rem] font-bold uppercase tracking-wider rounded-full flex items-center gap-1 shadow-md z-10" style={{ position: 'absolute' }}>
+                      <span className="top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 w-fit py-1 px-3 bg-black text-white text-[0.7rem] font-bold uppercase tracking-wider rounded-full flex items-center gap-1 shadow-md z-10" style={{ position: 'absolute' }}>
                         <svg className="w-3 h-3 text-[#EDB347]" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
                         Most Popular
                       </span>
                     )}
-                    <h5 className={`text-xl sm:text-2xl font-bold font-display mb-5 ${tier.isFeatured ? "text-black" : "text-white"}`}>
+                    <h3 className={`text-xl sm:text-2xl font-bold font-display mb-5 ${tier.isFeatured ? "text-black" : "text-white"}`}>
                       {tier.name}
-                    </h5>
+                    </h3>
                     <div className={`border-t pt-4 pb-3 flex justify-between items-center ${tier.isFeatured ? "border-black/20" : "border-white/10"}`}>
-                      <span className={`text-[0.6rem] uppercase tracking-wider font-semibold ${tier.isFeatured ? "text-black/70" : "text-gray-400"}`}>
+                      <span className={`text-[0.7rem] uppercase tracking-wider font-semibold ${tier.isFeatured ? "text-black/70" : "text-gray-400"}`}>
                         Loop frequency
                       </span>
                       <span className={`text-sm font-bold ${tier.isFeatured ? "text-black" : "text-white"}`}>
@@ -110,7 +117,7 @@ export default function ServicesPage() {
                     </div>
                     <hr className={tier.isFeatured ? "border-black/20" : "border-white/10"} />
                     <div className={`pt-3 pb-4 flex justify-between items-center ${tier.isFeatured ? "border-black/20" : "border-white/10"}`}>
-                      <span className={`text-[0.6rem] uppercase tracking-wider font-semibold ${tier.isFeatured ? "text-black/70" : "text-gray-400"}`}>
+                      <span className={`text-[0.7rem] uppercase tracking-wider font-semibold ${tier.isFeatured ? "text-black/70" : "text-gray-400"}`}>
                         Appearances / hour
                       </span>
                       <span className={`text-2xl font-bold font-display ${tier.isFeatured ? "text-black" : "text-white"}`}>
@@ -119,7 +126,7 @@ export default function ServicesPage() {
                     </div>
                     <hr className={tier.isFeatured ? "border-black/20" : "border-white/10"} />
                     <div className="mt-4 mb-6 flex-1">
-                      <span className={`text-[0.6rem] font-bold uppercase tracking-wider ${tier.isFeatured ? "text-black/70" : "text-gray-400"}`}>
+                      <span className={`text-[0.7rem] font-bold uppercase tracking-wider ${tier.isFeatured ? "text-black/70" : "text-gray-400"}`}>
                         Best For
                       </span>
                       <p className={`text-sm mt-1 leading-relaxed ${tier.isFeatured ? "text-black/80" : "text-gray-400"}`}>
@@ -130,8 +137,8 @@ export default function ServicesPage() {
                       href="/contact"
                        className={`group inline-flex items-center justify-center w-full px-6 py-[11px] rounded-full font-semibold text-sm tracking-wide transition-all duration-200 active:scale-[0.97] no-underline ${
                         tier.isFeatured
-                          ? "btn-sweep bg-black text-white hover:text-black"
-                          : "bg-white text-black hover:bg-[#EDB347] hover:text-black"
+                          ? "btn-sweep bg-black text-white"
+                          : "btn-lift bg-white text-black hover:bg-[#EDB347] hover:text-black"
                       }`}
                     >
                       Request a Quote
@@ -144,7 +151,7 @@ export default function ServicesPage() {
             ))}
           </div>
           <p className="text-sm text-gray-400 leading-relaxed mt-8 text-center">
-            Restricted industries (Politics, Betting) are on a fixed-rate package. Custom packages are also available <span className="text-white font-semibold">contact us for details.</span>
+            Restricted industries (Politics, Betting) are on a fixed-rate package. Custom packages are also available — <span className="text-white font-semibold">contact us for details.</span>
           </p>
         </div>
       </AnimatedSection>
@@ -155,8 +162,7 @@ export default function ServicesPage() {
             <div className="mb-14">
               <h2 className="text-3xl sm:text-4xl lg:text-2xl font-extrabold leading-tight tracking-[-0.02em] text-white">
                 Custom builds &amp;
-              </h2>
-              <h2 className="text-3xl sm:text-4xl lg:text-2xl font-extrabold leading-tight tracking-[-0.02em] text-white">
+                <br />
                 <span className="italic text-[#EDB347]">creative</span> support.
               </h2>
             </div>

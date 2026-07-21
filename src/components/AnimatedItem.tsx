@@ -19,7 +19,7 @@ export default function AnimatedItem({
 
   return (
     <div
-      className={`${inView ? `${animateClass} ${delayClass}` : "opacity-0"} ${className}`}
+      className={`${inView ? `${animateClass} ${delayClass}` : "anim-pending"} ${className}`}
     >
       {children}
     </div>
