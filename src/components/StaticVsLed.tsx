@@ -1,6 +1,7 @@
 "use client";
 
 import { useInView } from "@/hooks/useInView";
+import { Check, X } from "@phosphor-icons/react";
 
 export default function StaticVsLed() {
   const { ref, inView } = useInView(0.5);
@@ -15,9 +16,9 @@ export default function StaticVsLed() {
                 inView ? "animate-fade-up delay-1" : "anim-pending"
               }`}
             >
-              <span className="text-black">Static is seen.</span>
+              <span className="text-black">LED beats static,</span>
               <br />
-              <span className="italic text-[#EDB347]">LED is remembered.</span>
+              <span className="text-black">on every measure.</span>
             </h2>
           </div>
 
@@ -27,14 +28,14 @@ export default function StaticVsLed() {
             }`}
           >
             Printed billboards fade into the background. An LED screen commands
-            attention day and night - with motion, repetition, and real-time
-            updates that static can never match.
+            attention day and night, with motion, repetition, and real-time
+            updates static can never match.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           <div
-            className={`mission-vision-card static-card-hover relative rounded-[24px] bg-gray-100 border border-gray-200 p-8 sm:p-10 shadow-xl transition-all duration-500 ${
+            className={`mission-vision-card static-card-hover relative rounded-2xl bg-gray-100 border border-gray-200 p-8 sm:p-10 shadow-xl transition-all duration-500 ${
               inView ? "animate-fade-up delay-3" : "anim-pending"
             }`}
           >
@@ -59,9 +60,7 @@ export default function StaticVsLed() {
                 "Static content - no updates",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3 text-sm text-gray-600">
-                  <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <X size={16} weight="bold" className="text-gray-400 mt-0.5 flex-shrink-0" />
                   {item}
                 </li>
               ))}
@@ -69,7 +68,7 @@ export default function StaticVsLed() {
           </div>
 
           <div
-            className={`mission-vision-card relative rounded-[24px] bg-gradient-to-br from-[#A97316] to-[#EDB347] p-8 sm:p-10 shadow-xl shadow-[#A97316]/15 transition-all duration-500 ${
+            className={`mission-vision-card relative rounded-2xl bg-gradient-to-br from-brand-600 to-brand-500 p-8 sm:p-10 shadow-xl shadow-brand-600/15 transition-all duration-500 ${
               inView ? "animate-fade-up delay-4" : "anim-pending"
             }`}
           >
@@ -95,9 +94,7 @@ export default function StaticVsLed() {
                 "Visible 24/7 - day and night",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3 text-sm text-white/80 font-medium">
-                  <svg className="w-4 h-4 text-white/60 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <Check size={16} weight="bold" className="text-white/60 mt-0.5 flex-shrink-0" />
                   {item}
                 </li>
               ))}

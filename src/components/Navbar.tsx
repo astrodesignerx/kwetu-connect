@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ArrowRight, List, X } from "@phosphor-icons/react";
 
 const navItems = ["Home", "About", "Services", "Billboard", "Contact"];
 
@@ -18,6 +19,15 @@ export default function Navbar() {
   }, [mobileOpen]);
 
   useEffect(() => {
+    if (!mobileOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
+
+  useEffect(() => {
     // Lenis scrolls the window, so the native scroll event covers both the
     // smooth-scroll path and the fallback when Lenis isn't available.
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -28,7 +38,7 @@ export default function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-500 ${
+      className={`sticky top-0 md:top-10 z-50 w-full transition-all duration-500 ${
         scrolled
           ? "bg-black/95 backdrop-blur-sm border-b border-white/10"
           : "bg-transparent backdrop-blur-none border-b border-transparent"
@@ -52,7 +62,7 @@ export default function Navbar() {
                 href={href}
                 data-active={isActive}
                 className={`link-underline text-sm font-medium transition-colors duration-200 no-underline ${
-                  isActive ? "text-[#EDB347]" : "text-gray-300 hover:text-[#EDB347]"
+                  isActive ? "text-brand-500" : "text-gray-300 hover:text-brand-500"
                 }`}
               >
                 {item}
@@ -64,52 +74,42 @@ export default function Navbar() {
         <div className="hidden md:block">
           <Link
             href="/contact"
-            className="group btn-sweep inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#EDB347] text-black font-semibold text-sm tracking-wide transition-all duration-200 no-underline"
+            className="group btn-sweep inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-500 text-black font-semibold text-sm tracking-wide transition-all duration-200 no-underline"
           >
             Book a Slot
-            <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-            </svg>
+            <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform duration-200" />
           </Link>
         </div>
 
         <button
           type="button"
-          className="md:hidden inline-flex items-center justify-center p-3 text-white hover:text-[#EDB347] transition-colors min-w-[44px] min-h-[44px]"
+          className="md:hidden inline-flex items-center justify-center p-3 text-white hover:text-brand-500 transition-colors min-w-[44px] min-h-[44px]"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
         >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-          >
-            {mobileOpen ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            ) : (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            )}
-          </svg>
+          {mobileOpen ? (
+            <X size={24} weight="bold" />
+          ) : (
+            <List size={24} weight="bold" />
+          )}
         </button>
       </div>
 
-      {mobileOpen && (
-        <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden" onClick={() => setMobileOpen(false)} />
-      )}
+      <div
+        aria-hidden="true"
+        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden transition-opacity duration-200 ease-out ${
+          mobileOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setMobileOpen(false)}
+      />
 
-      {mobileOpen && (
-        <nav className="md:hidden border-t border-white/10 bg-black/98 fixed top-[88px] left-0 right-0 z-50">
+      <nav
+        inert={!mobileOpen}
+        className={`md:hidden border-t border-white/10 bg-black/98 fixed top-[88px] left-0 right-0 z-50 transition-[opacity,translate] duration-200 ease-out ${
+          mobileOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"
+        }`}
+      >
           <div className="px-4 py-4 space-y-2">
             {navItems.map((item) => {
               const href = item === "Home" ? "/" : `/${item.toLowerCase()}`;
@@ -121,8 +121,8 @@ export default function Navbar() {
                   onClick={() => setMobileOpen(false)}
                   className={`block px-4 py-3 text-sm font-medium rounded-lg transition-colors no-underline ${
                     isActive
-                      ? "text-[#EDB347] bg-white/5"
-                      : "text-gray-300 hover:text-[#EDB347] hover:bg-white/5"
+                      ? "text-brand-500 bg-white/5"
+                      : "text-gray-300 hover:text-brand-500 hover:bg-white/5"
                   }`}
                 >
                   {item}
@@ -132,16 +132,13 @@ export default function Navbar() {
             <Link
               href="/contact"
               onClick={() => setMobileOpen(false)}
-              className="group btn-sweep inline-flex items-center justify-center w-full px-5 py-3 rounded-full bg-[#EDB347] text-black font-semibold text-sm tracking-wide transition-all duration-200 no-underline mt-3"
+              className="group btn-sweep inline-flex items-center justify-center w-full px-5 py-3 rounded-full bg-brand-500 text-black font-semibold text-sm tracking-wide transition-all duration-200 no-underline mt-3"
             >
               Book a Slot
-              <svg className="w-3.5 h-3.5 ml-1.5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-              </svg>
+              <ArrowRight size={14} className="ml-1.5 group-hover:translate-x-0.5 transition-transform duration-200" />
             </Link>
           </div>
         </nav>
-      )}
     </header>
   );
 }

@@ -3,9 +3,9 @@
 html {
 }
 
-@custom-media --breakpoint-xs (width >= 480px);
-
 @theme inline {
+  --breakpoint-xs: 30rem;
+
   --color-brand-50: #fef7e9;
   --color-brand-100: #fcedd3;
   --color-brand-200: #f8d9a5;
@@ -38,9 +38,8 @@ html {
   --color-error: #ef4444;
   --color-info: #3b82f6;
 
-  --font-sans: var(--font-inter), 'Inter', sans-serif;
-  --font-display: var(--font-playfair), 'Playfair Display', serif;
-  --font-serif-alt: var(--font-playfair), 'Playfair Display', serif;
+  --font-sans: var(--font-archivo), 'Archivo', sans-serif;
+  --font-display: var(--font-archivo), 'Archivo', sans-serif;
 
   --font-weight-light: 300;
   --font-weight-regular: 400;
@@ -61,8 +60,6 @@ html {
   --text-h3: 1.75rem;
   --text-h2: 2.5rem;
   --text-h1: 3.5rem;
-  --text-2xl: 3.5rem;
-  --text-3xl: 4.5rem;
 
   --leading-tight: 0.9;
   --leading-snug: 1.375;
@@ -525,6 +522,15 @@ html.js .anim-pending {
   animation: rgb-split-b 8s steps(1, end) infinite;
 }
 
+/* The RGB-split pseudo layers use blend modes over full-viewport images —
+   too costly on low-end phones. The glitch-cut flip still carries the effect. */
+@media (width < 40rem) {
+  .crossfade-layer::before,
+  .crossfade-layer::after {
+    display: none;
+  }
+}
+
 @keyframes rgb-split-r {
   0%, 3%   { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
   4%       { opacity: 0.85; transform: translate(-5px, 0); clip-path: inset(6% 0 70% 0); }
@@ -626,6 +632,21 @@ html.js .anim-pending {
   background: rgba(237, 179, 71, 0.5);
   pointer-events: none;
   animation: float-particle 10s ease-in infinite;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-modal-in {
+  animation: modal-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {

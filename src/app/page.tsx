@@ -3,11 +3,14 @@
 import { preload } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight, BuildingOffice, CalendarCheck, CaretDown, GraduationCap, ShoppingCart } from "@phosphor-icons/react";
 import StaticVsLed from "@/components/StaticVsLed";
 import AnimatedSection from "@/components/AnimatedSection";
 import AnimatedItem from "@/components/AnimatedItem";
 import HeroAccessories from "@/components/HeroAccessories";
 import SpotlightHover from "@/components/SpotlightHover";
+import HowItWorks from "@/components/HowItWorks";
+import RecentCampaigns from "@/components/RecentCampaigns";
 import { getLenis } from "@/components/SmoothScroll";
 
 export default function HomePage() {
@@ -19,7 +22,7 @@ export default function HomePage() {
 
   return (
     <>
-      <AnimatedSection className="relative min-h-[calc(94vh+55px)] flex flex-col bg-black">
+      <AnimatedSection className="relative min-h-svh flex flex-col bg-black">
         <div
           className="hero-kenburns-enter absolute -top-[88px] left-0 right-0 w-full h-[calc(100%+88px)] overflow-hidden"
         >
@@ -36,10 +39,12 @@ export default function HomePage() {
             style={{ backgroundImage: "url('/images/hero-kenburns.webp')" }}
           />
         </div>
-        <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent" />
+        {/* Mobile text runs full-width, so a vertical scrim keeps it legible over
+            the photo; desktop text sits on the left, so it fades horizontally. */}
+        <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-gradient-to-t from-black/95 via-black/60 to-black/30 sm:bg-gradient-to-r sm:from-black/80 sm:via-black/60 sm:to-transparent" />
         {/* ── Hero overlay effects ── */}
-        <div className="absolute inset-0 scan-lines paused-scan pointer-events-none" />
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-[88px] left-0 right-0 bottom-0 scan-lines paused-scan pointer-events-none" />
+        <div className="absolute -top-[88px] left-0 right-0 bottom-0 overflow-hidden pointer-events-none">
           {[
             { left: 4, bottom: 6, size: 3, delay: 0.2, dur: 9.0 },
             { left: 11, bottom: 18, size: 2, delay: 3.4, dur: 11.2 },
@@ -71,7 +76,7 @@ export default function HomePage() {
           ].map((p, i) => (
             <div
               key={i}
-              className="particle"
+              className={`particle ${i % 2 ? "max-sm:hidden" : ""}`}
               style={{
                 left: `${p.left}%`,
                 bottom: `${p.bottom}%`,
@@ -83,19 +88,25 @@ export default function HomePage() {
             />
           ))}
         </div>
-        <div className="flex-1 flex items-center">
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 w-full">
+        <div className="flex-1 flex flex-col justify-center">
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20 pb-24 sm:pb-28 w-full">
             <div className="max-w-2xl">
             <AnimatedItem delay={1}>
-              <span className="section-label inline-block text-xs font-semibold text-[#A97316] uppercase tracking-[0.15em] mb-5">
-                LED ADVERTISING
-              </span>
+              <div className="flex items-center gap-2.5 mb-4">
+                <span className="relative flex h-2 w-2" aria-hidden="true">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-brand-500 opacity-60 animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-500" />
+                </span>
+                <span className="section-label inline-block text-xs font-semibold text-brand-600 uppercase tracking-[0.15em]">
+                  LED ADVERTISING
+                </span>
+              </div>
             </AnimatedItem>
             <AnimatedItem delay={2}>
-              <h1 className="text-[2.2rem] xs:text-[2.8rem] sm:text-[4rem] lg:text-[5rem] font-extrabold leading-[0.9] tracking-[-0.02em] text-white mb-6">
-                Connecting<br />
-                <span className="italic text-[#EDB347]">Brands</span> to<br />
-                <span className="italic text-[#EDB347]">Community.</span>
+              <h1 className="text-[2.2rem] xs:text-[2.8rem] sm:text-[4rem] lg:text-[5rem] font-extrabold leading-[1.02] sm:leading-[0.9] tracking-[-0.02em] text-white mb-6">
+                Connecting<br className="hidden sm:block" />{" "}
+                <span className="italic text-brand-500">Brands</span><br />
+                to <span className="italic text-brand-500">Community.</span>
               </h1>
             </AnimatedItem>
             <AnimatedItem delay={3}>
@@ -108,16 +119,14 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
                   href="/contact"
-                   className="group btn-sweep inline-flex items-center justify-center px-6 py-3 rounded-full bg-[#EDB347] text-black font-semibold text-sm tracking-wide transition-all duration-200 no-underline"
+                   className="group btn-sweep inline-flex items-center justify-center px-6 py-3 rounded-full bg-brand-500 text-black font-semibold text-sm tracking-wide transition-all duration-200 no-underline"
                 >
                   Book a Slot
-                  <svg className="w-3.5 h-3.5 ml-1.5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                  </svg>
+                  <ArrowRight size={14} className="ml-1.5 group-hover:translate-x-0.5 transition-transform duration-200" />
                 </Link>
                 <Link
                   href="/billboard"
-                  className="btn-outline inline-flex items-center justify-center px-6 py-3 rounded-full border border-white/30 text-white font-semibold text-sm tracking-wide hover:bg-white/10 hover:text-[#EDB347] no-underline"
+                  className="btn-outline inline-flex items-center justify-center px-6 py-3 rounded-full border border-white/25 text-gray-200 font-semibold text-sm tracking-wide hover:bg-white/10 hover:text-brand-500 hover:border-white/40 no-underline"
                 >
                   View Our Billboard
                 </Link>
@@ -143,9 +152,7 @@ export default function HomePage() {
           <span className="text-xs uppercase tracking-[0.3em] text-[#8A8A8A]">
             SCROLL
           </span>
-          <svg className="w-4 h-4 text-[#8A8A8A]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 9l7 7 7-7" />
-          </svg>
+          <CaretDown size={16} weight="bold" className="text-[#8A8A8A]" />
         </button>
         </div>
       </AnimatedSection>
@@ -154,6 +161,8 @@ export default function HomePage() {
 
       <StaticVsLed />
 
+      <HowItWorks />
+
       <AnimatedSection className="relative py-20 lg:py-24 bg-black text-white overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center opacity-20 blur-sm" style={{ backgroundImage: "url('/images/stats-traffic.webp')" }} />
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/95 to-black" />
@@ -161,21 +170,21 @@ export default function HomePage() {
           <AnimatedItem delay={1}>
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-14">
               <div>
-                <h2 className="text-3xl sm:text-4xl lg:text-2xl font-bold leading-tight tracking-[-0.02em] text-white">
+                <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-white">
                   Numbers that{" "}
-                  <span className="italic text-[#EDB347]">deliver</span> results.
+                  <span className="italic text-brand-500">deliver</span> results.
                 </h2>
               </div>
             </div>
           </AnimatedItem>
           <SpotlightHover>
           <AnimatedItem delay={2}>
-            <div className="rounded-2xl border border-white/5 bg-[#111111] overflow-hidden">
+            <div className="rounded-2xl border border-white/5 bg-surface-base overflow-hidden">
               <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/5">
                 {[
-                  { highlight: "35K\u201350K+", title: "Daily Traffic Reached", desc: "Vehicles and pedestrians passing our Eldoret screen every day." },
-                  { highlight: "HIGH", title: "Brand Recall Through Repetition", desc: "Multiple exposures per visit drive recognition that static can\u2019t match." },
-                  { highlight: "PRIME", title: "Commuter & Foot Traffic Exposure", desc: "Capturing CBD-bound, airport-bound, and Langas corridor traffic." },
+                  { highlight: "35,000\u201355,000+", title: "Daily Impressions", desc: "Vehicles and pedestrians passing our Eldoret screen every day." },
+                  { highlight: "60 /hr", title: "Exposures per Hour", desc: "Multiple exposures per visit drive recognition that static can\u2019t match." },
+                  { highlight: "200 m", title: "Viewing Distance", desc: "Visible well before the junction, day and night, from multi-lane traffic." },
                 ].map((col) => (
                   <div key={col.title} className="p-8 lg:p-10 flex flex-col">
                     <span className="text-3xl sm:text-4xl font-extrabold font-sans text-white mb-2">{col.highlight}</span>
@@ -187,12 +196,6 @@ export default function HomePage() {
             </div>
           </AnimatedItem>
           </SpotlightHover>
-          <AnimatedItem delay={4}>
-            <p className="text-center mt-10 text-base">
-              <span className="text-gray-400 font-medium">Visibility today.</span>{" "}
-              <span className="text-[#EDB347] italic font-semibold">Sales tomorrow.</span>
-            </p>
-          </AnimatedItem>
         </div>
       </AnimatedSection>
 
@@ -200,9 +203,8 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-14">
             <AnimatedItem delay={1}>
-              <h2 className="text-3xl sm:text-4xl lg:text-2xl font-bold leading-tight tracking-[-0.02em] text-black">
-                Who we{" "}
-                <span className="italic text-[#EDB347]">work</span> with.
+              <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-black">
+                Who we work with
               </h2>
             </AnimatedItem>
             <AnimatedItem delay={1}>
@@ -212,45 +214,38 @@ export default function HomePage() {
               </p>
             </AnimatedItem>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {[
-              { image: "/images/retail.webp", label: "Retail & Supermarkets", svg: "M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" },
-              { image: "/images/real-estate.webp", label: "Real Estate Developers", svg: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
-              { image: "/images/schools.webp", label: "Schools & Colleges", svg: "M12 14l9-5-9-5-9 5 9 5zm0 7l-9-5 9-5 9 5-9 5z" },
-              { image: "/images/events.webp", label: "Events & Promotions", svg: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
+              { image: "/images/retail.webp", label: "Retail & Supermarkets", Icon: ShoppingCart },
+              { image: "/images/real-estate.webp", label: "Real Estate Developers", Icon: BuildingOffice },
+              { image: "/images/schools.webp", label: "Schools & Colleges", Icon: GraduationCap },
+              { image: "/images/events.webp", label: "Events & Promotions", Icon: CalendarCheck },
             ].map((category, i) => (
               <AnimatedItem key={category.label} delay={Math.min(i + 2, 5)}>
-                <div className="relative rounded-2xl overflow-hidden min-h-[240px] md:h-96 group transition-all duration-200">
+                <div className="relative rounded-2xl overflow-hidden min-h-[240px] lg:h-[420px] group transition-all duration-200">
                   <Image
                     src={category.image}
                     alt={category.label}
                     fill
-                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                    sizes="(min-width: 1024px) 50vw, (min-width: 640px) 50vw, 100vw"
                     className="object-cover md:grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110"
                   />
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/95 to-transparent" />
-                  <div className="relative h-full flex flex-col items-center justify-end p-6 text-center">
-                    <svg className="w-10 h-10 text-[#EDB347] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={category.svg} />
-                    </svg>
-                    <h3 className="text-base font-bold font-sans text-white group-hover:text-[#EDB347] transition-colors">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/10 md:via-transparent md:to-transparent" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-end p-6 text-center">
+                    <category.Icon size={40} weight="light" className="text-brand-500 mb-4" />
+                    <h3 className="text-base font-bold font-sans text-white group-hover:text-brand-500 transition-colors">
                       {category.label}
                     </h3>
-                    <div className="w-8 h-0.5 bg-[#EDB347] mt-3"></div>
+                    <div className="w-8 h-0.5 bg-brand-500 mt-3"></div>
                   </div>
                 </div>
               </AnimatedItem>
             ))}
           </div>
-          <AnimatedItem delay={5}>
-            <p className="text-center mt-14 text-base">
-              <span className="text-gray-500 font-medium">Your Industry. </span>
-              <span className="text-[#EDB347] italic font-semibold">Your Message.</span>{' '}
-              <span className="text-gray-500 font-medium">Our Screen.</span>
-            </p>
-          </AnimatedItem>
         </div>
       </AnimatedSection>
+
+      <RecentCampaigns />
     </>
   );
 }

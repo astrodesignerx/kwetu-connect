@@ -1,5 +1,6 @@
 import AnimatedSection from "@/components/AnimatedSection";
 import AnimatedItem from "@/components/AnimatedItem";
+import { Star } from "@phosphor-icons/react/ssr";
 
 const marqueeItems = [
   { type: "text", content: "Local Focus" },
@@ -25,17 +26,17 @@ export default function HeroAccessories() {
             item.type === "text" ? (
               <span
                 key={i}
-                className="font-[family-name:var(--font-playfair)] text-base md:text-xl text-[#EDB347] leading-none"
+                className="font-display text-base md:text-xl text-brand-500 leading-none"
               >
                 {item.content}
               </span>
             ) : (
-              <span
+              <Star
                 key={i}
-                className="text-base md:text-xl text-white leading-none"
-              >
-                {item.content}
-              </span>
+                size={16}
+                weight="fill"
+                className="w-4 h-4 md:w-5 md:h-5 text-white shrink-0 leading-none"
+              />
             )
           )}
         </div>

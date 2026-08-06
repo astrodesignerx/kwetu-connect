@@ -1,44 +1,42 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 
 export default function SpotlightHover({ children }: { children: React.ReactNode }) {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0, opacity: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
+    const container = containerRef.current;
+    const overlay = overlayRef.current;
+    if (!container || !overlay) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = section.getBoundingClientRect();
-      setPosition({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-        opacity: 1,
-      });
+    const handleMove = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      container.style.setProperty("--sx", `${e.clientX - rect.left}px`);
+      container.style.setProperty("--sy", `${e.clientY - rect.top}px`);
     };
+    const handleEnter = () => overlay.classList.add("opacity-100");
+    const handleLeave = () => overlay.classList.remove("opacity-100");
 
-    const handleMouseLeave = () => {
-      setPosition((prev) => ({ ...prev, opacity: 0 }));
-    };
-
-    section.addEventListener("mousemove", handleMouseMove);
-    section.addEventListener("mouseleave", handleMouseLeave);
-
+    container.addEventListener("mousemove", handleMove);
+    container.addEventListener("mouseenter", handleEnter);
+    container.addEventListener("mouseleave", handleLeave);
     return () => {
-      section.removeEventListener("mousemove", handleMouseMove);
-      section.removeEventListener("mouseleave", handleMouseLeave);
+      container.removeEventListener("mousemove", handleMove);
+      container.removeEventListener("mouseenter", handleEnter);
+      container.removeEventListener("mouseleave", handleLeave);
     };
   }, []);
 
   return (
-    <div ref={sectionRef} className="relative">
+    <div ref={containerRef} className="relative">
       <div
-        className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-500"
+        ref={overlayRef}
+        className="pointer-events-none absolute inset-0 z-10 opacity-0 transition-opacity duration-500"
         style={{
-          opacity: position.opacity,
-          background: `radial-gradient(500px circle at ${position.x}px ${position.y}px, rgba(237, 179, 71, 0.15), transparent 50%)`,
+          background:
+            "radial-gradient(500px circle at var(--sx, 50%) var(--sy, 50%), rgba(237, 179, 71, 0.15), transparent 50%)",
         }}
       />
       {children}

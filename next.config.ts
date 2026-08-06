@@ -4,19 +4,19 @@ const isProd = process.env.NODE_ENV === "production";
 
 // Next.js (RSC flight data) and this site's JSON-LD / feature-detect snippet are
 // inlined, so script/style need 'unsafe-inline'. Everything else is locked to
-// same-origin plus the two third parties the site actually talks to:
-// api.web3forms.com (contact form) and Google Maps (embedded iframe).
+// same-origin. The contact form posts to our own /api/contact route (covered by
+// 'self'); the only third party is Google Maps (embedded iframe).
 const contentSecurityPolicy = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self'",
-  "connect-src 'self' https://api.web3forms.com",
+  "connect-src 'self'",
   "frame-src https://maps.google.com https://www.google.com",
   "frame-ancestors 'self'",
   "base-uri 'self'",
-  "form-action 'self' https://api.web3forms.com",
+  "form-action 'self'",
   "object-src 'none'",
   "upgrade-insecure-requests",
 ].join("; ");

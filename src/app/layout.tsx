@@ -1,23 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Archivo } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingButtons from "@/components/FloatingButtons";
 import SmoothScroll from "@/components/SmoothScroll";
 import PixelWaveButtons from "@/components/PixelWaveButtons";
+import UtilityBar from "@/components/UtilityBar";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const archivo = Archivo({
+  variable: "--font-archivo",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  style: ["normal", "italic"],
+  axes: ["wdth"],
   display: "swap",
 });
 
@@ -118,7 +113,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${playfair.variable} h-full`}>
+    <html lang="en" suppressHydrationWarning className={`${archivo.variable} h-full`}>
       <body className="bg-black min-h-full flex flex-col font-sans">
         {/* Marks JS availability before first paint so reveal animations
             only hide content when they can actually reveal it again. */}
@@ -133,12 +128,13 @@ export default function RootLayout({
         />
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-lg focus:bg-[#EDB347] focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-black"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-lg focus:bg-brand-500 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-black"
         >
           Skip to content
         </a>
         <SmoothScroll />
         <PixelWaveButtons />
+        <UtilityBar />
         <Navbar />
         <main id="main-content" className="flex-1 -mt-[88px]">{children}</main>
         <Footer />

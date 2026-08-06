@@ -47,7 +47,7 @@ export default function TermsPage() {
   return (
     <section className="bg-white pt-[calc(88px+4rem)] pb-20">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <span className="section-label inline-block text-xs font-semibold text-[#8a5e12] uppercase tracking-[0.15em] mb-5">
+        <span className="section-label inline-block text-xs font-semibold text-brand-700 uppercase tracking-[0.15em] mb-5">
           Legal
         </span>
         <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight tracking-[-0.02em] text-black mb-4">
@@ -64,7 +64,7 @@ export default function TermsPage() {
         </div>
         <p className="text-sm text-gray-500 mt-12">
           See also our{" "}
-          <Link href="/privacy" className="text-[#8a5e12] font-semibold hover:text-[#A97316]">
+          <Link href="/privacy" className="text-brand-700 font-semibold hover:text-brand-600">
             Privacy Policy
           </Link>
           .
