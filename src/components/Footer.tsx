@@ -38,7 +38,7 @@ export default function Footer({ showCTA = true }: { showCTA?: boolean }) {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-9 gap-8 lg:gap-12 items-start">
           <div className="lg:col-span-3 lg:col-start-1">
             <div className="flex items-start gap-3">
-              <Image src="/logo-secondary.svg" alt="Kwetu Connect Advertising" width={125} height={47} className="h-[47.25px] w-auto" />
+              <Image src="/logo-main.svg" alt="Kwetu Connect Advertising" width={154} height={47} className="h-[47.25px] w-auto" />
             </div>
             <p className="text-base md:text-lg font-bold text-white mt-6 leading-[1.15] tracking-tight font-sans">
               Local Focus.{" "}

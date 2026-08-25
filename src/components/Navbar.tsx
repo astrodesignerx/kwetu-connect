@@ -49,7 +49,7 @@ export default function Navbar() {
           href="/"
           className="flex items-center gap-2 text-white no-underline"
         >
-          <Image src="/logo-main.svg" alt="Kwetu Connect" width={109} height={41} className="h-[41px] w-auto" />
+          <Image src="/logo-main.svg" alt="Kwetu Connect" width={134} height={41} className="h-[41px] w-auto" />
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">

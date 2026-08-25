@@ -61,9 +61,6 @@ export const metadata: Metadata = {
       "Eldoret's premier LED billboard advertising platform. Put your brand where it can't be ignored.",
     images: ["/images/og-image.jpg"],
   },
-  icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }, { url: "/favicon.ico" }],
-  },
 };
 
 export const viewport: Viewport = {
