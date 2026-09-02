@@ -1,40 +1,58 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react";
 import AnimatedSection from "@/components/AnimatedSection";
 import AnimatedItem from "@/components/AnimatedItem";
 import { campaigns } from "@/data/campaigns";
 
-function MarqueeCard({ campaign }: { campaign: (typeof campaigns)[number] }) {
+function MarqueeCard({
+  campaign,
+  index,
+  activeIndex,
+  onHover,
+  onLeave,
+}: {
+  campaign: (typeof campaigns)[number];
+  index: number;
+  activeIndex: number | null;
+  onHover: (idx: number) => void;
+  onLeave: () => void;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const handleEnter = () => {
+  // All videos autoplay by default; when a card is hovered, pause all others.
+  useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    v.play().catch(() => {});
-  };
+    if (activeIndex === null) {
+      v.play().catch(() => {});
+    } else if (activeIndex === index) {
+      v.play().catch(() => {});
+    } else {
+      v.pause();
+    }
+  }, [activeIndex, index]);
 
-  const handleLeave = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.pause();
-    // keep last frame; don't reset so poster doesn't flash on quick re-hover
-  };
+  // Ensure autoplay on mount (muted inline is allowed, but some browsers need a kick)
+  useEffect(() => {
+    videoRef.current?.play().catch(() => {});
+  }, []);
 
   return (
     <div
       className="group/card relative flex-none w-[300px] sm:w-[380px] lg:w-[440px] aspect-video overflow-hidden rounded-xl bg-surface-base border border-white/10 select-none"
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
-      onFocus={handleEnter}
-      onBlur={handleLeave}
+      onMouseEnter={() => onHover(index)}
+      onMouseLeave={onLeave}
+      onFocus={() => onHover(index)}
+      onBlur={onLeave}
     >
       <video
         ref={videoRef}
         src={campaign.video}
         poster={campaign.cover}
+        autoPlay
         muted
         loop
         playsInline
@@ -63,6 +81,7 @@ export default function RecentCampaigns() {
   const isDraggingRef = useRef(false);
   const startXRef = useRef(0);
   const startScrollRef = useRef(0);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const el = viewportRef.current;
@@ -164,7 +183,14 @@ export default function RecentCampaigns() {
           >
             <div className="flex w-max gap-4 sm:gap-5 pr-4 sm:pr-5">
               {loop.map((campaign, idx) => (
-                <MarqueeCard key={`${campaign.slug}-${idx}`} campaign={campaign} />
+                <MarqueeCard
+                  key={`${campaign.slug}-${idx}`}
+                  campaign={campaign}
+                  index={idx}
+                  activeIndex={activeIndex}
+                  onHover={setActiveIndex}
+                  onLeave={() => setActiveIndex(null)}
+                />
               ))}
             </div>
           </div>
