@@ -11,21 +11,50 @@ function MarqueeCard({
   campaign,
   index,
   activeIndex,
+  viewportRef,
   onHover,
   onLeave,
 }: {
   campaign: (typeof campaigns)[number];
   index: number;
   activeIndex: number | null;
+  viewportRef: React.RefObject<HTMLDivElement | null>;
   onHover: (idx: number) => void;
   onLeave: () => void;
 }) {
+  const cardRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const isVisibleRef = useRef(true);
 
-  // All videos autoplay by default; when a card is hovered, pause all others.
+  // Visible-only decode: pause off-screen videos to cut concurrent decodes from 12 to ~4.
+  useEffect(() => {
+    const card = cardRef.current;
+    const viewport = viewportRef.current;
+    if (!card || !viewport) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+        const v = videoRef.current;
+        if (!v) return;
+        if (!entry.isIntersecting) {
+          v.pause();
+        } else if (activeIndex === null || activeIndex === index) {
+          v.play().catch(() => {});
+        }
+      },
+      { root: viewport, threshold: 0.1, rootMargin: "80px" }
+    );
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, [viewportRef, activeIndex, index]);
+
+  // All visible videos play by default; when a card is hovered, pause all others.
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
+    if (!isVisibleRef.current) return; // off-screen stays paused
     if (activeIndex === null) {
       v.play().catch(() => {});
     } else if (activeIndex === index) {
@@ -42,7 +71,8 @@ function MarqueeCard({
 
   return (
     <div
-      className="group/card relative flex-none w-[300px] sm:w-[380px] lg:w-[440px] aspect-video overflow-hidden rounded-xl bg-surface-base border border-white/10 select-none"
+      ref={cardRef}
+      className="group/card relative flex-none w-[300px] sm:w-[380px] lg:w-[440px] aspect-video overflow-hidden rounded-xl bg-surface-base border border-white/10 select-none [contain:layout_paint] [will-change:transform]"
       onMouseEnter={() => onHover(index)}
       onMouseLeave={onLeave}
       onFocus={() => onHover(index)}
@@ -112,7 +142,7 @@ export default function RecentCampaigns() {
           <div>
             <AnimatedItem delay={1}>
               <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-white">
-                Recently on screen
+                Recently on <span className="italic text-brand-500">screen</span>
               </h2>
             </AnimatedItem>
             <AnimatedItem delay={2}>
@@ -188,6 +218,7 @@ export default function RecentCampaigns() {
                   campaign={campaign}
                   index={idx}
                   activeIndex={activeIndex}
+                  viewportRef={viewportRef}
                   onHover={setActiveIndex}
                   onLeave={() => setActiveIndex(null)}
                 />
