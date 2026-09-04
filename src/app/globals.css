@@ -24,6 +24,10 @@ html {
   --color-bg-dark-800: #111111;
   --color-bg-dark: #000000;
 
+  /* Soft charcoal used for page sections instead of pure black.
+     Pure black stays reserved for video letterbox and overlays. */
+  --color-ink: #141414;
+
   --color-surface-base: #111111;
   --color-surface-raised: #1a1a1a;
   --color-surface-overlay: #222222;
@@ -92,7 +96,7 @@ html {
     font-family: var(--font-sans);
     font-weight: var(--font-weight-regular);
     color: var(--color-text-primary);
-    background-color: var(--color-bg-dark-900);
+    background-color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

@@ -5,7 +5,6 @@ import Footer from "@/components/Footer";
 import FloatingButtons from "@/components/FloatingButtons";
 import SmoothScroll from "@/components/SmoothScroll";
 import PixelWaveButtons from "@/components/PixelWaveButtons";
-import UtilityBar from "@/components/UtilityBar";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -111,7 +110,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${archivo.variable} h-full`}>
-      <body className="bg-black min-h-full flex flex-col font-sans">
+      <body className="bg-ink min-h-full flex flex-col font-sans">
         {/* Marks JS availability before first paint so reveal animations
             only hide content when they can actually reveal it again. */}
         <script
@@ -131,7 +130,6 @@ export default function RootLayout({
         </a>
         <SmoothScroll />
         <PixelWaveButtons />
-        <UtilityBar />
         <Navbar />
         <main id="main-content" className="flex-1 -mt-[88px]">{children}</main>
         <Footer />

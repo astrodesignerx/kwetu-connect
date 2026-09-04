@@ -67,7 +67,7 @@ export default function CampaignCard({ campaign }: { campaign: Campaign }) {
     <>
       <div
         ref={containerRef}
-        className="group relative rounded-2xl overflow-hidden border border-white/5 bg-surface-base"
+        className="group relative rounded-2xl overflow-hidden border border-white/5 bg-surface-raised"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >

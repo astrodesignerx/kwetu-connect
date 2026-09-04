@@ -76,7 +76,7 @@ export default function ContactPage() {
 
   return (
     <>
-      <section className="relative py-[calc(6rem+30px)] lg:py-[calc(7rem+30px)] bg-black text-white overflow-hidden">
+      <section className="relative py-[calc(7rem+30px)] lg:py-[calc(9rem+30px)] bg-ink text-white overflow-hidden">
         <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-cover bg-center hero-bg" style={{ backgroundImage: "url('/images/hero-city.webp')" }} />
         <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -96,7 +96,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <AnimatedSection className="pt-10 lg:pt-14 pb-20 lg:pb-24 bg-white relative">
+      <AnimatedSection className="py-20 lg:py-24 bg-white relative">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-16">
             <AnimatedItem delay={1} className="lg:col-span-3 h-full">
@@ -141,7 +141,7 @@ export default function ContactPage() {
                     />
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
                       <div>
-                        <label htmlFor="fullName" className="block text-[0.7rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                        <label htmlFor="fullName" className="block text-[0.6875rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                           Full Name <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -156,7 +156,7 @@ export default function ContactPage() {
                         />
                       </div>
                       <div>
-                        <label htmlFor="company" className="block text-[0.7rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                        <label htmlFor="company" className="block text-[0.6875rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                           Company / Business <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -171,7 +171,7 @@ export default function ContactPage() {
                         />
                       </div>
                       <div>
-                        <label htmlFor="phone" className="block text-[0.7rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                        <label htmlFor="phone" className="block text-[0.6875rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                           Phone Number <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -186,7 +186,7 @@ export default function ContactPage() {
                         />
                       </div>
                       <div>
-                        <label htmlFor="email" className="block text-[0.7rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                        <label htmlFor="email" className="block text-[0.6875rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                           Email Address <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -203,7 +203,7 @@ export default function ContactPage() {
                     </div>
 
                     <div className="mb-5">
-                      <span id="package-label" className="block text-[0.7rem] font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                      <span id="package-label" className="block text-[0.6875rem] font-semibold text-gray-500 uppercase tracking-wider mb-2">
                         Preferred Package
                       </span>
                       <div className="flex flex-wrap gap-2" role="group" aria-labelledby="package-label">
@@ -215,8 +215,8 @@ export default function ContactPage() {
                             onClick={() => setFormData((prev) => ({ ...prev, preferredPackage: pkg }))}
                             className={`px-4 py-2.5 rounded-full text-xs font-semibold transition-colors border ${
                               formData.preferredPackage === pkg
-                                ? "bg-brand-600 text-white border-brand-600"
-                                : "bg-gray-100 text-gray-700 border-gray-200 hover:text-white hover:border-brand-500/50 hover:bg-brand-600"
+                                ? "bg-brand-500 text-black border-brand-500"
+                                : "bg-gray-100 text-gray-700 border-gray-200 hover:border-brand-500 hover:bg-brand-500/15"
                             }`}
                           >
                             {pkg}
@@ -226,7 +226,7 @@ export default function ContactPage() {
                     </div>
 
                     <div className="mb-6 flex-1">
-                      <label htmlFor="campaignBrief" className="block text-[0.7rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label htmlFor="campaignBrief" className="block text-[0.6875rem] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                         Campaign Brief <span className="text-red-500">*</span>
                       </label>
                       <textarea
@@ -250,13 +250,13 @@ export default function ContactPage() {
                     <button
                       type="submit"
                       disabled={status === "sending"}
-                      className="group btn-sweep w-full px-8 py-3.5 rounded-full bg-brand-500 text-black font-bold text-sm tracking-wide transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="group btn-sweep w-full px-6 py-3 rounded-full bg-brand-500 text-black font-semibold text-sm tracking-wide transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       {status === "sending" ? "Sending…" : "Send Inquiry"}
                       <ArrowRight size={14} className="ml-1.5 inline group-hover:translate-x-0.5 transition-transform duration-200" />
                     </button>
 
-                    <p className="text-[0.7rem] text-gray-500 mt-3 text-center">
+                    <p className="text-[0.6875rem] text-gray-500 mt-3 text-center">
                       By submitting, you agree to our{" "}
                       <Link href="/privacy" className="text-brand-700 font-semibold hover:text-brand-600">
                         privacy policy
@@ -356,7 +356,7 @@ export default function ContactPage() {
             </AnimatedItem>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-600/50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-600/30 to-transparent" />
       </AnimatedSection>
     </>
   );

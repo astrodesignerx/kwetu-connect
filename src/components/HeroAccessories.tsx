@@ -19,7 +19,7 @@ const marqueeItems = [
 
 export default function HeroAccessories() {
   return (
-    <AnimatedSection className="w-full bg-black h-[78px] flex items-center overflow-hidden">
+    <AnimatedSection className="w-full bg-ink h-[78px] flex items-center overflow-hidden">
       <AnimatedItem delay={1}>
         <div aria-hidden="true" className="flex flex-row items-center gap-16 whitespace-nowrap animate-marquee w-max">
           {[...marqueeItems, ...marqueeItems].map((item, i) =>

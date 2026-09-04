@@ -46,7 +46,7 @@ const tiers = [
 export default function ServicesPage() {
   return (
     <>
-      <section className="relative py-[calc(7rem+30px)] lg:py-[calc(9rem+30px)] bg-black text-white overflow-hidden">
+      <section className="relative py-[calc(7rem+30px)] lg:py-[calc(9rem+30px)] bg-ink text-white overflow-hidden">
         <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-cover bg-center hero-bg" style={{ backgroundImage: "url('/images/hero-city.webp')" }} />
         <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -69,8 +69,8 @@ export default function ServicesPage() {
 
       <AnimatedSection className="py-20 lg:py-24 bg-white" threshold={0.3}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-16 max-w-3xl">
-            <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-extrabold leading-tight tracking-[-0.02em] text-black">
+          <div className="mb-12 max-w-3xl">
+            <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-black">
               Four ways to run your campaign
             </h2>
             <p className="text-sm text-gray-500 leading-relaxed mt-4 max-w-xl">
@@ -86,11 +86,11 @@ export default function ServicesPage() {
                     className={`tier-card relative rounded-2xl border p-6 h-full flex flex-col ${
                       tier.isFeatured
                         ? "tier-card-featured bg-brand-500 text-black border-brand-500"
-                        : "bg-surface-base text-white border-white/5"
+                        : "bg-surface-raised text-white border-white/5"
                     }`}
                   >
                     {tier.isFeatured && (
-                      <span className="top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 w-fit py-1 px-3 bg-black text-white text-[0.7rem] font-bold uppercase tracking-wider rounded-full flex items-center gap-1 shadow-md z-10" style={{ position: 'absolute' }}>
+                      <span className="top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 w-fit py-1 px-3 bg-black text-white text-[0.6875rem] font-bold uppercase tracking-wider rounded-full flex items-center gap-1 shadow-md z-10" style={{ position: 'absolute' }}>
                         <Star size={12} weight="fill" className="text-brand-500" />
                         Most Popular
                       </span>
@@ -99,7 +99,7 @@ export default function ServicesPage() {
                       {tier.name}
                     </h3>
                     <div className={`border-t pt-4 pb-3 flex justify-between items-center ${tier.isFeatured ? "border-black/20" : "border-white/10"}`}>
-                      <span className={`text-[0.7rem] uppercase tracking-wider font-semibold ${tier.isFeatured ? "text-black/70" : "text-gray-400"}`}>
+                      <span className={`text-[0.6875rem] uppercase tracking-wider font-semibold ${tier.isFeatured ? "text-black/70" : "text-gray-400"}`}>
                         Loop frequency
                       </span>
                       <span className={`text-sm font-bold ${tier.isFeatured ? "text-black" : "text-white"}`}>
@@ -108,7 +108,7 @@ export default function ServicesPage() {
                     </div>
                     <hr className={tier.isFeatured ? "border-black/20" : "border-white/10"} />
                     <div className={`pt-3 pb-4 flex justify-between items-center ${tier.isFeatured ? "border-black/20" : "border-white/10"}`}>
-                      <span className={`text-[0.7rem] uppercase tracking-wider font-semibold ${tier.isFeatured ? "text-black/70" : "text-gray-400"}`}>
+                      <span className={`text-[0.6875rem] uppercase tracking-wider font-semibold ${tier.isFeatured ? "text-black/70" : "text-gray-400"}`}>
                         Appearances / hour
                       </span>
                       <span className={`text-[2rem] font-bold font-display ${tier.isFeatured ? "text-black" : "text-white"}`}>
@@ -117,7 +117,7 @@ export default function ServicesPage() {
                     </div>
                     <hr className={tier.isFeatured ? "border-black/20" : "border-white/10"} />
                     <div className="mt-4 mb-6 flex-1">
-                      <span className={`text-[0.7rem] font-bold uppercase tracking-wider ${tier.isFeatured ? "text-black/70" : "text-gray-400"}`}>
+                      <span className={`text-[0.6875rem] font-bold uppercase tracking-wider ${tier.isFeatured ? "text-black/70" : "text-gray-400"}`}>
                         Best For
                       </span>
                       <p className={`text-sm mt-1 leading-relaxed ${tier.isFeatured ? "text-black/80" : "text-gray-400"}`}>
@@ -126,10 +126,10 @@ export default function ServicesPage() {
                     </div>
                     <Link
                       href="/contact"
-                       className={`group inline-flex items-center justify-center w-full px-6 py-[11px] rounded-full font-semibold text-sm tracking-wide transition-all duration-200 active:scale-[0.97] no-underline ${
+                       className={`group inline-flex items-center justify-center w-full px-6 py-3 rounded-full font-semibold text-sm tracking-wide transition-all duration-200 active:scale-[0.97] no-underline ${
                         tier.isFeatured
                           ? "btn-sweep bg-black text-white"
-                          : "btn-lift bg-white text-black hover:bg-brand-500 hover:text-black"
+                          : "btn-sweep bg-white text-black hover:bg-brand-500 hover:text-black"
                       }`}
                     >
                       Book a Slot
@@ -140,12 +140,12 @@ export default function ServicesPage() {
             ))}
           </div>
           <p className="text-sm text-gray-400 leading-relaxed mt-8 text-center">
-            Restricted industries (Politics, Betting) are on a fixed-rate package. Custom packages are also available; <span className="text-white font-semibold">contact us for details.</span>
+            Restricted industries (Politics, Betting) are on a fixed-rate package. Custom packages are also available; <span className="text-black font-semibold">contact us for details.</span>
           </p>
         </div>
       </AnimatedSection>
 
-      <AnimatedSection className="relative py-24 lg:py-32 bg-black overflow-hidden">
+      <AnimatedSection className="relative py-20 lg:py-24 bg-ink overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/images/traffic-transit.webp')" }} />
         <div className="absolute inset-0 bg-black/70" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
@@ -155,21 +155,21 @@ export default function ServicesPage() {
         </div>
       </AnimatedSection>
 
-      <AnimatedSection className="py-20 lg:py-24 bg-black">
+      <AnimatedSection className="py-20 lg:py-24 bg-ink">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <AnimatedItem delay={1}>
-            <div className="mb-14">
-              <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-extrabold leading-tight tracking-[-0.02em] text-white">
+            <div className="mb-12">
+              <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-white">
                 Design and
                 <br />
                 build support
               </h2>
             </div>
           </AnimatedItem>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <AnimatedItem delay={2}>
                 <SpotlightHover>
-                <div className="mission-vision-card relative rounded-2xl border border-white/5 bg-surface-base p-8 min-h-[320px] flex flex-col">
+                <div className="mission-vision-card relative rounded-2xl border border-white/5 bg-surface-raised p-8 min-h-[320px] flex flex-col">
                   <div className="relative flex-1 flex flex-col">
                     <Plus size={40} weight="light" className="text-brand-500 mb-5" />
                     <h3 className="text-xl font-bold font-display text-white mb-3">
@@ -182,7 +182,7 @@ Custom Packages
                     </p>
                     <Link
                       href="/contact"
-                      className="inline-flex items-center gap-2 text-sm font-semibold text-brand-500 hover:text-brand-400 transition-colors no-underline mt-auto"
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-brand-400 transition-colors no-underline mt-auto"
                     >
                       Build a custom package
                       <ArrowRight size={14} />
@@ -193,7 +193,7 @@ Custom Packages
             </AnimatedItem>
             <AnimatedItem delay={3}>
                 <SpotlightHover>
-                <div className="mission-vision-card relative rounded-2xl border border-white/5 bg-surface-base p-8 min-h-[320px] flex flex-col">
+                <div className="mission-vision-card relative rounded-2xl border border-white/5 bg-surface-raised p-8 min-h-[320px] flex flex-col">
                   <div className="relative flex-1 flex flex-col">
                     <Play size={40} weight="fill" className="text-brand-500 mb-5" />
                     <h3 className="text-xl font-bold font-display text-white mb-3">
@@ -206,7 +206,7 @@ Custom Packages
                     </p>
                     <Link
                       href="/contact"
-                      className="inline-flex items-center gap-2 text-sm font-semibold text-brand-500 hover:text-brand-400 transition-colors no-underline mt-auto"
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-brand-400 transition-colors no-underline mt-auto"
                     >
                       Brief the creative team
                       <ArrowRight size={14} />

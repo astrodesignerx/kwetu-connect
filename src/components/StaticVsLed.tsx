@@ -7,12 +7,12 @@ export default function StaticVsLed() {
   const { ref, inView } = useInView(0.5);
 
   return (
-    <section id="static-vs-led" className="relative py-24 lg:py-32 bg-white overflow-hidden scroll-mt-[88px]">
+    <section id="static-vs-led" className="relative py-20 lg:py-24 bg-white overflow-hidden scroll-mt-[88px]">
       <div ref={ref} className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-[720px] mb-16 lg:mb-20 flex flex-col justify-between min-h-[170px]">
+        <div className="max-w-[720px] mb-12 flex flex-col justify-between min-h-[170px]">
           <div>
             <h2
-              className={`text-4xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] tracking-[-0.02em] mb-4 ${
+              className={`text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] mb-4 ${
                 inView ? "animate-fade-up delay-1" : "anim-pending"
               }`}
             >
@@ -40,10 +40,10 @@ export default function StaticVsLed() {
             }`}
           >
             <div className="flex items-center justify-between mb-6">
-              <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-[0.12em]">
+              <span className="text-[0.6875rem] font-semibold text-gray-500 uppercase tracking-wider">
                 Static Billboard
               </span>
-              <span className="text-[11px] text-gray-400 italic">
+              <span className="text-[0.6875rem] text-gray-400 italic">
                 - the old way
               </span>
             </div>
@@ -73,10 +73,10 @@ export default function StaticVsLed() {
             }`}
           >
             <div className="flex items-center justify-between mb-6">
-              <span className="text-[11px] font-semibold text-white/80 uppercase tracking-[0.12em]">
+              <span className="text-[0.6875rem] font-semibold text-white/80 uppercase tracking-wider">
                 LED Billboard
               </span>
-              <span className="text-[11px] text-white/70 italic">
+              <span className="text-[0.6875rem] text-white/70 italic">
                 - the Kwetu way
               </span>
             </div>

@@ -72,7 +72,7 @@ function MarqueeCard({
   return (
     <div
       ref={cardRef}
-      className="group/card relative flex-none w-[300px] sm:w-[380px] lg:w-[440px] aspect-video overflow-hidden rounded-xl bg-surface-base border border-white/10 select-none [contain:layout_paint] [will-change:transform]"
+      className="group/card relative flex-none w-[340px] sm:w-[480px] lg:w-[560px] aspect-video overflow-hidden rounded-2xl bg-surface-raised border border-white/10 select-none [contain:layout_paint] [will-change:transform]"
       onMouseEnter={() => onHover(index)}
       onMouseLeave={onLeave}
       onFocus={() => onHover(index)}
@@ -136,7 +136,8 @@ export default function RecentCampaigns() {
   }, []);
 
   return (
-    <AnimatedSection className="py-20 lg:py-24 bg-black overflow-hidden">
+    <AnimatedSection className="relative py-20 lg:py-24 bg-ink overflow-hidden">
+      <div aria-hidden className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-600/30 to-transparent" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12">
           <div>
@@ -167,11 +168,11 @@ export default function RecentCampaigns() {
         <div className="relative">
           <div
             aria-hidden
-            className="pointer-events-none absolute left-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-r from-black to-transparent z-[1]"
+            className="pointer-events-none absolute left-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-r from-ink to-transparent z-[1]"
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-l from-black to-transparent z-[1]"
+            className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-l from-ink to-transparent z-[1]"
           />
 
           <div
@@ -211,7 +212,7 @@ export default function RecentCampaigns() {
               isHoveringRef.current = false;
             }}
           >
-            <div className="flex w-max gap-4 sm:gap-5 pr-4 sm:pr-5">
+            <div className="flex w-max gap-5 sm:gap-6 pr-5 sm:pr-6">
               {loop.map((campaign, idx) => (
                 <MarqueeCard
                   key={`${campaign.slug}-${idx}`}

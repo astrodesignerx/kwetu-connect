@@ -24,12 +24,12 @@ export default function HowItWorks() {
   return (
     <AnimatedSection className="py-20 lg:py-24 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-14 max-w-3xl">
+        <div className="mb-12 max-w-3xl">
           <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-black">
             Three steps from brief to screen
           </h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {steps.map((step, i) => (
             <AnimatedItem key={step.title} delay={Math.min(i + 1, 3)}>
               <div className="flex gap-5 md:flex-col">

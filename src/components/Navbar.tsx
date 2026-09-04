@@ -38,9 +38,9 @@ export default function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 md:top-10 z-50 w-full transition-all duration-500 ${
+      className={`sticky top-0 z-50 w-full transition-all duration-500 ${
         scrolled
-          ? "bg-black/95 backdrop-blur-sm border-b border-white/10"
+          ? "bg-ink/95 backdrop-blur-sm border-b border-white/10"
           : "bg-transparent backdrop-blur-none border-b border-transparent"
       }`}
     >
@@ -74,7 +74,7 @@ export default function Navbar() {
         <div className="hidden md:block">
           <Link
             href="/contact"
-            className="group btn-sweep inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-500 text-black font-semibold text-sm tracking-wide transition-all duration-200 no-underline"
+            className="group btn-sweep inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-500 text-black font-semibold text-sm tracking-wide transition-all duration-200 no-underline"
           >
             Book a Slot
             <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform duration-200" />
@@ -132,7 +132,7 @@ export default function Navbar() {
             <Link
               href="/contact"
               onClick={() => setMobileOpen(false)}
-              className="group btn-sweep inline-flex items-center justify-center w-full px-5 py-3 rounded-full bg-brand-500 text-black font-semibold text-sm tracking-wide transition-all duration-200 no-underline mt-3"
+              className="group btn-sweep inline-flex items-center justify-center w-full px-6 py-3 rounded-full bg-brand-500 text-black font-semibold text-sm tracking-wide transition-all duration-200 no-underline mt-3"
             >
               Book a Slot
               <ArrowRight size={14} className="ml-1.5 group-hover:translate-x-0.5 transition-transform duration-200" />

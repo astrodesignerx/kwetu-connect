@@ -1,16 +1,15 @@
 "use client";
 
 import { preload } from "react-dom";
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BuildingOffice, CalendarCheck, CaretDown, GraduationCap, ShoppingCart } from "@phosphor-icons/react";
+import { ArrowRight, CaretDown } from "@phosphor-icons/react";
 import StaticVsLed from "@/components/StaticVsLed";
 import AnimatedSection from "@/components/AnimatedSection";
 import AnimatedItem from "@/components/AnimatedItem";
 import HeroAccessories from "@/components/HeroAccessories";
-import SpotlightHover from "@/components/SpotlightHover";
 import HowItWorks from "@/components/HowItWorks";
 import RecentCampaigns from "@/components/RecentCampaigns";
+import WhoWeWorkWith from "@/components/WhoWeWorkWith";
 import { getLenis } from "@/components/SmoothScroll";
 
 export default function HomePage() {
@@ -22,7 +21,7 @@ export default function HomePage() {
 
   return (
     <>
-      <AnimatedSection className="relative min-h-svh flex flex-col bg-black">
+      <AnimatedSection className="relative min-h-svh flex flex-col bg-ink">
         <div
           className="hero-kenburns-enter absolute -top-[88px] left-0 right-0 w-full h-[calc(100%+88px)] overflow-hidden"
         >
@@ -103,10 +102,10 @@ export default function HomePage() {
               </div>
             </AnimatedItem>
             <AnimatedItem delay={2}>
-              <h1 className="text-[2.2rem] xs:text-[2.8rem] sm:text-[4rem] lg:text-[5rem] font-extrabold leading-[1.02] sm:leading-[0.9] tracking-[-0.02em] text-white mb-6">
-                Connecting<br className="hidden sm:block" />{" "}
-                <span className="italic text-brand-500">Brands</span><br />
-                to <span className="italic text-brand-500">Community.</span>
+              <h1 className="text-[2.2rem] xs:text-[2.8rem] sm:text-[4rem] lg:text-[4.5rem] font-extrabold leading-[1.02] sm:leading-[0.9] tracking-[-0.02em] text-white mb-6">
+                Connecting<br />
+                <span className="italic text-brand-500">Brands</span> to<br />
+                <span className="italic text-brand-500">Community</span>
               </h1>
             </AnimatedItem>
             <AnimatedItem delay={3}>
@@ -149,10 +148,10 @@ export default function HomePage() {
           }}
           className="flex flex-col items-center gap-1 pb-8 pointer-events-auto animate-float cursor-pointer bg-transparent border-none"
         >
-          <span className="text-xs uppercase tracking-[0.3em] text-[#8A8A8A]">
+          <span className="text-xs uppercase tracking-[0.3em] text-gray-500">
             SCROLL
           </span>
-          <CaretDown size={16} weight="bold" className="text-[#8A8A8A]" />
+          <CaretDown size={16} weight="bold" className="text-gray-500" />
         </button>
         </div>
       </AnimatedSection>
@@ -163,45 +162,9 @@ export default function HomePage() {
 
       <HowItWorks />
 
-      <AnimatedSection className="relative py-20 lg:py-24 bg-black text-white overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center opacity-20 blur-sm" style={{ backgroundImage: "url('/images/stats-traffic.webp')" }} />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/95 to-black" />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <AnimatedItem delay={1}>
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-14">
-              <div>
-                <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-white">
-                  Numbers that{" "}
-                  <span className="italic text-brand-500">deliver</span> results.
-                </h2>
-              </div>
-            </div>
-          </AnimatedItem>
-          <SpotlightHover>
-          <AnimatedItem delay={2}>
-            <div className="rounded-2xl border border-white/5 bg-surface-base overflow-hidden">
-              <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/5">
-                {[
-                  { highlight: "35,000\u201355,000+", title: "Daily Impressions", desc: "Vehicles and pedestrians passing our Eldoret screen every day." },
-                  { highlight: "60 /hr", title: "Exposures per Hour", desc: "Multiple exposures per visit drive recognition that static can\u2019t match." },
-                  { highlight: "200 m", title: "Viewing Distance", desc: "Visible well before the junction, day and night, from multi-lane traffic." },
-                ].map((col) => (
-                  <div key={col.title} className="p-8 lg:p-10 flex flex-col">
-                    <span className="text-3xl sm:text-4xl font-extrabold font-sans text-white mb-2">{col.highlight}</span>
-                    <span className="text-base font-bold font-sans text-white mb-3">{col.title}</span>
-                    <p className="text-sm text-gray-400 leading-relaxed mt-auto">{col.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </AnimatedItem>
-          </SpotlightHover>
-        </div>
-      </AnimatedSection>
-
-      <AnimatedSection className="py-20 lg:py-24 bg-white">
+      <AnimatedSection className="py-20 lg:py-24 bg-white text-black overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-14">
+          <div className="mb-12">
             <AnimatedItem delay={1}>
               <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-black">
                 Who we work with
@@ -214,34 +177,41 @@ export default function HomePage() {
               </p>
             </AnimatedItem>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {[
-              { image: "/images/retail.webp", label: "Retail & Supermarkets", Icon: ShoppingCart },
-              { image: "/images/real-estate.webp", label: "Real Estate Developers", Icon: BuildingOffice },
-              { image: "/images/schools.webp", label: "Schools & Colleges", Icon: GraduationCap },
-              { image: "/images/events.webp", label: "Events & Promotions", Icon: CalendarCheck },
-            ].map((category, i) => (
-              <AnimatedItem key={category.label} delay={Math.min(i + 2, 5)}>
-                <div className="relative rounded-2xl overflow-hidden min-h-[240px] lg:h-[420px] group transition-all duration-200">
-                  <Image
-                    src={category.image}
-                    alt={category.label}
-                    fill
-                    sizes="(min-width: 1024px) 50vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover md:grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/10 md:via-transparent md:to-transparent" />
-                  <div className="absolute inset-0 flex flex-col items-center justify-end p-6 text-center">
-                    <category.Icon size={40} weight="light" className="text-brand-500 mb-4" />
-                    <h3 className="text-base font-bold font-sans text-white group-hover:text-brand-500 transition-colors">
-                      {category.label}
-                    </h3>
-                    <div className="w-8 h-0.5 bg-brand-500 mt-3"></div>
+          <AnimatedItem delay={2}>
+            <WhoWeWorkWith />
+          </AnimatedItem>
+        </div>
+      </AnimatedSection>
+
+      <AnimatedSection className="relative py-20 lg:py-24 bg-gradient-gold text-black overflow-hidden">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <AnimatedItem delay={1}>
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-12">
+              <div>
+                <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-black">
+                  Numbers that{" "}
+                  <span className="italic text-brand-900">deliver</span> results.
+                </h2>
+              </div>
+            </div>
+          </AnimatedItem>
+          <AnimatedItem delay={2}>
+            <div className="rounded-2xl border border-black/10 bg-white/20 backdrop-blur-sm overflow-hidden">
+              <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-black/10">
+                {[
+                  { highlight: "35,000\u201355,000+", title: "Daily Impressions", desc: "Vehicles and pedestrians passing our Eldoret screen every day." },
+                  { highlight: "60 /hr", title: "Exposures per Hour", desc: "Multiple exposures per visit drive recognition that static can\u2019t match." },
+                  { highlight: "200 m", title: "Viewing Distance", desc: "Visible well before the junction, day and night, from multi-lane traffic." },
+                ].map((col) => (
+                  <div key={col.title} className="p-8 lg:p-10 flex flex-col">
+                    <span className="text-3xl sm:text-4xl font-extrabold font-sans text-black mb-2">{col.highlight}</span>
+                    <span className="text-base font-bold font-sans text-black mb-3">{col.title}</span>
+                    <p className="text-sm text-black/70 leading-relaxed mt-auto">{col.desc}</p>
                   </div>
-                </div>
-              </AnimatedItem>
-            ))}
-          </div>
+                ))}
+              </div>
+            </div>
+          </AnimatedItem>
         </div>
       </AnimatedSection>
 

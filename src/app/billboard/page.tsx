@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function BillboardPage() {
   return (
     <>
-      <section className="relative py-[calc(7rem+30px)] lg:py-[calc(9rem+30px)] bg-black text-white overflow-hidden">
+      <section className="relative py-[calc(7rem+30px)] lg:py-[calc(9rem+30px)] bg-ink text-white overflow-hidden">
         <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-cover bg-center hero-bg" style={{ backgroundImage: "url('/images/billboard-landing.webp')" }} />
         <div className="absolute -top-[88px] left-0 right-0 bottom-0 bg-gradient-to-r from-black/95 via-black/80 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -36,7 +36,7 @@ export default function BillboardPage() {
         </div>
       </section>
 
-      <AnimatedSection className="py-[100px] bg-white">
+      <AnimatedSection className="py-20 lg:py-24 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <AnimatedItem delay={1} animateClass="animate-fade-up-slow">
             <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-2">
@@ -97,58 +97,10 @@ export default function BillboardPage() {
         </div>
       </AnimatedSection>
 
-      <AnimatedSection className="py-20 lg:py-24 bg-black">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <AnimatedItem delay={1}>
-            <div className="mb-14">
-              <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-white mb-4">
-                Your campaign,
-                <br />
-                live on screen
-              </h2>
-              <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
-                Real-world examples of how a campaign looks on our display.
-              </p>
-            </div>
-          </AnimatedItem>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              { image: "/images/daytime-billboard.webp", title: "Daytime / inbound CBD" },
-              { image: "/images/evening-billboard.webp", title: "Evening / outbound airport" },
-            ].map((item, i) => (
-              <AnimatedItem key={item.title} delay={Math.min(i + 2, 5)}>
-                <div className="relative rounded-2xl overflow-hidden min-h-[240px] md:h-80 group">
-                  <Image
-                    src={item.image}
-                    alt={`Billboard campaign mockup — ${item.title}`}
-                    fill
-                    sizes="(min-width: 768px) 50vw, 100vw"
-                    className="object-cover object-top transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                  <div className="absolute inset-0 flex flex-col justify-between p-6">
-                    <div>
-                      <span className="inline-block px-2 py-0.5 rounded text-[0.6875rem] font-semibold text-brand-500 uppercase tracking-wider bg-black/40 backdrop-blur-sm">
-                        Live Mockup
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold font-display text-white mb-1">
-                        {item.title}
-                      </h3>
-                    </div>
-                  </div>
-                </div>
-              </AnimatedItem>
-            ))}
-          </div>
-        </div>
-      </AnimatedSection>
-
       <AnimatedSection className="py-20 lg:py-24 bg-gradient-gold">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <AnimatedItem delay={1}>
-            <div className="mb-14 max-w-3xl">
+            <div className="mb-12 max-w-3xl">
               <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-black">
                 Where the screen is
               </h2>
@@ -184,24 +136,67 @@ export default function BillboardPage() {
         </div>
       </AnimatedSection>
 
-      <AnimatedSection className="relative py-20 lg:py-24 bg-black text-white overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center opacity-10" style={{ backgroundImage: "url('/images/hero-billboard.webp')" }} />
-        <div className="absolute inset-0 bg-black/80" />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+      <AnimatedSection className="relative py-20 lg:py-24 bg-ink text-white overflow-hidden">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <AnimatedItem delay={1}>
-            <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-white mb-12">
-              Put your brand here
-            </h2>
+            <div className="mb-12">
+              <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-white mb-4">
+                Your campaign,
+                <br />
+                live on screen
+              </h2>
+              <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
+                Real-world examples of how a campaign looks on our display.
+              </p>
+            </div>
           </AnimatedItem>
-          <AnimatedItem delay={5}>
-            <Link
-              href="/contact"
-              className="group btn-sweep inline-flex items-center justify-center px-10 py-4 rounded-full bg-brand-500 text-black font-bold text-sm tracking-wide transition-all duration-200 no-underline"
-            >
-              Book a Slot
-              <ArrowRight size={16} className="ml-1.5 group-hover:translate-x-0.5 transition-transform duration-200" />
-            </Link>
-          </AnimatedItem>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              { image: "/images/daytime-billboard.webp", title: "Daytime / inbound CBD" },
+              { image: "/images/evening-billboard.webp", title: "Evening / outbound airport" },
+            ].map((item, i) => (
+              <AnimatedItem key={item.title} delay={Math.min(i + 2, 5)}>
+                <div className="relative rounded-2xl overflow-hidden min-h-[240px] md:h-80 group">
+                  <Image
+                    src={item.image}
+                    alt={`Billboard campaign mockup — ${item.title}`}
+                    fill
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    className="object-cover object-top transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                  <div className="absolute inset-0 flex flex-col justify-between p-6">
+                    <div>
+                      <span className="inline-block px-2 py-0.5 rounded text-[0.6875rem] font-semibold text-brand-500 uppercase tracking-wider bg-ink/40 backdrop-blur-sm">
+                        Live Mockup
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold font-display text-white mb-1">
+                        {item.title}
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+              </AnimatedItem>
+            ))}
+          </div>
+          <div className="mt-20 lg:mt-24 text-center">
+            <AnimatedItem delay={1}>
+              <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-white mb-12">
+                Put your brand here
+              </h2>
+            </AnimatedItem>
+            <AnimatedItem delay={2}>
+              <Link
+                href="/contact"
+                className="group btn-sweep inline-flex items-center justify-center px-6 py-3 rounded-full bg-brand-500 text-black font-semibold text-sm tracking-wide transition-all duration-200 no-underline"
+              >
+                Book a Slot
+                <ArrowRight size={16} className="ml-1.5 group-hover:translate-x-0.5 transition-transform duration-200" />
+              </Link>
+            </AnimatedItem>
+          </div>
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-600/30 to-transparent" />
       </AnimatedSection>
