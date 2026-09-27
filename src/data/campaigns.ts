@@ -25,6 +25,6 @@ export const campaigns: Campaign[] = [
     cover: "/images/daytime-billboard.webp",
     video: "/videos/KCA Motion Ad 1.mp4",
     description:
-      "An in-house motion ad produced to show the screen's full-HD LED playback in real traffic. It swaps with client campaigns throughout the loop.",
+      "An in-house motion ad produced to show the screen's full-motion LED playback in real traffic. It swaps with client campaigns throughout the loop.",
   },
 ];

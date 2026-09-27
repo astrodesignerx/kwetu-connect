@@ -8,7 +8,7 @@ import AnimatedItem from "@/components/AnimatedItem";
 export const metadata: Metadata = {
   title: "Our Billboard — Kisumu Ndogo Road, Eldoret",
   description:
-    "Full-HD LED billboard on Kisumu Ndogo Road near Langas Junction, Eldoret — 35,000–55,000+ daily impressions across CBD, airport, and Langas traffic.",
+    "5.12m × 2.88m LED billboard on Kisumu Ndogo Road near Langas Junction, Eldoret — 35,000–55,000+ daily impressions across CBD, airport, and Langas traffic.",
   alternates: { canonical: "/billboard" },
 };
 
@@ -50,9 +50,9 @@ export default function BillboardPage() {
                   specifications.
                 </h2>
                 <p className="text-sm text-gray-600 leading-relaxed mb-8 max-w-md">
-                  16.1ft&sup2; of full-HD LED canvas, visible from over 200
-                  metres. Strategically mounted at 15ft elevation for
-                  unobstructed sightlines across multi-lane traffic and
+                  14.7m&sup2; of LED canvas in true 16:9 widescreen, visible
+                  from over 200 metres. Strategically mounted at 15ft elevation
+                  for unobstructed sightlines across multi-lane traffic and
                   pedestrian walkways.
                 </p>
                 <div className="flex flex-wrap gap-3">
@@ -74,7 +74,9 @@ export default function BillboardPage() {
               <div className="grid grid-cols-2 divide-x divide-y divide-gray-200">
                 {[
                   { label: "Format", value: "LED Digital Billboard" },
-                  { label: "Dimensions", value: "492cm x 379cm" },
+                  { label: "Dimensions", value: "512cm x 288cm (16:9)" },
+                  { label: "Resolution", value: "768 x 432 px" },
+                  { label: "Pixel Pitch", value: "P6.667mm" },
                   { label: "Location", value: "Eldoret Town - Kisumu Ndogo Road" },
                   { label: "Visibility", value: "Inbound CBD | Outbound Airport | Langas" },
                   { label: "Daily Reach", value: "35,000 \u2013 55,000+ impressions" },
