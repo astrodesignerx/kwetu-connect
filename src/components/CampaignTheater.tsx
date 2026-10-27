@@ -124,10 +124,10 @@ export default function CampaignTheater() {
                   Watch fullscreen
                 </button>
                 <Link
-                  href="/contact"
+                  href="/book"
                   className="btn-outline inline-flex items-center px-6 py-3 rounded-full border border-white/25 text-sm font-semibold text-gray-200 hover:bg-white/10 no-underline"
                 >
-                  Book this slot
+                  Book plays like this
                 </Link>
               </div>
             </div>
@@ -271,10 +271,10 @@ export default function CampaignTheater() {
             <div className="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 overflow-y-auto">
               <p className="text-sm text-gray-300 leading-relaxed flex-1">{campaign.description}</p>
               <Link
-                href="/contact"
+                href="/book"
                 className="group btn-sweep inline-flex items-center justify-center px-6 py-3 rounded-full bg-brand-500 text-black text-sm font-semibold transition-all duration-200 no-underline shrink-0"
               >
-                Book this slot
+                Book plays like this
               </Link>
             </div>
           </div>

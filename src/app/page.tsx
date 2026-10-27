@@ -117,10 +117,10 @@ export default function HomePage() {
             <AnimatedItem delay={4}>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
-                  href="/contact"
+                  href="/book"
                    className="group btn-sweep inline-flex items-center justify-center px-6 py-3 rounded-full bg-brand-500 text-black font-semibold text-sm tracking-wide transition-all duration-200 no-underline"
                 >
-                  Book a Slot
+                  Book plays
                   <ArrowRight size={14} className="ml-1.5 group-hover:translate-x-0.5 transition-transform duration-200" />
                 </Link>
                 <Link

@@ -125,14 +125,14 @@ export default function ServicesPage() {
                       </p>
                     </div>
                     <Link
-                      href="/contact"
+                      href="/book"
                        className={`group inline-flex items-center justify-center w-full px-6 py-3 rounded-full font-semibold text-sm tracking-wide transition-all duration-200 active:scale-[0.97] no-underline ${
                         tier.isFeatured
                           ? "btn-sweep bg-black text-white"
                           : "btn-sweep bg-white text-black hover:bg-brand-500 hover:text-black"
                       }`}
                     >
-                      Book a Slot
+                      Book plays
                       <ArrowRight size={14} className="ml-1.5 group-hover:translate-x-0.5 transition-transform duration-200" />
                     </Link>
                   </div>

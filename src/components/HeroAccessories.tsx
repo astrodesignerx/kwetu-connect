@@ -7,13 +7,13 @@ const marqueeItems = [
   { type: "icon", content: "★" },
   { type: "text", content: "Global Reach" },
   { type: "icon", content: "★" },
-  { type: "text", content: "Book a Slot" },
+  { type: "text", content: "Book plays" },
   { type: "icon", content: "★" },
   { type: "text", content: "Local Focus" },
   { type: "icon", content: "★" },
   { type: "text", content: "Global Reach" },
   { type: "icon", content: "★" },
-  { type: "text", content: "Book a Slot" },
+  { type: "text", content: "Book plays" },
   { type: "icon", content: "★" },
 ];
 
