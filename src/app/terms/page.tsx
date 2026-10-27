@@ -15,7 +15,7 @@ const sections = [
   },
   {
     heading: "2. Inquiries and quotations",
-    body: "Submitting the contact form is an inquiry, not a binding booking. Slot availability, pricing, and campaign schedules are confirmed in writing. Quotations are valid for the period stated on the quotation.",
+    body: "Submitting the contact form is an inquiry, not a binding booking. Space on the screen, pricing, and campaign schedules are confirmed in writing. Quotations are valid for the period stated on the quotation.",
   },
   {
     heading: "3. Advertising content",
@@ -23,7 +23,7 @@ const sections = [
   },
   {
     heading: "4. Scheduling and availability",
-    body: "Loop frequencies and appearance counts describe the standard operation of our display. Temporary interruptions may occur due to power, maintenance, or events beyond our control; affected airtime is rescheduled or credited.",
+    body: "How often an advert plays and the number of plays describe the standard operation of our display. Temporary interruptions may occur due to power, maintenance, or events beyond our control; affected airtime is rescheduled or credited.",
   },
   {
     heading: "5. Payment",

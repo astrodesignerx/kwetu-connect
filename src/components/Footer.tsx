@@ -17,7 +17,7 @@ export default function Footer({ showCTA = true }: { showCTA?: boolean }) {
         <section className="bg-brand-400 py-6">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
             <p className="text-base md:text-xl font-bold font-sans text-black text-center md:text-left">
-              Limited slots available - book your space today.
+              Busy hours sell out first. Book your plays early.
             </p>
             <Link
               href="/contact"

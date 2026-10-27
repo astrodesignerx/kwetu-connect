@@ -116,13 +116,13 @@ export default function AboutPage() {
               },
               {
                 num: "04",
-                title: "Affordable & Flexible Packages",
-                body: "From local shops to national brands, we have a package that fits your budget. No long-term lock-ins required.",
+                title: "Affordable & Flexible Bookings",
+                body: "From local shops to national brands, you book only the plays your budget allows. No long-term lock-ins required.",
               },
               {
                 num: "05",
                 title: "Personalized Client Service",
-                body: "You're not just a slot number. We work with you to craft messaging that resonates with your audience.",
+                body: "You're not just a name on a schedule. We work with you to craft messaging that resonates with your audience.",
               },
               {
                 num: "06",

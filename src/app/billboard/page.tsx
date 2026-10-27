@@ -67,7 +67,7 @@ export default function BillboardPage() {
                     href="/services"
                     className="btn-outline inline-flex items-center gap-2 px-6 py-3 rounded-full border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-100 no-underline"
                   >
-                    See Packages
+                    See prices
                   </Link>
                 </div>
               </div>
@@ -78,7 +78,7 @@ export default function BillboardPage() {
                   { label: "Location", value: "Eldoret Town - Kisumu Ndogo Road" },
                   { label: "Visibility", value: "Inbound CBD | Outbound Airport | Langas" },
                   { label: "Daily Reach", value: "35,000 \u2013 55,000+ impressions" },
-                  { label: "Availability", value: "Slots Available - Contact Us" },
+                  { label: "Availability", value: "Book online" },
                 ].map((spec) => (
                   <div key={spec.label} className="mission-vision-card relative p-5 sm:p-6 flex flex-col justify-center min-h-[90px] sm:min-h-[120px]">
                     <div className="relative z-10">

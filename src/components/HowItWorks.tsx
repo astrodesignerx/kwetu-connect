@@ -6,7 +6,7 @@ const steps = [
   {
     icon: Phone,
     title: "Brief us",
-    body: "A 15-minute call or the form. We confirm slot availability and what works for your goal.",
+    body: "A 15-minute call or the form. We confirm space on the screen and what works for your goal.",
   },
   {
     icon: Palette,
@@ -16,7 +16,7 @@ const steps = [
   {
     icon: Broadcast,
     title: "Live on screen",
-    body: "Your ad joins the loop. Most campaigns go live within days, not weeks.",
+    body: "Your advert goes on screen. Most campaigns go live within days, not weeks.",
   },
 ];
 
