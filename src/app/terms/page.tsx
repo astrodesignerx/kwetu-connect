@@ -23,7 +23,7 @@ const sections = [
   },
   {
     heading: "4. Scheduling and availability",
-    body: "How often an advert plays and the number of plays describe the standard operation of our display. Temporary interruptions may occur due to power, maintenance, or events beyond our control; affected airtime is rescheduled or credited.",
+    body: "How often an advert plays and the number of plays describe the normal operation of our display. Temporary interruptions may occur due to power, maintenance, or events beyond our control; affected airtime is rescheduled or credited.",
   },
   {
     heading: "5. Payment",

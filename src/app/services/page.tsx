@@ -4,44 +4,86 @@ import { ArrowRight, Play, Plus, Star } from "@phosphor-icons/react/ssr";
 import AnimatedSection from "@/components/AnimatedSection";
 import AnimatedItem from "@/components/AnimatedItem";
 import SpotlightHover from "@/components/SpotlightHover";
+import { DEFAULT_SETTINGS, quote } from "@/lib/booking";
+import type { BookingRequest } from "@/lib/booking";
 
 export const metadata: Metadata = {
-  title: "Services & Packages — LED Billboard Advertising Tiers",
+  title: "Prices and Services | LED Billboard Advertising in Eldoret",
   description:
-    "Flexible LED billboard advertising packages in Eldoret: Basic, Standard, Premium, and Platinum tiers, plus custom campaigns and creative design services.",
+    "We sell plays at KES 1 a second on our LED billboard in Eldoret, with discounts for bigger bookings and design help if you need it.",
   alternates: { canonical: "/services" },
 };
 
-const tiers = [
+const formatNumber = (value: number) =>
+  String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+const formatKes = (value: number) => `KES ${formatNumber(value)}`;
+
+const formatHour = (hour: number) => `${String(hour).padStart(2, "0")}:00`;
+
+const weekdayScreen = DEFAULT_SETTINGS.screenHours[1];
+const weekendScreen = DEFAULT_SETTINGS.screenHours[5];
+
+const discountSteps = [...DEFAULT_SETTINGS.discountSteps].sort(
+  (a, b) => a.minPlays - b.minPlays
+);
+
+type Example = {
+  name: string;
+  detail: string;
+  request: BookingRequest;
+};
+
+const examples: Example[] = [
   {
-    name: "Basic",
-    loop: "Every 3 loops",
-    appearances: "15",
-    bestFor: "Entry-level or local advertisers",
-    isFeatured: false,
+    name: "Small shop",
+    detail: "10 s play, every 6 minutes, Saturdays, Morning and Midday, 4 weeks",
+    request: {
+      lengthSeconds: 10,
+      howOften: 10,
+      days: [6],
+      blocks: ["morning", "midday"],
+      startDate: "2026-11-02",
+      endDate: "2026-11-29",
+    },
   },
   {
-    name: "Standard",
-    loop: "Every 2 loops",
-    appearances: "30",
-    bestFor: "Consistent, sustained brand awareness",
-    isFeatured: false,
+    name: "Growing business",
+    detail: "15 s play, every 6 minutes, Friday to Sunday, every block, 2 weeks",
+    request: {
+      lengthSeconds: 15,
+      howOften: 10,
+      days: [5, 6, 0],
+      blocks: ["morning", "midday", "afternoon", "evening", "late"],
+      startDate: "2026-11-02",
+      endDate: "2026-11-15",
+    },
   },
   {
-    name: "Premium",
-    loop: "Every loop",
-    appearances: "60",
-    bestFor: "High-frequency brand building campaigns",
-    isFeatured: false,
-  },
-  {
-    name: "Platinum",
-    loop: "Every loop",
-    appearances: "60+",
-    bestFor: "Dominant brands seeking maximum screen presence",
-    isFeatured: true,
+    name: "Large organisation",
+    detail: "15 s play, every 6 minutes, every day, every block, 12 weeks",
+    request: {
+      lengthSeconds: 15,
+      howOften: 10,
+      days: [0, 1, 2, 3, 4, 5, 6],
+      blocks: ["morning", "midday", "afternoon", "evening", "late"],
+      startDate: "2026-11-02",
+      endDate: "2027-01-24",
+    },
   },
 ];
+
+function exampleQuote(request: BookingRequest) {
+  const result = quote(request);
+  if (!result.ok) {
+    throw new Error(`Example booking is invalid: ${result.errors.join(" ")}`);
+  }
+  return result;
+}
+
+function bookingHref(request: BookingRequest) {
+  return `/book?len=${request.lengthSeconds}&often=${request.howOften}&days=${request.days.join(",")}&blocks=${request.blocks.join(",")}&from=${request.startDate}&to=${request.endDate}`;
+}
 
 export default function ServicesPage() {
   return (
@@ -52,16 +94,16 @@ export default function ServicesPage() {
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <span className="section-label inline-block text-xs font-semibold text-brand-600 uppercase tracking-[0.15em] mb-5">
-              Services &amp; Packages
+              Plays &amp; Prices
             </span>
             <h1 className="text-[2rem] xs:text-[2.5rem] sm:text-5xl lg:text-[4.5rem] font-extrabold leading-tight tracking-[-0.02em] mb-6">
               A single LED screen<br />
               in Eldoret&apos;s busiest corridor
             </h1>
             <p className="text-sm sm:text-base text-gray-300 leading-relaxed max-w-2xl">
-              We offer flexible advertising packages designed for businesses of
-              every size, from local shops making their first impression to
-              national brands amplifying their presence in the North Rift.
+              We sell plays on one screen, for businesses of every size, from
+              local shops making their first impression to national brands
+              amplifying their presence in the North Rift.
             </p>
           </div>
         </div>
@@ -71,63 +113,141 @@ export default function ServicesPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 max-w-3xl">
             <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-black">
-              Four ways to run your campaign
+              We sell plays
             </h2>
             <p className="text-sm text-gray-500 leading-relaxed mt-4 max-w-xl">
-              All tiers include creative review, scheduling, and performance
-              reporting. No hidden fees, transparent reporting, and support at
-              every step.
+              A play is your advert, shown once. Plays cost KES 1 a second, so
+              a 10 s play costs KES 10. Pick a length, then choose how often it
+              plays, the days and the time blocks. The booking page works out
+              the plays and the price as you go.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {tiers.map((tier, i) => (
-                <AnimatedItem key={tier.name} delay={Math.min(i + 1, 5)} animateClass="animate-fade-up-slow">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {DEFAULT_SETTINGS.lengths.map((length, i) => (
+              <AnimatedItem key={length} delay={Math.min(i + 1, 5)} animateClass="animate-fade-up-slow">
+                <div className="tier-card relative rounded-2xl border p-6 h-full flex flex-col bg-surface-raised text-white border-white/5">
+                  <span className="text-[0.6875rem] uppercase tracking-wider font-semibold text-gray-400">
+                    Length
+                  </span>
+                  <h3 className="text-2xl font-bold font-display mb-5 text-white">
+                    {length} s
+                  </h3>
+                  <div className="border-t border-white/10 pt-4 flex justify-between items-baseline gap-2 mt-auto">
+                    <span className="text-[0.6875rem] uppercase tracking-wider font-semibold text-gray-400">
+                      One play
+                    </span>
+                    <span className="text-[2rem] font-bold font-display text-white">
+                      {formatKes(length * DEFAULT_SETTINGS.kesPerSecond)}
+                    </span>
+                  </div>
+                </div>
+              </AnimatedItem>
+            ))}
+          </div>
+
+          <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
+              <h3 className="text-xl font-bold font-display text-black mb-4">
+                Book more, pay less
+              </h3>
+              <ul className="divide-y divide-gray-200">
+                {discountSteps.map((step, i) => (
+                  <li key={step.minPlays} className="flex items-center justify-between gap-4 py-3">
+                    <span className="text-sm text-gray-600">
+                      {i === 0
+                        ? `Up to ${formatNumber(step.minPlays - 1)} plays`
+                        : `${formatNumber(step.minPlays)} plays or more`}
+                    </span>
+                    <span className="text-sm font-bold text-black">
+                      {i === 0 ? "No discount" : `${step.percent}% off`}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex flex-col gap-4 text-sm text-gray-600 leading-relaxed">
+              <p className="font-bold text-black">
+                The smallest order is {formatKes(DEFAULT_SETTINGS.minOrderKes)}.
+              </p>
+              <p>
+                <span className="font-bold text-black">Every hour costs the same.</span>{" "}
+                You pay for the length of the play, not the time of day.
+              </p>
+              <p className="font-bold text-black">Prices include VAT.</p>
+              <p>
+                Screen hours run {formatHour(weekdayScreen.open)} to{" "}
+                {formatHour(weekdayScreen.close)} Monday to Thursday, and{" "}
+                {formatHour(weekendScreen.open)} to {formatHour(weekendScreen.close)}{" "}
+                Friday to Sunday. KCA confirms space before you pay.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-16 mb-12 max-w-3xl">
+            <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-black">
+              Three example bookings
+            </h2>
+            <p className="text-sm text-gray-500 leading-relaxed mt-4 max-w-xl">
+              Each price below comes from the same booking engine that runs
+              the booking page. Open one to change the answers and see a new
+              price.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {examples.map((example, i) => {
+              const result = exampleQuote(example.request);
+              const isFeatured = example.name === "Growing business";
+              return (
+                <AnimatedItem key={example.name} delay={Math.min(i + 1, 3)} animateClass="animate-fade-up-slow">
                   <div
                     className={`tier-card relative rounded-2xl border p-6 h-full flex flex-col ${
-                      tier.isFeatured
+                      isFeatured
                         ? "tier-card-featured bg-brand-500 text-black border-brand-500"
                         : "bg-surface-raised text-white border-white/5"
                     }`}
                   >
-                    {tier.isFeatured && (
-                      <span className="top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 w-fit py-1 px-3 bg-black text-white text-[0.6875rem] font-bold uppercase tracking-wider rounded-full flex items-center gap-1 shadow-md z-10" style={{ position: 'absolute' }}>
+                    {isFeatured && (
+                      <span className="top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 w-fit py-1 px-3 bg-black text-white text-[0.6875rem] font-bold uppercase tracking-wider rounded-full flex items-center gap-1 shadow-md z-10" style={{ position: "absolute" }}>
                         <Star size={12} weight="fill" className="text-brand-500" />
-                        Most Popular
+                        Most popular
                       </span>
                     )}
-                    <h3 className={`text-2xl font-bold font-display mb-5 ${tier.isFeatured ? "text-black" : "text-white"}`}>
-                      {tier.name}
+                    <h3 className={`text-2xl font-bold font-display mb-2 ${isFeatured ? "text-black" : "text-white"}`}>
+                      {example.name}
                     </h3>
-                    <div className={`border-t pt-4 pb-3 flex justify-between items-center ${tier.isFeatured ? "border-black/20" : "border-white/10"}`}>
-                      <span className={`text-[0.6875rem] uppercase tracking-wider font-semibold ${tier.isFeatured ? "text-black/70" : "text-gray-400"}`}>
-                        Loop frequency
+                    <p className={`text-sm leading-relaxed mb-5 ${isFeatured ? "text-black/80" : "text-gray-400"}`}>
+                      {example.detail}
+                    </p>
+                    <div className={`border-t pt-4 pb-3 flex justify-between items-center ${isFeatured ? "border-black/20" : "border-white/10"}`}>
+                      <span className={`text-[0.6875rem] uppercase tracking-wider font-semibold ${isFeatured ? "text-black/70" : "text-gray-400"}`}>
+                        Plays
                       </span>
-                      <span className={`text-sm font-bold ${tier.isFeatured ? "text-black" : "text-white"}`}>
-                        {tier.loop}
-                      </span>
-                    </div>
-                    <hr className={tier.isFeatured ? "border-black/20" : "border-white/10"} />
-                    <div className={`pt-3 pb-4 flex justify-between items-center ${tier.isFeatured ? "border-black/20" : "border-white/10"}`}>
-                      <span className={`text-[0.6875rem] uppercase tracking-wider font-semibold ${tier.isFeatured ? "text-black/70" : "text-gray-400"}`}>
-                        Appearances / hour
-                      </span>
-                      <span className={`text-[2rem] font-bold font-display ${tier.isFeatured ? "text-black" : "text-white"}`}>
-                        {tier.appearances}
+                      <span className={`text-[2rem] font-bold font-display ${isFeatured ? "text-black" : "text-white"}`}>
+                        {formatNumber(result.plays)}
                       </span>
                     </div>
-                    <hr className={tier.isFeatured ? "border-black/20" : "border-white/10"} />
-                    <div className="mt-4 mb-6 flex-1">
-                      <span className={`text-[0.6875rem] font-bold uppercase tracking-wider ${tier.isFeatured ? "text-black/70" : "text-gray-400"}`}>
-                        Best For
+                    <hr className={isFeatured ? "border-black/20" : "border-white/10"} />
+                    <div className={`pt-3 pb-4 flex justify-between items-center ${isFeatured ? "border-black/20" : "border-white/10"}`}>
+                      <span className={`text-[0.6875rem] uppercase tracking-wider font-semibold ${isFeatured ? "text-black/70" : "text-gray-400"}`}>
+                        Price
                       </span>
-                      <p className={`text-sm mt-1 leading-relaxed ${tier.isFeatured ? "text-black/80" : "text-gray-400"}`}>
-                        {tier.bestFor}
-                      </p>
+                      <span className={`text-[2rem] font-bold font-display ${isFeatured ? "text-black" : "text-white"}`}>
+                        {formatKes(result.priceKes)}
+                      </span>
+                    </div>
+                    <hr className={isFeatured ? "border-black/20" : "border-white/10"} />
+                    <div className={`pt-3 pb-4 flex justify-between items-center ${isFeatured ? "border-black/20" : "border-white/10"}`}>
+                      <span className={`text-[0.6875rem] uppercase tracking-wider font-semibold ${isFeatured ? "text-black/70" : "text-gray-400"}`}>
+                        Discount
+                      </span>
+                      <span className={`text-sm font-bold ${isFeatured ? "text-black" : "text-white"}`}>
+                        {result.discountPercent > 0 ? `${result.discountPercent}% off` : "None"}
+                      </span>
                     </div>
                     <Link
-                      href="/book"
-                       className={`group inline-flex items-center justify-center w-full px-6 py-3 rounded-full font-semibold text-sm tracking-wide transition-all duration-200 active:scale-[0.97] no-underline ${
-                        tier.isFeatured
+                      href={bookingHref(example.request)}
+                      className={`group inline-flex items-center justify-center w-full px-6 py-3 rounded-full font-semibold text-sm tracking-wide transition-all duration-200 active:scale-[0.97] no-underline mt-2 ${
+                        isFeatured
                           ? "btn-sweep bg-black text-white"
                           : "btn-sweep bg-white text-black hover:bg-brand-500 hover:text-black"
                       }`}
@@ -137,10 +257,12 @@ export default function ServicesPage() {
                     </Link>
                   </div>
                 </AnimatedItem>
-            ))}
+              );
+            })}
           </div>
           <p className="text-sm text-gray-400 leading-relaxed mt-8 text-center">
-            Restricted industries (Politics, Betting) are on a fixed-rate package. Custom packages are also available; <span className="text-black font-semibold">contact us for details.</span>
+            Political, alcohol and betting adverts are approved by our manager
+            one at a time, within Kenyan law.
           </p>
         </div>
       </AnimatedSection>
@@ -173,18 +295,20 @@ export default function ServicesPage() {
                   <div className="relative flex-1 flex flex-col">
                     <Plus size={40} weight="light" className="text-brand-500 mb-5" />
                     <h3 className="text-xl font-bold font-display text-white mb-3">
-Custom Packages
+                      Large organisations
                     </h3>
                     <p className="text-base text-gray-400 leading-relaxed mb-6 flex-1">
-                      Have a unique campaign requirement? We&apos;ll build a package
-                      around your goals, timeline, and budget. Multi-month,
-                      geo-targeted bursts, product launches, all welcome.
+                      Bookings of KES 50,000 or more can be paid by invoice. Up
+                      to 3 adverts in one booking, a play report every week, and
+                      one named KCA contact. Screen takeovers for more than{" "}
+                      {DEFAULT_SETTINGS.maxPlaysPerAdvertiserPerHour} plays an
+                      hour or a whole event.
                     </p>
                     <Link
                       href="/contact"
                       className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-brand-400 transition-colors no-underline mt-auto"
                     >
-                      Build a custom package
+                      Talk to us
                       <ArrowRight size={14} />
                     </Link>
                   </div>
@@ -197,12 +321,13 @@ Custom Packages
                   <div className="relative flex-1 flex flex-col">
                     <Play size={40} weight="fill" className="text-brand-500 mb-5" />
                     <h3 className="text-xl font-bold font-display text-white mb-3">
-                      Motion &amp; Still Ad Design Services
+                      Design help
                     </h3>
                     <p className="text-base text-gray-400 leading-relaxed mb-6 flex-1">
-                      Need your creative done? Our team offers motion and still ad
-                      design services to get your campaign live fast: bold,
-                      on-screen-ready, optimised for LED.
+                      A still advert from your logo, photo and words is KES
+                      1,500. A simple moving advert up to 15 seconds is KES
+                      5,000. Tell us what you sell and we will make it work on
+                      the screen.
                     </p>
                     <Link
                       href="/contact"
