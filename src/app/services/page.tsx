@@ -151,16 +151,18 @@ export default function ServicesPage() {
                 Book more, pay less
               </h3>
               <ul className="divide-y divide-gray-200">
-                {discountSteps.map((step, i) => (
+                <li className="flex items-center justify-between gap-4 py-3">
+                  <span className="text-sm text-gray-600">
+                    {`Up to ${formatNumber(discountSteps[0].minPlays - 1)} plays`}
+                  </span>
+                  <span className="text-sm font-bold text-black">No discount</span>
+                </li>
+                {discountSteps.map((step) => (
                   <li key={step.minPlays} className="flex items-center justify-between gap-4 py-3">
                     <span className="text-sm text-gray-600">
-                      {i === 0
-                        ? `Up to ${formatNumber(step.minPlays - 1)} plays`
-                        : `${formatNumber(step.minPlays)} plays or more`}
+                      {`${formatNumber(step.minPlays)} plays or more`}
                     </span>
-                    <span className="text-sm font-bold text-black">
-                      {i === 0 ? "No discount" : `${step.percent}% off`}
-                    </span>
+                    <span className="text-sm font-bold text-black">{`${step.percent}% off`}</span>
                   </li>
                 ))}
               </ul>
@@ -209,7 +211,7 @@ export default function ServicesPage() {
                     {isFeatured && (
                       <span className="top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 w-fit py-1 px-3 bg-black text-white text-[0.6875rem] font-bold uppercase tracking-wider rounded-full flex items-center gap-1 shadow-md z-10" style={{ position: "absolute" }}>
                         <Star size={12} weight="fill" className="text-brand-500" />
-                        Most popular
+                        First discount
                       </span>
                     )}
                     <h3 className={`text-2xl font-bold font-display mb-2 ${isFeatured ? "text-black" : "text-white"}`}>
