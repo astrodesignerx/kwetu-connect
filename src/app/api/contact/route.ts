@@ -19,7 +19,7 @@ type ContactPayload = {
   phone?: string;
   email?: string;
   campaignBrief?: string;
-  preferredPackage?: string;
+  need?: string;
   botcheck?: string;
 };
 
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
   const phone = (body.phone || "").trim();
   const email = (body.email || "").trim();
   const campaignBrief = (body.campaignBrief || "").trim();
-  const preferredPackage = (body.preferredPackage || "").trim() || "Not specified";
+  const need = (body.need || "").trim() || "Not specified";
 
   if (!fullName || !company || !phone || !email || !campaignBrief) {
     return NextResponse.json(
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
         <tr><td style="padding: 4px 16px 4px 0; color: #666;">Company</td><td style="padding: 4px 0;">${esc(company)}</td></tr>
         <tr><td style="padding: 4px 16px 4px 0; color: #666;">Phone</td><td style="padding: 4px 0;">${esc(phone)}</td></tr>
         <tr><td style="padding: 4px 16px 4px 0; color: #666;">Email</td><td style="padding: 4px 0;">${esc(email)}</td></tr>
-        <tr><td style="padding: 4px 16px 4px 0; color: #666;">Package</td><td style="padding: 4px 0;">${esc(preferredPackage)}</td></tr>
+        <tr><td style="padding: 4px 16px 4px 0; color: #666;">Needs</td><td style="padding: 4px 0;">${esc(need)}</td></tr>
       </table>
       <h3 style="margin: 20px 0 8px;">Campaign brief</h3>
       <p style="white-space: pre-wrap; margin: 0;">${esc(campaignBrief)}</p>
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
     `Company: ${company}`,
     `Phone: ${phone}`,
     `Email: ${email}`,
-    `Package: ${preferredPackage}`,
+    `Needs: ${need}`,
     "",
     "Campaign brief:",
     campaignBrief,

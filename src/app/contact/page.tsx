@@ -6,12 +6,12 @@ import { ArrowRight, CheckCircle } from "@phosphor-icons/react";
 import AnimatedSection from "@/components/AnimatedSection";
 import AnimatedItem from "@/components/AnimatedItem";
 
-const packages = [
-  "Platinum / Prime",
-  "Premium",
-  "Standard",
-  "Basic",
-  "Not Sure",
+const needs = [
+  "A small booking",
+  "A large campaign",
+  "A screen takeover",
+  "Design help",
+  "Not sure yet",
 ];
 
 export default function ContactPage() {
@@ -21,7 +21,7 @@ export default function ContactPage() {
     phone: "",
     email: "",
     campaignBrief: "",
-    preferredPackage: "",
+    need: "",
   });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
@@ -54,7 +54,7 @@ export default function ContactPage() {
           company: formData.company,
           phone: formData.phone,
           email: formData.email,
-          preferredPackage: formData.preferredPackage || "Not specified",
+          need: formData.need || "Not specified",
           campaignBrief: formData.campaignBrief,
         }),
       });
@@ -108,7 +108,7 @@ export default function ContactPage() {
                   </h3>
                   <p className="text-sm text-green-700">
                     Thank you for reaching out. The Kwetu Connect team will
-                    contact you within 24 hours with a tailored package.
+                    contact you within 24 hours with a plan that fits.
                   </p>
                 </div>
               ) : (
@@ -203,23 +203,23 @@ export default function ContactPage() {
                     </div>
 
                     <div className="mb-5">
-                      <span id="package-label" className="block text-[0.6875rem] font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                        Preferred Package
+                      <span id="need-label" className="block text-[0.6875rem] font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                        What do you need?
                       </span>
-                      <div className="flex flex-wrap gap-2" role="group" aria-labelledby="package-label">
-                        {packages.map((pkg) => (
+                      <div className="flex flex-wrap gap-2" role="group" aria-labelledby="need-label">
+                        {needs.map((item) => (
                           <button
-                            key={pkg}
+                            key={item}
                             type="button"
-                            aria-pressed={formData.preferredPackage === pkg}
-                            onClick={() => setFormData((prev) => ({ ...prev, preferredPackage: pkg }))}
+                            aria-pressed={formData.need === item}
+                            onClick={() => setFormData((prev) => ({ ...prev, need: item }))}
                             className={`px-4 py-2.5 rounded-full text-xs font-semibold transition-colors border ${
-                              formData.preferredPackage === pkg
+                              formData.need === item
                                 ? "bg-brand-500 text-black border-brand-500"
                                 : "bg-gray-100 text-gray-700 border-gray-200 hover:border-brand-500 hover:bg-brand-500/15"
                             }`}
                           >
-                            {pkg}
+                            {item}
                           </button>
                         ))}
                       </div>
