@@ -223,6 +223,16 @@ describe("earliestStartDate", () => {
     expect(earliestStartDate("2026-11-07")).toBe("2026-11-10");
   });
 
+  it("refuses a malformed date instead of quoting zero", () => {
+    const result = quote({ ...smallShop, startDate: "2026-13-45" });
+    expect(result.ok).toBe(false);
+  });
+
+  it("keeps each play's price to the cent", () => {
+    const result = quote(growingBusiness);
+    expect(result.ok && result.perPlayKes).toBe(13.5);
+  });
+
   it("skips a public holiday", () => {
     const settings: BookingSettings = {
       ...DEFAULT_SETTINGS,

@@ -40,6 +40,7 @@ export function quote(
 
   if (!lengthAvailable) errors.push("That length is not available.");
   if (!howOftenAvailable) errors.push("That how often choice is not available.");
+  if (!datesValid) errors.push("Choose a real start date and end date.");
   if (datesValid && !datesInOrder) {
     errors.push("The end date is before the start date.");
   }
@@ -63,7 +64,8 @@ export function quote(
   const priceKes = Math.floor(
     (fullPriceKes * (100 - discountPercent)) / 100
   );
-  const perPlayKes = Math.floor(priceKes / plays);
+  // Kept to the cent so a 10% discount on 15 s reads KES 13.50, not 13.
+  const perPlayKes = Math.round((priceKes * 100) / plays) / 100;
   const nextStep =
     settings.discountSteps
       .filter((step) => step.minPlays > plays)

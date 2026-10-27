@@ -163,6 +163,10 @@ function formatKes(value: number): string {
   return `KES ${formatNumber(value)}`;
 }
 
+function formatPerPlay(value: number): string {
+  return Number.isInteger(value) ? formatKes(value) : `KES ${value.toFixed(2)}`;
+}
+
 function formatDate(value: string): string {
   const [year, month, day] = value.split("-").map(Number);
   return `${day} ${MONTHS[month - 1]} ${year}`;
@@ -716,7 +720,7 @@ export default function BookingQuote({
                           />
                           <ResultRow
                             label="Each play costs"
-                            value={formatKes(result.perPlayKes)}
+                            value={formatPerPlay(result.perPlayKes)}
                           />
                         </div>
 
