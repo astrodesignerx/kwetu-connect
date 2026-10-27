@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { getLenis } from "@/components/SmoothScroll";
+import { WHATSAPP_NUMBER } from "@/lib/contact";
 import { ArrowUp, Phone } from "@phosphor-icons/react";
 
-const WA_LINK =
-  "https://wa.me/254729911021?text=Hi%20Kwetu%20Connect%2C%20I%27d%20like%20to%20ask%20about%20advertising%20on%20your%20LED%20billboard.";
+const WA_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20Kwetu%20Connect%2C%20I%27d%20like%20to%20ask%20about%20advertising%20on%20your%20LED%20billboard.`;
 
 export default function FloatingButtons() {
   const [visible, setVisible] = useState(false);

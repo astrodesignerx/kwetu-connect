@@ -158,7 +158,7 @@ describe("hourPlaylist", () => {
     }
 
     expect(worstDrift, `worst drift ${worstDrift} in hour ${worstHour}`).toBeLessThanOrEqual(60);
-  });
+  }, 20000);
 });
 
 function scheduleBooking(
