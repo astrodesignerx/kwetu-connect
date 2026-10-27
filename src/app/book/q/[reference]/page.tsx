@@ -6,6 +6,14 @@ import { WHATSAPP_NUMBER } from "@/lib/contact";
 import { BookingSummary, CapacityNotice } from "@/components/booking/BookingSummary";
 
 export const dynamic = "force-dynamic";
+const NEXT_STEP: Record<string, string> = {
+  Quote: "Pay by M-Pesa or card, then send us your advert. KCA confirms within 1 working day.",
+  Paid: "Payment received. Send us your advert if you have not yet; KCA checks it within 1 working day.",
+  Approved: "Your advert is approved and will go live on your start date.",
+  Live: "Your advert is on screen now. KCA sends your play report at the end.",
+  Finished: "This booking has finished. Ask KCA for your play report or book again.",
+  Cancelled: "This booking was cancelled. Contact KCA if you have questions.",
+};
 export const metadata: Metadata = { title: "Your booking", robots: { index: false, follow: false }, alternates: { canonical: null } };
 export default async function QuotePage({ params }: { params: Promise<{ reference: string }> }) {
   const { reference } = await params;
@@ -20,7 +28,7 @@ export default async function QuotePage({ params }: { params: Promise<{ referenc
       <p>Status: <strong>{booking.status}</strong></p>
       <BookingSummary booking={booking} settings={settings} />
       {booking.status === "Quote" && <CapacityNotice capacity={booking.capacity} />}
-      <p>Pay by M-Pesa or card, then send us your advert. KCA confirms within 1 working day.</p>
+      <p>{NEXT_STEP[booking.status]}</p>
       <a className="staff-button" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer">Send this booking to KCA on WhatsApp</a>
       <p><Link className="underline" href="/book">Create another quote</Link></p>
     </div>

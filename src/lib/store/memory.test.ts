@@ -58,6 +58,14 @@ describe("memory booking store", () => {
     await expect(store.addAdvert(b.reference, file, 10)).rejects.toThrow("At most 3");
     expect((await store.bookingDetail(b.reference))?.adverts[0].filePath).toBe("");
   });
+  it("approves an advert without a reason but needs one to refuse", async () => {
+    const b = await paid();
+    await store.addAdvert(b.reference, file, 10);
+    const advert = (await store.bookingDetail(b.reference))!.adverts[0];
+    await expect(store.decideAdvert(b.reference, advert.id, "refused", " ")).rejects.toThrow("reason");
+    await store.decideAdvert(b.reference, advert.id, "approved", "");
+    expect((await store.bookingDetail(b.reference))!.adverts[0].decision).toBe("approved");
+  });
   it("writes exactly one history row for every move and none for refused moves", async () => {
     const b = await paid();
     await expect(store.move(b.reference, "Approved", "staff@example.test", "")).rejects.toThrow("at least one");

@@ -130,7 +130,8 @@ export abstract class BaseStore implements BookingStore {
   }
   async decideAdvert(reference: string, id: string, decision: "approved" | "refused", rawReason: string) {
     ensure(decision === "approved" || decision === "refused", "Choose approved or refused.");
-    const reason = text(rawReason, "a decision reason", 500);
+    // Only a refusal needs a reason; approving can be one click.
+    const reason = text(rawReason ?? "", "a reason for refusing", 500, decision === "approved");
     await this.transaction((data) => {
       const b = this.find(data, reference);
       ensure(b.status !== "Finished" && b.status !== "Cancelled", "This booking is closed.");

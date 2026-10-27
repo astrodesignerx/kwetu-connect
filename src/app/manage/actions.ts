@@ -29,7 +29,7 @@ export async function uploadAdvert(_state: ActionState, form: FormData) {
   });
 }
 export async function decideAdvert(_state: ActionState, form: FormData) {
-  return change(form, async (ref) => getStore().decideAdvert(ref, text(form.get("id"), "an advert ID", 40), String(form.get("decision")) as "approved" | "refused", text(form.get("reason"), "a decision reason", 500)));
+  return change(form, async (ref) => getStore().decideAdvert(ref, text(form.get("id"), "an advert ID", 40), String(form.get("decision")) as "approved" | "refused", String(form.get("reason") ?? "")));
 }
 export async function saveSettings(_state: ActionState, form: FormData): Promise<ActionState> {
   await requireStaff();
