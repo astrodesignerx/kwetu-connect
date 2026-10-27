@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getStore } from "@/lib/store";
+import { todayInNairobi } from "@/lib/store/validation";
 import BookingQuote from "@/components/booking/BookingQuote";
 
 export const metadata: Metadata = {
@@ -8,19 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/book" },
 };
 
-function todayInNairobi(): string {
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Africa/Nairobi",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date());
-
-  const part = (type: string) =>
-    parts.find((entry) => entry.type === type)?.value ?? "01";
-
-  return `${part("year")}-${part("month")}-${part("day")}`;
-}
+export const dynamic = "force-dynamic";
 
 export default async function BookPage({
   searchParams,
@@ -30,6 +20,6 @@ export default async function BookPage({
   const params = await searchParams;
 
   return (
-    <BookingQuote initialParams={params} today={todayInNairobi()} />
+    <BookingQuote initialParams={params} today={todayInNairobi()} settings={await getStore().getSettings()} />
   );
 }

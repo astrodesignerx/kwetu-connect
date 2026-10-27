@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo } from "next/font/google";
+import localFont from "next/font/local";
+import PublicChrome from "@/components/PublicChrome";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingButtons from "@/components/FloatingButtons";
@@ -7,11 +8,13 @@ import SmoothScroll from "@/components/SmoothScroll";
 import PixelWaveButtons from "@/components/PixelWaveButtons";
 import "./globals.css";
 
-const archivo = Archivo({
+const archivo = localFont({
   variable: "--font-archivo",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  axes: ["wdth"],
+  src: [
+    { path: "../../public/fonts/archivo/archivo-latin-normal.woff2", weight: "100 900", style: "normal" },
+    { path: "../../public/fonts/archivo/archivo-latin-italic.woff2", weight: "100 900", style: "italic" },
+  ],
+  declarations: [{ prop: "font-stretch", value: "62% 125%" }],
   display: "swap",
 });
 
@@ -128,12 +131,9 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <SmoothScroll />
-        <PixelWaveButtons />
-        <Navbar />
+        <PublicChrome><SmoothScroll /><PixelWaveButtons /><Navbar /></PublicChrome>
         <main id="main-content" className="flex-1 -mt-[88px]">{children}</main>
-        <Footer />
-        <FloatingButtons />
+        <PublicChrome><Footer /><FloatingButtons /></PublicChrome>
       </body>
     </html>
   );

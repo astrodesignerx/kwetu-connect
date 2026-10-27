@@ -9,7 +9,7 @@ import {
 } from "react";
 import AnimatedItem from "@/components/AnimatedItem";
 import AnimatedSection from "@/components/AnimatedSection";
-import { WHATSAPP_NUMBER } from "@/lib/contact";
+import BookingForm from "./BookingForm";
 import {
   addDays,
   earliestStartDate,
@@ -20,7 +20,7 @@ import {
 import { suggestPlan } from "@/lib/booking/plan";
 import { quote } from "@/lib/booking/quote";
 import {
-  DEFAULT_SETTINGS,
+  type BookingSettings,
   type BlockId,
 } from "@/lib/booking/settings";
 
@@ -43,15 +43,6 @@ type BudgetMessage = {
 
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 const DAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const DAY_LONG = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
 const BLOCK_ORDER: BlockId[] = [
   "morning",
   "midday",
@@ -107,18 +98,18 @@ function normaliseBlocks(blocks: BlockId[]): BlockId[] {
   return BLOCK_ORDER.filter((block) => chosen.has(block));
 }
 
-function readAnswers(params: SearchParams, today: string): Answers {
-  const earliest = earliestStartDate(today);
+function readAnswers(params: SearchParams, today: string, settings: BookingSettings): Answers {
+  const earliest = earliestStartDate(today, settings);
   const lengthValue = Number(readParam(params, "len"));
-  const lengthSeconds = DEFAULT_SETTINGS.lengths.includes(lengthValue)
+  const lengthSeconds = settings.lengths.includes(lengthValue)
     ? lengthValue
-    : 10;
+    : (settings.lengths.includes(10) ? 10 : settings.lengths[0]);
   const oftenValue = Number(readParam(params, "often"));
-  const howOften = DEFAULT_SETTINGS.howOften.some(
+  const howOften = settings.howOften.some(
     (option) => option.plays === oftenValue
   )
     ? oftenValue
-    : 10;
+    : (settings.howOften.some((o) => o.plays === 10) ? 10 : settings.howOften[0].plays);
 
   const daysValue = readParam(params, "days");
   const days =
@@ -180,15 +171,8 @@ function formatDate(value: string): string {
   return `${day} ${MONTHS[month - 1]} ${year}`;
 }
 
-function howOftenLabel(plays: number): string {
-  return (
-    DEFAULT_SETTINGS.howOften.find((option) => option.plays === plays)
-      ?.label ?? `${plays} plays an hour`
-  );
-}
-
-function blockHours(block: BlockId): string {
-  const hours = DEFAULT_SETTINGS.timeBlocks[block];
+function blockHours(block: BlockId, settings: BookingSettings): string {
+  const hours = settings.timeBlocks[block];
   return `${formatHour(hours.startHour)} to ${formatHour(hours.endHour)}`;
 }
 
@@ -259,13 +243,16 @@ function ResultRow({ label, value }: { label: string; value: string }) {
 export default function BookingQuote({
   initialParams,
   today,
+  settings,
 }: {
   initialParams: SearchParams;
   today: string;
+  settings: BookingSettings;
 }) {
   const [answers, setAnswers] = useState<Answers>(() =>
-    readAnswers(initialParams, today)
+    readAnswers(initialParams, today, settings)
   );
+  const [bookOpen, setBookOpen] = useState(false);
   const [budgetInput, setBudgetInput] = useState("");
   const [budgetMessage, setBudgetMessage] = useState<BudgetMessage | null>(
     null
@@ -275,7 +262,7 @@ export default function BookingQuote({
   );
 
   const query = buildQuery(answers);
-  const earliest = useMemo(() => earliestStartDate(today), [today]);
+  const earliest = useMemo(() => earliestStartDate(today, settings), [today, settings]);
 
   useEffect(() => {
     const nextUrl = `${window.location.pathname}?${query}`;
@@ -297,7 +284,7 @@ export default function BookingQuote({
     [answers]
   );
 
-  const result = useMemo(() => quote(request), [request]);
+  const result = useMemo(() => quote(request, settings), [request, settings]);
   const signature = result.ok
     ? `${result.plays}-${result.priceKes}-${result.hoursBooked}-${result.discountPercent}`
     : result.errors.join("|");
@@ -353,7 +340,8 @@ export default function BookingQuote({
 
     const suggested = suggestPlan(
       { budgetKes },
-      { lengthSeconds: answers.lengthSeconds, startDate: answers.startDate }
+      { lengthSeconds: answers.lengthSeconds, startDate: answers.startDate },
+      settings
     );
 
     if (!suggested.ok) {
@@ -386,36 +374,7 @@ export default function BookingQuote({
     window.setTimeout(() => setCopyState("idle"), 2000);
   }
 
-  function sendQuote() {
-    if (!result.ok) return;
-
-    const link = `${window.location.origin}/book?${query}`;
-    const daysText = answers.days.length
-      ? answers.days.map((day) => DAY_LONG[day]).join(", ")
-      : "None";
-    const blocksText = answers.blocks.length
-      ? answers.blocks
-          .map((block) => DEFAULT_SETTINGS.timeBlocks[block].label)
-          .join(", ")
-      : "None";
-    const message = [
-      "Hello KCA, here is my quote.",
-      `Length: ${answers.lengthSeconds} seconds`,
-      `How often: ${howOftenLabel(answers.howOften)}`,
-      `Days: ${daysText}`,
-      `Time blocks: ${blocksText}`,
-      `Dates: ${answers.startDate} to ${answers.endDate}`,
-      `Plays: ${result.plays}`,
-      `Price: ${formatKes(result.priceKes)}`,
-      `Quote: ${link}`,
-    ].join("\n");
-
-    window.open(
-      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
-  }
+  function sendQuote() { setBookOpen(true); }
 
   return (
     <>
@@ -442,8 +401,7 @@ export default function BookingQuote({
             blocks. The price updates with every answer.
           </p>
           <p className="mt-4 text-xs leading-relaxed text-gray-400">
-            Screen hours: Monday to Thursday 6am to 10pm. Friday to Sunday 6am
-            to midnight.
+            Screen hours: {DAY_ORDER.map((day) => `${DAY_SHORT[day]} ${formatHour(settings.screenHours[day].open)} to ${formatHour(settings.screenHours[day].close)}`).join(". ")}.
           </p>
         </div>
       </section>
@@ -463,7 +421,7 @@ export default function BookingQuote({
                     title="How long is your advert?"
                   />
                   <div className="mt-5 grid grid-cols-5 gap-2">
-                    {DEFAULT_SETTINGS.lengths.map((length) => (
+                    {settings.lengths.map((length) => (
                       <ChoiceButton
                         key={length}
                         selected={answers.lengthSeconds === length}
@@ -489,7 +447,7 @@ export default function BookingQuote({
                     title="How often should it play?"
                   />
                   <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                    {DEFAULT_SETTINGS.howOften.map((option) => (
+                    {settings.howOften.map((option) => (
                       <ChoiceButton
                         key={option.plays}
                         selected={answers.howOften === option.plays}
@@ -542,10 +500,10 @@ export default function BookingQuote({
                           className="flex-col items-start px-3 text-left"
                         >
                           <span className="text-sm font-semibold">
-                            {DEFAULT_SETTINGS.timeBlocks[block].label}
+                            {settings.timeBlocks[block].label}
                           </span>
                           <span className="mt-0.5 text-[0.625rem] font-normal text-black/60">
-                            {blockHours(block)}
+                            {blockHours(block, settings)}
                           </span>
                         </ChoiceButton>
                       ))}
@@ -622,7 +580,7 @@ export default function BookingQuote({
                         id="budget"
                         type="number"
                         inputMode="numeric"
-                        min={DEFAULT_SETTINGS.minOrderKes}
+                        min={settings.minOrderKes}
                         step={1000}
                         value={budgetInput}
                         onChange={(event) =>
@@ -736,7 +694,7 @@ export default function BookingQuote({
                           {result.belowMinimum ? (
                             <p className="rounded-xl bg-brand-50 px-4 py-3 text-sm font-medium leading-relaxed text-brand-900">
                               The smallest order is{" "}
-                              {formatKes(DEFAULT_SETTINGS.minOrderKes)}.
+                              {formatKes(settings.minOrderKes)}.
                             </p>
                           ) : null}
 
@@ -753,15 +711,17 @@ export default function BookingQuote({
 
                     {onlyLate ? (
                       <p className="mt-4 text-sm leading-relaxed text-gray-600">
-                        Late runs Friday to Sunday only.
+                        Late plays follow the screen hours for each chosen day.
                       </p>
                     ) : null}
 
                     <div className="mt-5 space-y-2">
+                      {result.ok && !result.belowMinimum && <button type="button" className="staff-button w-full" aria-expanded={bookOpen} onClick={() => setBookOpen((open) => !open)}>Book these plays</button>}
+                      {bookOpen && result.ok && !result.belowMinimum && <BookingForm key={query} request={request} priceKes={result.priceKes} />}
                       <button
                         type="button"
                         onClick={sendQuote}
-                        disabled={!result.ok}
+                        disabled={!result.ok || result.belowMinimum}
                         className="btn-sweep inline-flex min-h-12 w-full items-center justify-center rounded-full bg-brand-500 px-5 text-sm font-semibold text-black transition-[transform,opacity] duration-200 ease-out hover:bg-brand-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transform-none motion-reduce:transition-none"
                       >
                         Send this quote to KCA
