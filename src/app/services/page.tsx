@@ -31,6 +31,8 @@ const discountSteps = [...DEFAULT_SETTINGS.discountSteps].sort(
 type Example = {
   name: string;
   detail: string;
+  weeks: number;
+  // Fixed reference dates only price the example: whole weeks cost the same whatever the start.
   request: BookingRequest;
 };
 
@@ -38,6 +40,7 @@ const examples: Example[] = [
   {
     name: "Small shop",
     detail: "10 s play, every 6 minutes, Saturdays, Morning and Midday, 4 weeks",
+    weeks: 4,
     request: {
       lengthSeconds: 10,
       howOften: 10,
@@ -50,6 +53,7 @@ const examples: Example[] = [
   {
     name: "Growing business",
     detail: "15 s play, every 6 minutes, Friday to Sunday, every block, 2 weeks",
+    weeks: 2,
     request: {
       lengthSeconds: 15,
       howOften: 10,
@@ -62,6 +66,7 @@ const examples: Example[] = [
   {
     name: "Large organisation",
     detail: "15 s play, every 6 minutes, every day, every block, 12 weeks",
+    weeks: 12,
     request: {
       lengthSeconds: 15,
       howOften: 10,
@@ -81,8 +86,8 @@ function exampleQuote(request: BookingRequest) {
   return result;
 }
 
-function bookingHref(request: BookingRequest) {
-  return `/book?len=${request.lengthSeconds}&often=${request.howOften}&days=${request.days.join(",")}&blocks=${request.blocks.join(",")}&from=${request.startDate}&to=${request.endDate}`;
+function bookingHref({ request, weeks }: Example) {
+  return `/book?len=${request.lengthSeconds}&often=${request.howOften}&days=${request.days.join(",")}&blocks=${request.blocks.join(",")}&weeks=${weeks}`;
 }
 
 export default function ServicesPage() {
@@ -247,7 +252,7 @@ export default function ServicesPage() {
                       </span>
                     </div>
                     <Link
-                      href={bookingHref(example.request)}
+                      href={bookingHref(example)}
                       className={`group inline-flex items-center justify-center w-full px-6 py-3 rounded-full font-semibold text-sm tracking-wide transition-all duration-200 active:scale-[0.97] no-underline mt-2 ${
                         isFeatured
                           ? "btn-sweep bg-black text-white"

@@ -137,9 +137,17 @@ function readAnswers(params: SearchParams, today: string): Answers {
     fromValue && isValidDate(fromValue) ? fromValue : earliest;
   const startDate = requestedStart < earliest ? earliest : requestedStart;
 
+  // `weeks` lets a link ask for whole weeks from the earliest start, so it never goes stale.
   const toValue = readParam(params, "to");
+  const weeksValue = Number(readParam(params, "weeks"));
+  const weeks =
+    Number.isInteger(weeksValue) && weeksValue >= 1 && weeksValue <= 52
+      ? weeksValue
+      : 4;
   const endDate =
-    toValue && isValidDate(toValue) ? toValue : addDays(startDate, 27);
+    toValue && isValidDate(toValue) && toValue >= startDate
+      ? toValue
+      : addDays(startDate, 7 * weeks - 1);
 
   return {
     lengthSeconds,
