@@ -28,6 +28,23 @@ const discountSteps = [...DEFAULT_SETTINGS.discountSteps].sort(
   (a, b) => a.minPlays - b.minPlays
 );
 
+// The discount ladder on the page: full price first, then each step, with what a 10 s play costs.
+const discountLadder = [
+  { label: `Up to ${formatNumber(discountSteps[0].minPlays - 1)}`, percent: 0 },
+  ...discountSteps.map((step) => ({ label: `${formatNumber(step.minPlays)}+`, percent: step.percent })),
+].map((step) => ({
+  ...step,
+  tenSecondPlay: (10 * DEFAULT_SETTINGS.kesPerSecond * (100 - step.percent)) / 100,
+}));
+
+// Rises from grey to full amber, and darkens enough for black text on each fill.
+const DISCOUNT_FILLS = [
+  "bg-gray-100 text-black",
+  "bg-brand-200 text-black",
+  "bg-brand-400 text-black",
+  "bg-brand-500 text-black",
+];
+
 type Example = {
   name: string;
   detail: string;
@@ -114,7 +131,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      <AnimatedSection className="py-20 lg:py-24 bg-white" threshold={0.3}>
+      <AnimatedSection className="py-20 lg:py-24 bg-white" threshold={0.05}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 max-w-3xl">
             <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold leading-tight tracking-[-0.02em] text-black">
@@ -137,11 +154,11 @@ export default function ServicesPage() {
                   <h3 className="text-2xl font-bold font-display mb-5 text-white">
                     {length} s
                   </h3>
-                  <div className="border-t border-white/10 pt-4 flex justify-between items-baseline gap-2 mt-auto">
+                  <div className="border-t border-white/10 pt-4 flex flex-col gap-1 mt-auto">
                     <span className="text-[0.6875rem] uppercase tracking-wider font-semibold text-gray-400">
                       One play
                     </span>
-                    <span className="text-[2rem] font-bold font-display text-white">
+                    <span className="text-[1.75rem] xl:text-[2rem] leading-none font-bold font-display text-white whitespace-nowrap">
                       {formatKes(length * DEFAULT_SETTINGS.kesPerSecond)}
                     </span>
                   </div>
@@ -152,25 +169,39 @@ export default function ServicesPage() {
 
           <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             <div className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
-              <h3 className="text-xl font-bold font-display text-black mb-4">
+              <h3 className="text-xl font-bold font-display text-black mb-1">
                 Book more, pay less
               </h3>
-              <ul className="divide-y divide-gray-200">
-                <li className="flex items-center justify-between gap-4 py-3">
-                  <span className="text-sm text-gray-600">
-                    {`Up to ${formatNumber(discountSteps[0].minPlays - 1)} plays`}
-                  </span>
-                  <span className="text-sm font-bold text-black">No discount</span>
-                </li>
-                {discountSteps.map((step) => (
-                  <li key={step.minPlays} className="flex items-center justify-between gap-4 py-3">
-                    <span className="text-sm text-gray-600">
-                      {`${formatNumber(step.minPlays)} plays or more`}
-                    </span>
-                    <span className="text-sm font-bold text-black">{`${step.percent}% off`}</span>
+              <p className="text-sm text-gray-600 mb-6">
+                The more plays in one booking, the less each play costs.
+              </p>
+              <ol className="grid grid-cols-4 gap-2 sm:gap-3 items-end">
+                {discountLadder.map((step, i) => (
+                  <li key={step.label} className="h-full">
+                    <AnimatedItem delay={i + 1} animateClass="animate-fade-up-slow" className="flex flex-col gap-2 h-full justify-end">
+                      <div
+                        className={`rounded-xl flex flex-col justify-start p-2.5 sm:p-3 ${DISCOUNT_FILLS[i]}`}
+                        style={{ height: `${72 + i * 44}px` }}
+                      >
+                        <span className="text-lg sm:text-2xl font-bold font-display leading-none whitespace-nowrap">
+                          {step.percent > 0 ? `${step.percent}%` : "0%"}
+                        </span>
+                        <span className="text-[0.6875rem] font-semibold mt-1">
+                          {step.percent > 0 ? "off" : "full price"}
+                        </span>
+                      </div>
+                      <span className="text-xs sm:text-sm font-semibold text-black whitespace-nowrap">
+                        {step.label}
+                        <span className="hidden lg:inline"> plays</span>
+                      </span>
+                      <span className="text-[0.6875rem] sm:text-xs text-gray-600 leading-snug">
+                        10 s play<span className="hidden sm:inline">:</span>{" "}
+                        <span className="block sm:inline whitespace-nowrap">{formatKes(step.tenSecondPlay)}</span>
+                      </span>
+                    </AnimatedItem>
                   </li>
                 ))}
-              </ul>
+              </ol>
             </div>
             <div className="flex flex-col gap-4 text-sm text-gray-600 leading-relaxed">
               <p className="font-bold text-black">
