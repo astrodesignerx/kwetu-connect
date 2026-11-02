@@ -111,8 +111,8 @@ export abstract class BaseStore implements BookingStore {
   async addAdvert(reference: string, file: AdvertUpload, seconds: number) {
     const fileName = text(file.name, "a file name", 150);
     ensure(/^[a-zA-Z0-9][a-zA-Z0-9_. ()-]*$/.test(fileName), "Use a file name starting with a letter or number, using letters, numbers, spaces, dots, brackets or hyphens.");
-    ensure(["video/mp4", "video/webm", "image/png", "image/jpeg"].includes(file.type), "Upload an MP4, WebM, PNG or JPEG advert.");
-    ensure(file.size > 0 && file.size <= 20 * 1024 * 1024, "Adverts must be up to 20 MB.");
+    ensure(["video/mp4", "image/png", "image/jpeg"].includes(file.type), "Upload an MP4, PNG or JPEG advert.");
+    ensure(file.size > 0 && file.size <= 50 * 1024 * 1024, "Adverts must be up to 50 MB.");
     ensure(Number.isInteger(seconds) && seconds > 0 && seconds <= 3600, "Enter the advert length in whole seconds.");
     const before = await this.bookingDetail(reference);
     ensure(before, "Booking not found.");

@@ -66,6 +66,13 @@ describe("memory booking store", () => {
     await store.decideAdvert(b.reference, advert.id, "approved", "");
     expect((await store.bookingDetail(b.reference))!.adverts[0].decision).toBe("approved");
   });
+  it("accepts only MP4, PNG or JPEG adverts up to 50 MB", async () => {
+    const b = await paid();
+    await expect(store.addAdvert(b.reference, { ...file, name: "shop.webm", type: "video/webm" }, 10)).rejects.toThrow("MP4");
+    await expect(store.addAdvert(b.reference, { ...file, size: 51 * 1024 * 1024 }, 10)).rejects.toThrow("50 MB");
+    await store.addAdvert(b.reference, { ...file, size: 50 * 1024 * 1024 }, 10);
+    expect((await store.bookingDetail(b.reference))!.adverts).toHaveLength(1);
+  });
   it("writes exactly one history row for every move and none for refused moves", async () => {
     const b = await paid();
     await expect(store.move(b.reference, "Approved", "staff@example.test", "")).rejects.toThrow("at least one");
