@@ -5,7 +5,8 @@ import type { QuoteSuccess } from "@/lib/booking/quote";
 export const number = (value: number) => value.toLocaleString("en-GB", { maximumFractionDigits: 2 });
 export function RollingPrice({ value }: { value: number }) {
   const amount = number(value);
-  return <p className="quote-price" aria-label={`KES ${amount}`}><span className="quote-currency" aria-hidden="true">KES</span>{" "}
+  // Screen readers read the hidden plain text; the rolling digits are visual only.
+  return <p className="quote-price"><span className="sr-only">KES {amount}</span><span className="quote-currency" aria-hidden="true">KES</span>{" "}
     <span aria-hidden="true" className="price-digits">{[...amount].map((digit, index) =>
       <span className="digit-window" key={index}><span className="price-digit" key={digit}>{digit}</span></span>)}</span>
   </p>;

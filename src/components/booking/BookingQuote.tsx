@@ -24,7 +24,7 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
   const [budgetInput, setBudgetInput] = useState("");
   const [budgetMessage, setBudgetMessage] = useState("");
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
-  const [availability, setAvailability] = useState({ from: initialAnswers.startDate, to: initialAnswers.endDate, grid: initialOccupancy, error: "" });
+  const [availability, setAvailability] = useState<{ from: string; to: string; grid: Occupancy | null; error: string }>({ from: initialAnswers.startDate, to: initialAnswers.endDate, grid: initialOccupancy, error: "" });
   const [retry, setRetry] = useState(0);
   const { startDate: from, endDate: to } = answers;
   const query = buildQuery(answers);
@@ -32,7 +32,9 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
   const rangeValid = from <= to && to <= addDays(from, 365);
   const result = useMemo(() => rangeValid ? quote(answers, settings) : { ok: false as const, errors: ["Choose dates in order, up to 366 days apart."] }, [answers, settings, rangeValid]);
   const availabilityCurrent = availability.from === from && availability.to === to;
-  const occupancy = availabilityCurrent ? availability.grid : occupancyByDayBlock([], from, from <= to && to <= addDays(from, 365) ? to : from, settings);
+  // Until busy hours for these dates are known, cells show as "checking", never as a guessed "open".
+  const availabilityKnown = availabilityCurrent && availability.grid !== null;
+  const occupancy = availabilityKnown ? availability.grid! : occupancyByDayBlock([], from, from <= to && to <= addDays(from, 365) ? to : from, settings);
   const weeks = (Math.round((Date.parse(to) - Date.parse(from)) / 86400000) + 1) / 7;
   function openSheet(value: typeof sheet) { setSheet(value); setSheetOpen(true); }
 
@@ -49,7 +51,7 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
         const grid: Occupancy = await response.json();
         if (!controller.signal.aborted) setAvailability({ from, to, grid, error: "" });
       }).catch(() => {
-        if (!controller.signal.aborted) setAvailability({ from, to, grid: occupancyByDayBlock([], from, to, settings), error: "Unable to refresh busy hours. Please try again." });
+        if (!controller.signal.aborted) setAvailability({ from, to, grid: null, error: "Unable to refresh busy hours. Please try again." });
       });
     return () => controller.abort();
   }, [from, to, rangeValid, retry, settings]);
@@ -103,7 +105,7 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
         </div>
         <div className="booking-grid-panel timetable-panel">
           <div className="timetable-heading"><h1>Tap the hours you want</h1><TimetableLegend /></div>
-          <Timetable settings={settings} occupancy={occupancy} selection={answers} onSelect={(action) => change(toggleSelection(answers, action))} />
+          <Timetable settings={settings} occupancy={occupancy} pending={!availabilityKnown} selection={answers} onSelect={(action) => change(toggleSelection(answers, action))} />
           <p className="timetable-note">You choose days and times; your advert plays at every chosen time on every chosen day.</p>
           <div className="availability-message" role="status">
             {!rangeValid ? "Choose dates in order, up to 366 days apart." : !availabilityCurrent ? "Updating busy hours..." : availability.error}
@@ -114,8 +116,8 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
       </div>
     </div>
     <div className="quote-dock">
-      <button type="button" className="dock-price" aria-haspopup="dialog" aria-label="Expand your quote" onClick={() => openSheet("quote")}>
-        <small>Your quote <span aria-hidden="true">↑</span></small><strong key={result.ok ? result.priceKes : "empty"} className="dock-amount" aria-live="polite">{result.ok ? `KES ${number(result.priceKes)}` : "Choose hours"}</strong>
+      <button type="button" className="dock-price" aria-haspopup="dialog" onClick={() => openSheet("quote")}>
+        <small>Your quote <span aria-hidden="true">↑</span><span className="sr-only">, open details</span></small><strong key={result.ok ? result.priceKes : "empty"} className="dock-amount" aria-live="polite">{result.ok ? `KES ${number(result.priceKes)}` : "Choose hours"}</strong>
       </button>
       <button type="button" className="timetable-button" disabled={!canBook} onClick={() => openSheet("book")}>Book these plays</button>
     </div>

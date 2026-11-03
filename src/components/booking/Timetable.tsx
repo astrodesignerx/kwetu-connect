@@ -5,7 +5,7 @@ import { BLOCK_ORDER, DAY_ORDER, type Selection, type SelectionAction } from "@/
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 type Props = { settings: BookingSettings; occupancy: Occupancy; selection?: Selection;
-  onSelect?: (action: SelectionAction) => void; heat?: boolean };
+  onSelect?: (action: SelectionAction) => void; heat?: boolean; pending?: boolean };
 
 export function TimetableLegend({ heat = false }: { heat?: boolean }) {
   return <div className="timetable-legend" aria-label={heat ? "Time sold legend" : "Availability legend"}>
@@ -15,8 +15,8 @@ export function TimetableLegend({ heat = false }: { heat?: boolean }) {
   </div>;
 }
 
-export default function Timetable({ settings, occupancy, selection, onSelect, heat = false }: Props) {
-  return <div className="timetable" role="group" aria-label={heat ? "Share of time sold by day and time" : "Days and times"}>
+export default function Timetable({ settings, occupancy, selection, onSelect, heat = false, pending = false }: Props) {
+  return <div className="timetable" role="group" aria-busy={pending} aria-label={heat ? "Share of time sold by day and time" : "Days and times"}>
     <span aria-hidden="true" />
     {DAY_ORDER.map((day) => onSelect ? <button type="button" className="day-heading" key={day}
       aria-label={`Toggle ${DAYS[day]}`} aria-pressed={selection?.days.includes(day) ?? false}
@@ -32,15 +32,15 @@ export default function Timetable({ settings, occupancy, selection, onSelect, he
         {DAY_ORDER.map((day) => {
           const cell = occupancy[day][block];
           const selected = !!selection?.days.includes(day) && !!selection?.blocks.includes(block);
-          if (!cell.open) return <span key={day} className="time-cell is-closed" aria-label={`${DAYS[day]} ${time.label.toLowerCase()}, closed`}><span>Closed</span></span>;
-          const tone = selected ? "selected" : heat ? cell.soldShare >= 0.8 ? "selected" : cell.soldShare >= 0.4 ? "mid" : "open" : cell.soldShare >= 0.6 ? "busy" : "open";
-          const state = selected ? "yours" : cell.soldShare >= 0.6 ? "busy" : "open";
+          if (!cell.open) return <span key={day} role="img" className="time-cell is-closed" aria-label={`${DAYS[day]} ${time.label.toLowerCase()}, closed`}><span aria-hidden="true">Closed</span></span>;
+          const tone = selected ? "selected" : pending ? "pending" : heat ? cell.soldShare >= 0.8 ? "selected" : cell.soldShare >= 0.4 ? "mid" : "open" : cell.soldShare >= 0.6 ? "busy" : "open";
+          const state = selected ? "yours" : pending ? "checking" : cell.soldShare >= 0.6 ? "busy" : "open";
           const name = `${DAYS[day]} ${time.label.toLowerCase()}, ${heat ? `${Math.round(cell.soldShare * 100)}% sold` : state}`;
           return onSelect ? <button type="button" key={day} className={`time-cell is-${tone}`} aria-label={name} aria-pressed={selected}
             onClick={() => onSelect({ kind: "cell", day, block })}>
             <span key={String(selected)} className="cell-mark" aria-hidden="true">{selected ? "✓" : ""}</span>
-          </button> : <span key={day} className={`time-cell is-${tone}`} aria-label={name}>
-            {heat ? `${Math.round(cell.soldShare * 100)}%` : selected ? <span aria-hidden="true">✓</span> : null}
+          </button> : <span key={day} role="img" className={`time-cell is-${tone}`} aria-label={name}>
+            {heat ? <span aria-hidden="true">{Math.round(cell.soldShare * 100)}%</span> : selected ? <span aria-hidden="true">✓</span> : null}
           </span>;
         })}
       </Fragment>;
