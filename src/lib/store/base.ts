@@ -3,6 +3,7 @@ import { checkCapacity, type BookingStatus } from "../booking/capacity";
 import { earliestStartDate } from "../booking/hours";
 import { quote } from "../booking/quote";
 import { buildSchedule } from "../booking/playlist";
+import { occupancyByDayBlock } from "../booking/occupancy";
 import { DEFAULT_SETTINGS, type BookingSettings } from "../booking/settings";
 import { canMove } from "../booking/status";
 import type { Advert, Advertiser, AdvertUpload, Booking, BookingFilter, BookingStore, PublicBooking, QuoteInput, StatusChange } from "./types";
@@ -159,5 +160,10 @@ export abstract class BaseStore implements BookingStore {
       return { bookingId: b.reference, request: b.request, adverts: adverts.map((a) => a.filePath || a.fileName) };
     });
     return buildSchedule(bookings, from, to, this.settings(data));
+  }
+  async occupancy(from: string, to: string) {
+    dateWindow(from, to);
+    const data = await this.read();
+    return occupancyByDayBlock(data.bookings, from, to, this.settings(data));
   }
 }

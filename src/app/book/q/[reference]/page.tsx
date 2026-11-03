@@ -4,6 +4,8 @@ import Link from "next/link";
 import { getStore } from "@/lib/store";
 import { WHATSAPP_NUMBER } from "@/lib/contact";
 import { BookingSummary, CapacityNotice } from "@/components/booking/BookingSummary";
+import QuoteTotals from "@/components/booking/QuoteTotals";
+import StatusTag from "@/components/manage/StatusTag";
 
 export const dynamic = "force-dynamic";
 const NEXT_STEP: Record<string, string> = {
@@ -22,15 +24,22 @@ export default async function QuotePage({ params }: { params: Promise<{ referenc
   if (!booking) notFound();
   const settings = await store.getSettings();
   const message = [`Hello KCA, here is my booking ${booking.reference}.`, `Length: ${booking.request.lengthSeconds} seconds`, `How often: ${booking.request.howOften} plays an hour`, `Days: ${booking.request.days.map((d) => ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][d]).join(", ")}`, `Time blocks: ${booking.request.blocks.map((b) => settings.timeBlocks[b].label).join(", ")}`, `Dates: ${booking.request.startDate} to ${booking.request.endDate}`, `Plays: ${booking.plays}`, `Price: KES ${booking.priceKes.toLocaleString("en-GB")}`, `Reference: ${booking.reference}`].join("\n");
-  return <section className="bg-ink px-4 pb-16 pt-40 text-white">
-    <div className="mx-auto max-w-2xl space-y-6 rounded-2xl bg-white p-5 text-gray-900 sm:p-8">
-      <p className="text-sm font-semibold text-brand-700">Your booking</p><h1 className="break-all text-2xl font-bold">{booking.reference}</h1>
-      <p>Status: <strong>{booking.status}</strong></p>
-      <BookingSummary booking={booking} settings={settings} />
-      {booking.status === "Quote" && <CapacityNotice capacity={booking.capacity} />}
-      <p>{NEXT_STEP[booking.status]}</p>
-      <a className="staff-button" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer">Send this booking to KCA on WhatsApp</a>
-      <p><Link className="underline" href="/book">Create another quote</Link></p>
+  const next = [...settings.discountSteps].reverse().find((s) => s.minPlays > booking.plays);
+  const result = { ok: true as const, ...booking, hoursBooked: booking.plays / booking.request.howOften,
+    perPlayKes: Math.round(booking.priceKes / booking.plays * 100) / 100, belowMinimum: false,
+    nextStep: next ? { ...next, playsNeeded: next.minPlays - booking.plays } : null };
+  return <section className="booking-canvas saved-quote">
+    <div className="booking-workspace timetable-panel saved-layout">
+      <div className="space-y-6 min-w-0"><p className="text-sm font-semibold text-brand-700">Your booking</p><h1 className="break-all text-2xl font-bold">{booking.reference}</h1>
+        <BookingSummary booking={booking} settings={settings} />
+        {booking.status === "Quote" && <CapacityNotice capacity={booking.capacity} />}
+        <p><Link className="quiet-button underline" href="/book">Create another quote</Link></p>
+      </div>
+      <aside><QuoteTotals result={result} settings={settings}>
+        <div className="space-y-4"><StatusTag status={booking.status} /><p>{NEXT_STEP[booking.status]}</p>
+          <a className="timetable-button" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer">Send this booking to KCA on WhatsApp</a>
+        </div>
+      </QuoteTotals></aside>
     </div>
   </section>;
 }

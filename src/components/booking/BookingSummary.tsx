@@ -1,6 +1,8 @@
 ﻿import type { PublicBooking } from "@/lib/store/types";
 import type { BookingSettings } from "@/lib/booking/settings";
 import type { CapacityResult } from "@/lib/booking/capacity";
+import { occupancyByDayBlock } from "@/lib/booking/occupancy";
+import Timetable from "./Timetable";
 
 export function BookingSummary({ booking: b, settings }: { booking: Pick<PublicBooking, "request" | "plays" | "fullPriceKes" | "discountPercent" | "priceKes">; settings: BookingSettings }) {
   const r = b.request;
@@ -11,7 +13,10 @@ export function BookingSummary({ booking: b, settings }: { booking: Pick<PublicB
     ["Dates", `${r.startDate} to ${r.endDate}`], ["Plays", b.plays.toLocaleString("en-GB")],
     ["Full price", `KES ${b.fullPriceKes.toLocaleString("en-GB")}`], ["Discount", `${b.discountPercent}%`], ["Price", `KES ${b.priceKes.toLocaleString("en-GB")}`],
   ];
-  return <dl className="divide-y divide-gray-200">{rows.map(([label, value]) => <div key={label} className="flex flex-wrap justify-between gap-2 py-2"><dt>{label}</dt><dd className="max-w-full text-right font-semibold">{value}</dd></div>)}</dl>;
+  return <div className="booking-summary space-y-5">
+    <Timetable settings={settings} occupancy={occupancyByDayBlock([], r.startDate, r.endDate, settings)} selection={r} />
+    <dl className="summary-facts">{rows.filter(([label]) => label !== "Days" && label !== "Time blocks").map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+  </div>;
 }
 export function CapacityNotice({ capacity }: { capacity: CapacityResult }) {
   if (capacity.ok) return <p className="rounded-lg bg-brand-50 p-3 text-sm text-brand-900">Space is available now. KCA checks again when payment is marked.</p>;

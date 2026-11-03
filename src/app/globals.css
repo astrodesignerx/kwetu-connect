@@ -27,6 +27,12 @@ html {
   /* Soft charcoal used for page sections instead of pure black.
      Pure black stays reserved for video letterbox and overlays. */
   --color-ink: #141414;
+  --color-canvas: #eef0f2;
+  --color-cell-open: #f4f5f6;
+  --color-cell-line: #d8dbdf;
+  --color-cell-busy: #c9cdd2;
+  --color-control-line: #81868c;
+  --color-heat-mid: var(--color-brand-200);
 
   --color-surface-base: #111111;
   --color-surface-raised: #1a1a1a;
@@ -78,12 +84,19 @@ html {
   --radius-btn: 9999px;
   --radius-card: 16px;
   --radius-input: 8px;
+  --radius-panel: 14px;
+  --radius-cell: var(--radius-input);
+  --radius-segment: 10px;
 
   --duration-instant: 100ms;
   --duration-fast: 200ms;
   --duration-normal: 300ms;
   --duration-slow: 500ms;
   --duration-slower: 800ms;
+  --duration-quick: 120ms;
+  --duration-base: var(--duration-fast);
+  --duration-surface: 320ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
 
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
@@ -186,7 +199,7 @@ html.js .anim-pending {
 }
 
 .animate-quote-in {
-  animation: quote-in 200ms var(--ease-out);
+  animation: quote-in var(--duration-base) var(--ease-standard);
 }
 
 @keyframes float {
@@ -460,7 +473,7 @@ html.js .anim-pending {
 /* Top layer does a glitch cut + opacity flicker on irregular beats,
    revealing the aligned layer beneath (same zoom => seamless flip).
    NOTE: both effects animate opacity, so they MUST live in one keyframe
-   — two separate animations on the same property make the last one win. */
+   because two separate animations on the same property make the last one win. */
 .crossfade-layer {
   animation:
     ken-burns-zoom var(--ken-burns-duration) ease-in-out infinite,
@@ -541,7 +554,7 @@ html.js .anim-pending {
   animation: rgb-split-b 8s steps(1, end) infinite;
 }
 
-/* The RGB-split pseudo layers use blend modes over full-viewport images —
+/* The RGB-split pseudo layers use blend modes over full-viewport images,
    too costly on low-end phones. The glitch-cut flip still carries the effect. */
 @media (width < 40rem) {
   .crossfade-layer::before,
@@ -684,9 +697,9 @@ html.js .anim-pending {
 .staff-form input:not([type="hidden"]), .staff-form select, .staff-form textarea {
   width: 100%;
   min-width: 0;
-  min-height: 44px;
+  min-height: 40px;
   padding: 0.65rem 0.75rem;
-  border: 1px solid #9ca3af;
+  border: 1px solid var(--color-control-line);
   border-radius: 8px;
   background: #fff;
   color: #141414;
@@ -697,11 +710,11 @@ html.js .anim-pending {
 }
 .staff-button, .staff-link {
   display: inline-flex;
-  min-height: 44px;
+  min-height: 40px;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  transition: transform var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out);
+  border-radius: var(--radius-btn);
+  transition: transform var(--duration-base) var(--ease-standard), opacity var(--duration-base) var(--ease-standard);
 }
 .staff-button {
   padding: 0.65rem 1rem;
@@ -715,12 +728,216 @@ html.js .anim-pending {
 .staff-button:disabled { opacity: 0.45; cursor: wait; transform: none; }
 .staff-button:focus-visible, .staff-link:focus-visible { outline: 2px solid var(--color-brand-500); outline-offset: 4px; }
 .staff-results {
-  transition: opacity var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
+  transition: opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard);
 }
 .staff-results[data-pending="true"] { opacity: 0.5; transform: translateY(4px); }
-.manager-shell .staff-card { border: 1px solid #ffffff26; border-radius: 12px; padding: 1.25rem; }
+.manager-shell .staff-card { background: white; border-radius: var(--radius-panel); padding: 1.25rem; }
 .manager-shell .staff-card h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; }
 @media (prefers-reduced-motion: reduce) {
   .staff-button, .staff-link, .staff-results { transition: none; transform: none; }
   .staff-button:hover, .staff-link:hover, .staff-results[data-pending="true"] { transform: none; }
+}
+
+/* Timetable booking and manager surfaces. */
+.booking-canvas, .manager-shell { background: var(--color-canvas); color: var(--color-ink); min-height: 100vh; }
+.booking-canvas { padding: 112px 24px 28px; }
+.booking-workspace, .manager-workspace { max-width: 1280px; margin: 0 auto; min-width: 0; }
+.booking-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; font-size: 13px; color: #555; }
+.booking-title > :first-child { font-weight: 700; color: var(--color-ink); }
+.timetable-panel { background: white; border-radius: var(--radius-panel); padding: 20px; min-width: 0; }
+.booking-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+.booking-controls { grid-column: 1; display: flex; flex-wrap: wrap; align-items: start; gap: 20px 28px; padding: 16px 20px; }
+.booking-controls fieldset { min-width: 0; border: 0; margin: 0; padding: 0; }
+.booking-controls legend, .date-control > span { font-size: 12px; color: #555; font-weight: 700; margin-bottom: 8px; display: block; }
+.segmented { display: flex; flex-wrap: wrap; padding: 3px; border-radius: var(--radius-segment); background: var(--color-canvas); gap: 2px; }
+.segmented button, .segmented a { position: relative; isolation: isolate; min-height: 36px; padding: 7px 12px; border-radius: var(--radius-cell); font-size: 14px; font-weight: 500; }
+.segmented button::before, .segmented a::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--color-ink); border-radius: inherit; opacity: 0; transform: scale(0.96); transition: transform var(--duration-quick) var(--ease-standard), opacity var(--duration-quick) var(--ease-standard); }
+.segmented [aria-pressed="true"], .segmented [aria-current="page"] { color: white; font-weight: 700; }
+.segmented [aria-pressed="true"]::before, .segmented [aria-current="page"]::before { opacity: 1; transform: scale(1); }
+.segmented button:hover, .segmented a:hover { opacity: 0.8; }
+.date-control { flex: 1; min-width: 260px; }
+.date-range-button { width: 100%; display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; background: var(--color-canvas); border-radius: var(--radius-segment); font-size: 14px; text-align: left; }
+.budget-link { margin-top: 8px; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; color: var(--color-brand-700); }
+.booking-grid-panel { min-height: 480px; }
+.timetable-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.timetable-heading h1 { font-size: 28px; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em; }
+.timetable-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: #555; }
+.timetable-legend > span { display: flex; align-items: center; gap: 6px; }
+.legend-swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.is-open { background: var(--color-cell-open); border: 1px solid var(--color-cell-line); }
+.is-busy { background: var(--color-cell-busy); }
+.is-mid { background: var(--color-heat-mid); }
+.is-selected { background: var(--color-brand-500); color: var(--color-ink); }
+.timetable { display: grid; grid-template-columns: 90px repeat(7, minmax(0, 1fr)); grid-template-rows: 32px repeat(5, minmax(60px, 1fr)); gap: 6px; min-width: 0; font-size: 13px; }
+.day-heading { display: flex; align-items: center; justify-content: center; font-weight: 700; border-radius: var(--radius-cell); }
+.day-heading[aria-pressed="true"] { color: var(--color-brand-700); background: var(--color-brand-50); }
+.block-heading { display: flex; flex-direction: column; justify-content: center; align-items: start; text-align: left; border-radius: var(--radius-cell); line-height: 1.5; }
+.block-heading small { font-size: 11px; color: #555; }
+.block-heading[aria-pressed="true"] strong { color: var(--color-brand-700); }
+.time-cell { position: relative; isolation: isolate; display: flex; justify-content: center; align-items: center; border-radius: var(--radius-cell); font-weight: 700; min-width: 0; }
+button.time-cell { background: var(--color-cell-open); border: 1px solid var(--color-control-line); overflow: hidden; }
+button.time-cell::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; opacity: 0; transform: scale(0.96); transition: opacity var(--duration-quick) var(--ease-standard), transform var(--duration-quick) var(--ease-standard); background: var(--color-brand-500); }
+button.time-cell.is-busy { background: var(--color-cell-busy); }
+button.time-cell.is-selected { border-color: var(--color-brand-700); }
+button.time-cell.is-selected::before { opacity: 1; transform: scale(1); }
+.time-cell.is-closed { border: 1px dashed var(--color-cell-line); color: #62666b; font-size: 10px; font-weight: 400; }
+.cell-mark { display: block; font-size: 20px; animation: cell-in var(--duration-quick) var(--ease-standard); }
+.timetable-note { margin-top: 16px; font-size: 12px; line-height: 1.6; color: #555; }
+.availability-message { font-size: 12px; color: #555; margin-top: 4px; min-height: 18px; }
+.quote-desktop { grid-column: 2; grid-row: 1 / span 2; position: sticky; top: 104px; }
+.quote-card { border-radius: var(--radius-card); padding: 24px; background: var(--color-ink); color: white; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.quote-eyebrow { font-size: 12px; color: var(--color-brand-500); font-weight: 700; letter-spacing: 0.1em; }
+.quote-price { font-weight: 900; line-height: 1; letter-spacing: -0.04em; font-size: clamp(36px, 4.5vw, 64px); font-stretch: 75%; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; }
+.quote-currency { font-size: 22px; letter-spacing: -0.02em; }
+.price-digits { display: inline-flex; white-space: nowrap; max-width: 100%; }
+.digit-window { display: inline-block; overflow: hidden; }
+.price-digit { display: inline-block; animation: price-roll var(--duration-base) var(--ease-standard); }
+.quote-metrics { margin-top: -8px; color: #cfcfcf; font-size: 14px; line-height: 1.6; }
+.discount-ladder h2 { font-size: 13px; font-weight: 700; line-height: 1.5; margin-bottom: 10px; }
+.discount-ladder ol { display: grid; gap: 8px; }
+.discount-ladder li { display: grid; grid-template-columns: 34px minmax(0,1fr) 80px; gap: 10px; align-items: center; font-size: 13px; color: #aaa; }
+.discount-ladder li[data-current="true"] { color: var(--color-brand-500); }
+.discount-ladder small { text-align: right; font-size: 11px; }
+.ladder-track { display: block; height: 26px; border-radius: 6px; background: #2a2a2a; overflow: hidden; }
+.ladder-track[data-next="true"] { outline: 1px dashed var(--color-brand-500); outline-offset: -1px; }
+.ladder-track > span { display: block; height: 100%; width: 100%; background: var(--color-brand-500); border-radius: inherit; transform-origin: left; transition: transform var(--duration-surface) var(--ease-standard); }
+.discount-ladder > p { font-size: 13px; line-height: 1.6; color: #cfcfcf; margin-top: 12px; }
+.quote-actions { display: grid; gap: 10px; margin-top: 8px; }
+.quote-actions > p { font-size: 13px; }
+.timetable-button { display: inline-flex; justify-content: center; align-items: center; gap: 8px; width: 100%; min-height: 48px; padding: 12px 16px; border-radius: var(--radius-btn); background: var(--color-brand-500); color: var(--color-ink); font-size: 14px; font-weight: 700; text-align: center; }
+.timetable-button.is-outline { background: transparent; color: inherit; border: 1px solid #767676; min-height: 44px; font-weight: 500; }
+.quiet-button { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 6px 8px; font-size: 13px; border-radius: var(--radius-cell); }
+.timetable-button, .quiet-button, .date-range-button, .budget-link, .segmented button, .segmented a, .day-heading, .block-heading, button.time-cell { cursor: pointer; transition: transform var(--duration-quick) var(--ease-standard), opacity var(--duration-quick) var(--ease-standard); }
+.timetable-button:hover, .quiet-button:hover, .date-range-button:hover, .budget-link:hover, button.day-heading:hover, button.block-heading:hover, button.time-cell:hover { opacity: 0.82; }
+.timetable-button:active, .quiet-button:active, button.time-cell:active { transform: scale(0.98); }
+.timetable-button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.quote-footnote { color: #aaa; font-size: 12px; line-height: 1.6; text-align: center; }
+.copy-message:empty { display: none; }
+.copy-message { text-align: center; color: #cfcfcf; }
+.quote-dock { display: none; }
+.timetable-sheet { margin: auto; width: min(560px, calc(100% - 32px)); max-height: calc(100dvh - 48px); overflow: auto; border: 0; padding: 24px; border-radius: var(--radius-card); background: white; color: var(--color-ink); overscroll-behavior: contain; }
+.timetable-sheet[open] { animation: surface-in var(--duration-surface) var(--ease-standard); }
+.timetable-sheet::backdrop { background: #14141499; opacity: 1; transition: opacity var(--duration-surface) var(--ease-standard); }
+.timetable-sheet[data-closing="true"]::backdrop { opacity: 0; }
+body:has(.timetable-sheet[open]) { overflow: hidden; }
+.sheet-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; }
+.sheet-heading h2 { font-size: 22px; line-height: 1.2; font-weight: 800; }
+.sheet-content { animation: surface-in var(--duration-surface) var(--ease-standard); }
+.date-presets { display: flex; flex-wrap: wrap; gap: 8px; }
+.date-presets > button { background: var(--color-canvas); }
+.booking-footer { padding: 18px 24px; background: var(--color-canvas); color: #555; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 12px; }
+.booking-footer > div { display: flex; gap: 20px; }
+body:has(.booking-canvas) > header { background: var(--color-ink); }
+.saved-layout { display: grid; grid-template-columns: minmax(0,1fr) 340px; align-items: start; gap: 28px; }
+.saved-quote .booking-summary .timetable { grid-template-rows: 30px repeat(5, 58px); }
+.summary-facts { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px 24px; font-size: 13px; }
+.summary-facts dt { color: #555; }
+.summary-facts dd { font-weight: 600; margin-top: 4px; overflow-wrap: anywhere; }
+.manager-shell { padding: 24px 24px 48px; }
+body:has(.manager-shell) > main { margin-top: 0; background: var(--color-canvas); }
+.manager-workspace { max-width: 1280px; }
+.demo-notice { margin-bottom: 16px; font-size: 12px; color: var(--color-brand-700); }
+.manager-header { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; margin-bottom: 24px; }
+.manager-wordmark { font-size: 15px; font-weight: 900; letter-spacing: 0.06em; }
+.manager-nav { background: white; }
+.manager-email { margin-left: auto; font-size: 12px; color: #555; overflow-wrap: anywhere; }
+.manager-content { animation: surface-in var(--duration-surface) var(--ease-standard); }
+.week-navigation { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; margin-bottom: 16px; font-size: 13px; color: #555; }
+.week-navigation nav { display: flex; flex-wrap: wrap; gap: 4px; }
+.week-layout { display: grid; grid-template-columns: minmax(0,1fr) 340px; align-items: start; gap: 16px; }
+.week-grid-panel { animation: surface-in var(--duration-surface) var(--ease-standard); }
+.week-grid-panel h1 { font-size: 14px; font-weight: 500; color: #555; }
+.week-share { font-size: 64px; line-height: 1; font-weight: 900; letter-spacing: -0.04em; margin-top: 6px; font-stretch: 75%; }
+.week-grid-panel .timetable { grid-template-rows: 32px repeat(5, 70px); }
+.needs-you { display: grid; gap: 12px; }
+.needs-summary { background: var(--color-ink); color: white; border-radius: var(--radius-panel); padding: 20px; }
+.needs-summary h2 { color: var(--color-brand-500); font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.needs-summary p { margin-top: 10px; font-size: 23px; font-weight: 800; line-height: 1.3; }
+.needs-card { background: white; padding: 16px; border-radius: var(--radius-panel); display: grid; gap: 6px; border: 2px solid transparent; transition: transform var(--duration-base) var(--ease-standard), opacity var(--duration-base) var(--ease-standard); }
+.needs-card[data-priority="true"] { border-color: var(--color-brand-500); }
+.needs-card:hover { transform: translateY(-2px); opacity: 0.85; }
+.needs-card > div { display: flex; align-items: center; gap: 10px; font-size: 11px; color: #555; }
+.needs-card p, .live-bookings { font-size: 12px; color: #555; line-height: 1.6; }
+.needs-card .reference-link { font-size: 11px; color: #555; }
+.live-bookings { padding: 12px 0; }
+.live-bookings a { text-decoration: underline; text-underline-offset: 3px; }
+.status-tag { display: inline-flex; align-items: center; border-radius: var(--radius-btn); background: var(--color-canvas); color: #41464d; padding: 4px 10px; font-size: 11px; line-height: 1.4; font-weight: 700; white-space: nowrap; }
+.status-tag[data-status="Live"] { background: var(--color-brand-500); color: var(--color-ink); }
+.status-tag[data-status="Paid"], .status-tag[data-status="Approved"] { background: #e5eee7; color: #255036; }
+.quote-card .status-tag { align-self: start; }
+.status-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.status-filters a { background: white; border-radius: var(--radius-btn); padding: 9px 16px; font-size: 13px; transition: transform var(--duration-quick) var(--ease-standard), opacity var(--duration-quick) var(--ease-standard); }
+.status-filters [aria-current="page"] { background: var(--color-ink); color: white; }
+.status-filters a:hover { transform: translateY(-2px); opacity: 0.85; }
+.table-scroll { overflow: auto; }
+.booking-table { border-collapse: collapse; width: 100%; text-align: left; font-size: 14px; }
+.booking-table th { font-size: 12px; font-weight: 500; color: #555; }
+.booking-table th, .booking-table td { padding: 12px 10px; border-bottom: 1px solid var(--color-cell-line); }
+.booking-table td:nth-child(2) { font-weight: 700; min-width: 140px; }
+.booking-table td:nth-child(4), .booking-table td:nth-child(5) { font-variant-numeric: tabular-nums; }
+.reference-link { font-size: 12px; font-variant-numeric: tabular-nums; }
+.manager-shell .booking-summary .timetable { grid-template-columns: 76px repeat(7,minmax(0,1fr)); grid-template-rows: 28px repeat(5,44px); gap: 4px; font-size: 11px; }
+.manager-shell .booking-summary .block-heading small { font-size: 10px; }
+.manager-shell :is(details[open] > :not(summary), .staff-card, [role="status"]:not(:empty)) { animation: surface-in var(--duration-surface) var(--ease-standard); }
+.manager-shell .staff-card:nth-child(2) { animation-delay: 40ms; }
+.manager-shell .staff-card:nth-child(3) { animation-delay: 80ms; }
+.booking-canvas :focus-visible, .manager-shell :focus-visible, .timetable-sheet :focus-visible, .booking-footer :focus-visible { outline: 2px solid var(--color-brand-700); outline-offset: 3px; }
+.quote-card :focus-visible, .quote-dock :focus-visible { outline-color: var(--color-brand-500); }
+@keyframes cell-in { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes price-roll { from { transform: translateY(45%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes surface-in { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@media (min-width: 1600px) { .manager-shell { padding-top: 36px; } }
+@media (max-width: 1023px) {
+  .booking-layout, .week-layout, .saved-layout { grid-template-columns: minmax(0,1fr) 300px; }
+  .timetable-heading h1 { font-size: 24px; }
+  .timetable { grid-template-columns: 76px repeat(7,minmax(0,1fr)); gap: 4px; font-size: 12px; }
+  .quote-card { padding: 20px; }
+}
+@media (max-width: 767px) {
+  .booking-canvas { padding: 108px 12px 28px; }
+  .booking-canvas:not(.saved-quote) { padding-bottom: 108px; }
+  .booking-layout, .week-layout, .saved-layout { grid-template-columns: minmax(0,1fr); gap: 12px; }
+  .booking-title { padding: 0 4px; }
+  .booking-title > :last-child { font-size: 11px; }
+  .booking-controls { gap: 16px; padding: 16px; }
+  .booking-controls fieldset { width: 100%; }
+  .booking-controls .segmented { flex-wrap: nowrap; }
+  .booking-controls .segmented button { flex: 1; min-width: 0; padding-inline: 6px; }
+  .date-control { min-width: 0; width: 100%; flex-basis: 100%; }
+  .date-range-button { font-size: 12px; }
+  .timetable-panel { padding: 16px 12px; }
+  .timetable-heading { gap: 12px; margin-bottom: 12px; }
+  .timetable-heading h1 { font-size: 25px; }
+  .timetable { grid-template-columns: 64px repeat(7,minmax(0,1fr)); grid-template-rows: 32px repeat(5,52px); gap: 3px; font-size: 10px; }
+  .block-heading small { font-size: 9px; }
+  .time-cell.is-closed { font-size: 8px; }
+  .cell-mark { font-size: 16px; }
+  .booking-grid-panel { min-height: 0; }
+  .quote-desktop { display: none; }
+  .quote-dock { position: fixed; bottom: 0; left: 0; right: 0; z-index: 60; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--color-ink); color: white; padding: 12px 16px max(12px, env(safe-area-inset-bottom)); box-shadow: 0 -4px 20px #14141420; }
+  .dock-price { min-width: 0; text-align: left; border-radius: 8px; }
+  .dock-price small { display: block; color: #ccc; font-size: 11px; }
+  .dock-price strong { display: block; animation: price-roll var(--duration-base) var(--ease-standard); font-size: 24px; white-space: nowrap; letter-spacing: -0.03em; }
+  .quote-dock > .timetable-button { width: auto; flex-shrink: 0; font-size: 12px; min-height: 44px; padding-inline: 16px; }
+  .quote-price { font-size: 56px; }
+  .timetable-sheet { margin: auto 0 0; width: 100%; max-width: none; max-height: calc(100dvh - 24px); border-radius: var(--radius-card) var(--radius-card) 0 0; padding: 20px 16px max(24px, env(safe-area-inset-bottom)); }
+  .booking-footer { padding: 16px; }
+  body:has(.quote-dock) .booking-footer { padding-bottom: 110px; }
+  .manager-shell { padding: 20px 12px 32px; }
+  .manager-header { gap: 12px; margin-bottom: 16px; }
+  .manager-nav { order: 3; flex: 1 0 100%; justify-content: space-between; }
+  .manager-nav a { flex: 1; padding-inline: 8px; text-align: center; }
+  .manager-email { flex: 1; text-align: right; font-size: 10px; }
+  .manager-header > form { margin-left: auto; }
+  .manager-wordmark { font-size: 13px; }
+  .week-grid-panel .timetable { grid-template-rows: 32px repeat(5,52px); }
+  .week-grid-panel .timetable-heading h1 { font-size: 14px; }
+  .week-share { font-size: 56px; }
+  .manager-shell .staff-card { padding: 16px; }
+  .manager-shell .booking-summary .timetable { grid-template-columns: 60px repeat(7,minmax(0,1fr)); gap: 3px; font-size: 9px; }
+  .saved-quote .booking-summary .timetable { grid-template-rows: 28px repeat(5,48px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .booking-canvas *, .booking-canvas *::before, .manager-shell *, .manager-shell *::before, .timetable-sheet *, .timetable-sheet, .quote-dock * { animation: none !important; transition: none !important; }
+  .timetable-button:active, .quiet-button:active, button.time-cell:active, .needs-card:hover, .status-filters a:hover { transform: none; }
 }

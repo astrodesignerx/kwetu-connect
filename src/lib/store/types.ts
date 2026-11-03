@@ -2,6 +2,7 @@
 import type { BookingRequest } from "../booking/hours";
 import type { BookingSettings } from "../booking/settings";
 import type { Schedule } from "../booking/playlist";
+import type { Occupancy } from "../booking/occupancy";
 
 export type Advertiser = {
   id: string; name: string; phone: string; email: string; business: string;
@@ -43,4 +44,5 @@ export interface BookingStore {
   decideAdvert(reference: string, id: string, decision: "approved" | "refused", reason: string): Promise<void>;
   advertUrl(reference: string, id: string): Promise<string | null>;
   schedule(from: string, to: string): Promise<Schedule>;
+  occupancy(from: string, to: string): Promise<Occupancy>;
 }
