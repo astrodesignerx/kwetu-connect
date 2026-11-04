@@ -1017,7 +1017,7 @@ button.time-cell:active { transform: scale(.98); }
 .week-navigation nav { display: flex; gap: 6px; }
 .week-navigation a { font-size: 10px; min-height: 30px; }
 .overview-bento { display: grid; grid-template-columns: minmax(0,2fr) minmax(0,1fr) minmax(0,1fr); grid-template-rows: minmax(258px,1fr) auto minmax(192px,.8fr); gap: 14px; min-height: calc(100dvh - 155px); }
-.screen-now-content { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 18px; background: linear-gradient(90deg,var(--photo-overlay),transparent 150%); }
+.screen-now-content { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 18px; background: linear-gradient(90deg, var(--photo-overlay) 0%, color-mix(in srgb, var(--photo-overlay) 82%, transparent) 42%, transparent 74%); }
 .screen-now-content > .on-air { color: var(--live-text); font-weight: 650; text-transform: uppercase; letter-spacing: .15em; }
 .screen-now-time { margin-block: auto; padding-top: 28px; }
 .screen-now-time > strong { font-family: var(--font-archivo); font-size: clamp(28px,3.5vw,48px); font-weight: 900; font-stretch: 75%; letter-spacing: -.04em; line-height: 1.1; display: block; }
