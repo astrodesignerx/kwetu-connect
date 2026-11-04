@@ -1107,6 +1107,22 @@ button.time-cell:active { transform: scale(.98); }
 .booking-detail-panel .block-heading small, .booking-detail-panel .day-heading { font-size: 7px; }
 .booking-detail-panel .booking-detail .md\:grid-cols-3 { grid-template-columns: 1fr; }
 .booking-detail-panel input[type="file"] { font-size: 11px; }
+.detail-compact { display: flex; flex-direction: column; gap: 14px; }
+.detail-compact > *, .detail-compact .detail-facts-grid > * { margin: 0; }
+.detail-compact .detail-facts-grid { display: contents; }
+.detail-compact .detail-adverts { order: 1; }
+.detail-compact .detail-status { order: 2; }
+.detail-compact .detail-payment { order: 3; }
+.detail-compact .detail-payment[data-unpaid="true"] { order: 0; }
+.detail-compact .detail-history { order: 4; }
+.detail-compact .detail-answers { order: 5; }
+.detail-compact .detail-advertiser { order: 6; }
+.detail-compact .advert-preview { height: 200px; }
+.detail-compact .detail-adverts .p-4 { padding: 10px; }
+.detail-compact .detail-adverts .staff-form { margin-top: 10px; }
+.nightshift .staff-card summary, .nightshift .detail-adverts summary { cursor: pointer; font-size: 12px; font-weight: 650; }
+.nightshift details[open] > summary { margin-bottom: 14px; }
+.nightshift:has(.book-header) { min-height: 0; }
 .manager-shell:has(.manager-app):not(:has(.manager-content)) { padding: 20px; }
 .manager-shell:not(:has(.manager-app)) { padding: 70px 20px; }
 .manager-shell:not(:has(.manager-app)) .demo-notice { margin-bottom: 30px; }

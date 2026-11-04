@@ -9,8 +9,8 @@ export default async function StaffLayout({ children }: { children: React.ReactN
   const staff = await requireStaff();
   const store = getStore();
   const bookings = await store.listBookings();
-  const details = await Promise.all(bookings.filter((booking) => booking.status === "Paid").map((booking) => store.bookingDetail(booking.reference)));
-  const adverts = details.filter((detail) => detail && !detail.adverts.some((advert) => advert.decision === "approved")).length;
+  const details = await Promise.all(bookings.filter((booking) => !["Finished", "Cancelled"].includes(booking.status)).map((booking) => store.bookingDetail(booking.reference)));
+  const adverts = details.reduce((count, detail) => count + (detail?.adverts.filter((advert) => advert.decision === "waiting").length ?? 0), 0);
   const now = new Date();
   const hour = nairobiClock(now).hour;
   const name = staff.email.split("@")[0];
