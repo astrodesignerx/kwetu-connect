@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { addDays, earliestStartDate, isValidDate } from "@/lib/booking/hours";
 import { readAnswers, buildQuery, normaliseDays, normaliseBlocks, type Answers } from "@/lib/booking/answers";
 import { occupancyByDayBlock, type Occupancy } from "@/lib/booking/occupancy";
-import { fromCells, scheduleLines, toggleSelection } from "@/lib/booking/selection";
+import { fromCells, openSelection, scheduleLines, toggleSelection } from "@/lib/booking/selection";
 import { suggestPlan } from "@/lib/booking/plan";
 import { quote } from "@/lib/booking/quote";
 import type { BookingSettings } from "@/lib/booking/settings";
@@ -85,7 +85,8 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
   }
   const canBook = result.ok && !result.belowMinimum && rangeValid;
   const shortDate = (iso: string) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
-  const schedule = scheduleLines(answers, settings.timeBlocks);
+  const picked = { ...answers, ...openSelection(answers, (day, block) => occupancy[day][block].open) };
+  const schedule = scheduleLines(picked, settings.timeBlocks);
   const ready = advertReady(advert, answers.lengthSeconds);
   const advertLabel = !advert ? "Not added yet" : advert.running ? "Checking..." : ready ? "Checked, goes with your booking" : "Needs fixing";
   const plan = [
@@ -168,7 +169,7 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
               : "Your advert did not pass the checks, so it will not be sent. Fix it, or send it to KCA later."}</p>
           </div>
         </section>
-        <BookingForm key={query} request={answers} priceKes={result.priceKes} advert={ready ? advert!.file : null} advertSeconds={advert?.measured?.duration ? Math.round(advert.measured.duration) : answers.lengthSeconds} />
+        <BookingForm key={query} request={picked} priceKes={result.priceKes} advert={ready ? advert!.file : null} advertSeconds={advert?.measured?.duration ? Math.round(advert.measured.duration) : answers.lengthSeconds} />
       </div>}
     </Sheet>
   </section>;

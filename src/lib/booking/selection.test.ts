@@ -47,3 +47,19 @@ describe("schedule lines", () => {
     expect(scheduleLines({ days: [1, 2, 3, 4, 5, 6, 0], blocks: ["morning", "midday", "afternoon", "evening", "late"] }, DEFAULT_SETTINGS.timeBlocks)).toEqual(["Every day: All day"]);
   });
 });
+
+describe("closed boxes", () => {
+  const lateClosedMonToThu = (day: number, block: string) => !(block === "late" && day >= 1 && day <= 4);
+  it("openSelection drops closed boxes so the summary never lists them", async () => {
+    const { openSelection, scheduleLines } = await import("./selection");
+    const picked = openSelection({ days: [], blocks: [], cells: ["3-late", "6-late", "1-morning"] }, lateClosedMonToThu);
+    expect(picked.cells).toEqual(["1-morning", "6-late"]);
+    const labels = { morning: { label: "Morning" }, midday: { label: "Midday" }, afternoon: { label: "Afternoon" }, evening: { label: "Evening" }, late: { label: "Late" } };
+    expect(scheduleLines(picked, labels).join(" ")).not.toContain("Wed");
+  });
+  it("toggling a box also clears closed boxes left from an older link", async () => {
+    const { toggleSelection } = await import("./selection");
+    const next = toggleSelection({ days: [], blocks: [], cells: ["3-late", "6-late"] }, { kind: "cell", day: 0, block: "late" }, lateClosedMonToThu);
+    expect(next.cells).toEqual(["6-late", "0-late"]);
+  });
+});

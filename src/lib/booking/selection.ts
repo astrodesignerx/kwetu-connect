@@ -43,7 +43,12 @@ export function toggleSelection(selection: Selection, action: SelectionAction, i
     if (cells.has(key)) cells.delete(key);
     else if (isOpen(action.day, action.block)) cells.add(key);
   }
-  return fromCells([...cells]);
+  return fromCells([...cells].filter((key) => { const cell = parseCell(key); return cell !== null && isOpen(cell.day, cell.block); }));
+}
+
+/** The picked boxes with closed ones removed, so summaries and saved bookings only list boxes that can play. */
+export function openSelection(selection: Selection, isOpen: IsOpen): Required<Selection> {
+  return fromCells(requestCells(selection).filter((key) => { const cell = parseCell(key); return cell !== null && isOpen(cell.day, cell.block); }));
 }
 
 const SHORT_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
