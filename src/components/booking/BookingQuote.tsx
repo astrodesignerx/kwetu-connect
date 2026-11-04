@@ -83,7 +83,15 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
     window.setTimeout(() => setCopyState("idle"), 2000);
   }
   const canBook = result.ok && !result.belowMinimum && rangeValid;
+  const shortDate = (iso: string) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+  const plan = [
+    ["Days", answers.days.length === 7 ? "Every day" : answers.days.map((day) => ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][day]).join(", ") || "None chosen"],
+    ["Times", answers.blocks.map((block) => settings.timeBlocks[block].label).join(", ") || "None chosen"],
+    ["Dates", shortDate(answers.startDate) + " to " + shortDate(answers.endDate)],
+    ["Each play", answers.lengthSeconds + "s, " + answers.howOften + " an hour"],
+  ];
   const actions = <div className="quote-actions">
+    {result.ok && <dl className="quote-plan" aria-label="Your plan">{plan.map(([term, value]) => <div key={term}><dt>{term}</dt><dd>{value}</dd></div>)}</dl>}
     {result.ok && result.belowMinimum && <p role="status">The smallest order is KES {number(settings.minOrderKes)}.</p>}
     <Button type="button" disabled={!canBook} onClick={() => openSheet("book")}>Book these plays</Button>
     <div className="quote-secondary"><Button variant="outline" type="button" disabled={!canBook} onClick={() => openSheet("book")}>Send to KCA</Button>

@@ -1272,3 +1272,9 @@ button.time-cell:active { transform: scale(.98); }
   .nightshift *, .nightshift *::before, .nightshift *::after, .timetable-sheet, .timetable-sheet *, .ns-sheet-overlay, .ns-tooltip, .booking-footer { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .nightshift :is(button,a,section):hover, .nightshift :is(button,a):active { transform: none !important; }
 }
+.quote-plan { display: grid; margin: 0 0 6px; border: 1px solid var(--border); border-radius: 14px; background: var(--muted); }
+.quote-plan > div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 12px; font-size: 12px; line-height: 1.3; }
+.quote-plan > div + div { border-top: 1px solid var(--border); }
+.quote-plan dt { color: var(--muted-foreground); }
+.quote-plan dd { margin: 0; font-weight: 600; text-align: right; }
+.sheet-content .quote-plan { display: none; }
