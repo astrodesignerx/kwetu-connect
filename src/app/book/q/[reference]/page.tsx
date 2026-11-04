@@ -7,6 +7,7 @@ import { BookingSummary, CapacityNotice } from "@/components/booking/BookingSumm
 import QuoteTotals from "@/components/booking/QuoteTotals";
 import StatusTag from "@/components/manage/StatusTag";
 import BookHeader from "@/components/workspace/BookHeader";
+import { scheduleLines } from "@/lib/booking/selection";
 
 export const dynamic = "force-dynamic";
 const NEXT_STEP: Record<string, string> = {
@@ -18,13 +19,14 @@ const NEXT_STEP: Record<string, string> = {
   Cancelled: "This booking was cancelled. Contact KCA if you have questions.",
 };
 export const metadata: Metadata = { title: "Your booking", robots: { index: false, follow: false }, alternates: { canonical: null } };
-export default async function QuotePage({ params }: { params: Promise<{ reference: string }> }) {
+export default async function QuotePage({ params, searchParams }: { params: Promise<{ reference: string }>; searchParams: Promise<{ advert?: string }> }) {
   const { reference } = await params;
+  const { advert } = await searchParams;
   const store = getStore();
   const booking = await store.publicBooking(reference);
   if (!booking) notFound();
   const settings = await store.getSettings();
-  const message = [`Hello KCA, here is my booking ${booking.reference}.`, `Length: ${booking.request.lengthSeconds} seconds`, `How often: ${booking.request.howOften} plays an hour`, `Days: ${booking.request.days.map((d) => ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][d]).join(", ")}`, `Time blocks: ${booking.request.blocks.map((b) => settings.timeBlocks[b].label).join(", ")}`, `Dates: ${booking.request.startDate} to ${booking.request.endDate}`, `Plays: ${booking.plays}`, `Price: KES ${booking.priceKes.toLocaleString("en-GB")}`, `Reference: ${booking.reference}`].join("\n");
+  const message = [`Hello KCA, here is my booking ${booking.reference}.`, `Length: ${booking.request.lengthSeconds} seconds`, `How often: ${booking.request.howOften} plays an hour`, "When:", ...scheduleLines(booking.request, settings.timeBlocks), `Dates: ${booking.request.startDate} to ${booking.request.endDate}`, `Plays: ${booking.plays}`, `Price: KES ${booking.priceKes.toLocaleString("en-GB")}`, `Reference: ${booking.reference}`, ...(advert === "sent" ? ["My advert is uploaded with this booking."] : [])].join("\n");
   const next = [...settings.discountSteps].reverse().find((s) => s.minPlays > booking.plays);
   const result = { ok: true as const, ...booking, hoursBooked: booking.plays / booking.request.howOften,
     perPlayKes: Math.round(booking.priceKes / booking.plays * 100) / 100, belowMinimum: false,
@@ -37,7 +39,8 @@ export default async function QuotePage({ params }: { params: Promise<{ referenc
         <p><Link className="quiet-button underline" href="/book">Create another quote</Link></p>
       </div>
       <aside><QuoteTotals result={result} settings={settings} weeks={(Date.parse(booking.request.endDate) - Date.parse(booking.request.startDate) + 86400000) / 604800000}>
-        <div className="space-y-4"><StatusTag status={booking.status} /><p>{NEXT_STEP[booking.status]}</p>
+        <div className="space-y-4"><StatusTag status={booking.status} /><p>{advert === "sent" && booking.status === "Quote" ? "Your advert is saved with this booking. Pay by M-Pesa or card and KCA confirms within 1 working day." : NEXT_STEP[booking.status]}</p>
+          {advert === "failed" && <p role="status" className="text-red-700">Your booking is saved, but the advert did not upload. Send it to KCA on WhatsApp.</p>}
           <a className="timetable-button" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer">Send this booking to KCA on WhatsApp</a>
         </div>
       </QuoteTotals></aside>

@@ -14,8 +14,9 @@ function encode(row: { id: string }, booking = false): Row {
   return rename({ ...rest, ...request }, true);
 }
 function decodeBooking(row: Row): Booking {
-  const { lengthSeconds, howOften, days, blocks, startDate, endDate, ...rest } = rename(row, false);
-  return { ...rest, request: { lengthSeconds, howOften, days, blocks, startDate, endDate } } as Booking;
+  const { lengthSeconds, howOften, days, blocks, cells, startDate, endDate, ...rest } = rename(row, false);
+  // Bookings saved before 0003_booking_cells have no cells: every chosen day at every chosen time.
+  return { ...rest, request: { lengthSeconds, howOften, days, blocks, ...(Array.isArray(cells) && cells.length > 0 ? { cells } : {}), startDate, endDate } } as Booking;
 }
 function changed<T extends { id: string }>(before: T[], after: T[], booking = false) {
   const old = new Map(before.map((row) => [row.id, JSON.stringify(row)]));

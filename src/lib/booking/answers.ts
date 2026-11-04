@@ -1,6 +1,7 @@
 import { addDays, earliestStartDate, isValidDate, type BookingRequest } from "./hours";
 import type { BlockId, BookingSettings } from "./settings";
-import { DAY_ORDER, BLOCK_ORDER } from "./selection";
+import { DAY_ORDER, BLOCK_ORDER, fromCells } from "./selection";
+import { requestCells } from "./hours";
 export type SearchParams = Record<string, string | string[] | undefined>;
 export type Answers = BookingRequest;
 
@@ -60,6 +61,10 @@ export function readAnswers(params: SearchParams, today: string, settings: Booki
       ? (["morning", "midday"] as BlockId[])
       : normaliseBlocks(parseList(blocksValue).filter(isBlockId));
 
+  // `cells` names exact boxes; old links with only days and blocks book every chosen day at every chosen time.
+  const cellsValue = readParam(params, "cells");
+  const chosen = fromCells(cellsValue === undefined ? requestCells({ days, blocks }) : parseList(cellsValue));
+
   const fromValue = readParam(params, "from");
   const requestedStart =
     fromValue && isValidDate(fromValue) ? fromValue : earliest;
@@ -80,14 +85,13 @@ export function readAnswers(params: SearchParams, today: string, settings: Booki
   return {
     lengthSeconds,
     howOften,
-    days,
-    blocks,
+    ...chosen,
     startDate,
     endDate,
   };
 }
 
 export function buildQuery(answers: Answers): string {
-  return `len=${answers.lengthSeconds}&often=${answers.howOften}&days=${answers.days.join(",")}&blocks=${answers.blocks.join(",")}&from=${answers.startDate}&to=${answers.endDate}`;
+  return `len=${answers.lengthSeconds}&often=${answers.howOften}&cells=${requestCells(answers).join(",")}&from=${answers.startDate}&to=${answers.endDate}`;
 }
 

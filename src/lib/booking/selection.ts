@@ -1,21 +1,61 @@
+import { cellKey, requestCells } from "./hours";
 import type { BlockId } from "./settings";
 
 export const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 export const BLOCK_ORDER: BlockId[] = ["morning", "midday", "afternoon", "evening", "late"];
-export type Selection = { days: number[]; blocks: BlockId[] };
+export type Selection = { days: number[]; blocks: BlockId[]; cells?: string[] };
 export type SelectionAction = { kind: "day"; day: number } | { kind: "block"; block: BlockId }
   | { kind: "cell"; day: number; block: BlockId };
+/** Whether the screen is on for that day and time; closed boxes are never added. */
+export type IsOpen = (day: number, block: BlockId) => boolean;
 
-export function toggleSelection(selection: Selection, action: SelectionAction): Selection {
-  let { days, blocks } = selection;
-  if (action.kind === "day") days = days.includes(action.day) ? days.filter((d) => d !== action.day) : [...days, action.day];
-  else if (action.kind === "block") blocks = blocks.includes(action.block) ? blocks.filter((b) => b !== action.block) : [...blocks, action.block];
-  else if (days.includes(action.day) && blocks.includes(action.block)) {
-    if (blocks.length > 1) blocks = blocks.filter((b) => b !== action.block);
-    else days = days.filter((d) => d !== action.day);
-  } else {
-    days = [...days, action.day];
-    blocks = [...blocks, action.block];
+const CELL_PATTERN = /^([0-6])-([a-z]+)$/;
+
+export function parseCell(key: string): { day: number; block: BlockId } | null {
+  const match = CELL_PATTERN.exec(key);
+  if (!match || !BLOCK_ORDER.includes(match[2] as BlockId)) return null;
+  return { day: Number(match[1]), block: match[2] as BlockId };
+}
+
+/** Puts cells in grid order, drops duplicates and bad keys, and sets days and blocks to the ones the cells use. */
+export function fromCells(cells: string[]): Required<Selection> {
+  const chosen = new Set(cells.filter((key) => parseCell(key)));
+  const ordered = DAY_ORDER.flatMap((day) => BLOCK_ORDER.map((block) => cellKey(day, block))).filter((key) => chosen.has(key));
+  const parsed = ordered.map((key) => parseCell(key)!);
+  return {
+    cells: ordered,
+    days: DAY_ORDER.filter((day) => parsed.some((cell) => cell.day === day)),
+    blocks: BLOCK_ORDER.filter((block) => parsed.some((cell) => cell.block === block)),
+  };
+}
+
+export function toggleSelection(selection: Selection, action: SelectionAction, isOpen: IsOpen = () => true): Required<Selection> {
+  const cells = new Set(requestCells(selection));
+  const toggleGroup = (keys: string[]) => {
+    const open = keys.filter((key) => { const cell = parseCell(key)!; return isOpen(cell.day, cell.block); });
+    const allOn = open.length > 0 && open.every((key) => cells.has(key));
+    for (const key of open) { if (allOn) cells.delete(key); else cells.add(key); }
+  };
+  if (action.kind === "day") toggleGroup(BLOCK_ORDER.map((block) => cellKey(action.day, block)));
+  else if (action.kind === "block") toggleGroup(DAY_ORDER.map((day) => cellKey(day, action.block)));
+  else {
+    const key = cellKey(action.day, action.block);
+    if (cells.has(key)) cells.delete(key);
+    else if (isOpen(action.day, action.block)) cells.add(key);
   }
-  return { days: DAY_ORDER.filter((d) => days.includes(d)), blocks: BLOCK_ORDER.filter((b) => blocks.includes(b)) };
+  return fromCells([...cells]);
+}
+
+const SHORT_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+/** Plain lines such as "Fri, Sat: Morning, Midday", grouping days that share the same times. */
+export function scheduleLines(selection: Selection, labels: Record<BlockId, { label: string }>): string[] {
+  const cells = new Set(requestCells(selection));
+  const groups: { days: number[]; blocks: BlockId[] }[] = [];
+  for (const day of DAY_ORDER) {
+    const blocks = BLOCK_ORDER.filter((block) => cells.has(cellKey(day, block)));
+    if (blocks.length === 0) continue;
+    const same = groups.find((group) => group.blocks.join() === blocks.join());
+    if (same) same.days.push(day); else groups.push({ days: [day], blocks });
+  }
+  return groups.map((group) => `${group.days.length === 7 ? "Every day" : group.days.map((d) => SHORT_DAYS[d]).join(", ")}: ${group.blocks.length === 5 ? "All day" : group.blocks.map((b) => labels[b].label).join(", ")}`);
 }

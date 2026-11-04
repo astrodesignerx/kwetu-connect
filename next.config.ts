@@ -13,6 +13,7 @@ const contentSecurityPolicy = [
   "img-src 'self' data: blob:",
   "font-src 'self'",
   "connect-src 'self'",
+  "media-src 'self' blob:",
   "frame-src https://maps.google.com https://www.google.com",
   "frame-ancestors 'self'",
   "base-uri 'self'",

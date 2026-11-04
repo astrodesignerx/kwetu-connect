@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { addDays, earliestStartDate, isValidDate } from "@/lib/booking/hours";
 import { readAnswers, buildQuery, normaliseDays, normaliseBlocks, type Answers } from "@/lib/booking/answers";
 import { occupancyByDayBlock, type Occupancy } from "@/lib/booking/occupancy";
-import { toggleSelection } from "@/lib/booking/selection";
+import { fromCells, scheduleLines, toggleSelection } from "@/lib/booking/selection";
 import { suggestPlan } from "@/lib/booking/plan";
 import { quote } from "@/lib/booking/quote";
 import type { BookingSettings } from "@/lib/booking/settings";
@@ -11,7 +11,7 @@ import Timetable, { TimetableLegend } from "./Timetable";
 import QuoteTotals, { number } from "./QuoteTotals";
 import Sheet from "./Sheet";
 import BookingForm from "./BookingForm";
-import ScreenPreview from "./ScreenPreview";
+import AdvertUpload, { advertReady, type AdvertState } from "./AdvertUpload";
 import SegmentedChoice from "./SegmentedChoice";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
   initialAnswers: Answers; initialOccupancy: Occupancy; today: string; settings: BookingSettings;
 }) {
   const [answers, setAnswers] = useState(initialAnswers);
+  const [advert, setAdvert] = useState<AdvertState | null>(null);
   const [sheet, setSheet] = useState<"dates" | "budget" | "quote" | "book">("dates");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [budgetInput, setBudgetInput] = useState("");
@@ -74,7 +75,7 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
     if (!Number.isFinite(budgetKes) || budgetKes <= 0) { setBudgetMessage("Enter a budget in KES."); return; }
     const suggested = suggestPlan({ budgetKes }, { lengthSeconds: answers.lengthSeconds, startDate: from }, settings);
     if (!suggested.ok) { setBudgetMessage(suggested.reason); return; }
-    setAnswers({ ...suggested.request, days: normaliseDays(suggested.request.days), blocks: normaliseBlocks(suggested.request.blocks) });
+    setAnswers({ ...suggested.request, ...fromCells(normaliseDays(suggested.request.days).flatMap((day) => normaliseBlocks(suggested.request.blocks).map((block) => `${day}-${block}`))) });
     setBudgetMessage(`We filled in ${number(suggested.quote.plays)} plays for KES ${number(suggested.quote.priceKes)}.`);
   }
   async function copyLink() {
@@ -84,12 +85,16 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
   }
   const canBook = result.ok && !result.belowMinimum && rangeValid;
   const shortDate = (iso: string) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+  const schedule = scheduleLines(answers, settings.timeBlocks);
+  const ready = advertReady(advert, answers.lengthSeconds);
+  const advertLabel = !advert ? "Not added yet" : advert.running ? "Checking..." : ready ? "Checked, goes with your booking" : "Needs fixing";
   const plan = [
-    ["Days", answers.days.length === 7 ? "Every day" : answers.days.map((day) => ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][day]).join(", ") || "None chosen"],
-    ["Times", answers.blocks.map((block) => settings.timeBlocks[block].label).join(", ") || "None chosen"],
     ["Dates", shortDate(answers.startDate) + " to " + shortDate(answers.endDate)],
-    ["Each play", answers.lengthSeconds + "s, " + answers.howOften + " an hour"],
+    ["Advert", advertLabel],
   ];
+  const showing = <div className="quote-showing"><div><small>Your advert would show</small><strong>{answers.lengthSeconds}s, {answers.howOften} plays an hour</strong>
+    {schedule.length ? schedule.map((line) => <span key={line}>{line}</span>) : <span>Pick boxes in the grid</span>}</div>
+    <span key={result.ok ? result.plays : 0} className="preview-plays rolling-number">{number(result.ok ? result.plays : 0)}<small>plays</small></span></div>;
   const actions = <div className="quote-actions">
     {result.ok && <dl className="quote-plan" aria-label="Your plan">{plan.map(([term, value]) => <div key={term}><dt>{term}</dt><dd>{value}</dd></div>)}</dl>}
     {result.ok && result.belowMinimum && <p role="status">The smallest order is KES {number(settings.minOrderKes)}.</p>}
@@ -98,13 +103,13 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
     <Button variant="outline" type="button" onClick={copyLink}>{copyState === "copied" ? "Link copied" : "Copy link"}</Button></div>
     <p role="status" className="copy-message">{copyState === "failed" ? "Copy failed. Select the address bar." : copyState === "copied" ? "The link is on your clipboard." : ""}</p>
   </div>;
-  const card = result.ok ? <QuoteTotals result={result} settings={settings} weeks={weeks}>{actions}</QuoteTotals>
+  const card = result.ok ? <QuoteTotals result={result} settings={settings} weeks={weeks} lead={showing}>{actions}</QuoteTotals>
     : <div className="quote-card"><p className="quote-eyebrow">YOUR QUOTE</p><div role="status" className="quote-errors">{result.errors.map((e) => <p key={e}>{e}</p>)}</div><p>Choose days and times to see your price.</p></div>;
 
   return <section className="booking-canvas">
     <div className="booking-workspace">
       <div className="booking-layout">
-        <ScreenPreview answers={answers} settings={settings} plays={result.ok ? result.plays : 0} />
+        <AdvertUpload lengthSeconds={answers.lengthSeconds} advert={advert} onChange={setAdvert} />
         <div className="booking-controls">
           <Card className="length-tile"><fieldset><legend>Advert length <span>KES {settings.kesPerSecond} a second</span></legend><SegmentedChoice options={settings.lengths.map((length) => ({ value: length, label: length + "s" }))} value={answers.lengthSeconds} onChange={(lengthSeconds) => change({ lengthSeconds })} /></fieldset></Card>
           <Card className="frequency-tile"><fieldset><legend>Plays an hour <span>{settings.howOften.find((option) => option.plays === answers.howOften)?.label}</span></legend><SegmentedChoice options={settings.howOften.map((option) => ({ value: option.plays, label: String(option.plays), description: option.label }))} value={answers.howOften} onChange={(howOften) => change({ howOften })} /></fieldset></Card>
@@ -114,9 +119,9 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
           </Card>
         </div>
         <div className="booking-grid-panel timetable-panel">
-          <div className="timetable-heading"><div><h1>Pick your hours</h1><p>Your advert plays at every chosen time on every chosen day.</p></div><TimetableLegend /></div>
-          <Timetable settings={settings} occupancy={occupancy} pending={!availabilityKnown} selection={answers} onSelect={(action) => change(toggleSelection(answers, action))} />
-          <p className="timetable-note">You choose days and times; your advert plays at every chosen time on every chosen day.</p>
+          <div className="timetable-heading"><div><h1>Pick your hours</h1><p>Tap any box. Tap a day or a time to fill its whole column or row.</p></div><TimetableLegend /></div>
+          <Timetable settings={settings} occupancy={occupancy} pending={!availabilityKnown} selection={answers} onSelect={(action) => change(toggleSelection(answers, action, (day, block) => occupancy[day][block].open))} />
+          <p className="timetable-note">Your advert plays only in the boxes you pick, {answers.howOften} times an hour.</p>
           <div className="availability-message" role="status">
             {!rangeValid ? "Choose dates in order, up to 366 days apart." : !availabilityCurrent ? "Updating busy hours..." : availability.error}
             {availabilityCurrent && availability.error && <button type="button" className="quiet-button" onClick={() => setRetry((n) => n + 1)}>Try again</button>}
@@ -131,7 +136,7 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
       </button>
       <button type="button" className="timetable-button" disabled={!canBook} onClick={() => openSheet("book")}>Book these plays</button>
     </div>
-    <Sheet title={{ dates: "Choose dates", budget: "Start from a budget", quote: "Your quote", book: "Book these plays" }[sheet]} open={sheetOpen} onClose={() => setSheetOpen(false)}>
+    <Sheet variant={sheet === "book" ? "dialog" : "sheet"} title={{ dates: "Choose dates", budget: "Start from a budget", quote: "Your quote", book: "Book these plays" }[sheet]} open={sheetOpen} onClose={() => setSheetOpen(false)}>
       {sheet === "dates" && <div className="staff-form space-y-5"><p>Earliest start: {dateLabel(earliest)}.</p>
         <label>From<input type="date" value={from} min={earliest} onChange={(event) => {
           if (!isValidDate(event.target.value)) return;
@@ -148,7 +153,23 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
         <button type="submit" className="timetable-button">Use this budget</button><p role="status" key={budgetMessage} className="animate-quote-in">{budgetMessage}</p>
       </form>}
       {sheet === "quote" && card}
-      {sheet === "book" && result.ok && !result.belowMinimum && <BookingForm key={query} request={answers} priceKes={result.priceKes} />}
+      {sheet === "book" && result.ok && !result.belowMinimum && <div className="book-dialog">
+        <section className="book-recap" aria-label="Your booking">
+          <div className="book-recap-price"><small>Total, VAT included</small><strong>KES {number(result.priceKes)}</strong><span>{number(result.plays)} plays over {Number.isInteger(weeks) ? weeks : number(weeks)} weeks{result.discountPercent ? `, ${result.discountPercent}% off` : ""}</span></div>
+          <Timetable settings={settings} occupancy={occupancy} selection={answers} />
+          <dl className="quote-plan">{[["Dates", dateLabel(from) + " to " + dateLabel(to)], ["Each play", answers.lengthSeconds + "s, " + answers.howOften + " an hour"], ["Screen hours", number(result.hoursBooked)]].map(([term, value]) => <div key={term}><dt>{term}</dt><dd>{value}</dd></div>)}</dl>
+          <div className={`book-recap-advert is-${!advert ? "none" : ready ? "ready" : "blocked"}`}>
+            {advert && ready && (advert.file.type.startsWith("video/") ? <video src={advert.url} muted loop autoPlay playsInline aria-hidden="true" />
+              // eslint-disable-next-line @next/next/no-img-element
+              : <img src={advert.url} alt="" />)}
+            <p>{!advert ? "No advert yet. Add it in the photo box now, or send it to KCA later on WhatsApp."
+              : ready ? <><strong>{advert.file.name}</strong> is checked and goes with this booking.</>
+              : advert.running ? "Your advert is still being checked. Wait a moment to send it with this booking."
+              : "Your advert did not pass the checks, so it will not be sent. Fix it, or send it to KCA later."}</p>
+          </div>
+        </section>
+        <BookingForm key={query} request={answers} priceKes={result.priceKes} advert={ready ? advert!.file : null} advertSeconds={advert?.measured?.duration ? Math.round(advert.measured.duration) : answers.lengthSeconds} />
+      </div>}
     </Sheet>
   </section>;
 }

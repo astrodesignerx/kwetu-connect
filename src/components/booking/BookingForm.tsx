@@ -1,11 +1,18 @@
 ﻿"use client";
-import { useActionState } from "react";
+import { startTransition, useActionState, type FormEvent } from "react";
 import { bookPlays } from "@/app/book/actions";
 import type { BookingRequest } from "@/lib/booking/hours";
 
-export default function BookingForm({ request, priceKes }: { request: BookingRequest; priceKes: number }) {
+export default function BookingForm({ request, priceKes, advert = null, advertSeconds }: { request: BookingRequest; priceKes: number; advert?: File | null; advertSeconds: number }) {
   const [state, action, pending] = useActionState(bookPlays, { error: "" });
-  return <form action={action} className="staff-form mt-4 animate-quote-in space-y-4 text-sm text-gray-900 motion-reduce:animate-none">
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    // The checked advert lives outside this form, in the photo box.
+    if (advert) { form.set("advert", advert); form.set("advertSeconds", String(advertSeconds)); }
+    startTransition(() => action(form));
+  }
+  return <form onSubmit={submit} className="staff-form book-form animate-quote-in space-y-4 text-sm text-gray-900 motion-reduce:animate-none">
     <p>Save your booking to get a reference, then send it to KCA on WhatsApp.</p>
     <input type="hidden" name="request" value={JSON.stringify(request)} />
     <div className="absolute -left-[10000px]" aria-hidden="true"><label>Website<input name="website" tabIndex={-1} autoComplete="off" /></label></div>
@@ -15,6 +22,6 @@ export default function BookingForm({ request, priceKes }: { request: BookingReq
     <label>Business<input name="business" autoComplete="organization" required maxLength={150} /></label>
     <label>Payment<select name="paysBy" defaultValue="now"><option value="now">Pay now</option>{priceKes >= 50000 && <option value="invoice">Pay by invoice</option>}</select></label>
     <p aria-live="polite" className="text-red-700">{state.error}</p>
-    <button className="staff-button w-full" disabled={pending}>{pending ? "Saving booking..." : "Save booking"}</button>
+    <button className="staff-button w-full" disabled={pending}>{pending ? (advert ? "Saving booking and advert..." : "Saving booking...") : advert ? "Save booking and advert" : "Save booking"}</button>
   </form>;
 }

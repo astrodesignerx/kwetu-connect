@@ -1,5 +1,6 @@
 ﻿import { addDays, isValidDate, type BookingRequest } from "../booking/hours";
 import { DEFAULT_SETTINGS, type BookingSettings } from "../booking/settings";
+import { fromCells, parseCell } from "../booking/selection";
 import type { QuoteInput } from "./types";
 
 export class StoreError extends Error {}
@@ -40,7 +41,12 @@ export function validateQuote(input: QuoteInput): QuoteInput {
   ensure(Array.isArray(request.blocks) && request.blocks.length > 0 && request.blocks.length <= 5 && request.blocks.every((b) => Object.hasOwn(DEFAULT_SETTINGS.timeBlocks, b)), "Choose valid time blocks.");
   ensure(typeof request.startDate === "string" && typeof request.endDate === "string", "Choose real dates.");
   dateWindow(request.startDate, request.endDate);
-  return { request: structuredClone(request), name, phone, email, business, paysBy: input.paysBy };
+  let clean: BookingRequest = { lengthSeconds: request.lengthSeconds, howOften: request.howOften, days: request.days, blocks: request.blocks, startDate: request.startDate, endDate: request.endDate };
+  if (request.cells !== undefined) {
+    ensure(Array.isArray(request.cells) && request.cells.length > 0 && request.cells.length <= 35 && request.cells.every((c) => typeof c === "string" && parseCell(c) !== null), "Choose valid days and times.");
+    clean = { ...clean, ...fromCells(request.cells) };
+  }
+  return { request: structuredClone(clean), name, phone, email, business, paysBy: input.paysBy };
 }
 export function validateSettings(value: unknown): BookingSettings {
   ensure(value && typeof value === "object", "Enter all settings.");

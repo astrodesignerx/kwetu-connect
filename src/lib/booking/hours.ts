@@ -10,9 +10,21 @@ export type BookingRequest = {
   howOften: number;
   days: number[];
   blocks: BlockId[];
+  /** Exact day and time boxes, as "day-block" (e.g. "6-morning"). When missing, every chosen day gets every chosen block. */
+  cells?: string[];
   startDate: string;
   endDate: string;
 };
+
+export function cellKey(day: number, block: BlockId): string {
+  return `${day}-${block}`;
+}
+
+/** The day and time boxes a request books: its own cells, or every chosen day times every chosen block. */
+export function requestCells(request: Pick<BookingRequest, "days" | "blocks" | "cells">): string[] {
+  if (request.cells && request.cells.length > 0) return request.cells;
+  return request.days.flatMap((day) => request.blocks.map((block) => cellKey(day, block)));
+}
 
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
@@ -84,9 +96,9 @@ export function bookedHours(
   settings: BookingSettings = DEFAULT_SETTINGS
 ): string[] {
   const days = new Set(request.days);
-  const blocks = request.blocks
-    .map((id) => settings.timeBlocks[id])
-    .filter((block): block is TimeBlock => Boolean(block));
+  const cells = request.cells && request.cells.length > 0 ? new Set(request.cells) : null;
+  const blockIds = request.blocks.filter((id) => Boolean(settings.timeBlocks[id]));
+  const blocks: TimeBlock[] = blockIds.map((id) => settings.timeBlocks[id]);
 
   if (blocks.length === 0) return [];
 
@@ -105,8 +117,9 @@ export function bookedHours(
     const lastHour = Math.min(screenHours.close, lastBlockHour);
 
     for (let hour = firstHour; hour < lastHour; hour += 1) {
-      const inBlock = blocks.some(
-        (block) => hour >= block.startHour && hour < block.endHour
+      const inBlock = blockIds.some(
+        (id, index) => (!cells || cells.has(cellKey(weekday, id))) &&
+          hour >= blocks[index].startHour && hour < blocks[index].endHour
       );
       if (inBlock) hours.push(screenHourKey(date, hour));
     }
