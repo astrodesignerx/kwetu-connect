@@ -1143,9 +1143,33 @@ button.time-cell:active { transform: scale(.98); }
 .ns-tooltip svg { fill: var(--popover); }
 .staff-results { transition: opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard); }
 .staff-results[data-pending="true"] { opacity: .5; transform: translateY(4px); }
-.workspace-loading { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; padding: 20px; }
-.ns-skeleton { min-height: 200px; background: var(--muted); border-radius: 18px; animation: live-pulse 1.5s var(--ease-standard) infinite; }
-.loading-grid { grid-column: 1 / -1; min-height: 330px; }
+/* Loading skeletons: the real page containers, with grey bars inside. */
+.ns-skeleton { background: color-mix(in srgb, var(--foreground) 8%, transparent); border-radius: 8px; animation: live-pulse 1.5s var(--ease-standard) infinite; }
+.sk-line { display: block; height: 10px; border-radius: 6px; max-width: 100%; }
+.sk-block { border-color: transparent; border-radius: 18px; }
+.sk-cell { border-radius: 10px; min-height: 0; }
+.sk-timetable > .sk-line { align-self: center; justify-self: center; }
+.sk-timetable .sk-stack { justify-content: center; }
+.sk-stack { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.sk-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sk-push { margin-left: auto; }
+.sk-split { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.sk-fill { flex: 1; min-width: 0; }
+.sk-grow { flex: 1; min-height: 24px; }
+.sk-end { align-items: flex-end; }
+.sk-buttons { display: flex; gap: 8px; }
+.sk-buttons > * { flex: 1; min-width: 0; }
+.sk-button { height: 36px; border-radius: 10px; }
+.sk-panel { border-radius: 12px; width: 100%; }
+.sk-card-col { display: flex; flex-direction: column; gap: 10px; }
+.sk-quote { height: 100%; gap: 12px; }
+.sk-logo { width: 120px; height: 40px; }
+.sk-ring { width: 96px; height: 96px; border-radius: 999px; margin-bottom: 10px; }
+.sk-bars { display: flex; align-items: flex-end; gap: 4px; height: 110px; }
+.sk-bars > .sk-bar { flex: 1; border-radius: 4px; }
+.sk-list-row { pointer-events: none; }
+@media (max-width: 767px) { .sk-header .sk-push { display: none; } }
+@media (prefers-reduced-motion: reduce) { .ns-skeleton { animation: none; } }
 @keyframes cell-in { from { transform: scale(.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes price-roll { from { transform: translateY(45%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes surface-in { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
