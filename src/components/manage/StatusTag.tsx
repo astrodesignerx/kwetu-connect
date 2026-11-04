@@ -1,4 +1,5 @@
 import type { BookingStatus } from "@/lib/booking/capacity";
+import { Badge } from "@/components/ui/badge";
 export default function StatusTag({ status }: { status: BookingStatus }) {
-  return <span className="status-tag" data-status={status}>{status}</span>;
+  return <Badge className="status-tag" data-status={status}>{status}</Badge>;
 }

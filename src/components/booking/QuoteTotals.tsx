@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { BookingSettings } from "@/lib/booking/settings";
 import type { QuoteSuccess } from "@/lib/booking/quote";
+import { Ring } from "@/components/workspace/Charts";
 
 export const number = (value: number) => value.toLocaleString("en-GB", { maximumFractionDigits: 2 });
 export function RollingPrice({ value }: { value: number }) {
@@ -26,12 +27,16 @@ export function DiscountLadder({ plays, settings }: { plays: number; settings: B
     <p>{next ? `${number(next.minPlays - plays)} more plays reaches ${next.percent}% off.` : "You have reached the highest discount."}</p>
   </div>;
 }
-export default function QuoteTotals({ result, settings, children }: { result: QuoteSuccess; settings: BookingSettings; children?: ReactNode }) {
+export default function QuoteTotals({ result, settings, weeks, children }: { result: QuoteSuccess; settings: BookingSettings; weeks: number; children?: ReactNode }) {
+  const next = result.nextStep;
+  const gauge = next ? result.plays / next.minPlays : 1;
   return <div className="quote-card">
     <p className="quote-eyebrow">YOUR QUOTE</p>
     <div aria-live="polite" aria-atomic="true"><RollingPrice value={result.priceKes} /></div>
-    <p className="quote-metrics">{number(result.plays)} plays / KES {number(result.perPlayKes)} each / {number(result.hoursBooked)} screen hours</p>
+    <p className="quote-metrics">{number(result.plays)} plays / KES {number(result.perPlayKes)} each / VAT included</p>
+    <div className="discount-gauge"><Ring value={gauge} label={next ? "to " + next.percent + "% off" : "top discount"} small /><div><strong>{next ? number(next.playsNeeded) + " more plays" : result.discountPercent + "% discount"}</strong><p>{next ? "Reaches " + next.percent + "% off your plays." : "You have reached the highest discount."}</p></div></div>
     <DiscountLadder plays={result.plays} settings={settings} />
+    <div className="quote-stats">{[[number(result.hoursBooked), "screen hours"], [number(result.plays / weeks), "plays a week"], [number(weeks), "weeks"]].map(([value, label]) => <div key={label}><strong key={value} className="rolling-number">{value}</strong><span>{label}</span></div>)}</div>
     {children}
     <p className="quote-footnote">Prices include VAT. KCA confirms space before you pay.</p>
   </div>;

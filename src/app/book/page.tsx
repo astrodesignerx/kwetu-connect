@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getStore } from "@/lib/store";
 import { todayInNairobi } from "@/lib/store/validation";
 import BookingQuote from "@/components/booking/BookingQuote";
+import BookHeader from "@/components/workspace/BookHeader";
 import { readAnswers } from "@/lib/booking/answers";
 import { occupancyByDayBlock } from "@/lib/booking/occupancy";
 import { addDays } from "@/lib/booking/hours";
@@ -29,6 +30,6 @@ export default async function BookPage({
     ? await store.occupancy(answers.startDate, answers.endDate)
     : occupancyByDayBlock([], answers.startDate, addDays(answers.startDate, 365), settings);
   return (
-    <BookingQuote initialAnswers={answers} initialOccupancy={occupancy} today={today} settings={settings} />
+    <><BookHeader settings={settings} /><BookingQuote initialAnswers={answers} initialOccupancy={occupancy} today={today} settings={settings} /></>
   );
 }

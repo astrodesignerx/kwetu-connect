@@ -7,6 +7,7 @@ export default function PublicChrome({ children, footer = false, hideBooking = f
   if (path === "/book" || path.startsWith("/book/")) {
     if (hideBooking) return null;
     if (footer) return <footer className="booking-footer"><span>Kwetu Connect Advertising</span><div><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link><Link href="/contact">Contact KCA</Link></div></footer>;
+    return null;
   }
   return children;
 }

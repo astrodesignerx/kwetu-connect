@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import PublicChrome from "@/components/PublicChrome";
+import { themeScript, workspaceFonts } from "@/components/workspace/Workspace";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingButtons from "@/components/FloatingButtons";
@@ -112,13 +113,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${archivo.variable} h-full`}>
+    <html lang="en" suppressHydrationWarning className={`${archivo.variable} ${workspaceFonts} h-full`}>
       <body className="bg-ink min-h-full flex flex-col font-sans">
         {/* Marks JS availability before first paint so reveal animations
             only hide content when they can actually reveal it again. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: "document.documentElement.classList.add('js')",
+            __html: "document.documentElement.classList.add('js');" + themeScript,
           }}
         />
         <script

@@ -6,6 +6,7 @@ import { WHATSAPP_NUMBER } from "@/lib/contact";
 import { BookingSummary, CapacityNotice } from "@/components/booking/BookingSummary";
 import QuoteTotals from "@/components/booking/QuoteTotals";
 import StatusTag from "@/components/manage/StatusTag";
+import BookHeader from "@/components/workspace/BookHeader";
 
 export const dynamic = "force-dynamic";
 const NEXT_STEP: Record<string, string> = {
@@ -28,18 +29,18 @@ export default async function QuotePage({ params }: { params: Promise<{ referenc
   const result = { ok: true as const, ...booking, hoursBooked: booking.plays / booking.request.howOften,
     perPlayKes: Math.round(booking.priceKes / booking.plays * 100) / 100, belowMinimum: false,
     nextStep: next ? { ...next, playsNeeded: next.minPlays - booking.plays } : null };
-  return <section className="booking-canvas saved-quote">
+  return <><BookHeader settings={settings} step={3} /><section className="booking-canvas saved-quote">
     <div className="booking-workspace timetable-panel saved-layout">
       <div className="space-y-6 min-w-0"><p className="text-sm font-semibold text-brand-700">Your booking</p><h1 className="break-all text-2xl font-bold">{booking.reference}</h1>
         <BookingSummary booking={booking} settings={settings} />
         {booking.status === "Quote" && <CapacityNotice capacity={booking.capacity} />}
         <p><Link className="quiet-button underline" href="/book">Create another quote</Link></p>
       </div>
-      <aside><QuoteTotals result={result} settings={settings}>
+      <aside><QuoteTotals result={result} settings={settings} weeks={(Date.parse(booking.request.endDate) - Date.parse(booking.request.startDate) + 86400000) / 604800000}>
         <div className="space-y-4"><StatusTag status={booking.status} /><p>{NEXT_STEP[booking.status]}</p>
           <a className="timetable-button" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer">Send this booking to KCA on WhatsApp</a>
         </div>
       </QuoteTotals></aside>
     </div>
-  </section>;
+  </section></>;
 }

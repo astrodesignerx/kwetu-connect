@@ -11,6 +11,10 @@ import Timetable, { TimetableLegend } from "./Timetable";
 import QuoteTotals, { number } from "./QuoteTotals";
 import Sheet from "./Sheet";
 import BookingForm from "./BookingForm";
+import ScreenPreview from "./ScreenPreview";
+import SegmentedChoice from "./SegmentedChoice";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 function dateLabel(value: string) {
   return new Date(`${value}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
@@ -81,30 +85,28 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
   const canBook = result.ok && !result.belowMinimum && rangeValid;
   const actions = <div className="quote-actions">
     {result.ok && result.belowMinimum && <p role="status">The smallest order is KES {number(settings.minOrderKes)}.</p>}
-    <button type="button" className="timetable-button" disabled={!canBook} onClick={() => openSheet("book")}>Book these plays</button>
-    <button type="button" className="timetable-button is-outline" disabled={!canBook} onClick={() => openSheet("book")}>Send to KCA</button>
-    <button type="button" className="quiet-button" onClick={copyLink}>{copyState === "copied" ? "Link copied" : "Copy link"}</button>
+    <Button type="button" disabled={!canBook} onClick={() => openSheet("book")}>Book these plays</Button>
+    <div className="quote-secondary"><Button variant="outline" type="button" disabled={!canBook} onClick={() => openSheet("book")}>Send to KCA</Button>
+    <Button variant="outline" type="button" onClick={copyLink}>{copyState === "copied" ? "Link copied" : "Copy link"}</Button></div>
     <p role="status" className="copy-message">{copyState === "failed" ? "Copy failed. Select the address bar." : copyState === "copied" ? "The link is on your clipboard." : ""}</p>
   </div>;
-  const card = result.ok ? <QuoteTotals result={result} settings={settings}>{actions}</QuoteTotals>
+  const card = result.ok ? <QuoteTotals result={result} settings={settings} weeks={weeks}>{actions}</QuoteTotals>
     : <div className="quote-card"><p className="quote-eyebrow">YOUR QUOTE</p><div role="status" className="quote-errors">{result.errors.map((e) => <p key={e}>{e}</p>)}</div><p>Choose days and times to see your price.</p></div>;
 
   return <section className="booking-canvas">
     <div className="booking-workspace">
-      <div className="booking-title"><span>Book plays</span><span>Every hour costs the same.</span></div>
       <div className="booking-layout">
-        <div className="booking-controls timetable-panel">
-          <fieldset><legend>Length</legend><div className="segmented">{settings.lengths.map((length) => <button type="button" key={length}
-            aria-pressed={answers.lengthSeconds === length} onClick={() => change({ lengthSeconds: length })}>{length}s</button>)}</div></fieldset>
-          <fieldset><legend>Plays an hour</legend><div className="segmented">{settings.howOften.map((option) => <button type="button" key={option.plays}
-            aria-label={option.label} aria-pressed={answers.howOften === option.plays} onClick={() => change({ howOften: option.plays })}>{option.plays}</button>)}</div></fieldset>
-          <div className="date-control"><span id="dates-label">Dates</span><button type="button" className="date-range-button" aria-labelledby="dates-label dates-value" aria-haspopup="dialog" onClick={() => openSheet("dates")}>
+        <ScreenPreview answers={answers} settings={settings} plays={result.ok ? result.plays : 0} />
+        <div className="booking-controls">
+          <Card className="length-tile"><fieldset><legend>Advert length <span>KES {settings.kesPerSecond} a second</span></legend><SegmentedChoice options={settings.lengths.map((length) => ({ value: length, label: length + "s" }))} value={answers.lengthSeconds} onChange={(lengthSeconds) => change({ lengthSeconds })} /></fieldset></Card>
+          <Card className="frequency-tile"><fieldset><legend>Plays an hour <span>{settings.howOften.find((option) => option.plays === answers.howOften)?.label}</span></legend><SegmentedChoice options={settings.howOften.map((option) => ({ value: option.plays, label: String(option.plays), description: option.label }))} value={answers.howOften} onChange={(howOften) => change({ howOften })} /></fieldset></Card>
+          <Card className="date-control"><span id="dates-label">Dates</span><button type="button" className="date-range-button" aria-labelledby="dates-label dates-value" aria-haspopup="dialog" onClick={() => openSheet("dates")}>
             <span id="dates-value">{dateLabel(from)} to {dateLabel(to)} / {Number.isInteger(weeks) ? weeks : number(weeks)} weeks</span><span aria-hidden="true">↗</span></button>
             <button type="button" className="budget-link" onClick={() => openSheet("budget")}>Start from a budget</button>
-          </div>
+          </Card>
         </div>
         <div className="booking-grid-panel timetable-panel">
-          <div className="timetable-heading"><h1>Tap the hours you want</h1><TimetableLegend /></div>
+          <div className="timetable-heading"><div><h1>Pick your hours</h1><p>Your advert plays at every chosen time on every chosen day.</p></div><TimetableLegend /></div>
           <Timetable settings={settings} occupancy={occupancy} pending={!availabilityKnown} selection={answers} onSelect={(action) => change(toggleSelection(answers, action))} />
           <p className="timetable-note">You choose days and times; your advert plays at every chosen time on every chosen day.</p>
           <div className="availability-message" role="status">

@@ -1,0 +1,8 @@
+import Image from "next/image";
+import type { BookingDetail } from "@/lib/store/types";
+export default function AdvertPreview({ detail, demo }: { detail: BookingDetail; demo: boolean }) {
+  const advert = detail.adverts.find((item) => item.decision === "waiting") ?? detail.adverts[detail.adverts.length - 1];
+  const url = advert?.filePath ? "/manage/bookings/" + detail.booking.reference + "/advert/" + advert.id : null;
+  const video = advert?.fileName.toLowerCase().endsWith(".mp4");
+  return <section><div className="detail-heading"><div><p className="eyebrow">{advert?.decision === "waiting" ? "Advert to check" : "Booking detail"}</p><h2>{detail.advertiser.business}</h2></div></div><div className="advert-preview"><Image src="/images/evening-billboard.webp" alt="The KCA screen location" fill sizes="(max-width: 767px) 100vw, 430px" /><div className="advert-media">{url ? video ? <video controls preload="metadata" src={url} aria-label={advert.fileName} /> : <Image src={url} alt={advert.fileName} fill unoptimized sizes="400px" /> : <p>{advert ? demo ? "Demo file: " + advert.fileName : "Preview unavailable" : "No advert uploaded yet"}</p>}</div><span className="photo-pill">{url ? "Advert preview / not a live feed" : "Screen location"}</span></div>{advert && <div className="advert-facts"><div><span>Length</span><strong>{advert.seconds}s{advert.seconds === detail.booking.request.lengthSeconds ? ", matches" : ", check length"}</strong></div><div><span>File</span><strong>{video ? "MP4" : advert.fileName.split(".").pop()?.toUpperCase()}</strong></div><div><span>Decision</span><strong>{advert.decision}</strong></div></div>}</section>;
+}
