@@ -1,39 +1,52 @@
 # Kwetu Connect state
 
-Goal: the KCA website (Next.js 16, Vercel) with a booking engine, stored bookings in Supabase, a staff manager area, and the concept C "Timetable" design for Book plays and the manager. Hard rules: booking sums stay as in `src/lib/booking` (KCA Screen Rulebook is the source of truth), public pages never expose other advertisers' details, no em dashes or middle dots in copy, never merge or push without the user's OK.
+Goal: the KCA website, booking engine, Supabase bookings and staff manager. Next.js 16 on Vercel. Booking sums follow src/lib/booking and the KCA Screen Rulebook. Public pages never expose other advertisers' details. Use British spelling and no em dashes or middle dots in new copy. Merge, push and deployment require the user's authorisation.
 
-## Current status (2026-11-03)
-- The booking timetable heading now shows the selected play frequency, with the duplicate note below the grid removed.
-- Branch `ds/nightshift-redesign` contains the booking and manager redesign. The week strip keeps accessible day and time descriptions without a visible legend.
-- LIVE: `main` at `6a3165b` is pushed and deployed to https://kwetuconnectads.co.ke (Vercel project `kwetu-connect`, team `astrodesignerx-3017's projects`). It includes job 1 (engine, `/book`), job 2 (stored bookings, `/manage`), the Services price fix, and the Timetable redesign. Checked after deploy: `/`, `/book`, `/services`, `/manage/sign-in` (real staff sign-in, not demo) and `/book/occupancy` all return 200; occupancy returns shares only.
-- Branches `ds/bookings-store` and `ds/timetable-redesign` are merged into `main` (fast-forward) and pushed; they can be deleted.
-- Local checks on 2026-11-07: 308 tests pass with a 20 second timeout, TypeScript passes, and the production build passes in demo mode. Repository-wide lint fails on generated `.scratch` files and an existing error in `src/components/CampaignTheater.tsx`.
-- Browser-checked locally in memory mode: `/book` at 1280 and 375 px (no sideways scroll, price pinned on phones, cell toggles change the price, closed cells not focusable); a full run Quote to Paid (payment note) to advert upload and approval to Approved, with history rows; Week view shows the booking's sold share (Saturday morning 4%).
-- Not yet done: a real staff sign-in test on the live domain with `admin@kwetuconnectads.co.ke`.
+## Current status (2026-11-07)
 
-## Decisions
-- Booking prices remain VAT-inclusive. VAT wording has been removed from the booking quote.
-- The discount ladder remains visible without a message beneath it.
-- The advert tile icon turns green when its checks pass.
-- Concept C Timetable chosen 2026-11-03 (over A Signal, B Sentence, D Site). Canvas: https://claude.ai/artifact/7tD1MAVVnTDVzbtPoMGykt, master files `.claude/artifacts/kca-redesign-concepts/`, brief `.claude/notes/redesign-brief.md`, build brief `.claude/handoffs/20261103-timetable-redesign.md`.
-- A booking is chosen days times chosen time blocks (engine model unchanged); grid selection rules live in `src/lib/booking/selection.ts`.
-- Busy shading: `occupancyByDayBlock()` in `src/lib/booking/occupancy.ts` and `store.occupancy()`; public grid shows Busy at 60% sold or more; manager heat levels under 40%, 40 to 79%, 80% or more.
-- Sign-in uses email links with `token_hash` (`verifyOtp` in `src/app/manage/auth/callback/route.ts`) so links work in any browser; Supabase "Magic link or OTP" template links to `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email`.
-- Server actions with per-action staff checks; memory mode (demo) only when all three Supabase variables are missing.
-- Client demo data: start the dev server with `KCA_DEMO_DATA=1` (memory mode only) to fill the manager with 22 made-up bookings, about 79% of the current week sold. Source `src/lib/store/demo.ts`, checked by `src/lib/store/demo.test.ts`. Sign in locally by setting the `kca_demo=1` cookie (the memory-mode sign-in).
-- Codex builds (OpenCode Go key expired; GLM-5.3 Flash free still reviews).
+- LIVE: application release 66dd4c917a4fc2b49624ab9597133b526473ae80, feat: refine booking and manager workspaces, is committed, fast-forward merged from ds/nightshift-redesign into main, pushed and deployed to https://kwetuconnectads.co.ke. The user explicitly authorised this release. Main may include later documentation-only commits with identical application code.
+- Vercel project kwetu-connect, team astrodesignerx-3017s-projects, GitHub repository astrodesignerx/kwetu-connect. Production deployment: https://vercel.com/astrodesignerx-3017s-projects/kwetu-connect/21sj3pjzRBWGj4ZYnbttfmMb4YCv. GitHub production deployment ID 7613089031. The Vercel commit status reports success.
+- Supabase migrations 0001 through 0004 are applied. Migration 0004 was applied on 2026-11-07 in the signed-in SQL editor with a transaction and PostgREST schema reload. SQL checks returned ready=true, updates_prices=true and updates_cells=true. The service-role readiness RPC returns 200/true; anonymous access returns 401.
+- Release checks passed: 157 tests in 15 source files, TypeScript, ESLint on all changed TypeScript/TSX files since 2706c4b, whitespace checks, and a production build in the main checkout with its real Supabase configuration. Install used pnpm.cmd install --frozen-lockfile in non-interactive CI mode.
+- Live HTTP checks passed for /, /book, /book/find, /services, /manage/sign-in, three booking CSS assets and /book/occupancy. Manager routes redirect to sign-in, including requests carrying the demo cookie. Public occupancy contains no private advertiser fields. These are response checks, not real-user acceptance.
+- Pipeline was browser-checked locally in demo mode at 1440 and 390 px in both themes, including reduced motion, focus restoration, status changes, advert decisions and CSV downloads. Real stored-media playback, live staff sign-in and booking recovery email delivery remain unverified.
+- Evidence: .claude/handoffs/20261107-production-release.md, .claude/notes/release-build.log, release-lint.log, release-health.json, release-readiness.mjs. No OpenCode job ran; OpenCode spend was zero.
 
-## Live setup
-- Supabase project "Kwetu Connect Ads", ref `xmpxixlbdykfhdzxqguh`: migrations 0001 and 0002 applied; staff row and Auth user for `admin@kwetuconnectads.co.ke`; advert bucket 50 MB, MP4/PNG/JPEG; custom SMTP via Resend (`no-reply@kwetuconnectads.co.ke`); Site URL `https://kwetuconnectads.co.ke`; redirect URLs for the live domain, `http://localhost:3000` and the old preview.
-- Adding staff: a `staff` row (lowercase email, name) AND a Supabase Auth user (Authentication, Users, Add user, Create new user, Auto Confirm).
-- Vercel env (Production and Preview): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, plus the contact-form `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`. Local copy in `.env.local` (never commit).
-- Local dev server: `.claude/launch.json` name `kwetu-site-dev`, port 3002. To test in demo mode, rename `.env.local` aside and restore it after.
+## Accepted design and behaviour
 
-## Open questions
-- Before deployment, verify Supabase migrations 0003 and 0004 are applied in order. They were not applied as part of this push.
-- Retest staff sign-in on the live domain (blocking real use of `/manage`).
-- Fix or leave the older ESLint error in `CampaignTheater.tsx`.
-- Rulebook section 12 sign-off and decision 7 (play log export) still open.
+- Night Shift and Daylight are the current themes. Pipeline is the selected manager direction, superseding the Timetable manager appearance. Earlier concepts remain in .claude/artifacts/kca-redesign-concepts/ and .claude/notes/redesign-brief.md.
+- Bookings has Quote, Paid, Approved, Live and Finished columns, a separate Cancelled group, real totals, search/date/status filters, full inspector and confirmed drag moves. Existing payment, capacity, advert and date rules still govern transitions. Payment notes, contact details, uploads, answers, sums and history remain accessible.
+- /manage/adverts is a dedicated review desk with waiting, approved, refused, missing and all queues, private media previews, measured shape/duration checks, refusal reasons, missing-file uploads and status controls. The legacy bookings?adverts=1 URL redirects. Unmeasured values are labelled.
+- Schedule reads generated playlist entries for compact week bars, expandable booking names and an expandable Nairobi today timeline. Raw rows, playlist entries and CSV downloads remain available. All scheduling/playback figures are planned, never measured playback. Overview keeps the booking count beside Live and Open playlist in its header.
+- /book uses a two-tap range calendar, advert drop tile, single-box hour picks, budget suggestions and a compact quote with plan tiles, week strip, discount ladder, below-minimum fixes and price breakdown. The timetable heading shows the selected frequency. The advert icon turns green after checks pass. Prices remain VAT-inclusive; there is no visible week-strip legend or extra discount-ladder message. Settings uses summary tiles and a side editor.
+- A booking is a set of day/time cells, such as 6-morning. days and blocks are their unions. A legacy booking without cells still means every selected day at every selected block. Rules: src/lib/booking/selection.ts and bookedHours() in hours.ts. Pricing formulas are unchanged.
+- Customers can attach an advert before saving. Upload runs after the quote saves, so upload failure never loses the booking. Browser checks target the 768 x 432, 16:9 silent screen. Public busy shading starts at 60% sold; manager heat bands are below 40%, 40 to 79%, and at least 80%.
+- Returning customers have booking links, browser-local Your bookings, reference-plus-phone recovery, email links and progress. Editing an unpaid plan preserves its reference, retains files for review and refuses a recorded payment note. An unconfirmed payment still requires contacting KCA. The Pay first, recap second payment view keeps M-Pesa/card instructions, recap and WhatsApp links. The Paybill account uses the first 12 reference characters, matched by staff search.
+
+## Services and local servers
+
+- Supabase: Kwetu Connect Ads, ref xmpxixlbdykfhdzxqguh. Staff row and Auth user: admin@kwetuconnectads.co.ke. Advert bucket: 50 MB, MP4/PNG/JPEG. Resend SMTP sender: no-reply@kwetuconnectads.co.ke.
+- Production/Preview env names: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, CONTACT_TO_EMAIL, CONTACT_FROM_EMAIL. The main checkout's .env.local contains local credentials, never committed or copied into shared notes.
+- Staff sign-in uses token_hash and verifyOtp for cross-browser email links. Supabase template: {{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email. Site URL is the production domain; redirects include its manager callback, localhost:3000 and the old preview. New staff need both a lowercase staff row and an Auth user.
+- Pushing main triggers Vercel production deployment. The local Vercel CLI is logged out; GitHub deployment/status APIs work.
+- Dev: http://localhost:3005 from C:/Users/ether/.t3/worktrees/kwetu-connect/t3-45ed95a0, synthetic demo bookings, no worktree .env.local. Restarted 2026-11-07. Book, Bookings and Adverts return 200. The existing launcher respawned it; an extra manual launch hit EADDRINUSE. Active launcher and health: .claude/notes/dev-3005.pid and dev-3005-health.json.
+- Separate isolated production demo preview: http://localhost:3018/manage/bookings, source .claude/notes/pipeline-preview/. Demo sign-in only, no copied credentials. It predates four final quote-style refinements. The checked-in .claude/launch.json defaults to port 3002.
+- Windows commands use pnpm.cmd. Source tests: pnpm.cmd exec vitest run --exclude '**/.scratch/**'. The redesign worktree's ignored .scratch/revisit-app has duplicate tests; unrestricted discovery inflates the count. Shared artifacts, handoffs and notes belong in this checkout's .claude folders.
+- Unrelated .ignore and graft/ files were preserved. A release-owned Git stash preserves the previous canonical STATE.md, object da85709c55ba49b5b29811f9e33ff55658357df8.
+
+## Billboard control
+
+- NovaStar TB10 Plus player T10Plus_00003191, hotspot 192.168.41.1; 12 cabinets, 4 x 3, NV7508 cards. Average 4.32 kW, maximum 12.48 kW. Vendor kit: D:/Design/Kwetu Connect Advertising/software for 12 sets of outdoor led display.
+- Installed: ViPlex Express 4.0.0.4401 and NovaLCT 5.9.1. Decompiled local API: HTTPS 16674, /terminal/core/v1/..., Authorization token after TCP 16606 login, UDP 16601 discovery. Hardware access remains untested.
+- Recommendation: VNNOX first, optional on-site box later for real-time evidence. VNNOX has next-day play logs and a 1,500 calls/hour limit. Probe: .claude/notes/billboard/probe-billboard.mjs. Masters: .claude/artifacts/billboard-audit.html and billboard-setup-checklist.html.
+- Office in Nairobi, screen in Eldoret, manager in the US. Setup needs a 20-minute call with someone at the screen using ViPlex Handy. Confirm the helper and internet availability; otherwise a 4G module/data SIM is needed.
+
+## Open items
+
+- Confirm the real M-Pesa Paybill. MPESA_PAYBILL in src/lib/contact.ts is empty, so customers are directed to WhatsApp.
+- Verify real staff sign-in on the live domain, stored advert playback and booking-email delivery. Migration readiness is verified.
+- The older CampaignTheater effect lint error remains outside this release. Rulebook section 12 sign-off and decision 7, play-log export, remain open.
 
 ## Sources
-Briefs and reviews in `.claude/handoffs/` (job 2: `20261027-2300-bookings-store.md`; Timetable: `20261103-timetable-redesign.md`, Codex report `20261103-timetable-redesign-result.md`, GLM review `20261103-review-timetable-glm.md` with findings in `.scratch/REVIEW.md`). Supabase checklist: `.claude/notes/supabase-setup-checklist.md`.
+
+.claude/handoffs/20261027-2300-bookings-store.md, 20261103-timetable-redesign.md, 20261103-nightshift-build-result.md, 20261106-pipeline-build-result.md and 20261107-production-release.md. Setup: .claude/notes/supabase-setup-checklist.md. Browser evidence: .claude/notes/pipeline-browser-check.mjs and .claude/notes/pipeline-qa/checks.json.
