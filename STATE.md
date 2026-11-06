@@ -3,18 +3,24 @@
 Goal: the KCA website (Next.js 16, Vercel) with a booking engine, stored bookings in Supabase, a staff manager area, and the concept C "Timetable" design for Book plays and the manager. Hard rules: booking sums stay as in `src/lib/booking` (KCA Screen Rulebook is the source of truth), public pages never expose other advertisers' details, no em dashes or middle dots in copy, never merge or push without the user's OK.
 
 ## Current status (2026-11-03)
+- The booking timetable heading now shows the selected play frequency, with the duplicate note below the grid removed.
+- Branch `ds/nightshift-redesign` contains the booking and manager redesign. The week strip keeps accessible day and time descriptions without a visible legend.
 - LIVE: `main` at `6a3165b` is pushed and deployed to https://kwetuconnectads.co.ke (Vercel project `kwetu-connect`, team `astrodesignerx-3017's projects`). It includes job 1 (engine, `/book`), job 2 (stored bookings, `/manage`), the Services price fix, and the Timetable redesign. Checked after deploy: `/`, `/book`, `/services`, `/manage/sign-in` (real staff sign-in, not demo) and `/book/occupancy` all return 200; occupancy returns shares only.
 - Branches `ds/bookings-store` and `ds/timetable-redesign` are merged into `main` (fast-forward) and pushed; they can be deleted.
-- Tests: 117 pass (101 original, 16 new). `tsc` passes. Production build passes in memory mode. ESLint has one older error in `src/components/CampaignTheater.tsx` (setState in an effect), not from this work.
+- Local checks on 2026-11-07: 308 tests pass with a 20 second timeout, TypeScript passes, and the production build passes in demo mode. Repository-wide lint fails on generated `.scratch` files and an existing error in `src/components/CampaignTheater.tsx`.
 - Browser-checked locally in memory mode: `/book` at 1280 and 375 px (no sideways scroll, price pinned on phones, cell toggles change the price, closed cells not focusable); a full run Quote to Paid (payment note) to advert upload and approval to Approved, with history rows; Week view shows the booking's sold share (Saturday morning 4%).
 - Not yet done: a real staff sign-in test on the live domain with `admin@kwetuconnectads.co.ke`.
 
 ## Decisions
+- Booking prices remain VAT-inclusive. VAT wording has been removed from the booking quote.
+- The discount ladder remains visible without a message beneath it.
+- The advert tile icon turns green when its checks pass.
 - Concept C Timetable chosen 2026-11-03 (over A Signal, B Sentence, D Site). Canvas: https://claude.ai/artifact/7tD1MAVVnTDVzbtPoMGykt, master files `.claude/artifacts/kca-redesign-concepts/`, brief `.claude/notes/redesign-brief.md`, build brief `.claude/handoffs/20261103-timetable-redesign.md`.
 - A booking is chosen days times chosen time blocks (engine model unchanged); grid selection rules live in `src/lib/booking/selection.ts`.
 - Busy shading: `occupancyByDayBlock()` in `src/lib/booking/occupancy.ts` and `store.occupancy()`; public grid shows Busy at 60% sold or more; manager heat levels under 40%, 40 to 79%, 80% or more.
 - Sign-in uses email links with `token_hash` (`verifyOtp` in `src/app/manage/auth/callback/route.ts`) so links work in any browser; Supabase "Magic link or OTP" template links to `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email`.
 - Server actions with per-action staff checks; memory mode (demo) only when all three Supabase variables are missing.
+- Client demo data: start the dev server with `KCA_DEMO_DATA=1` (memory mode only) to fill the manager with 22 made-up bookings, about 79% of the current week sold. Source `src/lib/store/demo.ts`, checked by `src/lib/store/demo.test.ts`. Sign in locally by setting the `kca_demo=1` cookie (the memory-mode sign-in).
 - Codex builds (OpenCode Go key expired; GLM-5.3 Flash free still reviews).
 
 ## Live setup
@@ -24,6 +30,7 @@ Goal: the KCA website (Next.js 16, Vercel) with a booking engine, stored booking
 - Local dev server: `.claude/launch.json` name `kwetu-site-dev`, port 3002. To test in demo mode, rename `.env.local` aside and restore it after.
 
 ## Open questions
+- Before deployment, verify Supabase migrations 0003 and 0004 are applied in order. They were not applied as part of this push.
 - Retest staff sign-in on the live domain (blocking real use of `/manage`).
 - Fix or leave the older ESLint error in `CampaignTheater.tsx`.
 - Rulebook section 12 sign-off and decision 7 (play log export) still open.

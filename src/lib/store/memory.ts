@@ -1,8 +1,11 @@
-﻿import { BaseStore, emptyData, type StoreData } from "./base";
+import { BaseStore, emptyData, type StoreData } from "./base";
+import { demoData } from "./demo";
+import { todayInNairobi } from "./validation";
 
 export class MemoryStore extends BaseStore {
   readonly mode = "memory" as const;
-  private data: StoreData = emptyData();
+  // KCA_DEMO_DATA=1 starts the demo with made-up bookings (about 79% of this week sold).
+  private data: StoreData = process.env.KCA_DEMO_DATA === "1" ? demoData(todayInNairobi()) : emptyData();
   private queue: Promise<unknown> = Promise.resolve();
   protected async read() { await this.queue; return structuredClone(this.data); }
   protected async transaction<T>(change: (data: StoreData) => T): Promise<T> {

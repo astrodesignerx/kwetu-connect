@@ -7,7 +7,9 @@ import { occupancyByDayBlock } from "../booking/occupancy";
 import { DEFAULT_SETTINGS, type BookingSettings } from "../booking/settings";
 import { canMove } from "../booking/status";
 import type { Advert, Advertiser, AdvertUpload, Booking, BookingFilter, BookingStore, PublicBooking, QuoteInput, StatusChange } from "./types";
-import { dateWindow, ensure, text, todayInNairobi, validateQuote, validateSettings } from "./validation";
+import { dateWindow, ensure, normalisePhone, text, todayInNairobi, validateQuote, validateSettings } from "./validation";
+
+const REPLACED = /^Changed by the customer, replaced by (KCA-[0-9A-F]{16})$/;
 
 export type StoreData = {
   revision: number; settings: BookingSettings | null;
@@ -37,7 +39,24 @@ export abstract class BaseStore implements BookingStore {
     return checkCapacity(booking.request, booking.advertiserId, existing, this.settings(data));
   }
   private publicView(data: StoreData, b: Booking): PublicBooking {
-    return { reference: b.reference, request: b.request, plays: b.plays, fullPriceKes: b.fullPriceKes, discountPercent: b.discountPercent, priceKes: b.priceKes, status: b.status, capacity: this.capacity(data, b) };
+    const history = data.history.filter((h) => h.bookingId === b.id).sort((x, y) => x.createdAt.localeCompare(y.createdAt));
+    const replacedBy = b.status === "Cancelled" ? history.at(-1)?.note.match(REPLACED)?.[1] : undefined;
+    return { reference: b.reference, request: b.request, plays: b.plays, fullPriceKes: b.fullPriceKes, discountPercent: b.discountPercent, priceKes: b.priceKes, status: b.status, createdAt: b.createdAt,
+      capacity: this.capacity(data, b), adverts: data.adverts.filter((a) => a.bookingId === b.id).length, steps: history.map((h) => ({ status: h.toStatus, at: h.createdAt })), ...(replacedBy ? { replacedBy } : {}) };
+  }
+  /** The same price rules for a new booking and a changed one. */
+  private priced(request: QuoteInput["request"], paysBy: QuoteInput["paysBy"], settings: BookingSettings, today: string) {
+    ensure(request.startDate >= earliestStartDate(today, settings), "The start date is before the earliest available start. Choose a later date.");
+    const result = quote(request, settings);
+    ensure(result.ok, result.ok ? "" : result.errors.join(" "));
+    ensure(!result.belowMinimum, `The smallest order is KES ${settings.minOrderKes.toLocaleString("en-GB")}.`);
+    ensure(paysBy !== "invoice" || result.priceKes >= 50000, "Pay by invoice is available from KES 50,000.");
+    return result;
+  }
+  private newReference(data: StoreData) {
+    let reference: string;
+    do { reference = `KCA-${randomBytes(8).toString("hex").toUpperCase()}`; } while (data.bookings.some((b) => b.reference === reference));
+    return reference;
   }
   async getSettings() { return structuredClone(this.settings(await this.read())); }
   async saveSettings(input: unknown) {
@@ -48,11 +67,7 @@ export abstract class BaseStore implements BookingStore {
     const input = validateQuote(raw);
     return this.transaction((data) => {
       const settings = this.settings(data);
-      ensure(input.request.startDate >= earliestStartDate(today, settings), "The start date is before the earliest available start. Choose a later date.");
-      const result = quote(input.request, settings);
-      ensure(result.ok, result.ok ? "" : result.errors.join(" "));
-      ensure(!result.belowMinimum, `The smallest order is KES ${settings.minOrderKes.toLocaleString("en-GB")}.`);
-      ensure(input.paysBy !== "invoice" || result.priceKes >= 50000, "Pay by invoice is available from KES 50,000.");
+      const result = this.priced(input.request, input.paysBy, settings, today);
       const phoneIds = new Set(data.advertisers.filter((a) => a.phone === input.phone).map((a) => a.id));
       const dayQuotes = data.bookings.filter((b) => phoneIds.has(b.advertiserId) && this.localDate(b.createdAt) === today);
       ensure(dayQuotes.length < 5, "This phone number has reached 5 Quotes today. Please contact KCA.");
@@ -60,8 +75,7 @@ export abstract class BaseStore implements BookingStore {
       // Keep each submitted contact record private to its booking.
       const advertiser: Advertiser = { id: randomUUID(), name: input.name, phone: input.phone, email: input.email ?? "", business: input.business, paysBy: input.paysBy, createdAt: now };
       data.advertisers.push(advertiser);
-      let reference: string;
-      do { reference = `KCA-${randomBytes(8).toString("hex").toUpperCase()}`; } while (data.bookings.some((b) => b.reference === reference));
+      const reference = this.newReference(data);
       const booking: Booking = { id: randomUUID(), advertiserId: advertiser.id, reference, request: input.request, plays: result.plays, fullPriceKes: result.fullPriceKes, discountPercent: result.discountPercent, priceKes: result.priceKes, status: "Quote", paymentNote: "", createdAt: now, updatedAt: now };
       data.bookings.push(booking);
       return this.publicView(data, booking);
@@ -75,6 +89,41 @@ export abstract class BaseStore implements BookingStore {
     const data = await this.read();
     const booking = data.bookings.find((b) => b.reference === reference);
     return booking ? structuredClone(this.publicView(data, booking)) : null;
+  }
+  async replaceQuote(reference: string, rawRequest: unknown, today = todayInNairobi()) {
+    return this.transaction((data) => {
+      const old = this.find(data, reference);
+      ensure(old.status === "Quote", "This booking is paid or closed, so the plan can only change through KCA. Ask on WhatsApp.");
+      ensure(!old.paymentNote.trim(), "Payment has been recorded for this booking. Ask KCA to change the plan.");
+      const advertiser = data.advertisers.find((a) => a.id === old.advertiserId);
+      ensure(advertiser, "Advertiser not found.");
+      // Same checks as a new booking, with the contact details already on file.
+      const input = validateQuote({ request: rawRequest as QuoteInput["request"], name: advertiser.name, phone: advertiser.phone, email: advertiser.email, business: advertiser.business, paysBy: advertiser.paysBy });
+      const result = this.priced(input.request, advertiser.paysBy, this.settings(data), today);
+      const now = new Date().toISOString();
+      old.request = input.request; old.plays = result.plays; old.fullPriceKes = result.fullPriceKes;
+      old.discountPercent = result.discountPercent; old.priceKes = result.priceKes; old.updatedAt = now;
+      // The original files stay attached and need another review for the changed plan.
+      for (const advert of data.adverts.filter((a) => a.bookingId === old.id)) { advert.decision = "waiting"; advert.reason = ""; }
+      data.history.push({ id: randomUUID(), bookingId: old.id, fromStatus: "Quote", toStatus: "Quote", staffEmail: "customer", note: "Plan changed by the customer.", createdAt: now });
+      return this.publicView(data, old);
+    });
+  }
+  async findBooking(reference: string, rawPhone: string) {
+    const data = await this.read();
+    const booking = data.bookings.find((b) => b.reference === reference.trim().toUpperCase());
+    const phone = normalisePhone(rawPhone);
+    const advertiser = booking && data.advertisers.find((a) => a.id === booking.advertiserId);
+    return booking && phone && advertiser?.phone === phone ? structuredClone(this.publicView(data, booking)) : null;
+  }
+  async bookingsByEmail(rawEmail: string) {
+    const email = rawEmail.trim().toLowerCase();
+    const data = await this.read();
+    const people = data.advertisers.filter((a) => email && a.email.toLowerCase() === email);
+    const ids = new Set(people.map((a) => a.id));
+    const bookings = data.bookings.filter((b) => ids.has(b.advertiserId) && b.status !== "Cancelled" && b.status !== "Finished")
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 10).map((b) => structuredClone(this.publicView(data, b)));
+    return { name: people.at(-1)?.name ?? "", bookings };
   }
   async listBookings(filter: BookingFilter = {}) {
     const data = await this.read();

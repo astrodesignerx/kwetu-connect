@@ -21,6 +21,14 @@ export function text(value: unknown, label: string, max = 200, optional = false)
 export function dateWindow(from: string, to: string, maxDays = 366) {
   ensure(isValidDate(from) && isValidDate(to) && from <= to && to <= addDays(from, maxDays - 1), `Choose dates in order, up to ${maxDays} days apart.`);
 }
+/** Kenyan numbers to one form (2547...); null when it is not a phone number. */
+export function normalisePhone(raw: string): string | null {
+  if (typeof raw !== "string" || !/^\+?[\d\s()\-]+$/.test(raw.trim())) return null;
+  let phone = raw.replace(/\D/g, "");
+  if (/^0[17]\d{8}$/.test(phone)) phone = `254${phone.slice(1)}`;
+  if (/^[17]\d{8}$/.test(phone)) phone = `254${phone}`;
+  return /^\d{9,15}$/.test(phone) ? phone : null;
+}
 export function validateQuote(input: QuoteInput): QuoteInput {
   ensure(input && typeof input === "object", "Enter your booking details.");
   ensure(!input.website, "Unable to save this request.");

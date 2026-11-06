@@ -81,18 +81,10 @@ export function OverviewSkeleton() {
 }
 
 export function BookingsSkeleton() {
-  return <section className="bookings-split" role="status" aria-label="Loading bookings">
-    <div className="booking-list-pane sk-stack" aria-hidden="true">
-      <Line w="140px" h="24px" /><Line w="220px" />
-      <div className="sk-row">{[0, 1, 2, 3, 4].map((i) => <Line key={i} w="80px" h="30px" />)}</div>
-      <div className="booking-list">{Array.from({ length: 6 }, (_, i) => <div key={i} className="booking-list-row sk-list-row">
-        <Skeleton className="business-avatar" />
-        <div className="booking-list-business sk-stack"><Line w="50%" /><Line w="35%" /><Line w="45%" /></div>
-        <Line w="64px" h="22px" />
-        <div className="sk-stack sk-end"><Line w="90px" /><Line w="60px" /></div>
-      </div>)}</div>
-    </div>
-    <div className="booking-detail-panel sk-stack" aria-hidden="true"><Line w="40%" /><Line w="70%" h="28px" /><Panel h="180px" /><Line w="60%" /><Line w="50%" /><Panel h="120px" /></div>
+  return <section className="pipeline-page" role="status" aria-label="Loading bookings">
+    <div className="sk-stack" aria-hidden="true"><Line w="160px" /><Line w="220px" h="28px" /><Line w="280px" /></div>
+    <div className="sk-row" aria-hidden="true">{[0, 1, 2, 3, 4].map((i) => <Line key={i} w="80px" h="30px" />)}</div>
+    <div className="pipeline-scroll" aria-hidden="true"><div className="pipeline-board">{Array.from({ length: 5 }, (_, i) => <div className="pipeline-column sk-stack" key={i}><Line w="70%" /><Line w="50%" /><Panel h="190px" /><Panel h="190px" /></div>)}</div></div>
     <span className="sr-only">Loading bookings</span>
   </section>;
 }

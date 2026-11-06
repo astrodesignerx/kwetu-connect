@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import type { BookingSettings } from "@/lib/booking/settings";
 import type { QuoteSuccess } from "@/lib/booking/quote";
-import { Ring } from "@/components/workspace/Charts";
 
 export const number = (value: number) => value.toLocaleString("en-GB", { maximumFractionDigits: 2 });
 export function RollingPrice({ value }: { value: number }) {
@@ -20,25 +19,42 @@ export function DiscountLadder({ plays, settings }: { plays: number; settings: B
   return <div className="discount-ladder">
     <h2>Discount ladder</h2>
     <ol>{steps.map((step) => <li key={step.minPlays} data-current={step === current}>
-      <strong>{step.percent}%</strong><span className="ladder-track" data-next={step === next} aria-hidden="true">
+      <strong>{step.percent}%</strong><span className="ladder-track" aria-hidden="true">
         <span style={{ transform: `scaleX(${step === current ? progress : 0})` }} />
       </span><small>{step === current ? `you: ${number(plays)}` : `${number(step.minPlays)}+`}</small>
     </li>)}</ol>
-    <p>{next ? `${number(next.minPlays - plays)} more plays reaches ${next.percent}% off.` : "You have reached the highest discount."}</p>
   </div>;
 }
-export default function QuoteTotals({ result, settings, weeks, lead, children }: { result: QuoteSuccess; settings: BookingSettings; weeks: number; lead?: ReactNode; children?: ReactNode }) {
-  const next = result.nextStep;
-  const gauge = next ? result.plays / next.minPlays : 1;
-  return <div className="quote-card">
-    <p className="quote-eyebrow">YOUR QUOTE</p>
-    <div aria-live="polite" aria-atomic="true"><RollingPrice value={result.priceKes} /></div>
-    <p className="quote-metrics">{number(result.plays)} plays / KES {number(result.perPlayKes)} each / VAT included</p>
+export type PlanTile = { icon: keyof typeof tileIcons; value: string; note: string; tone?: string };
+// Line icons for the plan tiles; drawn with currentColor so the tile tone sets their colour.
+const tileIcons = {
+  length: <><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2.5 2M9 2h6" /></>,
+  often: <><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></>,
+  dates: <><rect x="3.5" y="5" width="17" height="15.5" rx="3" /><path d="M3.5 10h17M8 3v4M16 3v4" /></>,
+  advert: <><rect x="2.5" y="5" width="19" height="12" rx="2" /><path d="M8 21h8M12 14V8M9 11l3-3 3 3" /></>,
+  "advert-ok": <><rect x="2.5" y="5" width="19" height="12" rx="2" /><path d="M8 21h8M8.5 11l2.5 2.5 4.5-4.5" /></>,
+  "advert-fix": <><rect x="2.5" y="5" width="19" height="12" rx="2" /><path d="M8 21h8M12 8v3.5M12 14h.01" /></>,
+};
+/** Quote card, concept B "Split" (2026-11-05): price and plays side by side, plan as chips, compact ladder. */
+export default function QuoteTotals({ result, settings, weeks, chips, tiles, eyebrow, lead, gap, children }: {
+  result: QuoteSuccess; settings: BookingSettings; weeks: number; chips?: string[]; tiles?: PlanTile[]; eyebrow?: ReactNode; lead?: ReactNode; gap?: ReactNode; children?: ReactNode;
+}) {
+  const tags = chips ?? [`${number(weeks)} ${weeks === 1 ? "week" : "weeks"}`];
+  return <div className={`quote-card quote-split${result.belowMinimum ? " is-below" : ""}`}>
+    <p className="quote-eyebrow">{eyebrow ?? "YOUR QUOTE"}</p>
+    <div className="quote-top">
+      <div aria-live="polite" aria-atomic="true"><RollingPrice value={result.priceKes} /></div>
+      <p className="quote-plays"><strong key={result.plays} className="rolling-number">{number(result.plays)}</strong><small>plays</small></p>
+    </div>
+    <p className="quote-metrics">KES {number(result.perPlayKes)} a play</p>
+    {tiles ? <ul className="quote-tiles" aria-label="Your plan">{tiles.map((tile) => <li key={tile.icon} data-tone={tile.tone}>
+      <svg viewBox="0 0 24 24" aria-hidden="true">{tileIcons[tile.icon]}</svg>
+      <strong key={tile.value}>{tile.value}</strong><small key={tile.note}>{tile.note}</small>
+    </li>)}</ul>
+      : <ul className="quote-chips" aria-label="Your plan">{tags.map((tag) => <li key={tag}>{tag}</li>)}</ul>}
     {lead}
-    <div className="discount-gauge"><Ring value={gauge} label={next ? "to " + next.percent + "% off" : "top discount"} small /><div><strong>{next ? number(next.playsNeeded) + " more plays" : result.discountPercent + "% discount"}</strong><p>{next ? "Reaches " + next.percent + "% off your plays." : "You have reached the highest discount."}</p></div></div>
-    <DiscountLadder plays={result.plays} settings={settings} />
-    <div className="quote-stats">{[[number(result.hoursBooked), "screen hours"], [number(result.plays / weeks), "plays a week"], [number(weeks), "weeks"]].map(([value, label]) => <div key={label}><strong key={value} className="rolling-number">{value}</strong><span>{label}</span></div>)}</div>
+    {/* Below the smallest order the shortfall panel takes the ladder's place; once it is met the ladder returns. */}
+    {gap ?? <DiscountLadder plays={result.plays} settings={settings} />}
     {children}
-    <p className="quote-footnote">Prices include VAT. KCA confirms space before you pay.</p>
   </div>;
 }

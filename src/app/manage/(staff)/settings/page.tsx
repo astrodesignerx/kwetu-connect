@@ -3,5 +3,5 @@ import { getStore } from "@/lib/store";
 import SettingsEditor from "@/components/manage/SettingsEditor";
 export default async function SettingsPage() {
   await requireStaff();
-  return <section className="space-y-6"><h1 className="text-2xl font-bold">Booking settings</h1><p>Settings apply to new quotes and current capacity and schedules. Bookings keep their quoted prices.</p><SettingsEditor initial={await getStore().getSettings()} /></section>;
+  return <section className="settings-page"><p className="settings-intro">How the screen is sold. New quotes use these settings; quotes already made keep their price.</p><SettingsEditor initial={await getStore().getSettings()} /></section>;
 }

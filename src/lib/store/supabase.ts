@@ -54,6 +54,11 @@ export class SupabaseStore extends BaseStore {
     if (error) throw new StoreError("Unable to verify staff access.");
     return Boolean(data);
   }
+  async replaceQuote(reference: string, request: unknown, today?: string) {
+    const { data, error } = await this.client.rpc("booking_edits_ready");
+    if (error || data !== true) throw new StoreError("Plan changes are not available yet. Please ask KCA on WhatsApp.");
+    return super.replaceQuote(reference, request, today);
+  }
   protected async upload(path: string, file: AdvertUpload) {
     const { error } = await this.client.storage.from("adverts").upload(path, await file.arrayBuffer(), { contentType: file.type, upsert: false });
     if (error) throw new StoreError("Unable to upload the advert. Please try again.");

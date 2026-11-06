@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { Barlow_Condensed } from "next/font/google";
 import PublicChrome from "@/components/PublicChrome";
 import { themeScript, workspaceFonts } from "@/components/workspace/Workspace";
 import Navbar from "@/components/Navbar";
@@ -16,6 +17,14 @@ const archivo = localFont({
     { path: "../../public/fonts/archivo/archivo-latin-italic.woff2", weight: "100 900", style: "italic" },
   ],
   declarations: [{ prop: "font-stretch", value: "62% 125%" }],
+  display: "swap",
+});
+
+// Price font (picked 2026-11-05): Barlow Condensed ExtraBold, used only for the quote total.
+const barlow = Barlow_Condensed({
+  variable: "--font-barlow",
+  weight: ["800"],
+  subsets: ["latin"],
   display: "swap",
 });
 
@@ -113,7 +122,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${archivo.variable} ${workspaceFonts} h-full`}>
+    <html lang="en" suppressHydrationWarning className={`${archivo.variable} ${barlow.variable} ${workspaceFonts} h-full`}>
       <body className="bg-ink min-h-full flex flex-col font-sans">
         {/* Marks JS availability before first paint so reveal animations
             only hide content when they can actually reveal it again. */}

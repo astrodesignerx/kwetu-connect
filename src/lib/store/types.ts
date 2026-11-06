@@ -25,7 +25,15 @@ export type QuoteInput = {
   business: string; paysBy: "now" | "invoice"; website?: string;
 };
 export type BookingDetail = { booking: Booking; advertiser: Advertiser; adverts: Advert[]; history: StatusChange[]; capacity: CapacityResult };
-export type PublicBooking = Pick<Booking, "reference" | "request" | "plays" | "fullPriceKes" | "discountPercent" | "priceKes" | "status"> & { capacity: CapacityResult };
+/** One step a booking has passed, for the customer's progress track. No staff names. */
+export type PublicStep = { status: BookingStatus; at: string };
+export type PublicBooking = Pick<Booking, "reference" | "request" | "plays" | "fullPriceKes" | "discountPercent" | "priceKes" | "status" | "createdAt"> & {
+  capacity: CapacityResult; steps: PublicStep[];
+  /** How many advert files came with this booking (names and files stay private). */
+  adverts: number;
+  /** Set when the customer changed the plan: the reference that replaced this one. */
+  replacedBy?: string;
+};
 export type BookingFilter = { status?: string; from?: string; to?: string };
 export type BookingListItem = Booking & { business: string };
 export type AdvertUpload = { name: string; type: string; size: number; arrayBuffer(): Promise<ArrayBuffer> };
@@ -36,6 +44,12 @@ export interface BookingStore {
   isStaff(email: string): Promise<boolean>;
   createQuote(input: QuoteInput, today?: string): Promise<PublicBooking>;
   publicBooking(reference: string): Promise<PublicBooking | null>;
+  /** Change an unpaid booking while keeping its reference. */
+  replaceQuote(reference: string, request: unknown, today?: string): Promise<PublicBooking>;
+  /** The booking only if the phone matches the one it was made with. */
+  findBooking(reference: string, phone: string): Promise<PublicBooking | null>;
+  /** Open bookings made with this email, with the name to greet. */
+  bookingsByEmail(email: string): Promise<{ name: string; bookings: PublicBooking[] }>;
   listBookings(filter?: BookingFilter): Promise<BookingListItem[]>;
   bookingDetail(reference: string): Promise<BookingDetail | null>;
   savePaymentNote(reference: string, note: string): Promise<void>;
