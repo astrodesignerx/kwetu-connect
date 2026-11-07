@@ -12,21 +12,24 @@ import { RULEBOOK_EXAMPLES } from "@/lib/store/examples";
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const WEEK = [1, 2, 3, 4, 5, 6, 0];
-type Section = "price" | "discounts" | "capacity" | "lengths" | "often" | "lead" | "hours";
-const TITLES: Record<Section, string> = { price: "Price", discounts: "Discounts", capacity: "Sold per hour", lengths: "Lengths", often: "Plays an hour", lead: "Booking lead", hours: "Screen hours" };
-const ICONS = { price: Coins, discounts: Percent, capacity: Hourglass, lengths: FilmStrip, often: Play, lead: Timer, hours: Clock };
+type Section = "price" | "discounts" | "capacity" | "lengths" | "often" | "lead" | "blocks" | "hours";
+const TITLES: Record<Section, string> = { price: "Price", discounts: "Discounts", capacity: "Sold per hour", lengths: "Lengths", often: "Plays an hour", lead: "Booking lead", blocks: "Time blocks", hours: "Screen hours" };
+const ICONS = { price: Coins, discounts: Percent, capacity: Hourglass, lengths: FilmStrip, often: Play, lead: Timer, blocks: Clock, hours: Clock };
 const n = (value: number) => value.toLocaleString("en-GB");
 const hh = (hour: number) => String(hour).padStart(2, "0");
 
 /** "Mon to Thu 06 to 22, Fri to Sun 06 to 24": consecutive days with the same hours are grouped. */
-function hoursSummary(hours: BookingSettings["screenHours"]) {
+function hourGroups(hours: BookingSettings["screenHours"]) {
   const groups: { from: number; to: number; open: number; close: number }[] = [];
   for (const day of WEEK) {
     const h = hours[day]; const last = groups[groups.length - 1];
     if (last && last.open === h.open && last.close === h.close) last.to = day;
     else groups.push({ from: day, to: day, open: h.open, close: h.close });
   }
-  return groups.map((g) => (g.from === g.to ? SHORT[g.from] : SHORT[g.from] + " to " + SHORT[g.to]) + (g.open >= g.close ? " closed" : " " + hh(g.open) + " to " + hh(g.close))).join(", ");
+  return groups;
+}
+function hoursSummary(hours: BookingSettings["screenHours"]) {
+  return hourGroups(hours).map((g) => (g.from === g.to ? SHORT[g.from] : SHORT[g.from] + " to " + SHORT[g.to]) + (g.open >= g.close ? " closed" : " " + hh(g.open) + " to " + hh(g.close))).join(", ");
 }
 
 export default function SettingsEditor({ initial }: { initial: BookingSettings }) {
@@ -51,6 +54,7 @@ export default function SettingsEditor({ initial }: { initial: BookingSettings }
     { id: "lengths", value: lens.length ? `${lens[0]} to ${lens[lens.length - 1]}s` : "None", note: `${lens.length} choices` },
     { id: "often", value: plays.length ? `${plays[0]} to ${plays[plays.length - 1]}` : "None", note: `${plays.length} choices` },
     { id: "lead", value: `${candidate.leadWorkingDays} ${candidate.leadWorkingDays === 1 ? "day" : "days"}`, note: `${candidate.publicHolidays.length} holidays set` },
+    { id: "blocks", value: `${Object.keys(candidate.timeBlocks).length} blocks`, note: Object.values(candidate.timeBlocks).map((block) => block.label).join(", ") },
     { id: "hours", value: hoursSummary(candidate.screenHours), note: `${Object.keys(candidate.timeBlocks).length} time blocks, ${Object.values(candidate.timeBlocks).map((b) => b.label).join(", ")}`, wide: true },
   ];
 
@@ -58,6 +62,7 @@ export default function SettingsEditor({ initial }: { initial: BookingSettings }
     <label key={key}>{label}<input type="number" min={1} step={1} required value={settings[key]} onChange={(e) => update((s) => { s[key] = Number(e.target.value); })} /></label>;
 
   const editors: Record<Section, React.ReactNode> = {
+    blocks: <>{(Object.keys(settings.timeBlocks) as (keyof BookingSettings["timeBlocks"])[]).map((id) => <div key={id} className="settings-row is-block"><input aria-label={`${id} label`} value={settings.timeBlocks[id].label} maxLength={80} onChange={(e) => update((s) => { s.timeBlocks[id].label = e.target.value; })} /><input aria-label={`${id} start hour`} type="number" min={0} max={23} step={1} value={settings.timeBlocks[id].startHour} onChange={(e) => update((s) => { s.timeBlocks[id].startHour = Number(e.target.value); })} /><input aria-label={`${id} end hour`} type="number" min={1} max={24} step={1} value={settings.timeBlocks[id].endHour} onChange={(e) => update((s) => { s.timeBlocks[id].endHour = Number(e.target.value); })} /></div>)}</>,
     price: <>{field("kesPerSecond", "KES per second")}{field("minOrderKes", "Smallest order (KES)")}</>,
     capacity: <>{field("secondsForSalePerHour", "Seconds for sale per hour")}{field("maxPlaysPerAdvertiserPerHour", "Maximum plays per advertiser per hour")}</>,
     lengths: <label>Available lengths in seconds, separated by commas<input value={lengths} onChange={(e) => setLengths(e.target.value)} required /><span className="settings-hint">Use multiples of 5 seconds.</span></label>,
@@ -86,8 +91,9 @@ export default function SettingsEditor({ initial }: { initial: BookingSettings }
     <input type="hidden" name="settings" value={JSON.stringify(candidate)} />
     <div className="settings-tiles">{tiles.map((tile) => { const Icon = ICONS[tile.id]; return <button key={tile.id} type="button" className={`settings-tile${tile.wide ? " is-wide" : ""}`} data-section={tile.id} aria-pressed={open === tile.id} aria-controls="settings-panel" onClick={() => setOpen(open === tile.id ? null : tile.id)}>
       <span className="settings-tile-label"><span className="v2-setting-icon"><Icon size={17} aria-hidden="true" /></span>{TITLES[tile.id]}</span><strong key={tile.value}>{tile.value}</strong><span className="settings-tile-note">{open === tile.id ? "Editing" : tile.note}</span>
-      {tile.id === "discounts" && <span className="v2-discount-stair" aria-hidden="true">{steps.map((step) => <span key={step.minPlays + ":" + step.percent}><i style={{ height: `${26 + step.percent * 1.2}px` }}>{step.percent}%</i><small>{n(step.minPlays)}</small></span>)}</span>}
-      {tile.id === "hours" && <span className="v2-screen-hours" aria-hidden="true"><span />{Array.from({ length: 24 }, (_, hour) => <small key={hour}>{hour % 3 === 0 ? hh(hour) : ""}</small>)}{WEEK.map((day) => <span className="v2-screen-hour-row" key={day}><span>{SHORT[day]}</span>{Array.from({ length: 24 }, (_, hour) => <i key={hour} data-open={hour >= candidate.screenHours[day].open && hour < candidate.screenHours[day].close} />)}</span>)}</span>}
+      {(tile.id === "lengths" || tile.id === "often" || tile.id === "blocks") && <span className="v2-rule-chips" aria-hidden="true">{(tile.id === "lengths" ? lens.map((length) => length + "s") : tile.id === "often" ? plays.map(String) : Object.values(candidate.timeBlocks).map((block) => `${block.label} ${hh(block.startHour)} to ${hh(block.endHour)}`)).map((label) => <span key={label}>{label}</span>)}</span>}
+      {tile.id === "discounts" && <span className="v2-discount-stair" aria-hidden="true">{[{ minPlays: 0, percent: 0 }, ...steps].map((step) => <span key={step.minPlays + ":" + step.percent}><i style={{ height: `${18 + Math.min(99, step.percent) * 1.2}px` }}>{step.percent}%</i><small>{step.minPlays ? n(step.minPlays) : "Base"}</small></span>)}</span>}
+      {tile.id === "hours" && <span className="v2-screen-hours" aria-hidden="true"><span />{Array.from({ length: 24 }, (_, hour) => <small key={hour}>{hour % 3 === 0 ? hh(hour) : ""}</small>)}{hourGroups(candidate.screenHours).map((group) => <span className="v2-screen-hour-row" key={group.from}><span>{SHORT[group.from]}{group.from !== group.to ? " to " + SHORT[group.to] : ""}</span>{Array.from({ length: 24 }, (_, hour) => <i key={hour} data-open={hour >= group.open && hour < group.close} />)}</span>)}</span>}
     </button>; })}</div>
     <aside id="settings-panel" className="settings-panel" aria-label="Edit settings" data-open={open !== null}>
       <fieldset disabled={pending} className="settings-fields" key={open ?? "none"}>

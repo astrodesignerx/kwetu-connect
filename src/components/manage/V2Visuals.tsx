@@ -2,14 +2,16 @@
 
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { formatHour } from "@/lib/booking/hours";
+import { ChartBar, Clock, Coins, Play } from "@phosphor-icons/react";
 
 export function DarkIsland({ children, className = "" }: { children: ReactNode; className?: string }) {
   return <section className={"v2-card v2-dark " + className}>{children}</section>;
 }
 
 export function FolderCard({ label, value, note, colour = "teal", children, photo = false }: { label: string; value: ReactNode; note: string; colour?: string; children?: ReactNode; photo?: boolean }) {
+  const Icon = photo ? ChartBar : colour === "violet" ? Clock : colour === "green" ? Play : Coins;
   return <section className={"v2-folder" + (photo ? " v2-folder-photo" : "")} data-colour={colour}>
-    <div className="v2-folder-label"><i aria-hidden="true" />{label}</div>
+    <div className="v2-folder-label"><i aria-hidden="true"><Icon size={14} /></i>{label}</div>
     <div className="v2-folder-value">{value}</div><p>{note}</p>{children}
   </section>;
 }
@@ -51,5 +53,5 @@ export function HourTiles({ rows, onSelect, selected, today }: { rows: HourTileR
 }
 
 export function StageShareBar({ stages }: { stages: { label: string; count: number }[] }) {
-  return <section className="v2-card v2-stage-shares"><h2>Bookings by stage</h2><div>{stages.map(({ label, count }) => <div key={label} data-stage={label} style={{ flex: Math.max(1, count) }}><strong>{count}<small>{label}</small></strong><i aria-hidden="true" /></div>)}</div></section>;
+  return <section className="v2-card v2-stage-shares"><h2>Bookings by stage</h2><div className="v2-share-labels">{stages.map(({ label, count }) => <strong key={label}>{count}<small>{label}</small></strong>)}</div><div className="v2-share-bars" aria-hidden="true">{stages.map(({ label, count }) => <i key={label} data-stage={label} style={{ flex: Math.max(.1, count) }} />)}</div></section>;
 }

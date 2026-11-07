@@ -25,6 +25,13 @@ export function DiscountLadder({ plays, settings }: { plays: number; settings: B
     </li>)}</ol>
   </div>;
 }
+function DiscountRing({ plays, settings }: { plays: number; settings: BookingSettings }) {
+  const steps = [...settings.discountSteps, { minPlays: 0, percent: 0 }].sort((a, b) => a.minPlays - b.minPlays);
+  const current = steps.filter((step) => step.minPlays <= plays).at(-1)!;
+  const next = steps.find((step) => step.minPlays > plays);
+  const progress = next ? Math.max(0, Math.min(1, (plays - current.minPlays) / (next.minPlays - current.minPlays))) : 1;
+  return <div className="v2-discount-ring" role="img" aria-label={next ? `${number(next.minPlays - plays)} more plays for ${next.percent}% off` : "Highest discount reached"}><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="#ffffff14" strokeWidth="7" /><circle cx="50" cy="50" r="42" fill="none" stroke="#ff8a3d" strokeWidth="7" pathLength="100" strokeDasharray={`${progress * 100} 100`} strokeLinecap="round" /></svg><div><b key={plays}>{number(plays)}</b><small>plays</small></div><p>{next ? <><b>{number(next.minPlays - plays)}</b> more for {next.percent}% off</> : `${current.percent}% off, highest tier`}</p></div>;
+}
 export type PlanTile = { icon: keyof typeof tileIcons; value: string; note: string; tone?: string };
 // Line icons for the plan tiles; drawn with currentColor so the tile tone sets their colour.
 const tileIcons = {
@@ -36,15 +43,15 @@ const tileIcons = {
   "advert-fix": <><rect x="2.5" y="5" width="19" height="12" rx="2" /><path d="M8 21h8M12 8v3.5M12 14h.01" /></>,
 };
 /** Quote card, concept B "Split" (2026-11-05): price and plays side by side, plan as chips, compact ladder. */
-export default function QuoteTotals({ result, settings, weeks, chips, tiles, eyebrow, lead, gap, children }: {
-  result: QuoteSuccess; settings: BookingSettings; weeks: number; chips?: string[]; tiles?: PlanTile[]; eyebrow?: ReactNode; lead?: ReactNode; gap?: ReactNode; children?: ReactNode;
+export default function QuoteTotals({ result, settings, weeks, chips, tiles, eyebrow, lead, gap, children, v2 = false }: {
+  result: QuoteSuccess; settings: BookingSettings; weeks: number; chips?: string[]; tiles?: PlanTile[]; eyebrow?: ReactNode; lead?: ReactNode; gap?: ReactNode; children?: ReactNode; v2?: boolean;
 }) {
   const tags = chips ?? [`${number(weeks)} ${weeks === 1 ? "week" : "weeks"}`];
-  return <div className={`quote-card quote-split${result.belowMinimum ? " is-below" : ""}`}>
-    <p className="quote-eyebrow">{eyebrow ?? "YOUR QUOTE"}</p>
+  return <div className={`quote-card quote-split${result.belowMinimum ? " is-below" : ""}${v2 ? " v2-quote" : ""}`}>
+    <p className="quote-eyebrow">{eyebrow ?? "YOUR QUOTE"}{v2 && <span>VAT included</span>}</p>
     <div className="quote-top">
       <div aria-live="polite" aria-atomic="true"><RollingPrice value={result.priceKes} /></div>
-      <p className="quote-plays"><strong key={result.plays} className="rolling-number">{number(result.plays)}</strong><small>plays</small></p>
+      {v2 ? <DiscountRing plays={result.plays} settings={settings} /> : <p className="quote-plays"><strong key={result.plays} className="rolling-number">{number(result.plays)}</strong><small>plays</small></p>}
     </div>
     <p className="quote-metrics">KES {number(result.perPlayKes)} a play</p>
     {tiles ? <ul className="quote-tiles" aria-label="Your plan">{tiles.map((tile) => <li key={tile.icon} data-tone={tile.tone}>
@@ -54,7 +61,7 @@ export default function QuoteTotals({ result, settings, weeks, chips, tiles, eye
       : <ul className="quote-chips" aria-label="Your plan">{tags.map((tag) => <li key={tag}>{tag}</li>)}</ul>}
     {lead}
     {/* Below the smallest order the shortfall panel takes the ladder's place; once it is met the ladder returns. */}
-    {gap ?? <DiscountLadder plays={result.plays} settings={settings} />}
+    {v2 ? <><DiscountLadder plays={result.plays} settings={settings} />{gap}</> : gap ?? <DiscountLadder plays={result.plays} settings={settings} />}
     {children}
   </div>;
 }

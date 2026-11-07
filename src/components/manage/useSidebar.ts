@@ -10,9 +10,11 @@ function read() {
   return memory ?? !window.matchMedia("(max-width: 767px)").matches;
 }
 function subscribe(callback: () => void) {
+  const phone = window.matchMedia("(max-width: 767px)");
+  phone.addEventListener("change", callback);
   window.addEventListener(EVENT, callback);
   window.addEventListener("storage", callback);
-  return () => { window.removeEventListener(EVENT, callback); window.removeEventListener("storage", callback); };
+  return () => { phone.removeEventListener("change", callback); window.removeEventListener(EVENT, callback); window.removeEventListener("storage", callback); };
 }
 export function useSidebar() {
   const open = useSyncExternalStore(subscribe, read, () => true);

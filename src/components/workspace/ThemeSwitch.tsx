@@ -11,9 +11,13 @@ function subscribe(callback: () => void) {
   return () => { observer.disconnect(); media.removeEventListener("change", system); };
 }
 function setTheme(theme: "dark" | "light") {
-  document.documentElement.dataset.theme = theme;
-  try { localStorage.setItem("kca-theme", theme); } catch {}
-  document.cookie = "kca-theme=" + theme + ";path=/;max-age=31536000;SameSite=Lax";
+  const update = () => {
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem("kca-theme", theme); } catch {}
+    document.cookie = "kca-theme=" + theme + ";path=/;max-age=31536000;SameSite=Lax";
+  };
+  if (document.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) document.startViewTransition(update);
+  else update();
 }
 // icons: two small sun and moon buttons for the compact book top bar (2026-11-05).
 export default function ThemeSwitch({ variant = "switch" }: { variant?: "switch" | "icons" }) {

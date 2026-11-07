@@ -54,7 +54,7 @@ export default function DatesCalendar({ from, to, earliest, playDays, onChange }
     </div>
     <p className="calendar-foot" role="status">
       <span>{pickingEnd ? "Now tap the last day" : `${label(from)} to ${label(to)}`}</span>
-      <span>{pickingEnd ? `From ${label(from, false)}` : "Bold days play"}</span>
+      <span>{pickingEnd ? `From ${label(from, false)}` : "Lit days play"}</span>
     </p>
   </div>;
 }

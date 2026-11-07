@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { addDays, earliestStartDate } from "@/lib/booking/hours";
 import { readAnswers, buildQuery, normaliseDays, normaliseBlocks, type Answers } from "@/lib/booking/answers";
 import { occupancyByDayBlock, type Occupancy } from "@/lib/booking/occupancy";
-import { fromCells, openSelection, scheduleLines, toggleSelection } from "@/lib/booking/selection";
+import { BLOCK_ORDER, DAY_ORDER, fromCells, openSelection, scheduleLines, toggleSelection } from "@/lib/booking/selection";
 import { suggestPlan } from "@/lib/booking/plan";
 import { quote } from "@/lib/booking/quote";
 import type { BookingSettings } from "@/lib/booking/settings";
@@ -14,11 +14,11 @@ import BookingForm, { ChangeForm } from "./BookingForm";
 import AdvertUpload, { advertReady, type AdvertState } from "./AdvertUpload";
 import SegmentedChoice from "./SegmentedChoice";
 import DatesCalendar from "./DatesCalendar";
-import QuoteDetails, { WeekStrip } from "./QuoteDetails";
+import QuoteDetails, { WeeklyPlays } from "./QuoteDetails";
 import { WHATSAPP_NUMBER } from "@/lib/contact";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LinkSimple, Minus, PaintBrush, PaperPlaneTilt, Plus, WhatsappLogo } from "@phosphor-icons/react";
+import { FilmStrip, LinkSimple, Minus, PaintBrush, PaperPlaneTilt, Plus, WhatsappLogo } from "@phosphor-icons/react";
 
 function dateLabel(value: string) {
   return new Date(`${value}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
@@ -106,7 +106,7 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
     { icon: advertState === "ready" ? "advert-ok" : advertState === "fix" ? "advert-fix" : "advert", value: "Advert",
       note: { none: "not added yet", checking: "checking", ready: "checked", fix: "needs fixing" }[advertState], tone: advertState },
   ];
-  const lead = schedule.length ? <WeekStrip selection={picked} labels={settings.timeBlocks} />
+  const lead = schedule.length ? <WeeklyPlays request={picked} settings={settings} />
     : <p className="quote-schedule"><span>Pick boxes in the grid</span></p>;
   // Below the smallest order: show how far off it is, and one-tap changes that reach it.
   const shortBy = result.ok && result.belowMinimum ? settings.minOrderKes - result.priceKes : 0;
@@ -131,21 +131,21 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
     </div>
     <p role="status" className="copy-message">{copyState === "failed" ? "Copy failed. Select the address bar." : copyState === "copied" ? "The link is on your clipboard." : ""}</p>
   </div>;
-  const card = result.ok ? <QuoteTotals result={result} settings={settings} weeks={weeks} tiles={tiles} eyebrow={editing ? <span className="quote-editing"><span>CHANGING {editing.reference.slice(0, 12)}</span><s>was KES {number(editing.priceKes)}</s></span> : undefined} lead={lead} gap={gap}><QuoteDetails request={answers} result={result} settings={settings} advert={advertState} />{actions}</QuoteTotals>
+  const card = result.ok ? <QuoteTotals v2 result={result} settings={settings} weeks={weeks} tiles={tiles} eyebrow={editing ? <span className="quote-editing"><span>CHANGING {editing.reference.slice(0, 12)}</span><s>was KES {number(editing.priceKes)}</s></span> : undefined} lead={lead} gap={gap}><QuoteDetails request={answers} result={result} settings={settings} advert={advertState} />{actions}</QuoteTotals>
     : <div className="quote-card"><p className="quote-eyebrow">YOUR QUOTE</p><div role="status" className="quote-errors">{result.errors.map((e) => <p key={e}>{e}</p>)}</div><p>Choose days and times to see your price.</p></div>;
 
   return <section className="booking-canvas">
     <div className="booking-workspace">
       <div className="booking-layout">
-        <AdvertUpload lengthSeconds={answers.lengthSeconds} advert={advert} onChange={setAdvert} />
         <div className="booking-controls">
-          <Card className="advert-card">
-            <div className="control-title"><h2>Your advert</h2><p>KES {settings.kesPerSecond} a second, every play.</p></div>
+          <Card className="advert-card v2-advert-folder">
+            <div className="control-title"><span className="v2-advert-folder-icon"><FilmStrip size={18} aria-hidden="true" /></span><div><h2>Your advert</h2><p>KES {settings.kesPerSecond} a second, every play.</p></div></div>
             <fieldset><legend>Length</legend><SegmentedChoice options={settings.lengths.map((length) => ({ value: length, label: length + "s" }))} value={answers.lengthSeconds} onChange={(lengthSeconds) => change({ lengthSeconds })} /></fieldset>
             <div className="plays-stepper" role="group" aria-labelledby="plays-label">
               <div><span id="plays-label">Plays an hour</span><p>{oftenOption?.label}</p></div>
               <button type="button" aria-label="Fewer plays an hour" disabled={oftenIndex <= 0} onClick={() => change({ howOften: oftenSteps[oftenIndex - 1] })}><Minus size={16} aria-hidden="true" /></button>
-              <strong key={answers.howOften} aria-live="polite">{answers.howOften}</strong>
+              <div className="v2-frequency-caps" role="group" aria-label="Plays an hour">{oftenSteps.map((plays) => <button type="button" key={plays} aria-pressed={answers.howOften === plays} aria-label={`${plays} plays an hour`} onClick={() => change({ howOften: plays })}><span aria-hidden="true" style={{ height: `${10 + plays / Math.max(...oftenSteps) * 34}px` }} data-lit={plays <= answers.howOften} /><small>{plays}</small></button>)}</div>
+              <span className="sr-only" aria-live="polite">{answers.howOften} plays an hour</span>
               <button type="button" aria-label="More plays an hour" disabled={oftenIndex >= oftenSteps.length - 1} onClick={() => change({ howOften: oftenSteps[oftenIndex + 1] })}><Plus size={16} aria-hidden="true" /></button>
             </div>
           </Card>
@@ -166,13 +166,16 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
             <a className="ui-button ui-button-outline no-advert-link" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi KCA, I don't have an advert yet. Can you design a ${answers.lengthSeconds} second advert for me?`)}`} target="_blank" rel="noopener noreferrer"><WhatsappLogo size={16} weight="fill" aria-hidden="true" />Ask KCA to make it</a>
           </Card>}
         </div>
+        <AdvertUpload lengthSeconds={answers.lengthSeconds} advert={advert} onChange={setAdvert} />
         <div className="booking-grid-panel timetable-panel">
           <div className="timetable-heading"><div><h1>Pick your hours</h1><p>Your advert plays only in the boxes you pick, {answers.howOften} times an hour.</p></div><TimetableLegend /></div>
+          <div className="v2-quick-picks" role="group" aria-label="Quick hour picks"><span>Quick picks</span>{[{ label: "Every morning", days: DAY_ORDER, blocks: ["morning"] }, { label: "Evenings", days: DAY_ORDER, blocks: ["evening"] }, { label: "Weekends", days: [6, 0], blocks: BLOCK_ORDER }, { label: "Clear", days: [], blocks: [] }].map((pick) => <button type="button" key={pick.label} onClick={() => change(fromCells(pick.days.flatMap((day) => BLOCK_ORDER.filter((block) => pick.blocks.includes(block) && occupancy[day][block].open).map((block) => `${day}-${block}`))))}>{pick.label}</button>)}</div>
           <Timetable settings={settings} occupancy={occupancy} pending={!availabilityKnown} selection={answers} onSelect={(action) => change(toggleSelection(answers, action, (day, block) => occupancy[day][block].open))} />
           <div className="availability-message" role="status">
             {!rangeValid ? "Choose dates in order, up to 366 days apart." : !availabilityCurrent ? "Updating busy hours..." : availability.error}
             {availabilityCurrent && availability.error && <button type="button" className="quiet-button" onClick={() => setRetry((n) => n + 1)}>Try again</button>}
           </div>
+          {result.ok && <p className="v2-grid-summary"><b>{picked.cells.length}</b> boxes <span><b>{number(result.hoursBooked)}</b> screen hours</span><span><b>{number(result.plays)}</b> planned plays</span></p>}
         </div>
         <aside className="quote-desktop" aria-label="Your quote">{card}</aside>
       </div>

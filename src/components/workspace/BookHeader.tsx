@@ -6,7 +6,7 @@ import { WHATSAPP_NUMBER } from "@/lib/contact";
 import ThemeSwitch from "./ThemeSwitch";
 import OnAir from "./OnAir";
 import { MyBookings } from "@/components/booking/SavedBookings";
-const STEPS = [{ label: "Choose", Icon: CalendarBlank }, { label: "Your details", Icon: UserCircle }, { label: "Pay and send advert", Icon: Receipt }];
+const STEPS = [{ label: "Choose your plays", Icon: CalendarBlank }, { label: "Your details", Icon: UserCircle }, { label: "Pay", Icon: Receipt }];
 // Top bar, concept C with B's on-air chip (2026-11-05): icon steps where only the current step shows its label.
 export default function BookHeader({ settings, step = 1 }: { settings: BookingSettings; step?: number }) {
   return <header className="book-header">
@@ -14,7 +14,7 @@ export default function BookHeader({ settings, step = 1 }: { settings: BookingSe
     <ol className="book-steps is-icons" aria-label="Booking steps">{STEPS.map(({ label, Icon }, index) => {
       const n = index + 1;
       return <li key={label} aria-current={step === n ? "step" : undefined} data-done={n < step} title={n + " " + label}>
-        <Icon size={17} weight={step === n ? "bold" : "regular"} aria-hidden="true" /><span className="step-label">{label}</span><span className="sr-only">{"Step " + n + (step === n ? "" : ", " + label) + (n < step ? ", done" : "")}</span>
+        <span className="v2-step-number" aria-hidden="true">{n}</span><Icon className="sr-only" size={17} weight={step === n ? "bold" : "regular"} aria-hidden="true" /><span className="step-label">{label}</span><span className="sr-only">{"Step " + n + (step === n ? "" : ", " + label) + (n < step ? ", done" : "")}</span>
       </li>;
     })}</ol>
     <div className="book-header-tools">

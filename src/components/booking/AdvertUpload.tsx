@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type DragEvent } from "react";
 import { CheckCircle, UploadSimple, WarningCircle, XCircle } from "@phosphor-icons/react";
 import { CHECK_LABELS, CHECK_ORDER, measure, runCheck, type CheckId, type CheckResult, type Measured } from "@/lib/advert-checks";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 export type AdvertState = { file: File; url: string; measured: Measured | null; done: CheckId[]; running: boolean };
 
@@ -17,7 +18,7 @@ export function advertReady(advert: AdvertState | null, lengthSeconds: number) {
   return !!advert && !advert.running && advert.done.length === CHECK_ORDER.length && advertResults(advert, lengthSeconds).every((r) => r.state !== "fail");
 }
 
-const STEP_MS = 420;
+const STEP_MS = 320;
 const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
 export function CheckIcon({ state }: { state: CheckResult["state"] }) {
@@ -71,14 +72,15 @@ export default function AdvertUpload({ lengthSeconds, advert, onChange }: { leng
   // The whole tile is one upload box: click anywhere, or drop a file on it.
   if (!advert) return <section className={`screen-preview advert-drop${dragging ? " is-dragging" : ""}`} aria-label="Your advert"
     onDragOver={(e) => { e.preventDefault(); setDragging(true); }} onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragging(false); }} onDrop={drop}>
-    <span className="advert-drop-matrix" aria-hidden="true"><i /><i /><i /></span>
+    <Image src="/images/evening-billboard.webp" alt="" fill sizes="(max-width: 767px) 100vw, 42vw" className="v2-upload-photo" />
     <button type="button" className="advert-drop-hit" onClick={() => input.current?.click()} aria-label="Add your advert, choose a file" aria-describedby="advert-drop-help">
       <span className="advert-drop-over" aria-hidden="true"><UploadSimple weight="bold" />Drop to check it</span>
       <span className="advert-drop-card">
         <span className="advert-drop-icon" aria-hidden="true"><UploadSimple weight="bold" /></span>
-        <span className="advert-drop-text"><strong>Add your advert</strong><span id="advert-drop-help">Drop an MP4, PNG or JPEG anywhere here, or tap to choose. We check it against the screen in seconds.</span><small>16:9, up to 50 MB.</small></span>
+        <span className="advert-drop-text"><small>Add your advert</small><strong>See it on <em>the screen</em></strong><span id="advert-drop-help">Drop an MP4, PNG or JPEG here. We check it against the 768 x 432 screen.</span><small>16:9 / up to 50 MB / silent screen</small></span>
         <span className="ui-button advert-drop-cta" aria-hidden="true">Choose file</span>
       </span>
+      <span className="v2-upload-placeholder" aria-hidden="true">Your advert here</span>
     </button>
     {fileInput}
   </section>;
