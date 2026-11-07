@@ -1,5 +1,6 @@
 ﻿"use server";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { getStore } from "@/lib/store";
 import type { QuoteInput } from "@/lib/store/types";
 import { StoreError } from "@/lib/store/validation";
@@ -23,6 +24,26 @@ async function attachAdvert(reference: string, form: FormData) {
     await getStore().addAdvert(reference, new File([advert], safeName(advert.name, advert.type), { type: advert.type }), Math.round(Number(form.get("advertSeconds"))));
     return "?advert=sent";
   } catch { return "?advert=failed"; }
+}
+
+/** The private booking link permits a new file only when there is no advert awaiting use or review. */
+export async function replaceAdvert(form: FormData): Promise<void> {
+  const reference = String(form.get("reference") ?? "");
+  let result = "failed";
+  try {
+    const store = getStore();
+    const booking = await store.publicBooking(reference);
+    const advert = form.get("advert");
+    if (booking && ["Quote", "Paid", "Approved"].includes(booking.status)
+      && (booking.advertState === "refused" || booking.advertState === "none")
+      && advert instanceof File && advert.size > 0) {
+      await store.addAdvert(reference, new File([advert], safeName(advert.name, advert.type), { type: advert.type }), Number(form.get("advertSeconds")));
+      revalidatePath(`/book/q/${reference}`);
+      revalidatePath("/manage", "layout");
+      result = "sent";
+    }
+  } catch { /* Keep the booking and allow another attempt or contact with KCA. */ }
+  redirect(`/book/q/${encodeURIComponent(reference)}?advert=${result}`);
 }
 
 export async function bookPlays(_state: { error: string }, form: FormData): Promise<{ error: string }> {

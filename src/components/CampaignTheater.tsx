@@ -1,22 +1,27 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Play, X, ArrowsOut } from "@phosphor-icons/react";
 import { campaigns } from "@/data/campaigns";
 
+const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
+function subscribeReducedMotion(notify: () => void) {
+  const media = window.matchMedia(reducedMotionQuery);
+  media.addEventListener("change", notify);
+  return () => media.removeEventListener("change", notify);
+}
+const reducedMotionSnapshot = () => window.matchMedia(reducedMotionQuery).matches;
+const serverReducedMotionSnapshot = () => false;
+
 export default function CampaignTheater() {
   const [active, setActive] = useState(0);
   const [open, setOpen] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const reduceMotion = useSyncExternalStore(subscribeReducedMotion, reducedMotionSnapshot, serverReducedMotionSnapshot);
   const featuredRef = useRef<HTMLVideoElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const campaign = campaigns[active] ?? campaigns[0];
-
-  useEffect(() => {
-    setReduceMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }, []);
 
   // Replay the featured HD clip whenever the selection changes.
   useEffect(() => {

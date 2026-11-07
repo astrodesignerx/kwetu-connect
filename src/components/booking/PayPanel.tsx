@@ -37,6 +37,7 @@ Booking page: ${link}`;
       <div><p className="quote-eyebrow">AMOUNT DUE</p><p className="pay-amount"><span>KES</span>{number(priceKes)}</p></div>
       <span className="pay-chip">Step 1 of 3</span>
     </div>
+    <p className="pay-hint">KCA checks every advert before it plays. If yours needs changes, you upload a new one at no cost. Refunds apply only if we cannot run your advert.</p>
     <div className="pay-methods" role="radiogroup" aria-label="How you pay">
       <button type="button" role="radio" aria-checked={method === "mpesa"} onClick={() => setMethod("mpesa")}><b>M-Pesa</b><small>Paybill, your booking reference is the account</small></button>
       <button type="button" role="radio" aria-checked={method === "card"} onClick={() => setMethod("card")}><b>Card</b><small>Visa or Mastercard, KCA sends a link</small></button>

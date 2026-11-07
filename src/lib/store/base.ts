@@ -41,8 +41,11 @@ export abstract class BaseStore implements BookingStore {
   private publicView(data: StoreData, b: Booking): PublicBooking {
     const history = data.history.filter((h) => h.bookingId === b.id).sort((x, y) => x.createdAt.localeCompare(y.createdAt));
     const replacedBy = b.status === "Cancelled" ? history.at(-1)?.note.match(REPLACED)?.[1] : undefined;
+    const adverts = data.adverts.filter((a) => a.bookingId === b.id);
+    const newestRefused = adverts.filter((a) => a.decision === "refused").sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+    const advertState = adverts.some((a) => a.decision === "approved") ? "approved" : adverts.some((a) => a.decision === "waiting") ? "waiting" : newestRefused ? "refused" : "none";
     return { reference: b.reference, request: b.request, plays: b.plays, fullPriceKes: b.fullPriceKes, discountPercent: b.discountPercent, priceKes: b.priceKes, status: b.status, createdAt: b.createdAt,
-      capacity: this.capacity(data, b), adverts: data.adverts.filter((a) => a.bookingId === b.id).length, steps: history.map((h) => ({ status: h.toStatus, at: h.createdAt })), ...(replacedBy ? { replacedBy } : {}) };
+      capacity: this.capacity(data, b), adverts: adverts.length, advertState, ...(advertState === "refused" ? { refusedReason: newestRefused!.reason } : {}), steps: history.map((h) => ({ status: h.toStatus, at: h.createdAt })), ...(replacedBy ? { replacedBy } : {}) };
   }
   /** The same price rules for a new booking and a changed one. */
   private priced(request: QuoteInput["request"], paysBy: QuoteInput["paysBy"], settings: BookingSettings, today: string) {
@@ -166,14 +169,17 @@ export abstract class BaseStore implements BookingStore {
     ensure(Number.isInteger(seconds) && seconds > 0 && seconds <= 3600, "Enter the advert length in whole seconds.");
     const before = await this.bookingDetail(reference);
     ensure(before, "Booking not found.");
-    ensure(before.adverts.length < 3, "At most 3 adverts per booking.");
+    ensure(before.adverts.length < 6, "This booking has reached its upload limit. Contact KCA.");
+    ensure(before.adverts.filter((a) => a.decision !== "refused").length < 3, "At most 3 adverts per booking.");
     const path = `${before.booking.id}/${randomUUID()}/${fileName}`;
     await this.upload(path, file);
     try {
       await this.transaction((data) => {
         const b = this.find(data, reference);
         ensure(b.status !== "Finished" && b.status !== "Cancelled", "This booking is closed.");
-        ensure(data.adverts.filter((a) => a.bookingId === b.id).length < 3, "At most 3 adverts per booking.");
+        const adverts = data.adverts.filter((a) => a.bookingId === b.id);
+        ensure(adverts.length < 6, "This booking has reached its upload limit. Contact KCA.");
+        ensure(adverts.filter((a) => a.decision !== "refused").length < 3, "At most 3 adverts per booking.");
         data.adverts.push({ id: randomUUID(), bookingId: b.id, filePath: this.mode === "memory" ? "" : path, fileName, seconds, decision: "waiting", reason: "", createdAt: new Date().toISOString() });
       });
     } catch (error) { await this.removeUpload(path); throw error; }

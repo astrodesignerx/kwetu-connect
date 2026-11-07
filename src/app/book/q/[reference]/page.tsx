@@ -14,11 +14,12 @@ import { buildQuery } from "@/lib/booking/answers";
 import StatusTag from "@/components/manage/StatusTag";
 import BookHeader from "@/components/workspace/BookHeader";
 import { scheduleLines } from "@/lib/booking/selection";
+import { replaceAdvert } from "../../actions";
 
 export const dynamic = "force-dynamic";
 const NEXT_STEP: Record<string, string> = {
   Quote: "Pay by M-Pesa or card, then send us your advert. KCA confirms within 1 working day.",
-  Paid: "Payment received. Send us your advert if you have not yet; KCA checks it within 1 working day.",
+  Paid: "Payment received. Once you send an advert, KCA checks it within 1 working day.",
   Approved: "Your advert is approved and will go live on your start date.",
   Live: "Your advert is on screen now. KCA sends your play report at the end.",
   Finished: "This booking has finished. Ask KCA for your play report or book again.",
@@ -37,13 +38,16 @@ export default async function QuotePage({ params, searchParams }: { params: Prom
   const settings = await store.getSettings();
   const link = bookingUrl(await siteOrigin(), booking.reference);
   const r = booking.request;
-  const hasAdvert = booking.adverts > 0 || advert === "sent";
+  const hasAdvert = booking.advertState !== "none";
+  const advertLabel = { none: "not sent yet", waiting: "waiting for KCA check", approved: "approved", refused: "changes needed" }[booking.advertState];
+  const canUpload = ["Quote", "Paid", "Approved"].includes(booking.status)
+    && (booking.advertState === "refused" || (booking.advertState === "none" && booking.status !== "Quote"));
   const message = [`Hello KCA, here is my booking ${booking.reference}.`, `Length: ${r.lengthSeconds} seconds`, `How often: ${r.howOften} plays an hour`, "When:", ...scheduleLines(r, settings.timeBlocks), `Dates: ${r.startDate} to ${r.endDate}`, `Plays: ${booking.plays}`, `Price: KES ${booking.priceKes.toLocaleString("en-GB")}`, ...(hasAdvert ? ["My advert is uploaded with this booking."] : []), `Booking page: ${link}`].join("\n");
   const next = [...settings.discountSteps].reverse().find((s) => s.minPlays > booking.plays);
   const day = (iso: string) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
   const weeks = Math.round((Date.parse(r.endDate) - Date.parse(r.startDate) + 86400000) / 604800000 * 10) / 10;
   const facts = [
-    ["Advert", `${r.lengthSeconds} s, ${hasAdvert ? "saved" : "not sent yet"}`],
+    ["Advert", `${r.lengthSeconds} s, ${advertLabel}`],
     ["Plays", `${booking.plays.toLocaleString("en-GB")}, ${r.howOften} an hour`],
     ["Dates", `${day(r.startDate)} to ${day(r.endDate)}`, `${weeks} ${weeks === 1 ? "week" : "weeks"}`],
     ["Discount", `${booking.discountPercent}%`, next ? `${(next.minPlays - booking.plays).toLocaleString("en-GB")} more plays for ${next.percent}%` : "highest step"],
@@ -63,7 +67,23 @@ export default async function QuotePage({ params, searchParams }: { params: Prom
               <div><p className="quote-eyebrow">BOOKING STATUS</p><p className="pay-amount"><span>KES</span>{booking.priceKes.toLocaleString("en-GB")}</p></div>
               <StatusTag status={booking.status} />
             </div><p className="pay-status">{NEXT_STEP[booking.status]}</p></div>}
-        {advert === "failed" && <p role="status" className="pay-alert">Your booking is saved, but the advert did not upload. Send it to KCA on WhatsApp.</p>}
+        {advert === "sent" && <p role="status" className="pay-status">Your advert was sent. Check its status in your booking details.</p>}
+        {advert === "failed" && <p role="status" className="pay-alert">Your booking is saved, but the advert did not upload. Try again or send it to KCA on WhatsApp.</p>}
+        {booking.advertState === "refused" || canUpload ? <section className="pay-alert advert-notice" aria-labelledby="advert-notice-title">
+          <h2 id="advert-notice-title">{booking.advertState === "refused" ? "KCA asked for changes to your advert" : "Send your advert"}</h2>
+          {booking.advertState === "refused" && <p role="alert">{booking.refusedReason}</p>}
+          {canUpload && <form action={replaceAdvert} className="pay-body">
+            <input type="hidden" name="reference" value={booking.reference} />
+            <label className="pay-code"><small>Advert file (MP4, PNG or JPEG, up to 50 MB)</small>
+              <input name="advert" type="file" accept="video/mp4,image/png,image/jpeg" required />
+            </label>
+            <label className="pay-code"><small>Advert length in seconds</small>
+              <input name="advertSeconds" type="number" min={1} max={3600} step={1} defaultValue={r.lengthSeconds} required />
+            </label>
+            <button className="pay-button" type="submit">Send advert</button>
+          </form>}
+          <a className="pay-ghost" href={whatsapp(`Hello KCA, I need help with my advert for booking ${booking.reference}. ${link}`)} target="_blank" rel="noopener noreferrer">Ask KCA on WhatsApp</a>
+        </section> : null}
       </div>
       <aside className="pay-recap">
         <div className="pay-recap-card">

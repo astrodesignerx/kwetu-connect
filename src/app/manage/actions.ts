@@ -5,6 +5,7 @@ import { getStore } from "@/lib/store";
 import type { BookingStatus } from "@/lib/booking/capacity";
 import { StoreError, text } from "@/lib/store/validation";
 import type { ActionState } from "@/components/manage/ActionForm";
+import { sendBookingMail, siteOrigin } from "@/lib/booking-mail";
 
 async function change(form: FormData, run: (reference: string, staff: { email: string }) => Promise<void>): Promise<ActionState> {
   const staff = await requireStaff();
@@ -29,7 +30,22 @@ export async function uploadAdvert(_state: ActionState, form: FormData) {
   });
 }
 export async function decideAdvert(_state: ActionState, form: FormData) {
-  return change(form, async (ref) => getStore().decideAdvert(ref, text(form.get("id"), "an advert ID", 40), String(form.get("decision")) as "approved" | "refused", String(form.get("reason") ?? "")));
+  return change(form, async (ref) => {
+    const store = getStore();
+    const id = text(form.get("id"), "an advert ID", 40);
+    const decision = String(form.get("decision")) as "approved" | "refused";
+    await store.decideAdvert(ref, id, decision, String(form.get("reason") ?? ""));
+    if (decision === "refused") {
+      try {
+        const detail = await store.bookingDetail(ref);
+        if (detail?.advertiser.email) {
+          const booking = await store.publicBooking(ref);
+          const advert = detail.adverts.find((a) => a.id === id);
+          if (booking && advert) await sendBookingMail("refused", detail.advertiser.email, detail.advertiser.name, [booking], await siteOrigin(), advert.reason);
+        }
+      } catch { console.error("Advert refusal email failed to send."); }
+    }
+  });
 }
 export async function saveSettings(_state: ActionState, form: FormData): Promise<ActionState> {
   await requireStaff();

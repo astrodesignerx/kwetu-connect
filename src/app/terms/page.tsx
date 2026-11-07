@@ -30,15 +30,19 @@ const sections = [
     body: "Payment terms, including deposits and cancellation notice periods, are set out in your campaign agreement or invoice.",
   },
   {
-    heading: "6. Intellectual property",
+    heading: "6. Advert checks and refunds",
+    body: "KCA checks every advert before it plays. If yours needs changes, you upload a new one at no cost. Refunds apply only if we cannot run your advert. If KCA cannot run any version of your advert, KCA refunds the unplayed amount.",
+  },
+  {
+    heading: "7. Intellectual property",
     body: "You retain rights to your creative material and grant us a licence to display it for the booked campaign. All website content, branding, and photography on this site belongs to Kwetu Connect Advertising.",
   },
   {
-    heading: "7. Liability",
+    heading: "8. Liability",
     body: "To the maximum extent permitted by law, our liability in connection with a campaign is limited to the amount paid for that campaign. Nothing in these terms excludes liability that cannot be excluded under Kenyan law.",
   },
   {
-    heading: "8. Contact",
+    heading: "9. Contact",
     body: "Questions about these terms: info@kwetuconnectads.co.ke or +254 729 911 021, P.O. Box 8698-30100, Eldoret, Kenya.",
   },
 ];
@@ -53,7 +57,7 @@ export default function TermsPage() {
         <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight tracking-[-0.02em] text-black mb-4">
           Terms of Service
         </h1>
-        <p className="text-sm text-gray-500 mb-12">Last updated: July 2026</p>
+        <p className="text-sm text-gray-500 mb-12">Last updated: November 2026</p>
         <div className="space-y-10">
           {sections.map((s) => (
             <div key={s.heading}>
