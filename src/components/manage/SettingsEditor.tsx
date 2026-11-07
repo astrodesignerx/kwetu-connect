@@ -1,6 +1,6 @@
 ﻿"use client";
 import { useActionState, useState } from "react";
-import { X } from "@phosphor-icons/react";
+import { Clock, Coins, FilmStrip, Hourglass, Percent, Play, Timer, X } from "@phosphor-icons/react";
 import { saveSettings } from "@/app/manage/actions";
 import type { BookingSettings } from "@/lib/booking/settings";
 import { quote } from "@/lib/booking/quote";
@@ -14,6 +14,7 @@ const SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const WEEK = [1, 2, 3, 4, 5, 6, 0];
 type Section = "price" | "discounts" | "capacity" | "lengths" | "often" | "lead" | "hours";
 const TITLES: Record<Section, string> = { price: "Price", discounts: "Discounts", capacity: "Sold per hour", lengths: "Lengths", often: "Plays an hour", lead: "Booking lead", hours: "Screen hours" };
+const ICONS = { price: Coins, discounts: Percent, capacity: Hourglass, lengths: FilmStrip, often: Play, lead: Timer, hours: Clock };
 const n = (value: number) => value.toLocaleString("en-GB");
 const hh = (hour: number) => String(hour).padStart(2, "0");
 
@@ -83,9 +84,11 @@ export default function SettingsEditor({ initial }: { initial: BookingSettings }
 
   return <form action={action} className="staff-form settings-c">
     <input type="hidden" name="settings" value={JSON.stringify(candidate)} />
-    <div className="settings-tiles">{tiles.map((tile) => <button key={tile.id} type="button" className={`settings-tile${tile.wide ? " is-wide" : ""}`} aria-pressed={open === tile.id} aria-controls="settings-panel" onClick={() => setOpen(open === tile.id ? null : tile.id)}>
-      <span className="settings-tile-label">{TITLES[tile.id]}</span><strong key={tile.value}>{tile.value}</strong><span className="settings-tile-note">{open === tile.id ? "Editing" : tile.note}</span>
-    </button>)}</div>
+    <div className="settings-tiles">{tiles.map((tile) => { const Icon = ICONS[tile.id]; return <button key={tile.id} type="button" className={`settings-tile${tile.wide ? " is-wide" : ""}`} data-section={tile.id} aria-pressed={open === tile.id} aria-controls="settings-panel" onClick={() => setOpen(open === tile.id ? null : tile.id)}>
+      <span className="settings-tile-label"><span className="v2-setting-icon"><Icon size={17} aria-hidden="true" /></span>{TITLES[tile.id]}</span><strong key={tile.value}>{tile.value}</strong><span className="settings-tile-note">{open === tile.id ? "Editing" : tile.note}</span>
+      {tile.id === "discounts" && <span className="v2-discount-stair" aria-hidden="true">{steps.map((step) => <span key={step.minPlays + ":" + step.percent}><i style={{ height: `${26 + step.percent * 1.2}px` }}>{step.percent}%</i><small>{n(step.minPlays)}</small></span>)}</span>}
+      {tile.id === "hours" && <span className="v2-screen-hours" aria-hidden="true"><span />{Array.from({ length: 24 }, (_, hour) => <small key={hour}>{hour % 3 === 0 ? hh(hour) : ""}</small>)}{WEEK.map((day) => <span className="v2-screen-hour-row" key={day}><span>{SHORT[day]}</span>{Array.from({ length: 24 }, (_, hour) => <i key={hour} data-open={hour >= candidate.screenHours[day].open && hour < candidate.screenHours[day].close} />)}</span>)}</span>}
+    </button>; })}</div>
     <aside id="settings-panel" className="settings-panel" aria-label="Edit settings" data-open={open !== null}>
       <fieldset disabled={pending} className="settings-fields" key={open ?? "none"}>
         {open ? <><div className="settings-panel-head"><h2>{TITLES[open]}</h2><button type="button" className="settings-remove" aria-label="Close panel" onClick={() => setOpen(null)}><X size={14} aria-hidden="true" /></button></div>{editors[open]}</>
