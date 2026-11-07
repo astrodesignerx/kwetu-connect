@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run --exclude \"mail-os/**\" --exclude \"**/.scratch/**\""
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",

@@ -1,0 +1,10 @@
+.page { max-width: 1120px; margin: 0 auto; min-width: 0; display: grid; gap: 22px; }.page > header { margin-bottom: 0; }
+.note { color: var(--muted); font-size: 11px; margin-top: 10px; }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; }.filters button { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 7px 14px; font-size: 12px; color: var(--muted); transition: transform var(--t1) var(--ease); }.filters [aria-pressed="true"] { background: var(--fg); color: var(--surface); }.filters button:hover { transform: translateY(-2px); }.filters button:focus-visible { outline: 2px solid var(--sodium); outline-offset: 3px; }
+.timeline { display: grid; gap: 30px; animation: arrive var(--t2) var(--ease) both; }
+.day h2 { font: 11px var(--f-mono); text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }.day ol { display: grid; list-style: none; padding: 0; }.day li { display: grid; grid-template-columns: 45px 34px minmax(0, 1fr); gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); }.day time { font: 10px var(--f-mono); color: var(--faint); padding-top: 8px; }
+.eventMark { border: 1px solid currentColor; border-radius: 10px; height: 34px; display: grid; place-items: center; font: 600 13px var(--f-mono); }
+.day b { font-size: 13px; font-weight: 550; overflow-wrap: anywhere; }.day p, .day small { display: block; color: var(--muted); font-size: 11px; line-height: 1.7; margin-top: 5px; overflow-wrap: anywhere; }
+@keyframes arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 500px) { .day li { gap: 10px; grid-template-columns: 36px 28px minmax(0, 1fr); }.eventMark { height: 28px; } }
+@media (prefers-reduced-motion: reduce) { .timeline { animation: none; }.filters button { transition: none; }.filters button:hover { transform: none; } }

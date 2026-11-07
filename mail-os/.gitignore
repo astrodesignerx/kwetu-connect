@@ -1,0 +1,33 @@
+# .NET
+bin/
+obj/
+out/
+.vs/
+*.user
+
+# Node (Phase 1+)
+node_modules/
+.next/
+.turbo/
+
+# Local Postgres binaries + data (portable dev instance)
+infra/postgres/
+infra/pgdata/
+
+# Data Protection key ring (credential vault keys)
+infra/dpkeys/
+
+# Runtime logs (can contain message bodies and addresses — never commit)
+*.log
+
+# Attachment blob store (dev)
+infra/attachments/
+
+# Desktop packaging output
+apps/desktop/dist/
+
+# Secrets / local config
+*.local.env
+.env
+.env.local
+apps/api/appsettings.Production.json

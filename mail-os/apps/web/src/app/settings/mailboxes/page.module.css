@@ -1,0 +1,13 @@
+.page { max-width: 1160px; margin: 0 auto; min-width: 0; }
+.list { display: grid; gap: 20px; }
+.health { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 38px; }
+.identity h2 { margin: 18px 0 10px; overflow-wrap: anywhere; font: 650 24px var(--f-display); }
+.identity p, .note, .dialogText { color: var(--muted); font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; margin: 10px 0; }
+.numbers { display: flex; gap: 24px; flex-wrap: wrap; margin: 24px 0; }
+.chart { min-width: 0; }.chart h3 { font: 10px var(--f-mono); text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.connect { display: inline-flex; align-items: center; padding: 11px 16px; background: var(--sodium); color: var(--on-sodium); border-radius: 10px; font-size: 12px; font-weight: 650; transition: transform var(--t1) var(--ease); }
+.connect:hover { transform: translateY(-2px); }.connect:active { transform: scale(.98); }
+.add { display: flex; align-items: center; gap: 16px; padding: 24px; margin-top: 20px; border: 1px dashed var(--line); border-radius: 16px; color: var(--muted); font-size: 13px; transition: transform var(--t2) var(--ease); }.add span { font-size: 24px; }.add:hover { transform: translateY(-2px); }
+@media (max-width: 850px) { .health { grid-template-columns: minmax(0, 1fr); gap: 22px; } }
+@media (prefers-reduced-motion: reduce) { .connect, .add { transition: none; }.connect:hover, .connect:active, .add:hover { transform: none; } }

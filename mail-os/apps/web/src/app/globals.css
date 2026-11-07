@@ -1,0 +1,1704 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --bg: #E7E9EF;
+  --frame: #F7F8FA;
+  --surface: #FFFFFF;
+  --raise: #F0F1F5;
+  --line: #DDE0E8;
+  --fg: #12131B;
+  --muted: #5B5F73;
+  --faint: #9497AA;
+  --sodium: #FBB040;
+  --sodium-ink: #9A5800;
+  --on-sodium: #1B1206;
+  --jac: #6A48D8;
+  --good: #13864D;
+  --warn: #8D6900;
+  --bad: #C63A2E;
+  --glow: rgba(251,176,64,.34);
+  --board-bg: #06070B;
+  --board-fg: #FFF7E8;
+  --t1: 140ms;
+  --t2: 240ms;
+  --t3: 420ms;
+  --ease: cubic-bezier(.16,1,.3,1);
+  --spring: cubic-bezier(.34,1.56,.64,1);
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #0A0B11;
+  --frame: #0F1018;
+  --surface: #151722;
+  --raise: #1C1F2D;
+  --line: #272A3B;
+  --fg: #F2F0EA;
+  --muted: #9B9EB2;
+  --faint: #62667C;
+  --sodium: #FBB040;
+  --sodium-ink: #FFC66B;
+  --on-sodium: #1B1206;
+  --jac: #A285F4;
+  --good: #4FD18B;
+  --warn: #F2C94C;
+  --bad: #FF6B5E;
+  --glow: rgba(251,176,64,.38);
+  --board-bg: #06070B;
+  --board-fg: #FFF7E8;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-frame: var(--frame);
+  --color-surface: var(--surface);
+  --color-surface-dark: var(--surface);
+  --color-raise: var(--raise);
+  --color-sunken: var(--raise);
+  --color-sunken-dark: var(--raise);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-sodium: var(--sodium);
+  --color-sodium-ink: var(--sodium-ink);
+  --color-on-sodium: var(--on-sodium);
+  --color-jac: var(--jac);
+  --color-good: var(--good);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --color-glow: var(--glow);
+  --color-board-bg: var(--board-bg);
+  --color-board-fg: var(--board-fg);
+  --font-sans: var(--f-body), system-ui, sans-serif;
+  --font-display: var(--f-display), system-ui, sans-serif;
+  --font-mono: var(--f-mono), monospace;
+  --font-led: var(--f-led), monospace;
+}
+
+@theme {
+  /* Brand palette , Kwetu Connect Ads. Do not substitute default Tailwind colors;
+     see design_direction in the project spec. */
+  --color-brand-amber: #FBB040;
+  --color-brand-yellow: #F9ED32;
+  --color-brand-black: #171717;
+  --color-brand-cream: #FEFBD2;
+  /* White page background in light mode. */
+  --color-brand-paper: #FFFFFF;
+
+
+  /* Flat surfaces. Every panel in the app used to be translucent over a blurred
+     backdrop, which meant no surface had a colour of its own , each one sampled
+     whatever happened to be behind it, so a card over the thread list and the
+     same card over empty ground were different colours, and text contrast moved
+     with them. These are opaque, and they are the only fills used for panels.
+
+     Dark is a step *above* the page ground rather than below it: raised surfaces
+     catch more light, and #202020 on #171717 separates without a heavy border. */
+
+  /* Elevation, retuned for flat. Frosted panels needed large, diffuse shadows to
+     read as floating; opaque ones do not, and the same blur on a solid fill just
+     looks like a smudge. Tight and defined instead , the shadow says "above",
+     the border says "edge", and neither is doing the other's job. */
+  --shadow-raised: 0 1px 2px rgb(23 23 23 / 0.05), 0 2px 6px rgb(23 23 23 / 0.05);
+  --shadow-overlay: 0 4px 12px rgb(23 23 23 / 0.1), 0 1px 3px rgb(23 23 23 / 0.06);
+  --shadow-modal: 0 16px 48px rgb(23 23 23 / 0.2), 0 2px 8px rgb(23 23 23 / 0.08);
+
+  /* Motion tokens. One curve and three durations for the whole app, so a control
+     added next month moves like the ones already here instead of being hand-tuned.
+     `--ease-soft` is fast in, gentle out , the settle every surface uses. */
+  --ease-soft: var(--ease);
+  --duration-micro: var(--t1);
+  --duration-control: var(--t2);
+  --duration-surface: var(--t3);
+
+  /* One corner for the whole interface , the thread card's.
+     There is no scale any more. A scale only earns its keep when the steps mean
+     something, and here they did not: a 16px panel next to a 12px card next to a
+     10px row was three arbitrary values reading as sloppiness rather than as
+     hierarchy. Elevation, fill and spacing already say what is on top of what.
+     Change this one number and every corner in the app follows. */
+  --radius: 0.625rem; /* 10px */
+
+  /* Tailwind's own scale, collapsed onto that value, so the `rounded-*` utilities
+     already written throughout the components resolve here too and nothing has to
+     be hunted down class by class. `rounded-full` is deliberately untouched: it is
+     a circle or a pill , a shape, not a corner , and it still belongs on avatars,
+     status dots and the toggle switch. */
+  --radius-xs: var(--radius);
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+  --radius-2xl: var(--radius);
+  --radius-3xl: var(--radius);
+  --radius-4xl: var(--radius);
+}
+
+@layer base {
+  /* A flat ground. The two fixed amber radial washes that used to sit here were
+     the other half of the frosted look , they existed to give the blur something
+     to pick up. With opaque panels they only tinted the one part of the page that
+     is meant to stay neutral. */
+  body {
+    @apply bg-brand-paper font-sans text-brand-black antialiased dark:bg-brand-black dark:text-brand-cream;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  /* Opaque panel: solid fill, hairline border, tight shadow. The class name is
+     kept because it is used across a dozen components and renaming it would be
+     churn for its own sake , but there is no glass left in it. */
+  .glass-panel {
+    @apply rounded-2xl border border-brand-black/10 bg-surface shadow-raised dark:border-brand-cream/10 dark:bg-surface-dark;
+  }
+
+  .glass-input {
+    @apply w-full rounded-xl border border-brand-black/12 bg-sunken px-3 py-2 text-sm outline-none placeholder:text-brand-black/50 focus:border-brand-amber/60 focus:bg-surface focus:ring-2 focus:ring-brand-amber/40 dark:border-brand-cream/15 dark:bg-sunken-dark dark:placeholder:text-brand-cream/40 dark:focus:bg-surface-dark;
+    transition:
+      background-color var(--duration-micro) ease-out,
+      border-color var(--duration-micro) ease-out,
+      box-shadow var(--duration-micro) ease-out;
+  }
+
+  /* Same autofill override as .auth-input , every saved-credential field in the app
+     otherwise flips to Chrome's near-white background on the dark theme. */
+  .glass-input:-webkit-autofill,
+  .glass-input:-webkit-autofill:hover,
+  .glass-input:-webkit-autofill:focus,
+  .glass-input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--color-brand-black);
+    caret-color: var(--color-brand-black);
+    transition: background-color 100000s ease-in-out 0s;
+  }
+
+  .dark .glass-input:-webkit-autofill,
+  .dark .glass-input:-webkit-autofill:hover,
+  .dark .glass-input:-webkit-autofill:focus,
+  .dark .glass-input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--color-brand-cream);
+    caret-color: var(--color-brand-cream);
+  }
+
+  /* Every button gives under the press, on the same curve and duration. This is
+     the smallest of the micro-interactions and the one that does the most: a
+     control that does not move on click reads as unresponsive on a slow network,
+     because the press and the result are separated by the request. */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-amber px-4 py-2 text-sm font-semibold text-brand-black hover:bg-brand-amber/90 disabled:pointer-events-none disabled:opacity-50;
+    transition:
+      background-color var(--duration-micro) ease-out,
+      box-shadow var(--duration-control) var(--ease-soft),
+      transform var(--duration-micro) var(--ease-soft);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 4px 14px rgb(251 176 64 / 0.35);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.97);
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium hover:bg-brand-black/5 dark:hover:bg-brand-cream/10;
+    transition:
+      background-color var(--duration-micro) ease-out,
+      transform var(--duration-micro) var(--ease-soft);
+  }
+
+  .btn-ghost:active {
+    transform: scale(0.97);
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-red-600/90 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-600 disabled:pointer-events-none disabled:opacity-50;
+    transition:
+      background-color var(--duration-micro) ease-out,
+      transform var(--duration-micro) var(--ease-soft);
+  }
+
+  .btn-danger:active {
+    transform: scale(0.97);
+  }
+
+  .nav-item {
+    @apply relative flex items-center gap-3 rounded-[var(--radius)] px-2.5 py-2 text-sm font-medium text-brand-black/70 hover:bg-brand-black/5 hover:text-brand-black dark:text-brand-cream/70 dark:hover:bg-brand-cream/10 dark:hover:text-brand-cream;
+    transition:
+      background-color var(--duration-micro) ease-out,
+      color var(--duration-micro) ease-out,
+      transform var(--duration-micro) var(--ease-soft);
+  }
+
+  .nav-item:active {
+    transform: scale(0.985);
+  }
+
+  /* Icons in the rail settle into place as the row highlights, rather than the
+     colour switching under a static glyph. */
+  .nav-item svg {
+    transition:
+      color var(--duration-control) ease-out,
+      transform var(--duration-control) var(--ease-soft);
+  }
+
+  .nav-item:hover svg {
+    transform: translateX(1px);
+  }
+
+  /* The current destination lifts off the tinted rail rather than tinting further.
+     On a panel that is already a wash of colour, another wash is nearly invisible;
+     a raised white card is unambiguous, and it inverts the usual figure/ground so
+     the selected row reads as the same material as the content beside it. */
+  .nav-item-active {
+    @apply bg-white font-semibold text-brand-black shadow-sm dark:bg-brand-cream/[0.13] dark:text-brand-cream;
+  }
+
+  /* The icon carries the accent, so the row still says "amber" without a bar. */
+  .nav-item-active svg {
+    @apply text-brand-amber;
+    opacity: 1;
+  }
+
+  /* ---- App shell -------------------------------------------------------
+     One continuous surface divided by hairlines, not a set of floating cards
+     with gutters between them. Full width: a mail client is a workspace, and
+     a max-width cap was throwing away a third of a 1080p screen. Glass is
+     kept for things that genuinely float , modals, popovers , so it still
+     reads as elevation instead of as the default background.
+     --------------------------------------------------------------------- */
+  /* The row beneath the top bar. The frame owns the viewport height and the page
+     ground; this is only the rail-and-content split.
+
+     The two are no longer equal panes divided by a line. Navigation sits directly
+     on the page ground with nothing behind it, and the work , the thread list and
+     the message , is one card lifted off that ground. It reads as "the app, and
+     the controls around it" rather than as three columns of equal importance. */
+  .app-shell {
+    @apply flex w-full min-h-0 flex-1 gap-2 overflow-hidden p-3 pt-1;
+  }
+
+  /* No surface of its own: the rail sits directly on the page ground, and the one
+     card in the layout is the work. Nothing here needs a container to hold it
+     together , the group labels do that, and the active row is the only thing that
+     has to stand out, which it does by lifting off the ground rather than by
+     sitting inside a box. */
+  .app-rail {
+    @apply flex w-56 shrink-0 flex-col overflow-hidden;
+  }
+
+  /* The single container. Everything the page renders lives inside it, so the list
+     and the reader are two halves of one surface instead of two panels that happen
+     to be adjacent. */
+  .app-canvas {
+    @apply flex min-w-0 flex-1 overflow-hidden border border-brand-black/10 bg-surface shadow-raised dark:border-brand-cream/10 dark:bg-surface-dark;
+    border-radius: var(--radius);
+  }
+
+  /* Sentence case at readable size, not 10px all-caps. A group label is a signpost
+     you read once; shouting it in tracked capitals gave six words the same visual
+     weight as the destinations underneath them. */
+  .rail-group {
+    @apply px-2.5 pb-1.5 pt-5 text-[11px] font-semibold text-brand-black/45 dark:text-brand-cream/40;
+  }
+
+  .nav-count {
+    @apply ml-auto text-[11px] tabular-nums text-brand-black/60 dark:text-brand-cream/55;
+  }
+
+  /* Column divider inside the shell , replaces the gap between panels. */
+  .col-divide {
+    @apply border-l border-brand-black/10 dark:border-brand-cream/10;
+  }
+
+  /* ---- Thread list ------------------------------------------------------ */
+
+  /* Segmented control. The previous chip row wrapped onto a second line at
+     six filters, which left the last one looking orphaned. */
+  .seg-group {
+    @apply flex gap-0.5 rounded-lg bg-brand-black/5 p-0.5 dark:bg-brand-cream/5;
+  }
+
+  .seg {
+    @apply flex-1 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium text-brand-black/60 transition-colors duration-150 ease-out hover:text-brand-black dark:text-brand-cream/60 dark:hover:text-brand-cream;
+  }
+
+  .seg-active {
+    @apply bg-white font-semibold text-brand-black shadow-sm dark:bg-brand-black dark:text-brand-cream;
+  }
+
+  /* ---- Thread cards -----------------------------------------------------
+     One card per conversation, with air between them, rather than rows divided
+     by hairlines. A divided list asks you to find the boundaries; a stack of
+     cards has already drawn them, which is what lets each one carry three lines
+     of content , sender, subject, and a real two-line preview , without the
+     block turning into a wall.
+     --------------------------------------------------------------------- */
+
+  .thread-scroll {
+    @apply flex-1 overflow-y-auto px-2.5 py-2.5;
+  }
+
+  .thread-row {
+    @apply relative mb-2 grid w-full grid-cols-[2rem_minmax(0,1fr)] gap-2.5 border border-brand-black/[0.07] bg-surface px-3 py-2.5 text-left dark:border-brand-cream/[0.07] dark:bg-sunken-dark;
+    border-radius: var(--radius);
+    /* Only the compositable properties move on hover. */
+    transition:
+      transform var(--duration-micro) var(--ease-soft),
+      box-shadow var(--duration-micro) var(--ease-soft),
+      border-color var(--duration-micro) ease-out,
+      background-color var(--duration-micro) ease-out;
+  }
+
+  .thread-row:hover {
+    @apply border-brand-black/15 bg-sunken dark:border-brand-cream/15 dark:bg-surface-dark;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgb(23 23 23 / 0.07);
+  }
+
+  /* Tint plus a coloured edge. The edge is what makes this legible against the
+     hover state , an earlier full-strength amber fill read as a button, and a
+     tint alone was the same weight as hovering. */
+  .thread-row-active,
+  .thread-row-active:hover {
+    @apply border-brand-amber bg-brand-amber/15;
+    transform: none;
+    box-shadow: 0 2px 10px rgb(251 176 64 / 0.22);
+  }
+
+  /* Two lines of preview, cut cleanly. A single truncated line rarely contains
+     enough of the message to decide whether to open it. */
+  .thread-snippet {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
+  /* Avatar initials. Deterministic per-address tint, set inline by the caller. */
+  .avatar-initials {
+    @apply grid shrink-0 place-items-center rounded-full font-bold text-brand-black;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-brand-black/10 bg-brand-black/[0.04] px-1.5 py-0.5 text-[10px] font-semibold text-brand-black/70 dark:border-brand-cream/10 dark:bg-brand-cream/[0.06] dark:text-brand-cream/70;
+    transition:
+      background-color var(--duration-micro) ease-out,
+      border-color var(--duration-micro) ease-out,
+      color var(--duration-micro) ease-out;
+  }
+
+  .chip-client {
+    @apply border-brand-amber/40 bg-brand-amber/15 text-brand-black/80 dark:text-brand-cream/85;
+  }
+
+  .chip-mine {
+    @apply border-green-600/35 bg-green-600/15 text-green-700 dark:border-green-400/30 dark:text-green-300;
+  }
+
+  /* ---- Auth screens -----------------------------------------------------
+     Depth and motion are done in CSS on transform/opacity only. An animation
+     library would have cost ~50KB gzipped to serve two screens, and the
+     entrance, tilt and focus states are all compositable properties.
+     --------------------------------------------------------------------- */
+
+  .auth-stage {
+    @apply relative flex min-h-screen w-full items-center justify-center overflow-hidden p-6;
+  }
+
+  /* Ambient wash behind the card. Amber is the brand accent, so the glow is the
+     accent doing work rather than decoration bolted on.
+
+     The two layers drift on long, offset cycles. Slow enough that it reads as the
+     light in the room shifting rather than as an animation demanding attention ,
+     and it only runs on the auth screens, which are a moment, not a workspace. */
+  /* One flat amber band across the top of the sign-in screen. What was here before
+     , two breathing radial washes plus an SVG noise layer to stop them banding ,
+     was ambience for a frosted surface to sample. Nothing samples it now, and a
+     16-second scaling gradient behind a login form was motion with no message.
+     A single static band keeps the screen from being a blank sheet without
+     pretending to be lit. */
+  .auth-glow {
+    @apply pointer-events-none absolute inset-x-0 top-0 h-64;
+    background: linear-gradient(to bottom, rgb(251 176 64 / 0.1), transparent);
+  }
+
+  .dark .auth-glow {
+    background: linear-gradient(to bottom, rgb(251 176 64 / 0.07), transparent);
+  }
+
+  /* Kept as no-ops: the auth pages still render these elements, and removing the
+     rules rather than the markup would leave two unstyled divs. */
+  .auth-glow-2,
+  .auth-grain {
+    display: none;
+  }
+
+  /* The auth card used to be the app's showpiece of glass: a 3D tilt driven by
+     pointer position, a blurred amber sheen tracking the cursor, and a masked rim
+     that lit only the edge nearest it. All three simulated a pane of glass catching
+     light , the one thing a flat surface is not , so all three are gone, along with
+     the JavaScript that fed them --rx/--ry/--mx/--my.
+     `.auth-tilt` is kept as a plain hover-lift so the markup and the entrance
+     animation on the wrapper do not have to change. */
+  .auth-tilt {
+    transition: transform var(--duration-control) var(--ease-soft);
+  }
+
+  .auth-tilt:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Light mode needs the card to be a lighter surface than its ground: cream on
+     cream measured at a 1.00 contrast ratio , the card was literally the same
+     colour as the page, held apart by nothing but a hairline. */
+  .auth-card {
+    @apply relative overflow-hidden rounded-2xl border border-brand-black/[0.09] bg-surface p-7 dark:border-brand-cream/10 dark:bg-surface-dark;
+    box-shadow: var(--shadow-overlay);
+    transition: box-shadow var(--duration-control) var(--ease-soft);
+  }
+
+  .auth-tilt:hover .auth-card {
+    box-shadow: var(--shadow-modal);
+  }
+
+  /* Outlined mark: a hairline circle with a line icon inside, rather than a filled
+     tile. Shared by the auth cards and the navigation rail; the caller sets the size. */
+  .mail-mark {
+    @apply grid shrink-0 place-items-center rounded-full border text-brand-amber;
+    border-color: rgb(251 176 64 / 0.45);
+    transition: border-color var(--duration-control) ease-out;
+  }
+
+  .auth-tilt:hover .mail-mark {
+    border-color: rgb(251 176 64 / 0.75);
+  }
+
+  /* Content sits above the spotlight. */
+  .auth-content {
+    @apply relative z-10;
+  }
+
+  /* Entrance: the card settles first, then its contents follow. */
+  .auth-enter {
+    animation: auth-rise 460ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  }
+
+  .auth-stagger > * {
+    animation: auth-fade 380ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+    animation-delay: calc(120ms + var(--i, 0) * 55ms);
+  }
+
+  @keyframes auth-rise {
+    from { opacity: 0; transform: translateY(14px) scale(0.985); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  @keyframes auth-fade {
+    from { opacity: 0; transform: translateY(7px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* Input with a leading icon and an optional trailing control. */
+  .auth-field {
+    @apply relative flex items-center;
+  }
+
+  .auth-field-icon {
+    @apply pointer-events-none absolute left-3 text-brand-black/60 transition-colors duration-150 ease-out dark:text-brand-cream/55;
+  }
+
+  .auth-field:focus-within .auth-field-icon {
+    @apply text-brand-amber;
+  }
+
+  /* Fields lift very slightly on hover and focus. Small, but it's the difference
+     between a control that responds and one that just changes colour. */
+  .auth-input {
+    @apply h-11 w-full rounded-xl border border-brand-black/15 bg-sunken pl-10 pr-3 text-sm outline-none placeholder:text-brand-black/50 focus:border-brand-amber/70 focus:bg-surface focus:ring-2 focus:ring-brand-amber/40 dark:border-brand-cream/15 dark:bg-sunken-dark dark:placeholder:text-brand-cream/35 dark:focus:bg-surface-dark;
+    transition:
+      transform 160ms cubic-bezier(0.2, 0.8, 0.3, 1),
+      border-color 150ms ease-out,
+      background-color 150ms ease-out,
+      box-shadow 150ms ease-out;
+  }
+
+  .auth-input:hover:not(:focus) {
+    @apply border-brand-black/20 dark:border-brand-cream/25;
+  }
+
+  .auth-input:focus {
+    transform: translateY(-1px);
+  }
+
+  /* Chrome paints autofilled fields with its own near-white background and dark text,
+     which it applies at a level plain `background-color` cannot reach , on the dark
+     theme the field flipped to white the moment the browser filled it.
+     `-webkit-text-fill-color` is the only way to set the text colour, and the absurd
+     transition delay is the standard way to stop the background ever being painted.
+     A large inset box-shadow would also work but would fight the focus ring. */
+  .auth-input:-webkit-autofill,
+  .auth-input:-webkit-autofill:hover,
+  .auth-input:-webkit-autofill:focus,
+  .auth-input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--color-brand-black);
+    caret-color: var(--color-brand-black);
+    transition:
+      background-color 100000s ease-in-out 0s,
+      transform 160ms cubic-bezier(0.2, 0.8, 0.3, 1),
+      border-color 150ms ease-out,
+      box-shadow 150ms ease-out;
+  }
+
+  .dark .auth-input:-webkit-autofill,
+  .dark .auth-input:-webkit-autofill:hover,
+  .dark .auth-input:-webkit-autofill:focus,
+  .dark .auth-input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--color-brand-cream);
+    caret-color: var(--color-brand-cream);
+  }
+
+  .auth-submit {
+    @apply relative flex h-11 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-brand-amber text-sm font-semibold text-brand-black hover:bg-brand-amber/90 hover:shadow-[0_8px_24px_rgb(251_176_64/0.45)] disabled:pointer-events-none disabled:opacity-70;
+    transition:
+      transform 150ms cubic-bezier(0.2, 0.8, 0.3, 1),
+      background-color 150ms ease-out,
+      box-shadow 200ms ease-out;
+  }
+
+  .auth-submit:hover {
+    transform: translateY(-1px) scale(1.012);
+  }
+
+  .auth-submit:active {
+    transform: translateY(0) scale(0.988);
+  }
+
+  /* Sweep across the button while a real request is in flight. This one is doing a
+     job , masking latency , rather than decorating an idle control, so unlike the
+     reference design's always-running shimmer it only exists while busy. */
+  .auth-submit[data-busy="true"]::after {
+    content: "";
+    @apply pointer-events-none absolute inset-0;
+    background: linear-gradient(
+      100deg,
+      transparent 20%,
+      rgb(255 255 255 / 0.55) 50%,
+      transparent 80%
+    );
+    animation: auth-sweep 1.1s ease-in-out infinite;
+  }
+
+  @keyframes auth-sweep {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(100%); }
+  }
+
+  /* Underline grows from the left on hover, as in the reference design. */
+  .auth-link {
+    @apply relative font-medium text-brand-black dark:text-brand-cream;
+  }
+
+  .auth-link::after {
+    content: "";
+    @apply absolute -bottom-0.5 left-0 h-px w-0 bg-brand-amber;
+    transition: width 220ms cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+
+  .auth-link:hover::after,
+  .auth-link:focus-visible::after {
+    @apply w-full;
+  }
+
+  /* ---- Composer ---------------------------------------------------------
+     The compose window is the one screen in this app where the user *makes*
+     something, so it is treated as a document sheet rather than as a dialog: a
+     header that names the conversation, a stack of borderless fields divided by
+     hairlines, a writing surface that owns most of the height, and one fixed
+     action bar. Boxed inputs were pushing the writing area , the actual work ,
+     into a third of the window.
+     --------------------------------------------------------------------- */
+
+  .compose-backdrop {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-brand-black/55 p-4 sm:p-6;
+    animation: compose-veil var(--duration-surface) var(--ease-soft) both;
+  }
+
+  /* Exit is a real state, not an unmount: the sheet drops back and the veil clears
+     before the tree goes. Half the duration of the entrance , leaving should feel
+     quicker than arriving. */
+  .compose-backdrop[data-closing="true"] {
+    animation: compose-veil 160ms var(--ease-soft) reverse both;
+  }
+
+  .compose-sheet {
+    @apply relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-2xl border border-brand-black/10 bg-surface dark:border-brand-cream/10 dark:bg-surface-dark;
+    box-shadow: var(--shadow-modal);
+    animation: compose-rise 340ms var(--ease-soft) both;
+  }
+
+  .compose-backdrop[data-closing="true"] .compose-sheet {
+    animation: compose-rise 160ms var(--ease-soft) reverse both;
+  }
+
+  @keyframes compose-veil {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  @keyframes compose-rise {
+    from { opacity: 0; transform: translateY(18px) scale(0.985); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* Close control, floating above the sheet's top-left corner rather than sitting
+     inside a header bar. There is no header any more: To/Subject start immediately,
+     and the one thing every modal needs , a way out , gets its own small surface
+     instead of a whole row of chrome to carry it. */
+  .compose-close-pill {
+    @apply absolute -right-3 -top-3 z-10 grid h-8 w-8 place-items-center rounded-full border border-brand-black/10 bg-surface text-brand-black/70 shadow-overlay dark:border-brand-cream/15 dark:bg-surface-dark dark:text-brand-cream/70;
+    animation: compose-rise 340ms var(--ease-soft) both;
+    transition:
+      color var(--duration-micro) ease-out,
+      transform var(--duration-micro) var(--ease-soft);
+  }
+
+  .compose-close-pill:hover {
+    @apply text-brand-black dark:text-brand-cream;
+    transform: translateY(-1px);
+  }
+
+  .compose-backdrop[data-closing="true"] .compose-close-pill {
+    animation: compose-rise 160ms var(--ease-soft) reverse both;
+  }
+
+  /* Borderless field row. The hairline under it is the only division; the label is a
+     fixed-width gutter so To/Cc/Subject align down a single edge. */
+  .compose-row {
+    @apply flex items-start gap-3 border-b border-brand-black/[0.07] px-5 py-2.5 transition-colors duration-150 ease-out dark:border-brand-cream/[0.07];
+  }
+
+  .compose-row:focus-within {
+    @apply bg-brand-amber/[0.05];
+  }
+
+  /* Plain and quiet , a field name, not a shouted category label. The previous
+     uppercase, letter-spaced treatment gave "To" and "Subject" the same visual
+     weight as a section heading, in a window with no headings left to match. */
+  .compose-row-label {
+    @apply w-16 shrink-0 pt-1.5 text-sm font-medium text-brand-black/45 dark:text-brand-cream/40;
+  }
+
+  /* Cc / Bcc, and anything else that reveals more of the same row rather than
+     acting on it. Plain text rather than `.quote-toggle`'s bordered pill , these
+     sit right next to the field they extend, so a pill around them reads as a
+     second control competing with the input, not a peer to its label. */
+  .compose-row-link {
+    @apply text-xs font-medium text-brand-black/45 dark:text-brand-cream/40;
+    transition: color var(--duration-micro) ease-out;
+  }
+
+  .compose-row-link:hover {
+    @apply text-brand-amber;
+  }
+
+  .compose-bare-input {
+    @apply min-w-0 flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-brand-black/40 dark:placeholder:text-brand-cream/30;
+  }
+
+  /* Locked reply headers. A grey disabled box says "broken"; this says "settled" ,
+     the value reads as text, and the reason is one line away in the header. */
+  .compose-bare-input[readonly] {
+    @apply cursor-default text-brand-black/75 dark:text-brand-cream/70;
+  }
+
+  .chip-recipient {
+    @apply inline-flex max-w-full items-center gap-1.5 rounded-full border border-brand-black/10 bg-brand-black/[0.04] py-0.5 pl-0.5 pr-2 text-xs font-medium dark:border-brand-cream/10 dark:bg-brand-cream/[0.07];
+  }
+
+  /* ---- Editor ---- */
+
+  .editor-toolbar {
+    @apply flex shrink-0 flex-wrap items-center gap-0.5 border-b border-brand-black/[0.07] px-5 py-1.5 dark:border-brand-cream/[0.07];
+  }
+
+  .editor-sep {
+    @apply mx-1 h-4 w-px bg-brand-black/10 dark:bg-brand-cream/10;
+  }
+
+  .editor-tool {
+    @apply grid h-7 w-7 place-items-center rounded-md text-brand-black/60 dark:text-brand-cream/55;
+    transition:
+      background-color var(--duration-micro) ease-out,
+      color var(--duration-micro) ease-out,
+      transform var(--duration-micro) var(--ease-soft);
+  }
+
+  .editor-tool:hover {
+    @apply bg-brand-black/[0.06] text-brand-black dark:bg-brand-cream/10 dark:text-brand-cream;
+  }
+
+  .editor-tool:active {
+    transform: scale(0.9);
+  }
+
+  .editor-tool-active {
+    @apply bg-brand-amber/25 text-brand-black dark:text-brand-cream;
+  }
+
+  .editor-linkbar {
+    @apply flex shrink-0 items-center gap-1 border-b border-brand-black/[0.07] bg-brand-amber/[0.06] px-5 py-1.5 dark:border-brand-cream/[0.07];
+    animation: compose-slip var(--duration-control) var(--ease-soft) both;
+  }
+
+  @keyframes compose-slip {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* One source of truth for the writing surface's horizontal inset.
+     It used to be set per-caller as `[&_.editor-surface]:px-5`, which the
+     placeholder , a sibling of the surface, absolutely positioned at left:0 ,
+     had no way to read. So the ghost text sat hard against the window edge
+     while the text you typed started 20px in. Callers now set
+     `[--editor-pad-x:1.25rem]` and both read the same value. */
+  .editor-surface {
+    @apply h-full w-full text-sm leading-relaxed outline-none;
+    min-height: 12rem;
+    padding: 0.75rem var(--editor-pad-x, 0rem);
+  }
+
+  .editor-placeholder {
+    @apply pointer-events-none absolute text-sm text-brand-black/40 dark:text-brand-cream/30;
+    left: var(--editor-pad-x, 0rem);
+    top: 0.75rem;
+  }
+
+  /* Preflight strips list markers and blockquote indent; the editor is prose, so put
+     them back inside the surface only. */
+  .editor-surface ul { @apply my-2 list-disc pl-5; }
+  .editor-surface ol { @apply my-2 list-decimal pl-5; }
+  .editor-surface li { @apply my-0.5; }
+  .editor-surface p  { @apply my-2; }
+  .editor-surface a  { @apply text-brand-amber underline underline-offset-2; }
+  .editor-surface blockquote {
+    @apply my-2 border-l-[3px] border-brand-amber/60 pl-3 text-brand-black/75 dark:text-brand-cream/70;
+  }
+  .editor-surface img { @apply max-w-full rounded-lg; }
+
+  /* ---- Personalised fields ----------------------------------------------
+     A placeholder as it appears while writing: a named tag rather than
+     {{client_name}}. The element is contenteditable="false", so it selects and
+     deletes as one object , the styling has to make that behaviour look
+     deliberate, hence a filled pill rather than tinted text. */
+  .mf-chip {
+    @apply mx-px inline-block select-none whitespace-nowrap rounded-md border border-brand-amber/45 bg-brand-amber/20 px-1.5 py-px align-baseline text-[0.9em] font-semibold text-brand-black/85 dark:text-brand-cream/90;
+  }
+
+  /* A field the recipient's copy will fill in is worth seeing at a glance in the
+     preview list too, where chips are read-only. */
+  .mf-chip-static {
+    @apply cursor-default;
+  }
+
+  .mf-trigger {
+    @apply inline-flex items-center gap-1 rounded-lg border border-brand-black/10 px-2 py-1 text-[11px] font-medium text-brand-black/70 dark:border-brand-cream/10 dark:text-brand-cream/70;
+    transition:
+      background-color var(--duration-micro) ease-out,
+      border-color var(--duration-micro) ease-out,
+      color var(--duration-micro) ease-out;
+  }
+
+  .mf-trigger:hover {
+    @apply border-brand-black/20 bg-brand-black/[0.04] text-brand-black dark:border-brand-cream/20 dark:bg-brand-cream/[0.06] dark:text-brand-cream;
+  }
+
+  .mf-trigger-open {
+    @apply border-brand-amber/50 bg-brand-amber/15 text-brand-black dark:text-brand-cream;
+  }
+
+  .mf-menu {
+    @apply absolute right-0 z-30 mt-1.5 max-h-80 w-72 overflow-y-auto rounded-xl border border-brand-black/10 bg-white p-1.5 shadow-xl dark:border-brand-cream/10 dark:bg-brand-black;
+    transform-origin: top right;
+    animation: mf-menu-in var(--duration-control) var(--ease-soft) both;
+  }
+
+  @keyframes mf-menu-in {
+    from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .mf-menu-intro {
+    @apply px-2 py-1.5 text-[11px] leading-snug text-brand-black/55 dark:text-brand-cream/50;
+  }
+
+  .mf-menu-group {
+    @apply border-t border-brand-black/[0.07] pt-1 dark:border-brand-cream/[0.07];
+  }
+
+  .mf-menu-title {
+    @apply px-2 pb-0.5 pt-1 text-[10px] font-semibold uppercase tracking-wide text-brand-black/45 dark:text-brand-cream/40;
+  }
+
+  .mf-menu-item {
+    @apply flex w-full items-baseline justify-between gap-3 rounded-lg px-2 py-1.5 text-left text-xs font-medium text-brand-black/85 dark:text-brand-cream/85;
+    transition: background-color var(--duration-micro) ease-out;
+  }
+
+  .mf-menu-item:hover {
+    @apply bg-brand-amber/15;
+  }
+
+  .mf-menu-example {
+    @apply shrink-0 truncate text-[10px] font-normal text-brand-black/45 dark:text-brand-cream/40;
+    max-width: 9rem;
+  }
+
+  /* A rich text editor used as a form field rather than as a whole pane: it needs
+     the border the composer gets from the sheet around it. */
+  .editor-box {
+    @apply overflow-hidden rounded-xl border border-brand-black/10 bg-sunken dark:border-brand-cream/10 dark:bg-sunken-dark;
+    transition:
+      border-color var(--duration-micro) ease-out,
+      box-shadow var(--duration-micro) ease-out;
+  }
+
+  .editor-box:focus-within {
+    @apply border-brand-amber/50;
+    box-shadow: 0 0 0 3px rgb(251 176 64 / 0.15);
+  }
+
+  /* Anything revealed by a disclosure arrives rather than appearing. */
+  .disclosure {
+    animation: compose-slip var(--duration-surface) var(--ease-soft) both;
+  }
+
+  .editor-source {
+    @apply h-full min-h-48 w-full resize-none bg-transparent py-3 font-mono text-xs leading-relaxed outline-none placeholder:text-brand-black/40 dark:placeholder:text-brand-cream/30;
+  }
+
+  /* Quoted history: one line at rest, expandable, never editable. Dumping the whole
+     conversation into the field the user types in is what made the old window
+     unusable on any thread longer than one message. */
+  .quote-toggle {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-brand-black/10 px-2 py-1 text-[11px] font-medium text-brand-black/55 dark:border-brand-cream/10 dark:text-brand-cream/50;
+    transition:
+      background-color var(--duration-micro) ease-out,
+      color var(--duration-micro) ease-out,
+      border-color var(--duration-micro) ease-out;
+  }
+
+  .quote-toggle:hover {
+    @apply border-brand-black/20 bg-brand-black/[0.04] text-brand-black dark:border-brand-cream/20 dark:bg-brand-cream/[0.06] dark:text-brand-cream;
+  }
+
+  .compose-actionbar {
+    @apply flex shrink-0 flex-wrap items-center gap-2 border-t border-brand-black/10 px-5 py-3 dark:border-brand-cream/10;
+  }
+
+  /* Attachment card. Wide enough to show the real filename, with the size as the
+     secondary line , a truncated chip made it impossible to tell two revisions of the
+     same document apart. */
+  .attach-card {
+    @apply flex items-center gap-2.5 rounded-xl border border-brand-black/10 bg-brand-black/[0.03] py-1.5 pl-2.5 pr-1.5 dark:border-brand-cream/10 dark:bg-brand-cream/[0.05];
+    animation: compose-slip var(--duration-control) var(--ease-soft) both;
+  }
+
+  /* Drop target for dragged files. The whole writing area lights up, because that is
+     where people aim. */
+  .compose-dropzone[data-dragging="true"] {
+    @apply rounded-xl bg-brand-amber/10 outline-2 outline-dashed outline-offset-[-6px] outline-brand-amber/60;
+  }
+
+  .table-base {
+    @apply w-full text-sm;
+  }
+
+  .table-base thead th {
+    @apply border-b border-brand-black/10 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-brand-black/65 dark:border-brand-cream/10 dark:text-brand-cream/60;
+  }
+
+  .table-base tbody td {
+    @apply border-b border-brand-black/5 px-3 py-2.5 dark:border-brand-cream/5;
+  }
+}
+
+@layer base {
+  /* Motion is a transition, never a cut , but honor the OS setting by cutting
+     straight to end states for anyone who has asked for that. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Keyboard focus must always be visible; several controls previously relied
+     on hover alone. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-amber;
+  }
+
+  /* ---- Scrollbars -------------------------------------------------------
+     There aren't any.
+
+     The app has several independently scrolling regions , the rail, the thread
+     list, the reader, the composer , and every one of them drew its own bar. Even
+     styled down to a slim amber pill they read as system furniture bolted onto the
+     surface, and four of them at once broke the one-card layout into strips.
+
+     Scrolling itself is untouched: wheel, trackpad, keyboard (arrows, Page Up/Down,
+     Home/End, space) and programmatic scrolling all behave exactly as before. What
+     goes is the painted bar and the drag target on it , which is the trade being
+     made here, and it is only comfortable because this is a desktop app driven by
+     a wheel or a trackpad.
+     --------------------------------------------------------------------- */
+  * {
+    /* Firefox. `none` reserves no gutter either, so nothing reflows. */
+    scrollbar-width: none;
+    /* Legacy Edge and IE, harmless everywhere else. */
+    -ms-overflow-style: none;
+  }
+
+  /* Chromium and WebKit based browsers. `display: none`
+     rather than zero width: a 0px bar can still claim a hit area on some
+     platforms, which produces a scrollable strip you cannot see. */
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer components {
+  /* ---- Template gallery -------------------------------------------------
+     Templates are things you recognise by sight, so each card leads with the
+     email itself rather than its name. The preview is the real rendered HTML
+     in an iframe, scaled down , a screenshot of the thing, not an impression
+     of it.
+     --------------------------------------------------------------------- */
+
+  .tpl-grid {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  }
+
+  .tpl-card {
+    @apply relative flex flex-col overflow-hidden rounded-2xl border border-brand-black/10 bg-surface shadow-raised dark:border-brand-cream/10 dark:bg-surface-dark;
+    /* Only transform and box-shadow move, so the hover stays on the compositor. */
+    transition:
+      transform var(--duration-control) var(--ease-soft),
+      box-shadow var(--duration-control) var(--ease-soft),
+      border-color var(--duration-micro) ease-out;
+    animation: auth-fade 380ms var(--ease-soft) both;
+    animation-delay: calc(60ms + var(--i, 0) * 45ms);
+  }
+
+  .tpl-card:hover {
+    @apply border-brand-amber/45;
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px rgb(23 23 23 / 0.13), 0 2px 6px rgb(23 23 23 / 0.06);
+  }
+
+  /* The whole card is the edit target , see .tpl-open , so the ring belongs on
+     the card rather than on the small piece of text that carries the link. */
+  .tpl-card:focus-within {
+    @apply border-brand-amber/60;
+  }
+
+  /* A white sheet regardless of theme: an email is a sheet of paper, and mail
+     HTML brings its own colours that assume one , these six were built to read
+     as real agency mail, dark hero over a light body module, and that has to
+     survive contact with the app's own theme or the preview stops being honest
+     about what actually gets sent.
+
+     What the dark theme gets instead is the *frame*: a hairline top edge (the
+     card's own rounded corner already gave it a bottom one) and a soft shadow
+     cast onto the card below, so the sheet reads as something set deliberately
+     into a dark card rather than a pane that forgot to pick up the theme. */
+  .tpl-preview {
+    @apply relative shrink-0 overflow-hidden bg-white;
+    /* Tall enough to show a greeting, an opening paragraph and the start of the
+       signature , the part that tells one template from another. Taller than that
+       and short emails leave a band of empty sheet. */
+    height: 11.5rem;
+    border-bottom: 1px solid rgb(23 23 23 / 0.1);
+  }
+
+  .dark .tpl-preview {
+    border-top: 1px solid rgb(254 251 210 / 0.1);
+    border-bottom: 1px solid rgb(254 251 210 / 0.1);
+    box-shadow: 0 6px 16px -4px rgb(0 0 0 / 0.5);
+  }
+
+  /* Rendered at a desktop-ish canvas width and scaled to fit, so the preview
+     shows the layout a recipient on a laptop would see. The scale itself is set
+     from the card's measured width , CSS cannot divide a length by a length. */
+  .tpl-preview iframe {
+    @apply absolute left-0 top-0 border-0;
+    transform-origin: top left;
+    /* The preview is decoration for the link that wraps it; it must not swallow
+       clicks or take a tab stop of its own. */
+    pointer-events: none;
+  }
+
+  .tpl-preview::after {
+    /* The canvas is taller than the frame, so the render is cut off. Fading the
+       cut edge reads as "there is more", where a hard line reads as a bug. */
+    content: "";
+    @apply pointer-events-none absolute inset-x-0 bottom-0 h-12;
+    background: linear-gradient(to bottom, rgb(255 255 255 / 0), rgb(255 255 255 / 0.95));
+  }
+
+  .tpl-body {
+    @apply flex min-w-0 flex-1 flex-col gap-1.5 p-3.5;
+  }
+
+  /* Stretches the name's link across the whole card. Keeps one link for the
+     whole target while leaving the accessible name on the actual text. */
+  .tpl-open::after {
+    content: "";
+    @apply absolute inset-0;
+  }
+
+  /* Anything the card offers besides "open me" has to sit above that overlay. */
+  .tpl-actions {
+    @apply relative z-10 flex items-center gap-1;
+  }
+
+  /* Destructive, and one click from a grid of look-alike cards, so it stays
+     quiet until the card is hovered or something in it has focus. */
+  .tpl-delete {
+    @apply rounded-lg px-2 py-1 text-xs font-medium text-brand-black/55 opacity-0 dark:text-brand-cream/55;
+    transition:
+      opacity var(--duration-micro) ease-out,
+      color var(--duration-micro) ease-out,
+      background-color var(--duration-micro) ease-out;
+  }
+
+  .tpl-card:hover .tpl-delete,
+  .tpl-card:focus-within .tpl-delete {
+    @apply opacity-100;
+  }
+
+  .tpl-delete:hover {
+    @apply bg-red-500/10 text-red-600 dark:text-red-400;
+  }
+
+  /* Always reachable by keyboard, whatever the hover state says. */
+  .tpl-delete:focus-visible {
+    @apply opacity-100;
+  }
+}
+
+@layer components {
+  /* ---- Top bar ----------------------------------------------------------
+     The shell used to be a single row: rail on the left, panes on the right,
+     with search living inside the thread list's header and identity crammed
+     into the rail's footer. That put two global concerns , "find anything"
+     and "who am I" , inside a column that is really about one folder of one
+     mailbox, and it meant search vanished entirely on /clients and /settings.
+
+     Now the frame is a column: one bar across the top owning search and
+     identity, and the rail + content row beneath it.
+     --------------------------------------------------------------------- */
+
+  .app-frame {
+    @apply flex h-screen w-full flex-col overflow-hidden bg-brand-paper dark:bg-brand-black;
+  }
+
+  /* No bottom rule: the content card below draws its own edge, and a full-width
+     line above a floating card gives the eye two competing horizontals. */
+  /* Asymmetric padding on purpose: the left edge lines the mark up with the rail's
+     items (12px shell padding + 8px nav padding), the right edge lines the account
+     avatar up with the content card's right edge. */
+  .topbar {
+    @apply flex h-14 shrink-0 items-center gap-3 pl-5 pr-3;
+  }
+
+  .topbar-brand {
+    @apply flex w-52 shrink-0 items-center gap-2.5;
+  }
+
+  /* Search is centred in the bar and capped: a field stretched across a 1900px
+     display looks like a mistake, and nobody types a 200-character query. */
+  .topbar-search-wrap {
+    @apply relative mx-auto flex w-full max-w-2xl items-center;
+  }
+
+  .topbar-search {
+    @apply h-9 w-full rounded-[var(--radius)] border border-brand-black/10 bg-sunken pl-9 pr-20 text-sm outline-none placeholder:text-brand-black/50 dark:border-brand-cream/15 dark:bg-sunken-dark dark:placeholder:text-brand-cream/35;
+    transition:
+      border-color var(--duration-micro) ease-out,
+      background-color var(--duration-micro) ease-out,
+      box-shadow var(--duration-control) var(--ease-soft);
+  }
+
+  .topbar-search:focus {
+    @apply border-brand-amber/60 bg-white dark:bg-brand-cream/[0.1];
+    box-shadow: 0 0 0 3px rgb(251 176 64 / 0.28);
+  }
+
+  .topbar-search-icon {
+    @apply pointer-events-none absolute left-3 text-brand-black/45 transition-colors duration-150 ease-out dark:text-brand-cream/40;
+  }
+
+  .topbar-search-wrap:focus-within .topbar-search-icon {
+    @apply text-brand-amber;
+  }
+
+  /* Trailing hint inside the field. Disappears once there is a query, so it never
+     sits behind the user's own text. */
+  .topbar-search-hint {
+    @apply pointer-events-none absolute right-3 hidden items-center gap-1 text-[10px] font-medium text-brand-black/35 dark:text-brand-cream/30 sm:flex;
+  }
+
+  .topbar-icon {
+    @apply relative grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius)] text-brand-black/65 dark:text-brand-cream/60;
+    transition:
+      background-color var(--duration-micro) ease-out,
+      color var(--duration-micro) ease-out,
+      transform var(--duration-micro) var(--ease-soft);
+  }
+
+  .topbar-icon:hover {
+    @apply bg-brand-black/[0.06] text-brand-black dark:bg-brand-cream/10 dark:text-brand-cream;
+  }
+
+  .topbar-icon:active {
+    transform: scale(0.92);
+  }
+
+  .topbar-icon-active {
+    @apply bg-brand-amber/20 text-brand-black dark:text-brand-cream;
+  }
+
+  /* Unread marker on a quick-jump icon. A dot, not a number: the count already
+     has a home on the rail's folder row, and two of them disagree the moment
+     one refetches first. */
+  .topbar-dot {
+    @apply absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-brand-amber ring-2 ring-brand-paper dark:ring-brand-black;
+  }
+
+  /* ---- Popover menus ----------------------------------------------------
+     Glass is kept for surfaces that genuinely float, which is the whole reason
+     it still reads as elevation elsewhere in the app.
+     --------------------------------------------------------------------- */
+
+  .menu-pop {
+    @apply z-50 overflow-hidden border border-brand-black/10 bg-surface shadow-overlay dark:border-brand-cream/12 dark:bg-surface-dark;
+    border-radius: var(--radius);
+    animation: menu-pop var(--duration-control) var(--ease-soft) both;
+    transform-origin: top right;
+  }
+
+  /* Leaving is a state, not an unmount , and quicker than arriving, the same ratio
+     the compose sheet uses. */
+  .menu-pop[data-closing="true"] {
+    animation: menu-pop 140ms var(--ease-soft) reverse both;
+  }
+
+  @keyframes menu-pop {
+    from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .menu-item {
+    @apply flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm font-medium text-brand-black/75 dark:text-brand-cream/70;
+    transition:
+      background-color var(--duration-micro) ease-out,
+      color var(--duration-micro) ease-out;
+  }
+
+  .menu-item:hover {
+    @apply bg-brand-amber/15 text-brand-black dark:text-brand-cream;
+  }
+
+  .menu-sep {
+    @apply my-1 h-px bg-brand-black/8 dark:bg-brand-cream/10;
+  }
+
+  /* ---- Rail -------------------------------------------------------------- */
+
+  /* The one primary action, at the top of the rail where the reference puts it.
+     Full width so it is impossible to miss, and the only filled amber control in
+     the navigation column , everything else there is a destination, not a verb. */
+  .rail-compose {
+    @apply flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius)] bg-brand-amber text-sm font-semibold text-brand-black;
+    transition:
+      transform var(--duration-micro) var(--ease-soft),
+      box-shadow var(--duration-control) var(--ease-soft),
+      background-color var(--duration-micro) ease-out;
+  }
+
+  .rail-compose:hover {
+    @apply bg-brand-amber/92;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgb(251 176 64 / 0.4);
+  }
+
+  .rail-compose:active {
+    transform: translateY(0) scale(0.985);
+  }
+
+  /* ---- Mailbox tiles ----------------------------------------------------
+     Mailboxes were full-width rows carrying a whole address each, so two of them
+     ate as much of the rail as three folders , for a control you touch when you
+     switch accounts and never otherwise. As squares they are a grid of faces:
+     four to a row, identified by initial and colour, and the row grows sideways
+     instead of downwards as accounts are added.
+     --------------------------------------------------------------------- */
+
+  /* Wrapping row rather than a fixed four-column grid: the tiles are a set size,
+     so the row simply holds as many as fit and spills onto the next. */
+  .mailbox-grid {
+    @apply flex flex-wrap gap-1.5 px-2.5 pt-0.5;
+  }
+
+  .mailbox-tile {
+    @apply relative grid h-[30px] w-[30px] place-items-center overflow-hidden rounded-[var(--radius)] bg-brand-black/[0.08] text-[12px] font-bold leading-none text-brand-black/45 dark:bg-brand-cream/[0.09] dark:text-brand-cream/40;
+    transition:
+      background-color var(--duration-control) ease-out,
+      color var(--duration-control) ease-out,
+      transform var(--duration-micro) var(--ease-soft);
+  }
+
+  .mailbox-tile:hover {
+    @apply bg-brand-black/[0.14] text-brand-black/70 dark:bg-brand-cream/[0.16] dark:text-brand-cream/70;
+    transform: translateY(-1px);
+  }
+
+  /* The account you are reading is the accent colour itself. An earlier version
+     gave each mailbox its own generated tint and ringed the active one , but a
+     per-address colour is decoration on a set of two or three tiles, and it left
+     the selection competing with three other hues. Grey for the rest, brand
+     amber for the one in use. */
+  .mailbox-tile[data-active="true"],
+  .mailbox-tile[data-active="true"]:hover {
+    @apply bg-brand-amber text-brand-black;
+  }
+
+  /* Deliberately not amber: on the active tile an amber badge would vanish into
+     the fill, so the count is carried by contrast instead of by hue. */
+  /* Scaled with the tile: at 30px square a 16px badge covered a third of the face. */
+  .mailbox-tile-badge {
+    @apply absolute right-px top-px min-w-[0.75rem] rounded-full bg-brand-black px-[3px] text-center text-[8px] font-bold leading-3 tabular-nums text-brand-cream dark:bg-brand-cream dark:text-brand-black;
+  }
+
+  /* A mailbox that has stopped syncing still shows its mail, so this is a warning
+     on the tile rather than something that removes it from the grid. */
+  .mailbox-tile-warn {
+    @apply absolute bottom-px left-px h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-surface dark:ring-surface-dark;
+  }
+
+  .mailbox-add {
+    @apply grid h-[30px] w-[30px] place-items-center rounded-[var(--radius)] border border-dashed border-brand-black/20 text-brand-black/40 dark:border-brand-cream/20 dark:text-brand-cream/35;
+    transition:
+      border-color var(--duration-micro) ease-out,
+      color var(--duration-micro) ease-out,
+      transform var(--duration-micro) var(--ease-soft);
+  }
+
+  .mailbox-add:hover {
+    @apply border-brand-amber text-brand-amber;
+    transform: translateY(-1px);
+  }
+
+  /* Folder count. Quiet by default; the unread folder earns the filled amber pill
+     because it is the only count that means "there is work here". */
+  .count-badge {
+    @apply ml-auto shrink-0 text-[11px] tabular-nums text-brand-black/55 dark:text-brand-cream/50;
+  }
+
+  .count-badge-strong {
+    @apply ml-auto shrink-0 rounded-full bg-brand-amber px-1.5 py-px text-[10px] font-bold tabular-nums text-brand-black;
+  }
+
+  /* ---- Toggle switch ----------------------------------------------------
+     The dark-mode control was a text row that said "Dark mode" and toggled to
+     "Light mode" , so the label described both the current state and the action
+     depending on how you read it. A switch has no such ambiguity.
+     --------------------------------------------------------------------- */
+
+  .switch {
+    @apply relative h-4 w-7 shrink-0 rounded-full bg-brand-black/20 dark:bg-brand-cream/20;
+    transition: background-color var(--duration-control) var(--ease-soft);
+  }
+
+  .switch[data-on="true"] {
+    @apply bg-brand-amber;
+  }
+
+  .switch-knob {
+    @apply absolute left-0.5 top-0.5 h-3 w-3 rounded-full bg-white shadow-sm;
+    transition: transform var(--duration-control) var(--ease-soft);
+  }
+
+  .switch[data-on="true"] .switch-knob {
+    transform: translateX(0.75rem);
+  }
+
+  /* ---- Thread list toolbar ---------------------------------------------- */
+
+  .list-toolbar {
+    @apply flex h-12 shrink-0 items-center gap-2.5 border-b border-brand-black/10 px-4 dark:border-brand-cream/10;
+  }
+
+  .check-box {
+    @apply grid h-4 w-4 shrink-0 place-items-center rounded border border-brand-black/25 text-[10px] font-bold text-brand-black dark:border-brand-cream/30;
+    transition:
+      background-color var(--duration-micro) ease-out,
+      border-color var(--duration-micro) ease-out,
+      transform var(--duration-micro) var(--ease-soft);
+  }
+
+  .check-box:hover {
+    @apply border-brand-amber;
+    transform: scale(1.1);
+  }
+
+  .check-box[data-state="checked"],
+  .check-box[data-state="partial"] {
+    @apply border-brand-amber bg-brand-amber;
+  }
+
+  /* Rows arrive in sequence when the folder changes, so the eye follows the list
+     filling rather than finding a new one already there. Capped with nth-child so
+     row 200 does not wait six seconds for its turn. */
+  .thread-enter {
+    animation: auth-fade 260ms var(--ease-soft) both;
+  }
+
+  .thread-enter:nth-child(n + 13) {
+    animation-delay: 0ms;
+  }
+
+  /* ---- Reader ------------------------------------------------------------ */
+
+  /* Action buttons read as text with a leading icon, not as filled controls: on a
+     thread the message is the content and the toolbar is chrome. Reply keeps the
+     amber because it is what you came to do. */
+  .reader-action {
+    @apply inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-brand-black/70 dark:text-brand-cream/65;
+    transition:
+      background-color var(--duration-micro) ease-out,
+      color var(--duration-micro) ease-out,
+      transform var(--duration-micro) var(--ease-soft);
+  }
+
+  .reader-action:hover {
+    @apply bg-brand-black/[0.06] text-brand-black dark:bg-brand-cream/10 dark:text-brand-cream;
+  }
+
+  .reader-action:active {
+    transform: scale(0.96);
+  }
+
+  .reader-action-primary {
+    @apply bg-brand-amber font-semibold text-brand-black hover:bg-brand-amber/90;
+  }
+
+  .reader-action-danger:hover {
+    @apply bg-red-500/10 text-red-600 dark:text-red-400;
+  }
+
+  /* The compose window's one AI entry point. Outlined rather than filled, so it
+     reads as "ask for help" beside a Send button that is filled and unambiguous ,
+     the two should not compete for the same emphasis. */
+  .ai-generate-btn {
+    @apply inline-flex items-center gap-1.5 rounded-[var(--radius)] border border-brand-amber/50 bg-brand-amber/[0.08] px-3 py-1.5 text-xs font-semibold text-brand-amber disabled:pointer-events-none disabled:opacity-50;
+    transition:
+      background-color var(--duration-micro) ease-out,
+      border-color var(--duration-micro) ease-out,
+      box-shadow var(--duration-control) var(--ease-soft),
+      transform var(--duration-micro) var(--ease-soft);
+  }
+
+  .ai-generate-btn:hover {
+    @apply border-brand-amber bg-brand-amber/[0.16];
+    box-shadow: 0 0 0 3px rgb(251 176 64 / 0.15);
+  }
+
+  .ai-generate-btn:active {
+    transform: scale(0.97);
+  }
+
+  /* Disclosed addressing under the participant row. */
+  .detail-panel {
+    animation: compose-slip var(--duration-control) var(--ease-soft) both;
+  }
+
+  /* The who-and-when card, between the AI summary and the messages.
+     It sits in a stack of grey message cards and was one more grey card among
+     them, so the one block that answers "who is this conversation with" read as
+     the first message in it. An amber wash and an amber edge separate it by
+     category rather than by weight , it is the only element in the reader that is
+     about the thread rather than part of it. */
+  .reader-participants {
+    @apply mb-3 border border-brand-amber/30 bg-brand-amber/[0.07] px-3 py-2.5;
+    border-radius: var(--radius);
+  }
+
+  /* ---- Message card ------------------------------------------------------
+     The sender/date bar and the body it discloses.
+     --------------------------------------------------------------------- */
+
+  /* The divider under the header was previously added and removed with the open
+     state , `open && "border-b"`. Toggling a border changes the element's box by
+     1px, so every open and close nudged the layout, and the line appeared a frame
+     before the body did and vanished a frame after it: the stroke that flashed.
+     The border is always here now, and only its colour changes. */
+  .msg-head {
+    @apply flex w-full items-center gap-2.5 border-b border-transparent px-2.5 py-2 text-left;
+    transition:
+      background-color var(--duration-micro) ease-out,
+      border-color var(--duration-control) ease-out;
+  }
+
+  .msg-head[data-open="true"] {
+    @apply border-brand-black/[0.07] dark:border-brand-cream/[0.07];
+  }
+
+  /* The glide. `grid-template-rows: 0fr → 1fr` animates a element to its own
+     natural height without anyone having to measure it first , which matters
+     here because the body contains an iframe whose height the app cannot read
+     (`sandbox=""` denies it scripts, and relaxing that would hand mail HTML
+     same-origin access to the app). */
+  .msg-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--duration-control) var(--ease-soft);
+  }
+
+  .msg-body[data-open="true"] {
+    grid-template-rows: 1fr;
+  }
+
+  /* The row's child must be able to shrink below its content and clip, or the
+     grid track collapses while the content keeps its height and spills. */
+  .msg-body > * {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Docked reply. A thread is a conversation, and a conversation ends with a place
+     to answer , the modal composer stays for genuinely new mail, where there is no
+     thread to sit at the bottom of. */
+  .reply-dock {
+    @apply shrink-0 border-t border-brand-black/10 px-5 py-3 dark:border-brand-cream/10;
+    animation: compose-slip var(--duration-control) var(--ease-soft) both;
+  }
+
+  .reply-dock-collapsed {
+    @apply flex w-full items-center gap-2.5 rounded-[var(--radius)] border border-brand-black/12 bg-sunken px-4 py-2 text-left text-sm text-brand-black/50 dark:border-brand-cream/12 dark:bg-sunken-dark dark:text-brand-cream/40;
+    transition:
+      border-color var(--duration-micro) ease-out,
+      background-color var(--duration-micro) ease-out,
+      box-shadow var(--duration-control) var(--ease-soft);
+  }
+
+  .reply-dock-collapsed:hover {
+    @apply border-brand-amber/50 bg-surface dark:bg-surface-dark;
+    box-shadow: 0 4px 14px rgb(23 23 23 / 0.06);
+  }
+
+  /* ---- Settings hub ------------------------------------------------------
+     Settings had no index at all: the rail linked straight to six sub-pages, so
+     there was no one place that answered "what can I configure?".
+     --------------------------------------------------------------------- */
+
+  .hub-grid {
+    @apply grid gap-3;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  }
+
+  .hub-tile {
+    @apply flex items-start gap-3 border border-brand-black/10 bg-surface p-4 shadow-raised dark:border-brand-cream/10 dark:bg-surface-dark;
+    border-radius: var(--radius);
+    transition:
+      transform var(--duration-control) var(--ease-soft),
+      box-shadow var(--duration-control) var(--ease-soft),
+      border-color var(--duration-micro) ease-out;
+    animation: auth-fade 380ms var(--ease-soft) both;
+    animation-delay: calc(40ms + var(--i, 0) * 40ms);
+  }
+
+  .hub-tile:hover {
+    @apply border-brand-amber/45;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px rgb(23 23 23 / 0.12);
+  }
+
+  /* Each tile's icon carries its own tint, which is what makes the grid scannable
+     by colour rather than by reading six labels. */
+  .hub-tile-icon {
+    @apply grid h-10 w-10 shrink-0 place-items-center rounded-xl;
+    transition: transform var(--duration-control) var(--ease-soft);
+  }
+
+  .hub-tile:hover .hub-tile-icon {
+    transform: scale(1.06) rotate(-3deg);
+  }
+}
+
+/* Signal foundation. Existing page classes keep their compatibility tokens. */
+html { min-width: 0; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body), system-ui, sans-serif; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: default; }
+:focus-visible { outline: 2px solid var(--sodium); outline-offset: 3px; }
+.signal-logo { display: grid; flex-shrink: 0; place-items: center; }
+.signal-button { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--raise); color: var(--fg); font-size: 13px; font-weight: 500; white-space: nowrap; isolation: isolate; transition: transform var(--t1) var(--ease); }
+.signal-button::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: currentColor; opacity: 0; pointer-events: none; transition: opacity var(--t1) var(--ease); }
+.signal-button:hover::before { opacity: .06; }
+.signal-button:hover { transform: translateY(-1px); }
+.signal-button:active { transform: scale(.97); }
+.signal-button:disabled { pointer-events: none; opacity: .5; }
+.signal-button.btn-primary { background: var(--sodium); border-color: transparent; color: var(--on-sodium); font-weight: 600; box-shadow: 0 10px 26px -16px var(--glow); }
+.signal-button.btn-ghost { border-color: transparent; background: transparent; color: var(--muted); }
+.signal-button.btn-danger { background: color-mix(in oklab, var(--bad) 12%, var(--surface)); border-color: color-mix(in oklab, var(--bad) 35%, var(--line)); color: var(--bad); }
+.signal-button-small { min-height: 30px; padding-inline: 11px; font-size: 12px; }
+.signal-button-icon { width: 36px; height: 36px; padding: 0; flex-shrink: 0; }
+.signal-chip { --h: var(--muted); display: inline-flex; align-items: center; gap: 6px; border-radius: 99px; padding: 3px 9px; white-space: nowrap; font-size: 11.5px; font-weight: 500; background: color-mix(in oklab, var(--h) 15%, transparent); color: color-mix(in oklab, var(--h) 62%, var(--fg)); transition: transform var(--t1) var(--ease); }
+.signal-chip[data-dot=true]::before { content: ""; width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; background: var(--h); }
+.signal-chip:hover { transform: translateY(-1px); }
+.signal-chip:active { transform: scale(.97); }
+.signal-frame { display: grid; grid-template-columns: 236px minmax(0,1fr); height: 100dvh; min-width: 0; overflow: hidden; background: var(--frame); }
+.signal-desktop-sidebar { min-height: 0; }
+.signal-sidebar { height: 100%; min-height: 0; min-width: 0; display: flex; flex-direction: column; gap: 20px; padding: 24px 14px 14px; background: var(--surface); border-right: 1px solid var(--line); }
+.signal-brand { display: flex; align-items: center; gap: 10px; padding-inline: 6px; font: 700 19px var(--f-display), sans-serif; letter-spacing: -.03em; }
+.signal-new-message { width: 100%; justify-content: flex-start; min-height: 40px; }
+.signal-primary-nav { display: flex; flex-direction: column; gap: 3px; }
+.signal-nav-link { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px; color: var(--muted); font-size: 13.5px; font-weight: 500; transition: transform var(--t1) var(--ease); animation: signal-arrive var(--t3) var(--ease) backwards; animation-delay: calc(var(--i,0) * 50ms); }
+.signal-nav-link:hover { background: var(--raise); color: var(--fg); transform: translateX(2px); }
+.signal-nav-link:active { transform: scale(.98); }
+.signal-nav-link.is-active { color: var(--fg); background: var(--raise); }
+.signal-count { margin-left: auto; min-width: 20px; padding: 1px 6px; text-align: center; border-radius: 6px; background: var(--sodium); color: var(--on-sodium); font: 600 10px/18px var(--f-mono), monospace; }
+.signal-sidebar-context { flex: 1; min-height: 0; overflow-y: auto; }
+.signal-mail-context summary { display: flex; align-items: center; gap: 7px; cursor: pointer; color: var(--muted); font-size: 11px; padding: 0 10px 8px; }
+.signal-mail-context summary::after { content: "+"; margin-left: auto; }
+.signal-mail-context[open] summary::after { content: "-"; }
+.signal-mail-context nav { animation: signal-arrive var(--t2) var(--ease) both; }
+.signal-folder { display: flex; justify-content: space-between; padding: 5px 10px 5px 30px; font-size: 12px; color: var(--muted); border-radius: 8px; }
+.signal-folder:hover, .signal-folder[aria-current=page] { background: var(--raise); color: var(--fg); }
+.signal-folder small { font: 10px var(--f-mono), monospace; }
+.signal-mailbox-label { display: grid; gap: 7px; margin-top: 18px; padding-inline: 10px; font-size: 11px; color: var(--muted); }
+.signal-mailbox-label select { width: 100%; min-width: 0; padding: 7px; font-size: 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--raise); color: var(--fg); }
+.signal-connect { display: flex; align-items: center; gap: 5px; padding: 9px 10px; font-size: 11px; color: var(--muted); }
+.signal-user-row { display: flex; align-items: center; gap: 2px; border-top: 1px solid var(--line); padding-top: 14px; }
+.signal-user { display: flex; flex: 1; min-width: 0; align-items: center; gap: 9px; }
+.signal-user > span:nth-child(2) { flex: 1; min-width: 0; }
+.signal-user strong, .signal-user small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.signal-user strong { font-size: 12px; font-weight: 600; }
+.signal-user small { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.signal-user > svg { display: none; }
+.signal-avatar { display: grid; width: 32px; height: 32px; flex-shrink: 0; place-items: center; border-radius: 50%; background: color-mix(in oklab, var(--jac) 18%, var(--surface)); color: var(--fg); font-size: 11px; font-weight: 600; }
+.signal-workspace { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.signal-topbar { position: relative; display: flex; min-height: 65px; align-items: center; gap: 14px; padding: 12px 22px; border-bottom: 1px solid var(--line); }
+.signal-command-trigger { display: flex; align-items: center; gap: 10px; width: min(420px,55%); min-width: 0; height: 40px; margin-inline: auto; padding: 0 8px 0 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--raise); color: var(--muted); text-align: left; font-size: 13px; transition: transform var(--t1) var(--ease); }
+.signal-command-trigger:hover { transform: translateY(-1px); }
+.signal-command-trigger:active { transform: scale(.99); }
+.signal-command-trigger span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.signal-command-trigger kbd { margin-left: auto; flex-shrink: 0; }
+.signal-topbar-tools { display: flex; align-items: center; gap: 5px; }
+.signal-menu { display: none; }
+.signal-sync { position: relative; display: inline-block; width: 8px; height: 8px; margin-inline: 6px; border-radius: 50%; background: var(--warn); flex-shrink: 0; }
+.signal-sync[data-state=healthy] { background: var(--good); }
+.signal-sync[data-state=healthy]::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--good); animation: signal-ping 2.4s var(--ease) infinite; }
+.signal-sync[data-state=error] { background: var(--bad); }
+.signal-canvas { display: flex; flex: 1; min-height: 0; min-width: 0; overflow: hidden; }
+.signal-frame kbd { border: 1px solid var(--line); border-bottom-width: 2px; padding: 2px 5px; border-radius: 5px; background: var(--surface); color: var(--muted); font: 10px var(--f-mono), monospace; white-space: nowrap; }
+.signal-dialog { position: fixed; inset: 0; width: 100%; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: max(40px,10vh) 16px 24px; border: 0; background: transparent; color: var(--fg); overflow: auto; }
+.signal-dialog[open] { display: flex; justify-content: center; align-items: flex-start; }
+.signal-dialog::backdrop { background: rgb(6 7 11 / .6); opacity: 0; transition: opacity var(--t2) var(--ease); }
+.signal-dialog[data-visible=true]::backdrop { opacity: 1; }
+.signal-dialog-panel { width: min(560px,100%); min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 24px 80px rgb(0 0 0 / .24); opacity: 0; transform: translateY(12px) scale(.985); transition: opacity var(--t2) var(--ease), transform var(--t2) var(--ease); }
+.signal-dialog[data-visible=true] > .signal-dialog-panel { opacity: 1; transform: none; }
+.signal-command-input { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); color: var(--muted); }
+.signal-command-input input { flex: 1; min-width: 0; background: transparent; color: var(--fg); outline: 0; font-size: 15px; }
+.signal-command-input:focus-within { box-shadow: inset 0 -2px var(--sodium); }
+.signal-command-list { max-height: min(440px,60dvh); overflow-y: auto; padding: 8px; }
+.signal-command-list button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; border-radius: 10px; text-align: left; font-size: 13px; transition: transform var(--t1) var(--ease); }
+.signal-command-list button[aria-selected=true] { background: var(--raise); }
+.signal-command-list button:active { transform: scale(.99); }
+.signal-command-list button span { flex: 1; overflow-wrap: anywhere; }
+.signal-command-list small { color: var(--muted); font-size: 10px; }
+.signal-command-help { display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); }
+.signal-drawer { padding: 0; }
+.signal-drawer[open] { justify-content: flex-start; }
+.signal-drawer > .signal-dialog-panel { position: relative; width: min(296px,85vw); height: 100%; border-radius: 0; transform: translateX(-100%); }
+.signal-drawer[data-visible=true] > .signal-dialog-panel { transform: none; }
+.signal-drawer .signal-sidebar { padding-top: 30px; }
+.signal-drawer-close { position: absolute; right: 5px; top: 5px; z-index: 1; }
+.signal-help > .signal-dialog-panel { padding: 22px; }
+.signal-help h2 { font: 700 22px var(--f-display), sans-serif; }
+.signal-help dl { display: grid; gap: 12px; padding-top: 20px; }
+.signal-help dl > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 12px; }
+.signal-help dd { color: var(--muted); }
+.signal-toast { position: fixed; z-index: 100; left: 50%; bottom: max(24px,env(safe-area-inset-bottom)); max-width: calc(100vw - 32px); padding: 12px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--fg); color: var(--surface); box-shadow: 0 8px 24px rgb(0 0 0 / .16); font-size: 13px; pointer-events: none; opacity: 0; transform: translate(-50%,12px); transition: opacity var(--t2) var(--ease), transform var(--t2) var(--ease); }
+.signal-toast[data-visible=true] { opacity: 1; transform: translate(-50%,0); }
+.signal-auth { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); min-height: 100dvh; width: 100%; background: var(--surface); }
+.signal-auth-scene { position: relative; overflow: hidden; min-height: 100%; background: var(--board-bg); color: var(--board-fg); }
+.signal-light-field { position: absolute; inset: 0; width: 100%; height: 100%; }
+.signal-auth-brand { position: absolute; left: 32px; top: 30px; display: flex; align-items: center; gap: 10px; font: 700 19px var(--f-display), sans-serif; letter-spacing: -.03em; pointer-events: none; }
+.signal-auth-caption { position: absolute; left: 32px; bottom: 30px; font: 11px var(--f-mono), monospace; letter-spacing: .08em; color: rgb(255 247 232 / .45); pointer-events: none; }
+.signal-auth-form { display: flex; min-width: 0; align-items: center; justify-content: center; padding: 56px clamp(24px,5vw,80px); }
+.signal-auth-content { width: 100%; max-width: 380px; }
+.signal-auth-heading { margin-bottom: 32px; animation: signal-arrive var(--t3) var(--ease) both; }
+.signal-auth-heading h1 { font: 700 clamp(32px,3vw,44px)/1.06 var(--f-display), sans-serif; letter-spacing: -.04em; }
+.signal-auth-heading p { margin-top: 12px; font-size: 14px; color: var(--muted); }
+.signal-auth-content form { animation: signal-arrive var(--t3) var(--ease) 50ms both; }
+.signal-auth-field { display: flex; min-width: 0; flex-direction: column; gap: 7px; }
+.signal-auth-field label { font-size: 12px; font-weight: 500; color: var(--fg); }
+.signal-auth-field > p { font-size: 11px; line-height: 1.5; color: var(--muted); }
+.signal-auth-input-wrap { position: relative; display: flex; align-items: center; }
+.signal-auth-input-wrap > svg { position: absolute; left: 13px; color: var(--muted); pointer-events: none; }
+.signal-auth-input { width: 100%; min-width: 0; height: 46px; padding: 0 14px 0 39px; border: 1px solid var(--line); border-radius: 10px; background: var(--raise); color: var(--fg); font-size: 13px; }
+.signal-auth-input::placeholder { color: var(--muted); }
+.signal-auth-input:focus { outline: 2px solid var(--sodium); outline-offset: 2px; }
+.signal-auth-input:-webkit-autofill { -webkit-text-fill-color: var(--fg); caret-color: var(--fg); transition: background-color 100000s; }
+.signal-password { padding-right: 44px; }
+.signal-password-toggle { position: absolute; right: 7px; display: grid; place-items: center; width: 32px; height: 32px; color: var(--muted); border-radius: 7px; transition: transform var(--t1) var(--ease); }
+.signal-password-toggle:hover { transform: translateY(-1px); }
+.signal-password-toggle:active { transform: scale(.94); }
+.signal-remember { display: flex; align-items: center; gap: 10px; align-self: flex-start; font-size: 12px; color: var(--muted); border-radius: 8px; }
+.signal-switch { position: relative; display: inline-flex; align-items: center; width: 32px; height: 18px; border-radius: 99px; background: var(--line); }
+.signal-switch[data-on=true] { background: var(--sodium); }
+.signal-switch > span { width: 12px; height: 12px; border-radius: 50%; background: var(--surface); transform: translateX(3px); transition: transform var(--t2) var(--ease); }
+.signal-switch[data-on=true] > span { background: var(--on-sodium); transform: translateX(17px); }
+.signal-auth-submit { height: 46px; width: 100%; font-size: 14px; }
+.signal-auth-footer { margin-top: 28px; font-size: 12px; color: var(--muted); animation: signal-arrive var(--t3) var(--ease) 100ms both; }
+.signal-auth .auth-link { color: var(--fg); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--line); }
+.signal-auth .auth-link::after { display: none; }
+.signal-auth .auth-link:hover { text-decoration-color: var(--fg); }
+.signal-auth-error { padding: 10px 12px; border: 1px solid color-mix(in oklab,var(--bad) 35%,var(--line)); border-radius: 10px; background: color-mix(in oklab,var(--bad) 8%,var(--surface)); color: var(--bad); font-size: 12px; }
+.signal-loading { animation: signal-spin 1s var(--ease) infinite; }
+@keyframes signal-spin { to { transform: rotate(360deg); } }
+@keyframes signal-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes signal-ping { from { opacity: .65; transform: scale(1); } to { opacity: 0; transform: scale(3.2); } }
+@media (max-width: 859px) {
+  .signal-frame { grid-template-columns: minmax(0,1fr); }
+  .signal-desktop-sidebar { display: none; }
+  .signal-menu { display: inline-flex; }
+  .signal-topbar { gap: 8px; padding: 10px 12px; }
+  .signal-command-trigger { flex: 1; width: auto; padding-left: 10px; gap: 7px; }
+  .signal-command-trigger kbd { display: none; }
+  .signal-topbar-tools { gap: 1px; }
+  .signal-topbar-tools .signal-button-icon { width: 32px; }
+  .signal-auth { grid-template-columns: minmax(0,1fr); grid-template-rows: 230px auto; }
+  .signal-auth-scene { min-height: 230px; }
+  .signal-auth-brand { top: 22px; left: 24px; }
+  .signal-auth-caption { display: none; }
+  .signal-auth-form { padding: 38px 24px 48px; align-items: flex-start; }
+  .signal-auth-heading { margin-bottom: 26px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

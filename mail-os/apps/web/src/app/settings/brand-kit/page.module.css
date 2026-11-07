@@ -1,0 +1,15 @@
+.page { max-width: 1160px; margin: 0 auto; min-width: 0; }
+.layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.controls, .editable { min-width: 0; display: grid; gap: 20px; }.editable { border: 0; padding: 0; margin: 0; }.fields, .colours { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.colour { display: flex; align-items: center; gap: 9px; min-width: 0; }.colour > input[type="color"] { width: 38px; height: 38px; flex-shrink: 0; padding: 2px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); cursor: pointer; }.colour > input:last-child { font: 11px var(--f-mono); }
+.note { font-size: 12px; line-height: 1.7; color: var(--muted); margin: 8px 0 12px; }.logo { display: flex; margin-top: 18px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: white; }.logo img { max-height: 48px; max-width: 100%; object-fit: contain; }
+.editor { margin-top: 14px; min-width: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }.editor :global(.editor-surface) { min-height: 100px; overflow-wrap: anywhere; }
+.previewStage { position: sticky; top: 24px; min-width: 0; display: grid; justify-items: center; gap: 24px; padding: 24px 12px; background: var(--raise); border-radius: 20px; animation: arrive var(--t3) var(--ease) 100ms both; }
+.previewLabel { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; width: 100%; font: 10px var(--f-mono); color: var(--muted); text-transform: uppercase; }.previewLabel b { font-weight: 500; }
+.phone { width: min(100%, 320px); border: 7px solid var(--fg); border-radius: 32px; background: white; overflow: hidden; box-shadow: 0 20px 40px color-mix(in srgb, var(--fg) 8%, transparent); }.phoneBar { width: 72px; height: 5px; border-radius: 8px; background: var(--fg); margin: 10px auto 14px; }.phone iframe { display: block; width: 100%; height: 510px; border: 0; }
+.code summary { font-size: 12px; color: var(--muted); cursor: pointer; }.code[open] > section { display: grid; gap: 16px; margin-top: 14px; animation: arrive var(--t2) var(--ease) both; }.code textarea { min-width: 0; width: 100%; font: 11px/1.7 var(--f-mono); resize: vertical; }
+.actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; }
+@keyframes arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 950px) { .layout { grid-template-columns: minmax(0, 1fr); }.previewStage { position: static; grid-row: 1; } }
+@media (max-width: 550px) { .fields, .colours { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .previewStage, .code[open] > section { animation: none; } }

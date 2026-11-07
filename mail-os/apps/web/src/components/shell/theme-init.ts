@@ -1,0 +1,1 @@
+export const themeScript = `(function(){var t;try{t=localStorage.getItem('ccos-theme')}catch(e){}document.documentElement.classList.toggle('dark',t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches))})()`;

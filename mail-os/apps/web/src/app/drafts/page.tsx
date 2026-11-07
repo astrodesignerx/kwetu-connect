@@ -1,0 +1,59 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import { useRequireAuth } from "@/lib/use-require-auth";
+import s from "./page.module.css";
+import { StatusChip } from "@/components/signal";
+import { draftReadiness } from "@/lib/signal-mail";
+import { htmlToText } from "@/lib/mail-frame";
+import { ComposeModal, loadDraftToContext, type ComposeContext } from "@/components/compose";
+import { combineDraftLists } from "@/lib/drafts";
+
+export default function DraftsPage() {
+  const { ready } = useRequireAuth();
+  const queryClient = useQueryClient();
+  const overview = useQuery({ queryKey: ["overview"], queryFn: api.mailOverview, enabled: ready });
+  const mailboxes = overview.data?.mailboxes ?? [];
+  const mailboxIds = mailboxes.map((mailbox) => mailbox.id);
+  const mailboxById = new Map(mailboxes.map((mailbox) => [mailbox.id, mailbox]));
+  const saved = useQuery({
+    queryKey: ["drafts", "signal-mail", ...mailboxIds],
+    queryFn: async () => combineDraftLists(await Promise.all(mailboxIds.map((id) => api.listDrafts(id)))),
+    enabled: ready && mailboxIds.length > 0,
+  });
+  const drafts = saved.data ?? [];
+  const loading = overview.isPending || (mailboxIds.length > 0 && saved.isPending);
+  const failed = overview.isError || saved.isError;
+  const [editing, setEditing] = useState<ComposeContext | null>(null);
+  const remove = useMutation({
+    mutationFn: (id: string) => api.deleteDraft(id),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["drafts"] }),
+  });
+  if (!ready) return null;
+  return (
+    <div className={s.page}>
+      <header className={s.header}><div><h1>Drafts</h1><p>{loading ? "Loading drafts..." : failed ? "Drafts unavailable" : `${drafts.length} saved / ${drafts.filter((draft) => draftReadiness(draft).ready).length} ready`}</p></div><Link href="/mail?compose=1">New message</Link></header>
+      {remove.isError && <p role="alert">Could not discard this draft. Try again.</p>}
+      {failed && <p role="alert" className={s.quiet}>Drafts could not load. <button onClick={() => { void overview.refetch(); void saved.refetch(); }}>Try again</button></p>}
+      {loading ? <p className={s.quiet} role="status">Opening your saved messages...</p> : drafts.length ? <ul className={s.sheets}>{drafts.map((draft, index) => {
+        const readiness = draftReadiness(draft);
+        return <li className={s.sheet} key={draft.id} style={{ animationDelay: Math.min(index, 6) * 50 + 'ms' }}>
+          <button className={s.open} onClick={() => setEditing(loadDraftToContext(draft.mailboxConnectionId, draft))}>
+            <span className={s.recipient}>{draft.toAddrs ? `To ${draft.toAddrs}` : draft.ccAddrs ? `Cc ${draft.ccAddrs}` : draft.bccAddrs ? `Bcc ${draft.bccAddrs}` : '(no recipient)'}</span>
+            <h2>{draft.subject || '(no subject)'}</h2>
+            <p>{draft.bodyText || htmlToText(draft.bodyHtml ?? '') || 'No message yet.'}</p>
+            <span className={s.recipient}>From {mailboxById.get(draft.mailboxConnectionId)?.email}</span>
+            <span className={s.footer}><time dateTime={draft.updatedAt}>{new Date(draft.updatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</time><StatusChip label={readiness.label} colour={readiness.ready ? 'var(--good)' : 'var(--warn)'} /></span>
+          </button>
+          <button className={s.discard} disabled={remove.isPending} onClick={() => remove.mutate(draft.id)}>Discard</button>
+        </li>;
+      })}</ul> : !failed && <p className={s.quiet}>No drafts. Your next message starts here.</p>}
+      {editing && (
+        <ComposeModal ctx={editing} onClose={() => setEditing(null)} />
+      )}
+    </div>
+  );
+}

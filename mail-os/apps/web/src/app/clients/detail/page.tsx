@@ -1,0 +1,77 @@
+"use client";
+
+import { Suspense, useState, type CSSProperties } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import { clientColour, clientsApi, displayDate, replyDuration } from "@/lib/signal-clients";
+import { ClientAvatar, StateBoard, StatusChip } from "@/components/signal";
+import { Button } from "@/components/ui";
+import { ClientForm } from "@/components/clients/client-form";
+import { ClientProjects } from "@/components/clients/client-projects";
+import s from "./page.module.css";
+
+export default function ClientDetailPage() {
+  return <Suspense fallback={<StateBoard state="loading" label="Loading client" />}><ClientLookup /></Suspense>;
+}
+
+function ClientLookup() {
+  const id = useSearchParams().get("id") ?? "";
+  return id ? <ClientWorkspace key={id} id={id} /> : <p>Choose a client from <Link href="/clients">the directory</Link>.</p>;
+}
+
+function ClientWorkspace({ id }: { id: string }) {
+  const cache = useQueryClient();
+  const router = useRouter();
+  const company = useQuery({ queryKey: ["company", id], queryFn: () => api.getCompany(id) });
+  const insights = useQuery({ queryKey: ["client-insights", id], queryFn: ({ signal }) => clientsApi.insights(id, signal), refetchInterval: 60000 });
+  const [editing, setEditing] = useState(false);
+  const remove = useMutation({ mutationFn: () => api.deleteCompany(id), onSuccess: () => {
+    void cache.invalidateQueries({ queryKey: ["companies"] });
+    void cache.invalidateQueries({ queryKey: ["client-activity"] });
+    router.push("/clients");
+  } });
+  if (company.isPending) return <StateBoard state="loading" label="Loading client" />;
+  if (company.isError) return <div role="alert"><p>{company.error.message}</p><Link href="/clients">Back to clients</Link></div>;
+  const data = company.data;
+  const hue = clientColour(id);
+  const stats = insights.data;
+  const monogram = data.company.name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(word => Array.from(word)[0]).join("").toLocaleUpperCase("en-GB");
+  return <div className={s.page} style={{ "--h": hue } as CSSProperties}>
+    <header className={s.hero}>
+      <span className={s.monogram} aria-hidden="true">{monogram}</span>
+      <Link className={s.back} href="/clients">Back to clients</Link>
+      <div className={s.heroRow}>
+        <ClientAvatar name={data.company.name} colour={hue} size="large" />
+        <div className={s.grow}><p className={s.eyebrow}>Client workspace</p><h1>{data.company.name}</h1><div className={s.identity}><span>{data.company.domain || "No domain added"}</span>{stats && <StatusChip label={stats.waitingCount > 0 ? "Waiting on us" : "All replied"} colour={hue} />}</div></div>
+        <div className={s.actions}><Button variant="default" onClick={() => setEditing(!editing)}>{editing ? "Close editor" : "Edit client"}</Button></div>
+      </div>
+    </header>
+    {editing && <ClientForm initial={data.company} onDone={() => setEditing(false)} />}
+    {insights.isPending ? <p className={s.muted} role="status">Loading client insights...</p> : insights.isError ? <div role="alert" className={s.error}>Could not load insights. <Button variant="ghost" onClick={() => void insights.refetch()}>Try again</Button></div> : stats && <dl className={s.kpis}>
+      <div><dt>Boards booked</dt><dd>{stats.boardsBooked}</dd><small>{displayDate(stats.startDate)} to {displayDate(stats.endDate)}</small></div>
+      <div><dt>Median first reply</dt><dd>{replyDuration(stats.firstReply.medianSeconds)}</dd><small>{stats.firstReply.count} replies / last {stats.firstReply.days} days</small></div>
+      <div><dt>Last contact</dt><dd className={s.date}>{displayDate(stats.lastContactAt)}</dd></div>
+    </dl>}
+    {data.company.notes && <p className={s.notes}>{data.company.notes}</p>}
+    <ClientProjects companyId={id} projects={data.projects} colour={hue} />
+    <section className={s.panel}>
+      <div className={s.sectionHead}><h2>People</h2><span className={s.muted}>{data.contacts.length} contacts</span></div>
+      {!data.contacts.length ? <p className={s.muted}>Add the client&apos;s email domain to discover people from message addresses.</p> : <ul className={s.rows}>{data.contacts.map(contact => <li key={contact.id}>
+        <ClientAvatar name={contact.name || contact.email} colour={hue} size="small" /><div className={s.grow}><strong>{contact.name || contact.email}</strong><small>{contact.email}</small></div><small className={s.muted}>{contact.messageCount} messages</small>
+      </li>)}</ul>}
+    </section>
+    <section className={s.panel}>
+      <div className={s.sectionHead}><h2>Communication history</h2><Link href="/mail" className={s.back}>Link conversations in Mail</Link></div>
+      {!data.threads.length ? <p className={s.muted}>Open a conversation in Mail and use Tag to client to link it here.</p> : <ol className={s.timeline}>{data.threads.map(thread => {
+        const state = stats?.recentThreads.find(t => t.id === thread.id);
+        return <li key={thread.id}><time dateTime={thread.lastDate ?? undefined}>{displayDate(thread.lastDate)}</time><span className={s.dot} aria-hidden="true" /><Link href={`/mail?id=${encodeURIComponent(thread.id)}`}>
+          <strong>{thread.subject || "(no subject)"}</strong><small>{thread.snippet || thread.participants}</small>
+          {state && <StatusChip label={state.replyState === "ToReply" ? "Waiting on us" : state.replyState === "Awaiting" ? "Awaiting reply" : "Done"} colour={state.replyState === "ToReply" ? "var(--sodium)" : hue} />}
+        </Link></li>;
+      })}</ol>}
+    </section>
+    <footer className={s.footer}><Button variant="ghost" disabled={remove.isPending} onClick={() => { if (confirm(`Delete client ${data.company.name}, its projects and flights?`)) remove.mutate(); }}>Delete client</Button>{remove.isError && <p role="alert" className={s.error}>{remove.error.message}</p>}</footer>
+  </div>;
+}

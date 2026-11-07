@@ -1,0 +1,23 @@
+{
+  "company_name": "North Rift Foods",
+  "booking_reference": "DEMO-0124",
+  "start_date": "2 November 2026",
+  "end_date": "29 November 2026",
+  "campaign_duration": "20 seconds",
+  "appearances": "As agreed in your booking",
+  "package_name": "Custom campaign",
+  "artwork_deadline": "26 October 2026",
+  "report_period": "2 to 8 November 2026",
+  "verified_plays": "1,248",
+  "scheduled_plays": "1,260",
+  "unavailable_plays": "12",
+  "evidence_date": "8 November 2026",
+  "renewal_deadline": "23 November 2026",
+  "review_version": "Version 03",
+  "review_deadline": "26 October 2026",
+  "proof_reference": "DEMO-LOG-01",
+  "service_status": "Awaiting revised schedule",
+  "effective_date": "9 November 2026",
+  "service_reason": "Schedule change under review",
+  "next_update": "10 November 2026 at 10:00 EAT"
+}

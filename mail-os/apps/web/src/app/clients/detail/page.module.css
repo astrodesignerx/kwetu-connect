@@ -1,0 +1,42 @@
+.page { display: flex; flex-direction: column; gap: 22px; min-width: 0; color: var(--fg); }
+.hero { position: relative; overflow: hidden; padding: 26px; border: 1px solid color-mix(in srgb, var(--h) 24%, var(--line)); border-radius: 20px; background: radial-gradient(ellipse at top right, color-mix(in srgb, var(--h) 18%, transparent), transparent 75%), var(--surface); }
+.monogram { position: absolute; right: -10px; top: -30px; color: color-mix(in srgb, var(--h) 15%, transparent); font: 800 230px/1 var(--f-display); letter-spacing: -.08em; pointer-events: none; user-select: none; }
+.heroRow { position: relative; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin-top: 24px; }
+.hero h1 { font: 600 clamp(30px, 5vw, 44px)/1.1 var(--f-display); letter-spacing: -.03em; margin: 8px 0 14px; overflow-wrap: anywhere; }
+.identity { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font: 12px var(--f-mono); color: var(--muted); overflow-wrap: anywhere; }
+.eyebrow { font: 10px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.back { font-size: 12px; color: var(--muted); text-decoration: underline; text-underline-offset: 4px; }
+.grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.grow strong { display: block; font-size: 14px; }
+.grow small { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.kpis > div { padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; min-width: 0; }
+.kpis dt, .kpis small { color: var(--muted); font-size: 11px; line-height: 1.7; }
+.kpis dd { margin: 10px 0; font: 500 clamp(23px, 4vw, 32px)/1.2 var(--f-display); overflow-wrap: anywhere; }
+.kpis .date { font-size: 22px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px; min-width: 0; overflow: hidden; }
+.sectionHead { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.sectionHead h2 { font: 600 18px var(--f-display); }
+.muted, .notes { color: var(--muted); font-size: 12px; line-height: 1.7; }
+.notes { white-space: pre-wrap; overflow-wrap: anywhere; }
+.rows { list-style: none; padding: 0; margin: 0; }
+.rows li { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 16px 0; border-top: 1px solid var(--line); }
+.window { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; color: var(--muted); font-size: 12px; }
+.window input { color: var(--fg); background: var(--raise); border: 1px solid var(--line); border-radius: 8px; padding: 8px; min-width: 0; }
+.timeline { list-style: none; padding: 0; }
+.timeline li { display: grid; grid-template-columns: 100px 10px minmax(0, 1fr); gap: 14px; position: relative; padding: 14px 0; }
+.timeline time { color: var(--faint); font: 10px var(--f-mono); line-height: 1.7; }
+.timeline a { display: flex; flex-direction: column; align-items: start; gap: 7px; min-width: 0; transition: transform var(--t1) var(--ease); }
+.timeline a:hover { transform: translateX(3px); }
+.timeline strong { font-size: 13px; overflow-wrap: anywhere; }
+.timeline small { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; background: var(--h); }
+.footer { display: flex; justify-content: end; align-items: center; flex-wrap: wrap; gap: 12px; }
+.error { font-size: 12px; color: var(--bad); }
+.page > :is(section, header, dl) { animation: arrive var(--t3) var(--ease) both; }
+.page > dl { animation-delay: 50ms; }
+.page > section { animation-delay: 100ms; }
+@keyframes arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 600px) { .hero, .panel { padding: 18px; } .kpis { grid-template-columns: minmax(0, 1fr); } .timeline li { grid-template-columns: 8px minmax(0, 1fr); gap: 10px; } .timeline time { grid-column: 2; } .timeline .dot { grid-column: 1; grid-row: auto; } }
+@media (prefers-reduced-motion: reduce) { .page > :is(section, header, dl) { animation: none; } .timeline a { transition: none; } }

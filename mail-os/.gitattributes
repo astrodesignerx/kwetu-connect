@@ -1,0 +1,13 @@
+# Normalize line endings so Windows and Linux checkouts don't churn the diff.
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF.
+*.ps1  text eol=crlf
+*.cmd  text eol=crlf
+*.bat  text eol=crlf
+
+# Binary assets — never touch.
+*.png  binary
+*.ico  binary
+*.jpg  binary
+*.pdf  binary
