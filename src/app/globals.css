@@ -2406,3 +2406,106 @@ button.pay-ghost { width: 100%; background: transparent; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   :is(.nightshift, .timetable-sheet) *, :is(.nightshift, .timetable-sheet) *::before, :is(.nightshift, .timetable-sheet) *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* Booking stages and the shared two column inspector. */
+.nightshift *, .timetable-sheet * { font-family: var(--font-archivo), Arial, sans-serif; }
+.nightshift :is(code,kbd,.reference-link), .timetable-sheet code { font-family: var(--font-geist-mono), monospace; }
+.pipeline-page .pipeline-heading h1 { font-size: 30px; letter-spacing: -.04em; }
+.pipeline-page .bookings-title p { font-size: 12px; color: var(--muted-foreground); margin-top: 7px; }
+.pipeline-page .status-filters { gap: 5px; flex-wrap: wrap; }
+.pipeline-page .status-filters a { border: 0; background: var(--card); font-size: 11px; padding: 8px 12px; }
+.pipeline-page .status-filters a[aria-current="page"] { background: var(--foreground); color: var(--background); }
+.v2-filter-form { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 10px; padding: 0; border: 0; background: none; }
+.v2-filter-form label:first-of-type { flex: 1; min-width: 180px; }
+.v2-filter-form label:not(:first-of-type) { width: 145px; }
+.v2-filter-form label { font-size: 10px !important; }
+.v2-filter-form .ns-input { border: 0; background: var(--card); min-height: 36px; height: 36px; font-size: 12px; }
+.v2-filter-form button { border-radius: 999px; min-height: 36px; }
+.v2-bookings-summary { display: grid; grid-template-columns: minmax(0,1fr) 34%; gap: 14px; }
+.v2-booked-value { position: relative; min-height: 140px; overflow: hidden; }
+.v2-booked-value h2 { color: var(--muted-foreground); font-size: 11px; font-weight: 500; }
+.v2-booked-value > strong { display: block; font-size: 24px; letter-spacing: -.025em; margin-top: 8px; position: relative; z-index: 1; }
+.v2-booked-value .revenue-chart { margin: 5px -18px -18px; }
+.v2-booked-value svg { width: 100%; height: 65px; }
+.v2-booked-value .chart-line { stroke: #ff7a2e; stroke-dasharray: none; animation: none; }
+.v2-booked-value .chart-area { fill: #ff8a2a33; }
+.v2-booked-value figcaption { text-align: right; padding: 2px 16px 10px; font-size: 9px; }
+.pipeline-board { grid-template-columns: repeat(5,minmax(150px,1fr)); gap: 10px; }
+.pipeline-scroll { overflow: visible; }
+.pipeline-column, .pipeline-column[data-stage] { --stage: var(--v2-violet); border-radius: 22px; padding: 12px 8px; min-height: 380px; background: color-mix(in srgb, var(--stage) 8%, var(--v2-sunk)); border-color: color-mix(in srgb, var(--stage) 22%, var(--border)); }
+.pipeline-column[data-stage="Paid"] { --stage: var(--v2-sky); }
+.pipeline-column[data-stage="Approved"] { --stage: var(--v2-amber); }
+.pipeline-column[data-stage="Live"] { --stage: var(--v2-green); }
+.pipeline-column[data-stage="Finished"] { --stage: var(--v2-muted); }
+.pipeline-column > header { padding: 0 4px; }
+.pipeline-column > header h2 { font-size: 12px; font-weight: 600; }
+.pipeline-column > header i { box-shadow: 0 0 10px var(--stage); }
+.pipeline-column > header > span { border: 0; background: color-mix(in srgb, var(--stage) 12%, transparent); font-size: 10px; width: 22px; height: 22px; border-radius: 50%; }
+.pipeline-column .pipeline-column-total { padding: 0 4px; margin: 5px 0 14px; }
+.pipeline-card { position: relative; gap: 7px; padding: 12px; border-radius: 16px; background: var(--v2-silver), var(--card); border-color: color-mix(in srgb, var(--stage) 16%, var(--border)); box-shadow: var(--v2-shadow); }
+.pipeline-card .business-avatar { background: var(--avatar); color: #1d1006; border: 0; border-radius: 50%; width: 27px; height: 27px; font-size: 9px; }
+.pipeline-card > strong { font-size: 12px; line-height: 1.3; }
+.pipeline-card-length { background: none; padding: 0; font-size: 9px; }
+.pipeline-card .reference-link { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 8px; }
+.pipeline-card-price { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px; font-size: 12px; font-weight: 600; }
+.pipeline-card-price small { font-size: 9px; }
+.pipeline-card-dates { font-size: 9px; line-height: 1.5; }
+.pipeline-task { font-size: 10px; padding-top: 7px; line-height: 1.4; }
+.v2-stage-track { display: flex; gap: 3px; }
+.v2-stage-track i { width: 15px; height: 4px; border-radius: 99px; background: var(--input); }
+.v2-stage-track i[data-filled="true"] { background: var(--stage); }
+.pipeline-cancelled { padding-top: 10px; }
+.pipeline-stack { max-height: 540px; }
+.v2-inspector-overlay { background: #080604ad; backdrop-filter: blur(10px); }
+.pipeline-inspector { position: fixed; top: 50%; left: 50%; right: auto; bottom: auto; width: min(1040px, calc(100vw - 48px)); height: auto; min-height: 0; max-height: calc(100dvh - 48px); padding: 22px; border-radius: 26px; border: 1px solid var(--border); background: var(--v2-silver), var(--card); transform: translate(-50%,-50%); box-shadow: 0 40px 120px #0008; overflow-y: auto; animation: v2-popup-in var(--duration-surface) var(--ease-standard) both; }
+.pipeline-inspector[data-state="closed"] { animation: v2-popup-out var(--duration-base) var(--ease-standard) both; }
+.pipeline-inspector .sheet-heading { padding: 0 0 12px; margin: 0; }
+.pipeline-inspector .sheet-heading > :first-child { font-size: 18px; }
+.pipeline-inspector .sheet-heading .quiet-button { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; }
+.pipeline-inspector > .quiet-button { font-size: 11px; margin-bottom: 14px; }
+.pipeline-inspector .booking-detail-panel { border: 0; padding: 0; overflow: visible; }
+.v2-booking-detail { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 20px; align-items: start; min-width: 0; }
+.v2-detail-left, .v2-detail-right { display: grid; gap: 14px; min-width: 0; align-content: start; }
+.pipeline-inspector .v2-detail-left, .pipeline-inspector .v2-detail-right { max-height: calc(100dvh - 190px); overflow-y: auto; padding: 3px 5px 8px 3px; margin: -3px; scrollbar-width: thin; }
+.v2-booking-detail .staff-card, .pipeline-inspector .v2-booking-detail .staff-card { padding: 16px; border-radius: 17px; background: var(--card); border: 1px solid var(--border); box-shadow: none; min-width: 0; }
+.v2-booking-detail .detail-heading { margin-bottom: 10px; }
+.v2-booking-detail .advert-preview, .v2-booking-detail.detail-compact .advert-preview { aspect-ratio: 16 / 9; height: auto; min-height: 180px; border-radius: 18px; }
+.v2-booking-detail .advert-facts { gap: 7px; }
+.v2-booking-detail .advert-facts > div { border-radius: 12px; background: var(--muted); border: 0; padding: 10px; }
+.v2-booking-detail .advert-facts strong { font-size: 11px; }
+.v2-booking-detail .advert-facts span { font-size: 10px; }
+.v2-booking-detail .detail-adverts .grid { grid-template-columns: minmax(0,1fr); gap: 10px; }
+.v2-booking-detail .detail-adverts .grid > div { padding: 12px; border-radius: 12px; }
+.v2-detail-identity h1 { font-size: 23px; line-height: 1.2; margin-top: 7px; }
+.v2-detail-identity .eyebrow { font-size: 9px; overflow-wrap: anywhere; }
+.v2-detail-stages { display: flex; justify-content: space-between; gap: 4px; margin-top: 16px !important; list-style: none; padding: 0; }
+.v2-detail-stages li { display: grid; justify-items: center; gap: 5px; font-size: 9px; color: var(--muted-foreground); position: relative; flex: 1; }
+.v2-detail-stages li::before { content: ""; position: absolute; top: 13px; left: -50%; right: 50%; height: 1px; background: var(--input); z-index: 0; }
+.v2-detail-stages li:first-child::before { display: none; }
+.v2-detail-stages i { position: relative; z-index: 1; width: 27px; height: 27px; border-radius: 50%; display: grid; place-items: center; font-style: normal; background: var(--muted); border: 1px solid var(--border); }
+.v2-detail-stages [aria-current="step"] i { background: var(--v2-gradient); border-color: transparent; color: #1d1006; box-shadow: 0 0 15px -3px var(--v2-glow); }
+.v2-detail-stages [data-complete="true"] i { background: color-mix(in srgb,var(--v2-green) 15%,var(--card)); color: var(--v2-green); }
+.v2-booking-detail .staff-card h2 { margin-bottom: 12px; }
+.v2-booking-detail .staff-card p { font-size: 12px; line-height: 1.6; }
+.v2-booking-full { display: grid; gap: 20px; }
+.v2-booking-full > .quiet-button { justify-self: start; }
+@keyframes v2-popup-in { from { opacity: 0; transform: translate(-50%,calc(-50% + 14px)) scale(.98); } to { opacity: 1; transform: translate(-50%,-50%) scale(1); } }
+@keyframes v2-popup-out { from { opacity: 1; transform: translate(-50%,-50%) scale(1); } to { opacity: 0; transform: translate(-50%,calc(-50% + 8px)) scale(.98); } }
+@media (max-width: 1279px) { .pipeline-board { grid-template-columns: repeat(5,minmax(0,1fr)); } .pipeline-card { padding: 10px; } }
+@media (max-width: 900px) { .pipeline-board { grid-template-columns: repeat(2,minmax(0,1fr)); } .v2-bookings-summary { grid-template-columns: minmax(0,1fr); } }
+@media (max-width: 767px) {
+  .pipeline-page .pipeline-heading h1 { font-size: 27px; }
+  .pipeline-page .pipeline-heading .quiet-button { font-size: 10px; padding: 7px 10px; }
+  .pipeline-board, .pipeline-board.is-filtered { grid-template-columns: minmax(0,1fr); }
+  .pipeline-column { min-height: 160px; }
+  .pipeline-stack { max-height: 400px; }
+  .pipeline-card { padding: 14px; }
+  .v2-filter-form label:not(:first-of-type) { width: calc(50% - 5px); }
+  .v2-filter-form label:first-of-type { width: 100%; }
+  .v2-booking-detail { grid-template-columns: minmax(0,1fr); gap: 16px; }
+  .pipeline-inspector { width: calc(100vw - 20px); max-height: calc(100dvh - 24px); border-radius: 22px; padding: 16px; }
+  .pipeline-inspector .v2-detail-left, .pipeline-inspector .v2-detail-right { max-height: none; overflow: visible; margin: 0; padding: 0; }
+  .v2-detail-identity { order: -1; }
+  .v2-booking-detail .advert-preview { min-height: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .pipeline-inspector { animation: none !important; } }

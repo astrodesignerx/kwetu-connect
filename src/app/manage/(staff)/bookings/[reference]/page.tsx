@@ -9,5 +9,5 @@ export default async function BookingPage({ params }: { params: Promise<{ refere
   const store = getStore();
   const [detail, settings] = await Promise.all([store.bookingDetail(reference), store.getSettings()]);
   if (!detail) notFound();
-  return <><Link className="quiet-button" href="/manage/bookings">Back to bookings</Link><BookingDetail detail={detail} settings={settings} demo={store.mode === "memory"} /></>;
+  return <section className="v2-booking-full"><Link className="quiet-button" href="/manage/bookings">Back to bookings</Link><BookingDetail detail={detail} settings={settings} demo={store.mode === "memory"} /></section>;
 }

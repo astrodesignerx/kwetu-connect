@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, type ReactNode } from "react";
+import { useEffect, useRef, useState, useTransition, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -8,6 +8,7 @@ import { STATUSES } from "@/lib/booking/status";
 import type { BookingStatus } from "@/lib/booking/capacity";
 import type { BookingListItem } from "@/lib/store/types";
 import { number } from "@/components/booking/QuoteTotals";
+import { X } from "@phosphor-icons/react";
 
 export type PipelineCard = BookingListItem & { waiting: number; approved: number; advertCount: number };
 
@@ -34,7 +35,7 @@ export default function PipelineBoard({ bookings, query, selected, status }: { b
   const card = (booking: PipelineCard, index: number) => <Link
     key={booking.reference} href={href(booking.reference)} scroll={false}
     className="pipeline-card" data-stage={booking.status} data-selected={selected === booking.reference}
-    style={{ animationDelay: `${Math.min(index, 5) * 35}ms` }}
+    style={{ animationDelay: `${Math.min(index, 2) * 120}ms`, "--avatar": ["#a3e635", "#2dd4bf", "#fb923c", "#60a5fa", "#fb7185"][booking.business.charCodeAt(0) % 5] } as CSSProperties}
     draggable={!["Finished", "Cancelled"].includes(booking.status)}
     onDragStart={(event) => { event.dataTransfer.setData("text/plain", booking.reference); event.dataTransfer.effectAllowed = "move"; setDragged(booking.reference); }}
     onDragEnd={() => { setDragged(""); setOver(null); }}
@@ -45,6 +46,7 @@ export default function PipelineBoard({ bookings, query, selected, status }: { b
     <span className="pipeline-card-price">KES {number(booking.priceKes)}<small>{number(booking.plays)} plays</small></span>
     <span className="pipeline-card-dates">{booking.request.startDate}<br />to {booking.request.endDate}</span>
     <span className="pipeline-task">{nextTask(booking)}</span>
+    <span className="v2-stage-track" aria-hidden="true">{STATUSES.filter((stage) => stage !== "Cancelled").map((stage, index) => <i key={stage} data-filled={index <= STATUSES.indexOf(booking.status)} />)}</span>
   </Link>;
   return <div className="pipeline-results" aria-busy={pending} data-pending={pending}>
     <div className="pipeline-scroll" role="region" aria-label="Booking pipeline. Scroll to see all stages." tabIndex={0}>
@@ -69,11 +71,14 @@ export default function PipelineBoard({ bookings, query, selected, status }: { b
 
 export function PipelineInspector({ title, closeUrl, reference, children }: { title: string; closeUrl: string; reference: string; children: ReactNode }) {
   const router = useRouter();
-  return <Dialog.Root open onOpenChange={(open) => { if (!open) router.push(closeUrl, { scroll: false }); }}><Dialog.Portal>
-    <Dialog.Overlay className="ns-sheet-overlay" />
+  const [open, setOpen] = useState(true);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  return <Dialog.Root open={open} onOpenChange={(value) => { if (!value) { setOpen(false); timer.current = setTimeout(() => router.push(closeUrl, { scroll: false }), window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 200); } }}><Dialog.Portal>
+    <Dialog.Overlay className="ns-sheet-overlay v2-inspector-overlay" />
     <Dialog.Content className="timetable-sheet pipeline-inspector nightshift" aria-describedby={undefined} data-lenis-prevent
       onCloseAutoFocus={(event) => { event.preventDefault(); [...document.querySelectorAll<HTMLAnchorElement>(".pipeline-card")].find((card) => new URL(card.href).searchParams.get("selected") === reference)?.focus(); }}>
-      <div className="sheet-heading"><Dialog.Title>{title}</Dialog.Title><Dialog.Close className="quiet-button" aria-label="Close booking">Close</Dialog.Close></div>
+      <div className="sheet-heading"><Dialog.Title>{title}</Dialog.Title><Dialog.Close className="quiet-button" aria-label="Close booking"><X size={18} aria-hidden="true" /></Dialog.Close></div>
       <Link href={"/manage/bookings/" + reference} className="quiet-button">Open full booking</Link>
       <div className="booking-detail-panel">{children}</div>
     </Dialog.Content>
