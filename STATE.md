@@ -4,6 +4,8 @@ Goal: the KCA website, booking engine, Supabase bookings and staff manager. Next
 
 ## Current status (2026-11-07)
 
+- Local V2 Job A is in progress on ds/v2-ember-silver from a1862c0. Phase 1 adds Ember Silver tokens, the framed manager shell and shared visual components. No merge, push or deployment is authorised for this job. The approved brief is C:/Users/ether/Documents/kwetu-connect/.claude/handoffs/20261107-v2-build-brief.md. Checks and screenshots are kept in .claude/notes/v2-build/.
+
 - LIVE: application release 66dd4c917a4fc2b49624ab9597133b526473ae80, feat: refine booking and manager workspaces, is committed, fast-forward merged from ds/nightshift-redesign into main, pushed and deployed to https://kwetuconnectads.co.ke. The user explicitly authorised this release. Main may include later documentation-only commits with identical application code.
 - Vercel project kwetu-connect, team astrodesignerx-3017s-projects, GitHub repository astrodesignerx/kwetu-connect. Production deployment: https://vercel.com/astrodesignerx-3017s-projects/kwetu-connect/21sj3pjzRBWGj4ZYnbttfmMb4YCv. GitHub production deployment ID 7613089031. The Vercel commit status reports success.
 - Supabase migrations 0001 through 0004 are applied. Migration 0004 was applied on 2026-11-07 in the signed-in SQL editor with a transaction and PostgREST schema reload. SQL checks returned ready=true, updates_prices=true and updates_cells=true. The service-role readiness RPC returns 200/true; anonymous access returns 401.
