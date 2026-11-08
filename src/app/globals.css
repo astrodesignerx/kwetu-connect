@@ -1035,7 +1035,8 @@ button.time-cell:active { transform: scale(.98); }
 .chart-line { fill: none; stroke: var(--v2-e2); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1; animation: line-draw var(--duration-surface) var(--ease-out); }
 .revenue-chart figcaption { color: var(--muted-foreground); font-size: 9px; }
 .chart-drop { stroke: var(--muted-foreground); stroke-width: 1; stroke-dasharray: 2 3; opacity: .7; }
-.chart-dot { fill: var(--v2-e1); stroke: var(--v2-e2); stroke-width: 2; }
+.chart-plot { position: relative; }
+.chart-dot { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: var(--v2-e1); box-shadow: 0 0 0 2px var(--v2-e2); pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .chart-line { animation: none; stroke-dasharray: none; } }
 .tile-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
 .tile-heading > strong { font-size: 22px; }
