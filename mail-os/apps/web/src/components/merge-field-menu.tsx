@@ -5,8 +5,8 @@
  *
  * Replaces the instruction "type {{client_name}} and then list it in the variables
  * box" with picking "Client's name" off a menu. The caller decides what to do with
- * the choice — the rich text editor drops a chip at the caret, the subject line
- * inserts the raw placeholder — so this component only has to choose, not insert.
+ * the choice. The rich text editor drops a chip at the caret and the subject line
+ * inserts the raw placeholder, so this component only has to choose, not insert.
  *
  * Every item shows the example value the preview will use, because "Click rate"
  * and "2.98%" together answer the question people actually have, which is what
@@ -17,6 +17,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Plus } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useEditorTools } from "@/components/editor";
+import { Popover } from "@/components/popover";
 import { MERGE_FIELD_GROUPS, chipHtml, type MergeField } from "@/lib/merge-fields";
 
 export function MergeFieldMenu({
@@ -76,8 +77,7 @@ export function MergeFieldMenu({
         />
       </button>
 
-      {open && (
-        <div role="menu" className="mf-menu">
+      <Popover open={open} role="menu" className="mf-menu">
           <p className="mf-menu-intro">
             Pick a detail to drop in. It shows as a tag while you write, and is swapped
             for the real value when the email goes out.
@@ -103,8 +103,7 @@ export function MergeFieldMenu({
               ))}
             </div>
           ))}
-        </div>
-      )}
+      </Popover>
     </div>
   );
 }

@@ -4,51 +4,45 @@
 
 :root {
   color-scheme: light;
-  --bg: #E7E9EF;
-  --frame: #F7F8FA;
-  --surface: #FFFFFF;
-  --raise: #F0F1F5;
-  --line: #DDE0E8;
-  --fg: #12131B;
-  --muted: #5B5F73;
-  --faint: #9497AA;
-  --sodium: #FBB040;
-  --sodium-ink: #9A5800;
-  --on-sodium: #1B1206;
-  --jac: #6A48D8;
-  --good: #13864D;
-  --warn: #8D6900;
-  --bad: #C63A2E;
-  --glow: rgba(251,176,64,.34);
-  --board-bg: #06070B;
-  --board-fg: #FFF7E8;
-  --t1: 140ms;
-  --t2: 240ms;
-  --t3: 420ms;
-  --ease: cubic-bezier(.16,1,.3,1);
-  --spring: cubic-bezier(.34,1.56,.64,1);
+  --bg: #eceef1;
+  --frame: #eceef1;
+  --surface: #ffffff;
+  --raise: #f4f5f7;
+  --line: #e2e4e8;
+  --fg: #121315;
+  --muted: #62666e;
+  --faint: var(--muted);
+  --sodium: var(--fg);
+  --sodium-ink: var(--fg);
+  --on-sodium: var(--surface);
+  --jac: var(--muted);
+  --good: var(--muted);
+  --warn: var(--mail-waiting);
+  --bad: #b52b22;
+  --glow: transparent;
+  --mail-waiting: #995005;
+  --mail-shadow: 0 1px 2px rgb(18 19 21 / .04), 0 10px 30px -18px rgb(18 19 21 / .18);
+  --board-bg: #06070b;
+  --board-fg: #fff7e8;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --t1: 120ms;
+  --t2: 200ms;
+  --t3: 320ms;
+  --spring: var(--ease);
 }
 
 .dark {
   color-scheme: dark;
-  --bg: #0A0B11;
-  --frame: #0F1018;
-  --surface: #151722;
-  --raise: #1C1F2D;
-  --line: #272A3B;
-  --fg: #F2F0EA;
-  --muted: #9B9EB2;
-  --faint: #62667C;
-  --sodium: #FBB040;
-  --sodium-ink: #FFC66B;
-  --on-sodium: #1B1206;
-  --jac: #A285F4;
-  --good: #4FD18B;
-  --warn: #F2C94C;
-  --bad: #FF6B5E;
-  --glow: rgba(251,176,64,.38);
-  --board-bg: #06070B;
-  --board-fg: #FFF7E8;
+  --bg: #0d0e10;
+  --frame: #0d0e10;
+  --surface: #17181b;
+  --raise: #1f2024;
+  --line: #303238;
+  --fg: #f1f1f2;
+  --muted: #a0a3a9;
+  --bad: #ff887d;
+  --mail-waiting: #f2b25c;
+  --mail-shadow: 0 1px 0 rgb(255 255 255 / .03) inset, 0 14px 30px -20px rgb(0 0 0 / .8);
 }
 
 @theme inline {
@@ -82,7 +76,7 @@
 @theme {
   /* Brand palette , Kwetu Connect Ads. Do not substitute default Tailwind colors;
      see design_direction in the project spec. */
-  --color-brand-amber: #FBB040;
+  --color-attention: var(--mail-waiting);
   --color-brand-yellow: #F9ED32;
   --color-brand-black: #171717;
   --color-brand-cream: #FEFBD2;
@@ -121,7 +115,7 @@
      10px row was three arbitrary values reading as sloppiness rather than as
      hierarchy. Elevation, fill and spacing already say what is on top of what.
      Change this one number and every corner in the app follows. */
-  --radius: 0.625rem; /* 10px */
+  --radius: 0.75rem; /* Fields and small controls. */
 
   /* Tailwind's own scale, collapsed onto that value, so the `rounded-*` utilities
      already written throughout the components resolve here too and nothing has to
@@ -144,7 +138,9 @@
      to pick up. With opaque panels they only tinted the one part of the page that
      is meant to stay neutral. */
   body {
-    @apply bg-brand-paper font-sans text-brand-black antialiased dark:bg-brand-black dark:text-brand-cream;
+    @apply font-sans antialiased;
+    background: var(--bg);
+    color: var(--fg);
     min-height: 100vh;
   }
 }
@@ -153,17 +149,9 @@
   /* Opaque panel: solid fill, hairline border, tight shadow. The class name is
      kept because it is used across a dozen components and renaming it would be
      churn for its own sake , but there is no glass left in it. */
-  .glass-panel {
-    @apply rounded-2xl border border-brand-black/10 bg-surface shadow-raised dark:border-brand-cream/10 dark:bg-surface-dark;
-  }
+  .glass-panel { border: 0; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); }
 
-  .glass-input {
-    @apply w-full rounded-xl border border-brand-black/12 bg-sunken px-3 py-2 text-sm outline-none placeholder:text-brand-black/50 focus:border-brand-amber/60 focus:bg-surface focus:ring-2 focus:ring-brand-amber/40 dark:border-brand-cream/15 dark:bg-sunken-dark dark:placeholder:text-brand-cream/40 dark:focus:bg-surface-dark;
-    transition:
-      background-color var(--duration-micro) ease-out,
-      border-color var(--duration-micro) ease-out,
-      box-shadow var(--duration-micro) ease-out;
-  }
+  .glass-input { width: 100%; min-width: 0; min-height: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--raise); padding: 10px 12px; color: var(--fg); font-size: 13px; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
 
   /* Same autofill override as .auth-input , every saved-credential field in the app
      otherwise flips to Chrome's near-white background on the dark theme. */
@@ -171,8 +159,8 @@
   .glass-input:-webkit-autofill:hover,
   .glass-input:-webkit-autofill:focus,
   .glass-input:-webkit-autofill:active {
-    -webkit-text-fill-color: var(--color-brand-black);
-    caret-color: var(--color-brand-black);
+    -webkit-text-fill-color: var(--fg);
+    caret-color: var(--fg);
     transition: background-color 100000s ease-in-out 0s;
   }
 
@@ -180,35 +168,25 @@
   .dark .glass-input:-webkit-autofill:hover,
   .dark .glass-input:-webkit-autofill:focus,
   .dark .glass-input:-webkit-autofill:active {
-    -webkit-text-fill-color: var(--color-brand-cream);
-    caret-color: var(--color-brand-cream);
+    -webkit-text-fill-color: var(--fg);
+    caret-color: var(--fg);
   }
 
   /* Every button gives under the press, on the same curve and duration. This is
      the smallest of the micro-interactions and the one that does the most: a
      control that does not move on click reads as unresponsive on a slow network,
      because the press and the result are separated by the request. */
-  .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-amber px-4 py-2 text-sm font-semibold text-brand-black hover:bg-brand-amber/90 disabled:pointer-events-none disabled:opacity-50;
-    transition:
-      background-color var(--duration-micro) ease-out,
-      box-shadow var(--duration-control) var(--ease-soft),
-      transform var(--duration-micro) var(--ease-soft);
-  }
+  .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 10px 18px; border: 0; border-radius: 99px; background: var(--fg); color: var(--surface); font-size: 13px; font-weight: 600; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
 
-  .btn-primary:hover {
-    box-shadow: 0 4px 14px rgb(251 176 64 / 0.35);
-  }
+  .btn-primary:hover { transform: translateY(-2px); }
 
   .btn-primary:active {
     transform: scale(0.97);
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium hover:bg-brand-black/5 dark:hover:bg-brand-cream/10;
-    transition:
-      background-color var(--duration-micro) ease-out,
-      transform var(--duration-micro) var(--ease-soft);
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium hover:bg-raise;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .btn-ghost:active {
@@ -217,9 +195,7 @@
 
   .btn-danger {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-red-600/90 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-600 disabled:pointer-events-none disabled:opacity-50;
-    transition:
-      background-color var(--duration-micro) ease-out,
-      transform var(--duration-micro) var(--ease-soft);
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .btn-danger:active {
@@ -227,11 +203,8 @@
   }
 
   .nav-item {
-    @apply relative flex items-center gap-3 rounded-[var(--radius)] px-2.5 py-2 text-sm font-medium text-brand-black/70 hover:bg-brand-black/5 hover:text-brand-black dark:text-brand-cream/70 dark:hover:bg-brand-cream/10 dark:hover:text-brand-cream;
-    transition:
-      background-color var(--duration-micro) ease-out,
-      color var(--duration-micro) ease-out,
-      transform var(--duration-micro) var(--ease-soft);
+    @apply relative flex items-center gap-3 rounded-[var(--radius)] px-2.5 py-2 text-sm font-medium text-muted hover:bg-raise hover:text-fg dark:hover:text-fg;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .nav-item:active {
@@ -241,9 +214,7 @@
   /* Icons in the rail settle into place as the row highlights, rather than the
      colour switching under a static glyph. */
   .nav-item svg {
-    transition:
-      color var(--duration-control) ease-out,
-      transform var(--duration-control) var(--ease-soft);
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .nav-item:hover svg {
@@ -255,12 +226,12 @@
      a raised white card is unambiguous, and it inverts the usual figure/ground so
      the selected row reads as the same material as the content beside it. */
   .nav-item-active {
-    @apply bg-white font-semibold text-brand-black shadow-sm dark:bg-brand-cream/[0.13] dark:text-brand-cream;
+    @apply bg-white font-semibold text-fg shadow-sm;
   }
 
   /* The icon carries the accent, so the row still says "amber" without a bar. */
   .nav-item-active svg {
-    @apply text-brand-amber;
+    @apply text-fg;
     opacity: 1;
   }
 
@@ -295,7 +266,7 @@
      and the reader are two halves of one surface instead of two panels that happen
      to be adjacent. */
   .app-canvas {
-    @apply flex min-w-0 flex-1 overflow-hidden border border-brand-black/10 bg-surface shadow-raised dark:border-brand-cream/10 dark:bg-surface-dark;
+    @apply flex min-w-0 flex-1 overflow-hidden border border-line bg-surface shadow-raised dark:bg-surface-dark;
     border-radius: var(--radius);
   }
 
@@ -303,16 +274,16 @@
      you read once; shouting it in tracked capitals gave six words the same visual
      weight as the destinations underneath them. */
   .rail-group {
-    @apply px-2.5 pb-1.5 pt-5 text-[11px] font-semibold text-brand-black/45 dark:text-brand-cream/40;
+    @apply px-2.5 pb-1.5 pt-5 text-[11px] font-semibold text-muted;
   }
 
   .nav-count {
-    @apply ml-auto text-[11px] tabular-nums text-brand-black/60 dark:text-brand-cream/55;
+    @apply ml-auto text-[11px] tabular-nums text-muted;
   }
 
   /* Column divider inside the shell , replaces the gap between panels. */
   .col-divide {
-    @apply border-l border-brand-black/10 dark:border-brand-cream/10;
+    @apply border-l border-line;
   }
 
   /* ---- Thread list ------------------------------------------------------ */
@@ -320,15 +291,15 @@
   /* Segmented control. The previous chip row wrapped onto a second line at
      six filters, which left the last one looking orphaned. */
   .seg-group {
-    @apply flex gap-0.5 rounded-lg bg-brand-black/5 p-0.5 dark:bg-brand-cream/5;
+    @apply flex gap-0.5 rounded-lg bg-raise p-0.5;
   }
 
   .seg {
-    @apply flex-1 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium text-brand-black/60 transition-colors duration-150 ease-out hover:text-brand-black dark:text-brand-cream/60 dark:hover:text-brand-cream;
+    @apply flex-1 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium text-muted transition-colors duration-150 ease-out hover:text-fg dark:hover:text-fg;
   }
 
   .seg-active {
-    @apply bg-white font-semibold text-brand-black shadow-sm dark:bg-brand-black dark:text-brand-cream;
+    @apply bg-white font-semibold text-fg shadow-sm;
   }
 
   /* ---- Thread cards -----------------------------------------------------
@@ -344,18 +315,14 @@
   }
 
   .thread-row {
-    @apply relative mb-2 grid w-full grid-cols-[2rem_minmax(0,1fr)] gap-2.5 border border-brand-black/[0.07] bg-surface px-3 py-2.5 text-left dark:border-brand-cream/[0.07] dark:bg-sunken-dark;
+    @apply relative mb-2 grid w-full grid-cols-[2rem_minmax(0,1fr)] gap-2.5 border border-line bg-surface px-3 py-2.5 text-left dark:bg-sunken-dark;
     border-radius: var(--radius);
     /* Only the compositable properties move on hover. */
-    transition:
-      transform var(--duration-micro) var(--ease-soft),
-      box-shadow var(--duration-micro) var(--ease-soft),
-      border-color var(--duration-micro) ease-out,
-      background-color var(--duration-micro) ease-out;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .thread-row:hover {
-    @apply border-brand-black/15 bg-sunken dark:border-brand-cream/15 dark:bg-surface-dark;
+    @apply border-line bg-sunken dark:bg-surface-dark;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgb(23 23 23 / 0.07);
   }
@@ -365,9 +332,9 @@
      tint alone was the same weight as hovering. */
   .thread-row-active,
   .thread-row-active:hover {
-    @apply border-brand-amber bg-brand-amber/15;
+    @apply border-fg bg-raise;
     transform: none;
-    box-shadow: 0 2px 10px rgb(251 176 64 / 0.22);
+    box-shadow: var(--mail-shadow);
   }
 
   /* Two lines of preview, cut cleanly. A single truncated line rarely contains
@@ -381,23 +348,20 @@
 
   /* Avatar initials. Deterministic per-address tint, set inline by the caller. */
   .avatar-initials {
-    @apply grid shrink-0 place-items-center rounded-full font-bold text-brand-black;
+    @apply grid shrink-0 place-items-center rounded-full font-bold text-fg;
   }
 
   .chip {
-    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-brand-black/10 bg-brand-black/[0.04] px-1.5 py-0.5 text-[10px] font-semibold text-brand-black/70 dark:border-brand-cream/10 dark:bg-brand-cream/[0.06] dark:text-brand-cream/70;
-    transition:
-      background-color var(--duration-micro) ease-out,
-      border-color var(--duration-micro) ease-out,
-      color var(--duration-micro) ease-out;
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-line bg-raise px-1.5 py-0.5 text-[10px] font-semibold text-muted;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .chip-client {
-    @apply border-brand-amber/40 bg-brand-amber/15 text-brand-black/80 dark:text-brand-cream/85;
+    @apply border-fg bg-raise text-muted;
   }
 
   .chip-mine {
-    @apply border-green-600/35 bg-green-600/15 text-green-700 dark:border-green-400/30 dark:text-green-300;
+    @apply border-line bg-raise text-muted;
   }
 
   /* ---- Auth screens -----------------------------------------------------
@@ -424,11 +388,11 @@
      pretending to be lit. */
   .auth-glow {
     @apply pointer-events-none absolute inset-x-0 top-0 h-64;
-    background: linear-gradient(to bottom, rgb(251 176 64 / 0.1), transparent);
+    background: linear-gradient(to bottom, var(--raise), transparent);
   }
 
   .dark .auth-glow {
-    background: linear-gradient(to bottom, rgb(251 176 64 / 0.07), transparent);
+    background: linear-gradient(to bottom, var(--raise), transparent);
   }
 
   /* Kept as no-ops: the auth pages still render these elements, and removing the
@@ -446,7 +410,7 @@
      `.auth-tilt` is kept as a plain hover-lift so the markup and the entrance
      animation on the wrapper do not have to change. */
   .auth-tilt {
-    transition: transform var(--duration-control) var(--ease-soft);
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .auth-tilt:hover {
@@ -457,9 +421,9 @@
      cream measured at a 1.00 contrast ratio , the card was literally the same
      colour as the page, held apart by nothing but a hairline. */
   .auth-card {
-    @apply relative overflow-hidden rounded-2xl border border-brand-black/[0.09] bg-surface p-7 dark:border-brand-cream/10 dark:bg-surface-dark;
+    @apply relative overflow-hidden rounded-2xl border border-line bg-surface p-7 dark:bg-surface-dark;
     box-shadow: var(--shadow-overlay);
-    transition: box-shadow var(--duration-control) var(--ease-soft);
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .auth-tilt:hover .auth-card {
@@ -469,13 +433,13 @@
   /* Outlined mark: a hairline circle with a line icon inside, rather than a filled
      tile. Shared by the auth cards and the navigation rail; the caller sets the size. */
   .mail-mark {
-    @apply grid shrink-0 place-items-center rounded-full border text-brand-amber;
-    border-color: rgb(251 176 64 / 0.45);
-    transition: border-color var(--duration-control) ease-out;
+    @apply grid shrink-0 place-items-center rounded-full border text-fg;
+    border-color: var(--line);
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .auth-tilt:hover .mail-mark {
-    border-color: rgb(251 176 64 / 0.75);
+    border-color: var(--fg);
   }
 
   /* Content sits above the spotlight. */
@@ -509,26 +473,22 @@
   }
 
   .auth-field-icon {
-    @apply pointer-events-none absolute left-3 text-brand-black/60 transition-colors duration-150 ease-out dark:text-brand-cream/55;
+    @apply pointer-events-none absolute left-3 text-muted transition-colors duration-150 ease-out;
   }
 
   .auth-field:focus-within .auth-field-icon {
-    @apply text-brand-amber;
+    @apply text-fg;
   }
 
   /* Fields lift very slightly on hover and focus. Small, but it's the difference
      between a control that responds and one that just changes colour. */
   .auth-input {
-    @apply h-11 w-full rounded-xl border border-brand-black/15 bg-sunken pl-10 pr-3 text-sm outline-none placeholder:text-brand-black/50 focus:border-brand-amber/70 focus:bg-surface focus:ring-2 focus:ring-brand-amber/40 dark:border-brand-cream/15 dark:bg-sunken-dark dark:placeholder:text-brand-cream/35 dark:focus:bg-surface-dark;
-    transition:
-      transform 160ms cubic-bezier(0.2, 0.8, 0.3, 1),
-      border-color 150ms ease-out,
-      background-color 150ms ease-out,
-      box-shadow 150ms ease-out;
+    @apply h-11 w-full rounded-xl border border-line bg-sunken pl-10 pr-3 text-sm outline-none placeholder:text-muted focus:border-fg focus:bg-surface focus:ring-2 focus:ring-fg dark:bg-sunken-dark dark:focus:bg-surface-dark;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .auth-input:hover:not(:focus) {
-    @apply border-brand-black/20 dark:border-brand-cream/25;
+    @apply border-line;
   }
 
   .auth-input:focus {
@@ -545,8 +505,8 @@
   .auth-input:-webkit-autofill:hover,
   .auth-input:-webkit-autofill:focus,
   .auth-input:-webkit-autofill:active {
-    -webkit-text-fill-color: var(--color-brand-black);
-    caret-color: var(--color-brand-black);
+    -webkit-text-fill-color: var(--fg);
+    caret-color: var(--fg);
     transition:
       background-color 100000s ease-in-out 0s,
       transform 160ms cubic-bezier(0.2, 0.8, 0.3, 1),
@@ -558,16 +518,13 @@
   .dark .auth-input:-webkit-autofill:hover,
   .dark .auth-input:-webkit-autofill:focus,
   .dark .auth-input:-webkit-autofill:active {
-    -webkit-text-fill-color: var(--color-brand-cream);
-    caret-color: var(--color-brand-cream);
+    -webkit-text-fill-color: var(--fg);
+    caret-color: var(--fg);
   }
 
   .auth-submit {
-    @apply relative flex h-11 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-brand-amber text-sm font-semibold text-brand-black hover:bg-brand-amber/90 hover:shadow-[0_8px_24px_rgb(251_176_64/0.45)] disabled:pointer-events-none disabled:opacity-70;
-    transition:
-      transform 150ms cubic-bezier(0.2, 0.8, 0.3, 1),
-      background-color 150ms ease-out,
-      box-shadow 200ms ease-out;
+    @apply relative flex h-11 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-fg text-sm font-semibold text-surface disabled:pointer-events-none disabled:opacity-70;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .auth-submit:hover {
@@ -600,13 +557,13 @@
 
   /* Underline grows from the left on hover, as in the reference design. */
   .auth-link {
-    @apply relative font-medium text-brand-black dark:text-brand-cream;
+    @apply relative font-medium text-fg;
   }
 
   .auth-link::after {
     content: "";
-    @apply absolute -bottom-0.5 left-0 h-px w-0 bg-brand-amber;
-    transition: width 220ms cubic-bezier(0.2, 0.8, 0.3, 1);
+    @apply absolute -bottom-0.5 left-0 h-px w-0 bg-fg;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .auth-link:hover::after,
@@ -624,7 +581,7 @@
      --------------------------------------------------------------------- */
 
   .compose-backdrop {
-    @apply fixed inset-0 z-50 flex items-center justify-center bg-brand-black/55 p-4 sm:p-6;
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-raise p-4 sm:p-6;
     animation: compose-veil var(--duration-surface) var(--ease-soft) both;
   }
 
@@ -636,7 +593,7 @@
   }
 
   .compose-sheet {
-    @apply relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-2xl border border-brand-black/10 bg-surface dark:border-brand-cream/10 dark:bg-surface-dark;
+    @apply relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-2xl border border-line bg-surface dark:bg-surface-dark;
     box-shadow: var(--shadow-modal);
     animation: compose-rise 340ms var(--ease-soft) both;
   }
@@ -660,15 +617,13 @@
      and the one thing every modal needs , a way out , gets its own small surface
      instead of a whole row of chrome to carry it. */
   .compose-close-pill {
-    @apply absolute -right-3 -top-3 z-10 grid h-8 w-8 place-items-center rounded-full border border-brand-black/10 bg-surface text-brand-black/70 shadow-overlay dark:border-brand-cream/15 dark:bg-surface-dark dark:text-brand-cream/70;
+    @apply absolute -right-3 -top-3 z-10 grid h-8 w-8 place-items-center rounded-full border border-line bg-surface text-muted shadow-overlay dark:bg-surface-dark;
     animation: compose-rise 340ms var(--ease-soft) both;
-    transition:
-      color var(--duration-micro) ease-out,
-      transform var(--duration-micro) var(--ease-soft);
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .compose-close-pill:hover {
-    @apply text-brand-black dark:text-brand-cream;
+    @apply text-fg;
     transform: translateY(-1px);
   }
 
@@ -679,18 +634,18 @@
   /* Borderless field row. The hairline under it is the only division; the label is a
      fixed-width gutter so To/Cc/Subject align down a single edge. */
   .compose-row {
-    @apply flex items-start gap-3 border-b border-brand-black/[0.07] px-5 py-2.5 transition-colors duration-150 ease-out dark:border-brand-cream/[0.07];
+    @apply flex items-start gap-3 border-b border-line px-5 py-2.5 transition-colors duration-150 ease-out;
   }
 
   .compose-row:focus-within {
-    @apply bg-brand-amber/[0.05];
+    @apply bg-raise;
   }
 
   /* Plain and quiet , a field name, not a shouted category label. The previous
      uppercase, letter-spaced treatment gave "To" and "Subject" the same visual
      weight as a section heading, in a window with no headings left to match. */
   .compose-row-label {
-    @apply w-16 shrink-0 pt-1.5 text-sm font-medium text-brand-black/45 dark:text-brand-cream/40;
+    @apply w-16 shrink-0 pt-1.5 text-sm font-medium text-muted;
   }
 
   /* Cc / Bcc, and anything else that reveals more of the same row rather than
@@ -698,48 +653,45 @@
      sit right next to the field they extend, so a pill around them reads as a
      second control competing with the input, not a peer to its label. */
   .compose-row-link {
-    @apply text-xs font-medium text-brand-black/45 dark:text-brand-cream/40;
-    transition: color var(--duration-micro) ease-out;
+    @apply text-xs font-medium text-muted;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .compose-row-link:hover {
-    @apply text-brand-amber;
+    @apply text-fg;
   }
 
   .compose-bare-input {
-    @apply min-w-0 flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-brand-black/40 dark:placeholder:text-brand-cream/30;
+    @apply min-w-0 flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-muted;
   }
 
   /* Locked reply headers. A grey disabled box says "broken"; this says "settled" ,
      the value reads as text, and the reason is one line away in the header. */
   .compose-bare-input[readonly] {
-    @apply cursor-default text-brand-black/75 dark:text-brand-cream/70;
+    @apply cursor-default text-muted;
   }
 
   .chip-recipient {
-    @apply inline-flex max-w-full items-center gap-1.5 rounded-full border border-brand-black/10 bg-brand-black/[0.04] py-0.5 pl-0.5 pr-2 text-xs font-medium dark:border-brand-cream/10 dark:bg-brand-cream/[0.07];
+    @apply inline-flex max-w-full items-center gap-1.5 rounded-full border border-line bg-raise py-0.5 pl-0.5 pr-2 text-xs font-medium;
   }
 
   /* ---- Editor ---- */
 
   .editor-toolbar {
-    @apply flex shrink-0 flex-wrap items-center gap-0.5 border-b border-brand-black/[0.07] px-5 py-1.5 dark:border-brand-cream/[0.07];
+    @apply flex shrink-0 flex-wrap items-center gap-0.5 border-b border-line px-5 py-1.5;
   }
 
   .editor-sep {
-    @apply mx-1 h-4 w-px bg-brand-black/10 dark:bg-brand-cream/10;
+    @apply mx-1 h-4 w-px bg-raise;
   }
 
   .editor-tool {
-    @apply grid h-7 w-7 place-items-center rounded-md text-brand-black/60 dark:text-brand-cream/55;
-    transition:
-      background-color var(--duration-micro) ease-out,
-      color var(--duration-micro) ease-out,
-      transform var(--duration-micro) var(--ease-soft);
+    @apply grid h-7 w-7 place-items-center rounded-md text-muted;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .editor-tool:hover {
-    @apply bg-brand-black/[0.06] text-brand-black dark:bg-brand-cream/10 dark:text-brand-cream;
+    @apply bg-raise text-fg;
   }
 
   .editor-tool:active {
@@ -747,11 +699,11 @@
   }
 
   .editor-tool-active {
-    @apply bg-brand-amber/25 text-brand-black dark:text-brand-cream;
+    @apply bg-raise text-fg;
   }
 
   .editor-linkbar {
-    @apply flex shrink-0 items-center gap-1 border-b border-brand-black/[0.07] bg-brand-amber/[0.06] px-5 py-1.5 dark:border-brand-cream/[0.07];
+    @apply flex shrink-0 items-center gap-1 border-b border-line bg-raise px-5 py-1.5;
     animation: compose-slip var(--duration-control) var(--ease-soft) both;
   }
 
@@ -773,7 +725,7 @@
   }
 
   .editor-placeholder {
-    @apply pointer-events-none absolute text-sm text-brand-black/40 dark:text-brand-cream/30;
+    @apply pointer-events-none absolute text-sm text-muted;
     left: var(--editor-pad-x, 0rem);
     top: 0.75rem;
   }
@@ -784,9 +736,9 @@
   .editor-surface ol { @apply my-2 list-decimal pl-5; }
   .editor-surface li { @apply my-0.5; }
   .editor-surface p  { @apply my-2; }
-  .editor-surface a  { @apply text-brand-amber underline underline-offset-2; }
+  .editor-surface a  { @apply text-fg underline underline-offset-2; }
   .editor-surface blockquote {
-    @apply my-2 border-l-[3px] border-brand-amber/60 pl-3 text-brand-black/75 dark:text-brand-cream/70;
+    @apply my-2 border-l-[3px] border-fg pl-3 text-muted;
   }
   .editor-surface img { @apply max-w-full rounded-lg; }
 
@@ -796,7 +748,7 @@
      deletes as one object , the styling has to make that behaviour look
      deliberate, hence a filled pill rather than tinted text. */
   .mf-chip {
-    @apply mx-px inline-block select-none whitespace-nowrap rounded-md border border-brand-amber/45 bg-brand-amber/20 px-1.5 py-px align-baseline text-[0.9em] font-semibold text-brand-black/85 dark:text-brand-cream/90;
+    @apply mx-px inline-block select-none whitespace-nowrap rounded-md border border-fg bg-raise px-1.5 py-px align-baseline text-[0.9em] font-semibold text-muted;
   }
 
   /* A field the recipient's copy will fill in is worth seeing at a glance in the
@@ -806,23 +758,20 @@
   }
 
   .mf-trigger {
-    @apply inline-flex items-center gap-1 rounded-lg border border-brand-black/10 px-2 py-1 text-[11px] font-medium text-brand-black/70 dark:border-brand-cream/10 dark:text-brand-cream/70;
-    transition:
-      background-color var(--duration-micro) ease-out,
-      border-color var(--duration-micro) ease-out,
-      color var(--duration-micro) ease-out;
+    @apply inline-flex items-center gap-1 rounded-lg border border-line px-2 py-1 text-[11px] font-medium text-muted;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .mf-trigger:hover {
-    @apply border-brand-black/20 bg-brand-black/[0.04] text-brand-black dark:border-brand-cream/20 dark:bg-brand-cream/[0.06] dark:text-brand-cream;
+    @apply border-line bg-raise text-fg;
   }
 
   .mf-trigger-open {
-    @apply border-brand-amber/50 bg-brand-amber/15 text-brand-black dark:text-brand-cream;
+    @apply border-fg bg-raise text-fg;
   }
 
   .mf-menu {
-    @apply absolute right-0 z-30 mt-1.5 max-h-80 w-72 overflow-y-auto rounded-xl border border-brand-black/10 bg-white p-1.5 shadow-xl dark:border-brand-cream/10 dark:bg-brand-black;
+    @apply absolute right-0 z-30 mt-1.5 max-h-80 w-72 overflow-y-auto rounded-xl border border-line bg-white p-1.5 shadow-xl;
     transform-origin: top right;
     animation: mf-menu-in var(--duration-control) var(--ease-soft) both;
   }
@@ -833,43 +782,41 @@
   }
 
   .mf-menu-intro {
-    @apply px-2 py-1.5 text-[11px] leading-snug text-brand-black/55 dark:text-brand-cream/50;
+    @apply px-2 py-1.5 text-[11px] leading-snug text-muted;
   }
 
   .mf-menu-group {
-    @apply border-t border-brand-black/[0.07] pt-1 dark:border-brand-cream/[0.07];
+    @apply border-t border-line pt-1;
   }
 
   .mf-menu-title {
-    @apply px-2 pb-0.5 pt-1 text-[10px] font-semibold uppercase tracking-wide text-brand-black/45 dark:text-brand-cream/40;
+    @apply px-2 pb-0.5 pt-1 text-[10px] font-semibold text-muted;
   }
 
   .mf-menu-item {
-    @apply flex w-full items-baseline justify-between gap-3 rounded-lg px-2 py-1.5 text-left text-xs font-medium text-brand-black/85 dark:text-brand-cream/85;
-    transition: background-color var(--duration-micro) ease-out;
+    @apply flex w-full items-baseline justify-between gap-3 rounded-lg px-2 py-1.5 text-left text-xs font-medium text-muted;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .mf-menu-item:hover {
-    @apply bg-brand-amber/15;
+    @apply bg-raise;
   }
 
   .mf-menu-example {
-    @apply shrink-0 truncate text-[10px] font-normal text-brand-black/45 dark:text-brand-cream/40;
+    @apply shrink-0 truncate text-[10px] font-normal text-muted;
     max-width: 9rem;
   }
 
   /* A rich text editor used as a form field rather than as a whole pane: it needs
      the border the composer gets from the sheet around it. */
   .editor-box {
-    @apply overflow-hidden rounded-xl border border-brand-black/10 bg-sunken dark:border-brand-cream/10 dark:bg-sunken-dark;
-    transition:
-      border-color var(--duration-micro) ease-out,
-      box-shadow var(--duration-micro) ease-out;
+    @apply overflow-hidden rounded-xl border border-line bg-sunken dark:bg-sunken-dark;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .editor-box:focus-within {
-    @apply border-brand-amber/50;
-    box-shadow: 0 0 0 3px rgb(251 176 64 / 0.15);
+    @apply border-fg;
+    box-shadow: var(--mail-shadow);
   }
 
   /* Anything revealed by a disclosure arrives rather than appearing. */
@@ -878,40 +825,37 @@
   }
 
   .editor-source {
-    @apply h-full min-h-48 w-full resize-none bg-transparent py-3 font-mono text-xs leading-relaxed outline-none placeholder:text-brand-black/40 dark:placeholder:text-brand-cream/30;
+    @apply h-full min-h-48 w-full resize-none bg-transparent py-3 font-mono text-xs leading-relaxed outline-none placeholder:text-muted;
   }
 
   /* Quoted history: one line at rest, expandable, never editable. Dumping the whole
      conversation into the field the user types in is what made the old window
      unusable on any thread longer than one message. */
   .quote-toggle {
-    @apply inline-flex items-center gap-1.5 rounded-lg border border-brand-black/10 px-2 py-1 text-[11px] font-medium text-brand-black/55 dark:border-brand-cream/10 dark:text-brand-cream/50;
-    transition:
-      background-color var(--duration-micro) ease-out,
-      color var(--duration-micro) ease-out,
-      border-color var(--duration-micro) ease-out;
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-line px-2 py-1 text-[11px] font-medium text-muted;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .quote-toggle:hover {
-    @apply border-brand-black/20 bg-brand-black/[0.04] text-brand-black dark:border-brand-cream/20 dark:bg-brand-cream/[0.06] dark:text-brand-cream;
+    @apply border-line bg-raise text-fg;
   }
 
   .compose-actionbar {
-    @apply flex shrink-0 flex-wrap items-center gap-2 border-t border-brand-black/10 px-5 py-3 dark:border-brand-cream/10;
+    @apply flex shrink-0 flex-wrap items-center gap-2 border-t border-line px-5 py-3;
   }
 
   /* Attachment card. Wide enough to show the real filename, with the size as the
      secondary line , a truncated chip made it impossible to tell two revisions of the
      same document apart. */
   .attach-card {
-    @apply flex items-center gap-2.5 rounded-xl border border-brand-black/10 bg-brand-black/[0.03] py-1.5 pl-2.5 pr-1.5 dark:border-brand-cream/10 dark:bg-brand-cream/[0.05];
+    @apply flex items-center gap-2.5 rounded-xl border border-line bg-raise py-1.5 pl-2.5 pr-1.5;
     animation: compose-slip var(--duration-control) var(--ease-soft) both;
   }
 
   /* Drop target for dragged files. The whole writing area lights up, because that is
      where people aim. */
   .compose-dropzone[data-dragging="true"] {
-    @apply rounded-xl bg-brand-amber/10 outline-2 outline-dashed outline-offset-[-6px] outline-brand-amber/60;
+    @apply rounded-xl bg-raise outline-2 outline-dashed outline-offset-[-6px] outline-fg;
   }
 
   .table-base {
@@ -919,11 +863,11 @@
   }
 
   .table-base thead th {
-    @apply border-b border-brand-black/10 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-brand-black/65 dark:border-brand-cream/10 dark:text-brand-cream/60;
+    @apply border-b border-line px-3 py-2 text-left text-xs font-semibold text-muted;
   }
 
   .table-base tbody td {
-    @apply border-b border-brand-black/5 px-3 py-2.5 dark:border-brand-cream/5;
+    @apply border-b border-line px-3 py-2.5;
   }
 }
 
@@ -943,9 +887,7 @@
 
   /* Keyboard focus must always be visible; several controls previously relied
      on hover alone. */
-  :focus-visible {
-    @apply outline-2 outline-offset-2 outline-brand-amber;
-  }
+  :focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
 
   /* ---- Scrollbars -------------------------------------------------------
      There aren't any.
@@ -990,18 +932,15 @@
   }
 
   .tpl-card {
-    @apply relative flex flex-col overflow-hidden rounded-2xl border border-brand-black/10 bg-surface shadow-raised dark:border-brand-cream/10 dark:bg-surface-dark;
+    @apply relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-raised dark:bg-surface-dark;
     /* Only transform and box-shadow move, so the hover stays on the compositor. */
-    transition:
-      transform var(--duration-control) var(--ease-soft),
-      box-shadow var(--duration-control) var(--ease-soft),
-      border-color var(--duration-micro) ease-out;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
     animation: auth-fade 380ms var(--ease-soft) both;
     animation-delay: calc(60ms + var(--i, 0) * 45ms);
   }
 
   .tpl-card:hover {
-    @apply border-brand-amber/45;
+    @apply border-fg;
     transform: translateY(-3px);
     box-shadow: 0 18px 40px rgb(23 23 23 / 0.13), 0 2px 6px rgb(23 23 23 / 0.06);
   }
@@ -1009,7 +948,7 @@
   /* The whole card is the edit target , see .tpl-open , so the ring belongs on
      the card rather than on the small piece of text that carries the link. */
   .tpl-card:focus-within {
-    @apply border-brand-amber/60;
+    @apply border-fg;
   }
 
   /* A white sheet regardless of theme: an email is a sheet of paper, and mail
@@ -1075,11 +1014,8 @@
   /* Destructive, and one click from a grid of look-alike cards, so it stays
      quiet until the card is hovered or something in it has focus. */
   .tpl-delete {
-    @apply rounded-lg px-2 py-1 text-xs font-medium text-brand-black/55 opacity-0 dark:text-brand-cream/55;
-    transition:
-      opacity var(--duration-micro) ease-out,
-      color var(--duration-micro) ease-out,
-      background-color var(--duration-micro) ease-out;
+    @apply rounded-lg px-2 py-1 text-xs font-medium text-muted opacity-0;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .tpl-card:hover .tpl-delete,
@@ -1110,7 +1046,7 @@
      --------------------------------------------------------------------- */
 
   .app-frame {
-    @apply flex h-screen w-full flex-col overflow-hidden bg-brand-paper dark:bg-brand-black;
+    @apply flex h-screen w-full flex-col overflow-hidden bg-brand-paper;
   }
 
   /* No bottom rule: the content card below draws its own edge, and a full-width
@@ -1133,42 +1069,36 @@
   }
 
   .topbar-search {
-    @apply h-9 w-full rounded-[var(--radius)] border border-brand-black/10 bg-sunken pl-9 pr-20 text-sm outline-none placeholder:text-brand-black/50 dark:border-brand-cream/15 dark:bg-sunken-dark dark:placeholder:text-brand-cream/35;
-    transition:
-      border-color var(--duration-micro) ease-out,
-      background-color var(--duration-micro) ease-out,
-      box-shadow var(--duration-control) var(--ease-soft);
+    @apply h-9 w-full rounded-[var(--radius)] border border-line bg-sunken pl-9 pr-20 text-sm outline-none placeholder:text-muted dark:bg-sunken-dark;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .topbar-search:focus {
-    @apply border-brand-amber/60 bg-white dark:bg-brand-cream/[0.1];
-    box-shadow: 0 0 0 3px rgb(251 176 64 / 0.28);
+    @apply border-fg bg-white;
+    box-shadow: var(--mail-shadow);
   }
 
   .topbar-search-icon {
-    @apply pointer-events-none absolute left-3 text-brand-black/45 transition-colors duration-150 ease-out dark:text-brand-cream/40;
+    @apply pointer-events-none absolute left-3 text-muted transition-colors duration-150 ease-out;
   }
 
   .topbar-search-wrap:focus-within .topbar-search-icon {
-    @apply text-brand-amber;
+    @apply text-fg;
   }
 
   /* Trailing hint inside the field. Disappears once there is a query, so it never
      sits behind the user's own text. */
   .topbar-search-hint {
-    @apply pointer-events-none absolute right-3 hidden items-center gap-1 text-[10px] font-medium text-brand-black/35 dark:text-brand-cream/30 sm:flex;
+    @apply pointer-events-none absolute right-3 hidden items-center gap-1 text-[10px] font-medium text-muted sm:flex;
   }
 
   .topbar-icon {
-    @apply relative grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius)] text-brand-black/65 dark:text-brand-cream/60;
-    transition:
-      background-color var(--duration-micro) ease-out,
-      color var(--duration-micro) ease-out,
-      transform var(--duration-micro) var(--ease-soft);
+    @apply relative grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius)] text-muted;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .topbar-icon:hover {
-    @apply bg-brand-black/[0.06] text-brand-black dark:bg-brand-cream/10 dark:text-brand-cream;
+    @apply bg-raise text-fg;
   }
 
   .topbar-icon:active {
@@ -1176,14 +1106,14 @@
   }
 
   .topbar-icon-active {
-    @apply bg-brand-amber/20 text-brand-black dark:text-brand-cream;
+    @apply bg-raise text-fg;
   }
 
   /* Unread marker on a quick-jump icon. A dot, not a number: the count already
      has a home on the rail's folder row, and two of them disagree the moment
      one refetches first. */
   .topbar-dot {
-    @apply absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-brand-amber ring-2 ring-brand-paper dark:ring-brand-black;
+    @apply absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-fg ring-2 ring-bg;
   }
 
   /* ---- Popover menus ----------------------------------------------------
@@ -1192,7 +1122,7 @@
      --------------------------------------------------------------------- */
 
   .menu-pop {
-    @apply z-50 overflow-hidden border border-brand-black/10 bg-surface shadow-overlay dark:border-brand-cream/12 dark:bg-surface-dark;
+    @apply z-50 overflow-hidden border border-line bg-surface shadow-overlay dark:bg-surface-dark;
     border-radius: var(--radius);
     animation: menu-pop var(--duration-control) var(--ease-soft) both;
     transform-origin: top right;
@@ -1201,7 +1131,7 @@
   /* Leaving is a state, not an unmount , and quicker than arriving, the same ratio
      the compose sheet uses. */
   .menu-pop[data-closing="true"] {
-    animation: menu-pop 140ms var(--ease-soft) reverse both;
+    animation: menu-pop-out var(--t1) var(--ease) both;
   }
 
   @keyframes menu-pop {
@@ -1209,19 +1139,21 @@
     to   { opacity: 1; transform: none; }
   }
 
+  @keyframes menu-pop-out {
+    to { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  }
+
   .menu-item {
-    @apply flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm font-medium text-brand-black/75 dark:text-brand-cream/70;
-    transition:
-      background-color var(--duration-micro) ease-out,
-      color var(--duration-micro) ease-out;
+    @apply flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm font-medium text-muted;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .menu-item:hover {
-    @apply bg-brand-amber/15 text-brand-black dark:text-brand-cream;
+    @apply bg-raise text-fg;
   }
 
   .menu-sep {
-    @apply my-1 h-px bg-brand-black/8 dark:bg-brand-cream/10;
+    @apply my-1 h-px bg-raise;
   }
 
   /* ---- Rail -------------------------------------------------------------- */
@@ -1230,17 +1162,14 @@
      Full width so it is impossible to miss, and the only filled amber control in
      the navigation column , everything else there is a destination, not a verb. */
   .rail-compose {
-    @apply flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius)] bg-brand-amber text-sm font-semibold text-brand-black;
-    transition:
-      transform var(--duration-micro) var(--ease-soft),
-      box-shadow var(--duration-control) var(--ease-soft),
-      background-color var(--duration-micro) ease-out;
+    @apply flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius)] bg-fg text-sm font-semibold text-surface;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .rail-compose:hover {
-    @apply bg-brand-amber/92;
+    @apply bg-raise;
     transform: translateY(-1px);
-    box-shadow: 0 8px 22px rgb(251 176 64 / 0.4);
+    box-shadow: var(--mail-shadow);
   }
 
   .rail-compose:active {
@@ -1262,15 +1191,12 @@
   }
 
   .mailbox-tile {
-    @apply relative grid h-[30px] w-[30px] place-items-center overflow-hidden rounded-[var(--radius)] bg-brand-black/[0.08] text-[12px] font-bold leading-none text-brand-black/45 dark:bg-brand-cream/[0.09] dark:text-brand-cream/40;
-    transition:
-      background-color var(--duration-control) ease-out,
-      color var(--duration-control) ease-out,
-      transform var(--duration-micro) var(--ease-soft);
+    @apply relative grid h-[30px] w-[30px] place-items-center overflow-hidden rounded-[var(--radius)] bg-raise text-[12px] font-bold leading-none text-muted;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .mailbox-tile:hover {
-    @apply bg-brand-black/[0.14] text-brand-black/70 dark:bg-brand-cream/[0.16] dark:text-brand-cream/70;
+    @apply bg-raise text-muted;
     transform: translateY(-1px);
   }
 
@@ -1281,14 +1207,14 @@
      amber for the one in use. */
   .mailbox-tile[data-active="true"],
   .mailbox-tile[data-active="true"]:hover {
-    @apply bg-brand-amber text-brand-black;
+    @apply bg-fg text-surface;
   }
 
   /* Deliberately not amber: on the active tile an amber badge would vanish into
      the fill, so the count is carried by contrast instead of by hue. */
   /* Scaled with the tile: at 30px square a 16px badge covered a third of the face. */
   .mailbox-tile-badge {
-    @apply absolute right-px top-px min-w-[0.75rem] rounded-full bg-brand-black px-[3px] text-center text-[8px] font-bold leading-3 tabular-nums text-brand-cream dark:bg-brand-cream dark:text-brand-black;
+    @apply absolute right-px top-px min-w-[0.75rem] rounded-full bg-fg px-[3px] text-center text-[8px] font-bold leading-3 tabular-nums text-surface;
   }
 
   /* A mailbox that has stopped syncing still shows its mail, so this is a warning
@@ -1298,26 +1224,23 @@
   }
 
   .mailbox-add {
-    @apply grid h-[30px] w-[30px] place-items-center rounded-[var(--radius)] border border-dashed border-brand-black/20 text-brand-black/40 dark:border-brand-cream/20 dark:text-brand-cream/35;
-    transition:
-      border-color var(--duration-micro) ease-out,
-      color var(--duration-micro) ease-out,
-      transform var(--duration-micro) var(--ease-soft);
+    @apply grid h-[30px] w-[30px] place-items-center rounded-[var(--radius)] border border-dashed border-line text-muted;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .mailbox-add:hover {
-    @apply border-brand-amber text-brand-amber;
+    @apply border-fg text-fg;
     transform: translateY(-1px);
   }
 
   /* Folder count. Quiet by default; the unread folder earns the filled amber pill
      because it is the only count that means "there is work here". */
   .count-badge {
-    @apply ml-auto shrink-0 text-[11px] tabular-nums text-brand-black/55 dark:text-brand-cream/50;
+    @apply ml-auto shrink-0 text-[11px] tabular-nums text-muted;
   }
 
   .count-badge-strong {
-    @apply ml-auto shrink-0 rounded-full bg-brand-amber px-1.5 py-px text-[10px] font-bold tabular-nums text-brand-black;
+    @apply ml-auto shrink-0 rounded-full bg-fg px-1.5 py-px text-[10px] font-bold tabular-nums text-surface;
   }
 
   /* ---- Toggle switch ----------------------------------------------------
@@ -1327,17 +1250,17 @@
      --------------------------------------------------------------------- */
 
   .switch {
-    @apply relative h-4 w-7 shrink-0 rounded-full bg-brand-black/20 dark:bg-brand-cream/20;
-    transition: background-color var(--duration-control) var(--ease-soft);
+    @apply relative h-4 w-7 shrink-0 rounded-full bg-raise;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .switch[data-on="true"] {
-    @apply bg-brand-amber;
+    @apply bg-fg;
   }
 
   .switch-knob {
     @apply absolute left-0.5 top-0.5 h-3 w-3 rounded-full bg-white shadow-sm;
-    transition: transform var(--duration-control) var(--ease-soft);
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .switch[data-on="true"] .switch-knob {
@@ -1347,25 +1270,22 @@
   /* ---- Thread list toolbar ---------------------------------------------- */
 
   .list-toolbar {
-    @apply flex h-12 shrink-0 items-center gap-2.5 border-b border-brand-black/10 px-4 dark:border-brand-cream/10;
+    @apply flex h-12 shrink-0 items-center gap-2.5 border-b border-line px-4;
   }
 
   .check-box {
-    @apply grid h-4 w-4 shrink-0 place-items-center rounded border border-brand-black/25 text-[10px] font-bold text-brand-black dark:border-brand-cream/30;
-    transition:
-      background-color var(--duration-micro) ease-out,
-      border-color var(--duration-micro) ease-out,
-      transform var(--duration-micro) var(--ease-soft);
+    @apply grid h-4 w-4 shrink-0 place-items-center rounded border border-line text-[10px] font-bold text-fg;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .check-box:hover {
-    @apply border-brand-amber;
+    @apply border-fg;
     transform: scale(1.1);
   }
 
   .check-box[data-state="checked"],
   .check-box[data-state="partial"] {
-    @apply border-brand-amber bg-brand-amber;
+    @apply border-fg bg-fg;
   }
 
   /* Rows arrive in sequence when the folder changes, so the eye follows the list
@@ -1385,15 +1305,12 @@
      thread the message is the content and the toolbar is chrome. Reply keeps the
      amber because it is what you came to do. */
   .reader-action {
-    @apply inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-brand-black/70 dark:text-brand-cream/65;
-    transition:
-      background-color var(--duration-micro) ease-out,
-      color var(--duration-micro) ease-out,
-      transform var(--duration-micro) var(--ease-soft);
+    @apply inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .reader-action:hover {
-    @apply bg-brand-black/[0.06] text-brand-black dark:bg-brand-cream/10 dark:text-brand-cream;
+    @apply bg-raise text-fg;
   }
 
   .reader-action:active {
@@ -1401,7 +1318,7 @@
   }
 
   .reader-action-primary {
-    @apply bg-brand-amber font-semibold text-brand-black hover:bg-brand-amber/90;
+    @apply bg-fg font-semibold text-surface;
   }
 
   .reader-action-danger:hover {
@@ -1412,17 +1329,13 @@
      reads as "ask for help" beside a Send button that is filled and unambiguous ,
      the two should not compete for the same emphasis. */
   .ai-generate-btn {
-    @apply inline-flex items-center gap-1.5 rounded-[var(--radius)] border border-brand-amber/50 bg-brand-amber/[0.08] px-3 py-1.5 text-xs font-semibold text-brand-amber disabled:pointer-events-none disabled:opacity-50;
-    transition:
-      background-color var(--duration-micro) ease-out,
-      border-color var(--duration-micro) ease-out,
-      box-shadow var(--duration-control) var(--ease-soft),
-      transform var(--duration-micro) var(--ease-soft);
+    @apply inline-flex items-center gap-1.5 rounded-[var(--radius)] border border-fg bg-raise px-3 py-1.5 text-xs font-semibold text-fg disabled:pointer-events-none disabled:opacity-50;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .ai-generate-btn:hover {
-    @apply border-brand-amber bg-brand-amber/[0.16];
-    box-shadow: 0 0 0 3px rgb(251 176 64 / 0.15);
+    @apply border-fg bg-raise;
+    box-shadow: var(--mail-shadow);
   }
 
   .ai-generate-btn:active {
@@ -1441,7 +1354,7 @@
      category rather than by weight , it is the only element in the reader that is
      about the thread rather than part of it. */
   .reader-participants {
-    @apply mb-3 border border-brand-amber/30 bg-brand-amber/[0.07] px-3 py-2.5;
+    @apply mb-3 border border-fg bg-raise px-3 py-2.5;
     border-radius: var(--radius);
   }
 
@@ -1456,13 +1369,11 @@
      The border is always here now, and only its colour changes. */
   .msg-head {
     @apply flex w-full items-center gap-2.5 border-b border-transparent px-2.5 py-2 text-left;
-    transition:
-      background-color var(--duration-micro) ease-out,
-      border-color var(--duration-control) ease-out;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .msg-head[data-open="true"] {
-    @apply border-brand-black/[0.07] dark:border-brand-cream/[0.07];
+    @apply border-line;
   }
 
   /* The glide. `grid-template-rows: 0fr → 1fr` animates a element to its own
@@ -1473,7 +1384,7 @@
   .msg-body {
     display: grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows var(--duration-control) var(--ease-soft);
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .msg-body[data-open="true"] {
@@ -1491,20 +1402,17 @@
      to answer , the modal composer stays for genuinely new mail, where there is no
      thread to sit at the bottom of. */
   .reply-dock {
-    @apply shrink-0 border-t border-brand-black/10 px-5 py-3 dark:border-brand-cream/10;
+    @apply shrink-0 border-t border-line px-5 py-3;
     animation: compose-slip var(--duration-control) var(--ease-soft) both;
   }
 
   .reply-dock-collapsed {
-    @apply flex w-full items-center gap-2.5 rounded-[var(--radius)] border border-brand-black/12 bg-sunken px-4 py-2 text-left text-sm text-brand-black/50 dark:border-brand-cream/12 dark:bg-sunken-dark dark:text-brand-cream/40;
-    transition:
-      border-color var(--duration-micro) ease-out,
-      background-color var(--duration-micro) ease-out,
-      box-shadow var(--duration-control) var(--ease-soft);
+    @apply flex w-full items-center gap-2.5 rounded-[var(--radius)] border border-line bg-sunken px-4 py-2 text-left text-sm text-muted dark:bg-sunken-dark;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .reply-dock-collapsed:hover {
-    @apply border-brand-amber/50 bg-surface dark:bg-surface-dark;
+    @apply border-fg bg-surface dark:bg-surface-dark;
     box-shadow: 0 4px 14px rgb(23 23 23 / 0.06);
   }
 
@@ -1519,18 +1427,15 @@
   }
 
   .hub-tile {
-    @apply flex items-start gap-3 border border-brand-black/10 bg-surface p-4 shadow-raised dark:border-brand-cream/10 dark:bg-surface-dark;
+    @apply flex items-start gap-3 border border-line bg-surface p-4 shadow-raised dark:bg-surface-dark;
     border-radius: var(--radius);
-    transition:
-      transform var(--duration-control) var(--ease-soft),
-      box-shadow var(--duration-control) var(--ease-soft),
-      border-color var(--duration-micro) ease-out;
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
     animation: auth-fade 380ms var(--ease-soft) both;
     animation-delay: calc(40ms + var(--i, 0) * 40ms);
   }
 
   .hub-tile:hover {
-    @apply border-brand-amber/45;
+    @apply border-fg;
     transform: translateY(-2px);
     box-shadow: 0 14px 34px rgb(23 23 23 / 0.12);
   }
@@ -1539,7 +1444,7 @@
      by colour rather than by reading six labels. */
   .hub-tile-icon {
     @apply grid h-10 w-10 shrink-0 place-items-center rounded-xl;
-    transition: transform var(--duration-control) var(--ease-soft);
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
   .hub-tile:hover .hub-tile-icon {
@@ -1553,20 +1458,20 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-
 button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: default; }
-:focus-visible { outline: 2px solid var(--sodium); outline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
 .signal-logo { display: grid; flex-shrink: 0; place-items: center; }
-.signal-button { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--raise); color: var(--fg); font-size: 13px; font-weight: 500; white-space: nowrap; isolation: isolate; transition: transform var(--t1) var(--ease); }
-.signal-button::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: currentColor; opacity: 0; pointer-events: none; transition: opacity var(--t1) var(--ease); }
+.signal-button { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; max-width: 100%; padding: 0 16px; border: 0; border-radius: 99px; background: var(--raise); color: var(--fg); font-size: 13px; font-weight: 500; isolation: isolate; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+.signal-button::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: currentColor; opacity: 0; pointer-events: none; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
 .signal-button:hover::before { opacity: .06; }
 .signal-button:hover { transform: translateY(-1px); }
 .signal-button:active { transform: scale(.97); }
 .signal-button:disabled { pointer-events: none; opacity: .5; }
-.signal-button.btn-primary { background: var(--sodium); border-color: transparent; color: var(--on-sodium); font-weight: 600; box-shadow: 0 10px 26px -16px var(--glow); }
+.signal-button.btn-primary { background: var(--fg); color: var(--surface); font-weight: 600; box-shadow: none; }
 .signal-button.btn-ghost { border-color: transparent; background: transparent; color: var(--muted); }
 .signal-button.btn-danger { background: color-mix(in oklab, var(--bad) 12%, var(--surface)); border-color: color-mix(in oklab, var(--bad) 35%, var(--line)); color: var(--bad); }
 .signal-button-small { min-height: 30px; padding-inline: 11px; font-size: 12px; }
 .signal-button-icon { width: 36px; height: 36px; padding: 0; flex-shrink: 0; }
-.signal-chip { --h: var(--muted); display: inline-flex; align-items: center; gap: 6px; border-radius: 99px; padding: 3px 9px; white-space: nowrap; font-size: 11.5px; font-weight: 500; background: color-mix(in oklab, var(--h) 15%, transparent); color: color-mix(in oklab, var(--h) 62%, var(--fg)); transition: transform var(--t1) var(--ease); }
+.signal-chip { --h: var(--muted); display: inline-flex; align-items: center; gap: 6px; border-radius: 99px; padding: 3px 9px; white-space: nowrap; font-size: 11.5px; font-weight: 500; background: color-mix(in oklab, var(--h) 15%, transparent); color: color-mix(in oklab, var(--h) 62%, var(--fg)); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
 .signal-chip[data-dot=true]::before { content: ""; width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; background: var(--h); }
 .signal-chip:hover { transform: translateY(-1px); }
 .signal-chip:active { transform: scale(.97); }
@@ -1576,7 +1481,7 @@ button:disabled { cursor: default; }
 .signal-brand { display: flex; align-items: center; gap: 10px; padding-inline: 6px; font: 700 19px var(--f-display), sans-serif; letter-spacing: -.03em; }
 .signal-new-message { width: 100%; justify-content: flex-start; min-height: 40px; }
 .signal-primary-nav { display: flex; flex-direction: column; gap: 3px; }
-.signal-nav-link { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px; color: var(--muted); font-size: 13.5px; font-weight: 500; transition: transform var(--t1) var(--ease); animation: signal-arrive var(--t3) var(--ease) backwards; animation-delay: calc(var(--i,0) * 50ms); }
+.signal-nav-link { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px; color: var(--muted); font-size: 13.5px; font-weight: 500; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); animation: signal-arrive var(--t3) var(--ease) backwards; animation-delay: calc(var(--i,0) * 50ms); }
 .signal-nav-link:hover { background: var(--raise); color: var(--fg); transform: translateX(2px); }
 .signal-nav-link:active { transform: scale(.98); }
 .signal-nav-link.is-active { color: var(--fg); background: var(--raise); }
@@ -1585,7 +1490,7 @@ button:disabled { cursor: default; }
 .signal-mail-context summary { display: flex; align-items: center; gap: 7px; cursor: pointer; color: var(--muted); font-size: 11px; padding: 0 10px 8px; }
 .signal-mail-context summary::after { content: "+"; margin-left: auto; }
 .signal-mail-context[open] summary::after { content: "-"; }
-.signal-mail-context nav { animation: signal-arrive var(--t2) var(--ease) both; }
+.signal-mail-context nav { animation: signal-arrive var(--t2) var(--ease) backwards; }
 .signal-folder { display: flex; justify-content: space-between; padding: 5px 10px 5px 30px; font-size: 12px; color: var(--muted); border-radius: 8px; }
 .signal-folder:hover, .signal-folder[aria-current=page] { background: var(--raise); color: var(--fg); }
 .signal-folder small { font: 10px var(--f-mono), monospace; }
@@ -1602,7 +1507,7 @@ button:disabled { cursor: default; }
 .signal-avatar { display: grid; width: 32px; height: 32px; flex-shrink: 0; place-items: center; border-radius: 50%; background: color-mix(in oklab, var(--jac) 18%, var(--surface)); color: var(--fg); font-size: 11px; font-weight: 600; }
 .signal-workspace { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .signal-topbar { position: relative; display: flex; min-height: 65px; align-items: center; gap: 14px; padding: 12px 22px; border-bottom: 1px solid var(--line); }
-.signal-command-trigger { display: flex; align-items: center; gap: 10px; width: min(420px,55%); min-width: 0; height: 40px; margin-inline: auto; padding: 0 8px 0 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--raise); color: var(--muted); text-align: left; font-size: 13px; transition: transform var(--t1) var(--ease); }
+.signal-command-trigger { display: flex; align-items: center; gap: 10px; width: min(420px,55%); min-width: 0; height: 40px; margin-inline: auto; padding: 0 8px 0 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--raise); color: var(--muted); text-align: left; font-size: 13px; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
 .signal-command-trigger:hover { transform: translateY(-1px); }
 .signal-command-trigger:active { transform: scale(.99); }
 .signal-command-trigger span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
@@ -1617,15 +1522,15 @@ button:disabled { cursor: default; }
 .signal-frame kbd { border: 1px solid var(--line); border-bottom-width: 2px; padding: 2px 5px; border-radius: 5px; background: var(--surface); color: var(--muted); font: 10px var(--f-mono), monospace; white-space: nowrap; }
 .signal-dialog { position: fixed; inset: 0; width: 100%; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: max(40px,10vh) 16px 24px; border: 0; background: transparent; color: var(--fg); overflow: auto; }
 .signal-dialog[open] { display: flex; justify-content: center; align-items: flex-start; }
-.signal-dialog::backdrop { background: rgb(6 7 11 / .6); opacity: 0; transition: opacity var(--t2) var(--ease); }
+.signal-dialog::backdrop { background: rgb(6 7 11 / .6); opacity: 0; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
 .signal-dialog[data-visible=true]::backdrop { opacity: 1; }
-.signal-dialog-panel { width: min(560px,100%); min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 24px 80px rgb(0 0 0 / .24); opacity: 0; transform: translateY(12px) scale(.985); transition: opacity var(--t2) var(--ease), transform var(--t2) var(--ease); }
+.signal-dialog-panel { width: min(560px,100%); min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 24px 80px rgb(0 0 0 / .24); opacity: 0; transform: translateY(12px) scale(.985); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
 .signal-dialog[data-visible=true] > .signal-dialog-panel { opacity: 1; transform: none; }
 .signal-command-input { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); color: var(--muted); }
 .signal-command-input input { flex: 1; min-width: 0; background: transparent; color: var(--fg); outline: 0; font-size: 15px; }
 .signal-command-input:focus-within { box-shadow: inset 0 -2px var(--sodium); }
 .signal-command-list { max-height: min(440px,60dvh); overflow-y: auto; padding: 8px; }
-.signal-command-list button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; border-radius: 10px; text-align: left; font-size: 13px; transition: transform var(--t1) var(--ease); }
+.signal-command-list button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; border-radius: 10px; text-align: left; font-size: 13px; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
 .signal-command-list button[aria-selected=true] { background: var(--raise); }
 .signal-command-list button:active { transform: scale(.99); }
 .signal-command-list button span { flex: 1; overflow-wrap: anywhere; }
@@ -1642,39 +1547,39 @@ button:disabled { cursor: default; }
 .signal-help dl { display: grid; gap: 12px; padding-top: 20px; }
 .signal-help dl > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 12px; }
 .signal-help dd { color: var(--muted); }
-.signal-toast { position: fixed; z-index: 100; left: 50%; bottom: max(24px,env(safe-area-inset-bottom)); max-width: calc(100vw - 32px); padding: 12px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--fg); color: var(--surface); box-shadow: 0 8px 24px rgb(0 0 0 / .16); font-size: 13px; pointer-events: none; opacity: 0; transform: translate(-50%,12px); transition: opacity var(--t2) var(--ease), transform var(--t2) var(--ease); }
+.signal-toast { position: fixed; z-index: 100; left: 50%; bottom: max(24px,env(safe-area-inset-bottom)); max-width: calc(100vw - 32px); padding: 12px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--fg); color: var(--surface); box-shadow: 0 8px 24px rgb(0 0 0 / .16); font-size: 13px; pointer-events: none; opacity: 0; transform: translate(-50%,12px); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
 .signal-toast[data-visible=true] { opacity: 1; transform: translate(-50%,0); }
-.signal-auth { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); min-height: 100dvh; width: 100%; background: var(--surface); }
+.signal-auth { display: grid; place-items: center; min-height: 100dvh; width: 100%; padding: 32px 16px; background: var(--bg); }
 .signal-auth-scene { position: relative; overflow: hidden; min-height: 100%; background: var(--board-bg); color: var(--board-fg); }
 .signal-light-field { position: absolute; inset: 0; width: 100%; height: 100%; }
-.signal-auth-brand { position: absolute; left: 32px; top: 30px; display: flex; align-items: center; gap: 10px; font: 700 19px var(--f-display), sans-serif; letter-spacing: -.03em; pointer-events: none; }
+.signal-auth-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; font: 650 18px var(--f-body), sans-serif; color: var(--fg); }
 .signal-auth-caption { position: absolute; left: 32px; bottom: 30px; font: 11px var(--f-mono), monospace; letter-spacing: .08em; color: rgb(255 247 232 / .45); pointer-events: none; }
-.signal-auth-form { display: flex; min-width: 0; align-items: center; justify-content: center; padding: 56px clamp(24px,5vw,80px); }
-.signal-auth-content { width: 100%; max-width: 380px; }
-.signal-auth-heading { margin-bottom: 32px; animation: signal-arrive var(--t3) var(--ease) both; }
-.signal-auth-heading h1 { font: 700 clamp(32px,3vw,44px)/1.06 var(--f-display), sans-serif; letter-spacing: -.04em; }
+.signal-auth-form { width: min(460px, 100%); min-width: 0; padding: clamp(24px, 5vw, 40px); border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); }
+.signal-auth-content { width: 100%; min-width: 0; }
+.signal-auth-heading { margin-bottom: 32px; animation: signal-arrive var(--t3) var(--ease) backwards; }
+.signal-auth-heading h1 { font: 650 28px/1.2 var(--f-body), sans-serif; letter-spacing: -.03em; }
 .signal-auth-heading p { margin-top: 12px; font-size: 14px; color: var(--muted); }
-.signal-auth-content form { animation: signal-arrive var(--t3) var(--ease) 50ms both; }
+.signal-auth-content form { animation: signal-arrive var(--t3) var(--ease) 50ms backwards; }
 .signal-auth-field { display: flex; min-width: 0; flex-direction: column; gap: 7px; }
 .signal-auth-field label { font-size: 12px; font-weight: 500; color: var(--fg); }
 .signal-auth-field > p { font-size: 11px; line-height: 1.5; color: var(--muted); }
 .signal-auth-input-wrap { position: relative; display: flex; align-items: center; }
 .signal-auth-input-wrap > svg { position: absolute; left: 13px; color: var(--muted); pointer-events: none; }
-.signal-auth-input { width: 100%; min-width: 0; height: 46px; padding: 0 14px 0 39px; border: 1px solid var(--line); border-radius: 10px; background: var(--raise); color: var(--fg); font-size: 13px; }
+.signal-auth-input { width: 100%; min-width: 0; height: 46px; padding: 0 14px 0 39px; border: 1px solid var(--line); border-radius: 12px; background: var(--raise); color: var(--fg); font-size: 13px; }
 .signal-auth-input::placeholder { color: var(--muted); }
-.signal-auth-input:focus { outline: 2px solid var(--sodium); outline-offset: 2px; }
+.signal-auth-input:focus { outline: 2px solid var(--fg); outline-offset: 3px; }
 .signal-auth-input:-webkit-autofill { -webkit-text-fill-color: var(--fg); caret-color: var(--fg); transition: background-color 100000s; }
 .signal-password { padding-right: 44px; }
-.signal-password-toggle { position: absolute; right: 7px; display: grid; place-items: center; width: 32px; height: 32px; color: var(--muted); border-radius: 7px; transition: transform var(--t1) var(--ease); }
+.signal-password-toggle { position: absolute; right: 7px; display: grid; place-items: center; width: 32px; height: 32px; color: var(--muted); border-radius: 7px; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
 .signal-password-toggle:hover { transform: translateY(-1px); }
 .signal-password-toggle:active { transform: scale(.94); }
 .signal-remember { display: flex; align-items: center; gap: 10px; align-self: flex-start; font-size: 12px; color: var(--muted); border-radius: 8px; }
 .signal-switch { position: relative; display: inline-flex; align-items: center; width: 32px; height: 18px; border-radius: 99px; background: var(--line); }
 .signal-switch[data-on=true] { background: var(--sodium); }
-.signal-switch > span { width: 12px; height: 12px; border-radius: 50%; background: var(--surface); transform: translateX(3px); transition: transform var(--t2) var(--ease); }
-.signal-switch[data-on=true] > span { background: var(--on-sodium); transform: translateX(17px); }
+.signal-switch > span { width: 12px; height: 12px; border-radius: 50%; background: var(--surface); transform: translateX(3px); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+.signal-switch[data-on=true] > span { background: var(--surface); transform: translateX(17px); }
 .signal-auth-submit { height: 46px; width: 100%; font-size: 14px; }
-.signal-auth-footer { margin-top: 28px; font-size: 12px; color: var(--muted); animation: signal-arrive var(--t3) var(--ease) 100ms both; }
+.signal-auth-footer { margin-top: 28px; font-size: 12px; color: var(--muted); animation: signal-arrive var(--t3) var(--ease) 100ms backwards; }
 .signal-auth .auth-link { color: var(--fg); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--line); }
 .signal-auth .auth-link::after { display: none; }
 .signal-auth .auth-link:hover { text-decoration-color: var(--fg); }
@@ -1692,13 +1597,53 @@ button:disabled { cursor: default; }
   .signal-command-trigger kbd { display: none; }
   .signal-topbar-tools { gap: 1px; }
   .signal-topbar-tools .signal-button-icon { width: 32px; }
-  .signal-auth { grid-template-columns: minmax(0,1fr); grid-template-rows: 230px auto; }
+  .signal-auth { padding: 20px 12px; }
   .signal-auth-scene { min-height: 230px; }
-  .signal-auth-brand { top: 22px; left: 24px; }
+  .signal-auth-brand { margin-bottom: 28px; }
   .signal-auth-caption { display: none; }
-  .signal-auth-form { padding: 38px 24px 48px; align-items: flex-start; }
+  .signal-auth-form { padding: 28px 24px; }
   .signal-auth-heading { margin-bottom: 26px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* Shared V2 fields, arrival rhythm and portal surfaces. */
+.glass-input::placeholder { color: var(--muted); opacity: 1; }
+:is(input, textarea, select) { accent-color: var(--fg); }
+select { color: var(--fg); background-color: var(--raise); }
+option { color: var(--fg); background: var(--surface); }
+input[type="date"] { color-scheme: inherit; }
+:is(input, textarea, select):disabled { opacity: .55; cursor: default; }
+:is(input, textarea):-webkit-autofill { -webkit-text-fill-color: var(--fg); caret-color: var(--fg); box-shadow: 0 0 0 1000px var(--raise) inset; }
+:is(input, textarea):autofill { color: var(--fg); background: var(--raise); }
+.btn-primary:disabled { pointer-events: none; opacity: .5; }
+.signal-dialog-panel { border: 0; border-radius: 20px; box-shadow: var(--mail-shadow); }
+.v2-overlay { background: rgb(6 7 11 / .6); animation: compose-veil var(--t2) var(--ease) both; }
+.signal-sidebar { border-right: 0; }
+.signal-nav-link, .signal-folder { border-radius: 99px; }
+.signal-nav-link.is-active, .signal-folder[aria-current=page] { background: var(--fg); color: var(--surface); }
+.signal-user { overflow-wrap: anywhere; }
+.signal-chip { color: var(--h); background: color-mix(in srgb, var(--h) 9%, var(--surface)); }
+.view-state { display: grid; justify-items: center; gap: 14px; padding: 44px 24px; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); color: var(--muted); font-size: 13px; line-height: 1.6; text-align: center; overflow-wrap: anywhere; animation: signal-arrive var(--t2) var(--ease) backwards; }
+.view-state-skeleton { width: min(240px, 100%); display: grid; gap: 10px; }
+.view-state-skeleton i { height: 9px; border-radius: 99px; background: var(--raise); animation: v2-breathe 1.4s var(--ease) infinite alternate; }
+.view-state-skeleton i:last-child { width: 65%; animation-delay: 120ms; }
+.v2-scroll { flex: 1; min-width: 0; overflow-y: auto; scrollbar-gutter: stable; }
+.v2-content { width: 100%; max-width: 1040px; margin: 0 auto; padding: 20px 0 32px; }
+.v2-content > * { min-width: 0; }
+.v2-content h1 { font: 650 28px/1.2 var(--f-body), sans-serif; letter-spacing: -.03em; }
+.v2-content :is(button, a, summary, input, select, textarea) { transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+.v2-content :is(a, button):active { transform: scale(.98); }
+.v2-content > div > :is(section, header, dl), .v2-content > form > :is(section, header, fieldset) { animation: signal-arrive var(--t3) var(--ease) backwards; }
+.v2-content > div > :nth-child(2) { animation-delay: 40ms; }
+.v2-content > div > :nth-child(3) { animation-delay: 80ms; }
+.v2-content > div > :nth-child(4) { animation-delay: 120ms; }
+@keyframes v2-breathe { from { opacity: .5; } to { opacity: 1; } }
+@media (max-width: 859px) { .v2-content { padding-top: 14px; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  /* Popover dismissal consumes animationend, even when motion is reduced. */
+  .menu-pop { animation: menu-pop .01ms var(--ease) both !important; }
+  .menu-pop[data-closing="true"] { animation: menu-pop-out .01ms var(--ease) both !important; }
 }

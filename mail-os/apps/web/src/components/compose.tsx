@@ -59,7 +59,7 @@ export { loadDraftToContext, replyContextFromThread, type ComposeContext };
 
 /**
  * Width the template preview is rendered at before being scaled into the pane.
- * 640 is the max-width the brand kit centres the body in — the page width of
+ * 640 is the max-width the brand kit centres the body in : the page width of
  * these emails. Going wider only adds margin, which costs scale for nothing.
  */
 const PREVIEW_CANVAS_WIDTH = 640;
@@ -489,7 +489,7 @@ export function ComposeModal({
   const aiBusy = suggest.isPending || rewrite.isPending;
 
   /* -- Templates ------------------------------------------------------------
-     Applying a template used to drop its raw HTML — placeholders and all —
+     Applying a template used to drop its raw HTML : placeholders and all :
      straight into the editor, leaving `{{client_name}}` for the user to find and
      overwrite. Anything they missed went out to the client verbatim, because the
      send path substitutes a missing variable with its own name. The picker now
@@ -586,7 +586,7 @@ export function ComposeModal({
           type="button"
           onClick={() => dismiss({ save: true })}
           className="compose-close-pill"
-          title="Close (Esc) — the draft is kept"
+          title="Close (Esc). The draft is kept."
           aria-label="Close compose"
         >
           <X aria-hidden size={15} strokeWidth={2.4} />
@@ -603,7 +603,7 @@ export function ComposeModal({
         >
           {/* ---- Left: the message ----
               Below lg there is no room for two columns, so the preview replaces the
-              editor rather than the toggle doing nothing — which is what the old
+              editor rather than the toggle doing nothing : which is what the old
               `lg:hidden` button over a `hidden lg:flex` panel amounted to. */}
           <div
             className={cn(
@@ -730,7 +730,7 @@ export function ComposeModal({
                       title="Quoted conversation"
                       srcDoc={frameDocument(quoted, true)}
                       sandbox=""
-                      className="mt-2 h-64 w-full rounded-xl border border-brand-black/10 bg-white dark:border-brand-cream/10"
+                      className="mt-2 h-64 w-full rounded-xl border border-line bg-white"
                     />
                   )}
                 </div>
@@ -743,12 +743,12 @@ export function ComposeModal({
                     <div key={a.id} className="attach-card">
                       <Paperclip
                         size={14}
-                        className="shrink-0 text-brand-black/45 dark:text-brand-cream/40"
+                        className="shrink-0 text-muted"
                         aria-hidden
                       />
                       <div className="min-w-0">
                         <div className="max-w-[16rem] truncate text-xs font-medium">{a.fileName}</div>
-                        <div className="text-[10px] text-brand-black/50 dark:text-brand-cream/45">
+                        <div className="text-[10px] text-muted">
                           {formatBytes(a.sizeBytes)}
                         </div>
                       </div>
@@ -763,7 +763,7 @@ export function ComposeModal({
                     </div>
                   ))}
                   {uploading > 0 && (
-                    <span className="inline-flex items-center gap-1.5 self-center text-xs text-brand-black/55 dark:text-brand-cream/50">
+                    <span className="inline-flex items-center gap-1.5 self-center text-xs text-muted">
                       <Loader2 size={13} className="animate-spin" />
                       Uploading {uploading} file{uploading === 1 ? "" : "s"}…
                     </span>
@@ -776,15 +776,15 @@ export function ComposeModal({
 
           {/* ---- Right: live preview ---- */}
           {showPreview && (
-            <aside className="flex min-h-0 flex-col overflow-hidden lg:border-l lg:border-brand-black/10 dark:lg:border-brand-cream/10">
-              <div className="flex items-center gap-2 border-b border-brand-black/[0.07] px-4 py-2 dark:border-brand-cream/[0.07]">
-                <span className="text-[10px] font-bold uppercase tracking-[0.09em] text-brand-black/55 dark:text-brand-cream/50">
+            <aside className="flex min-h-0 flex-col overflow-hidden lg:border-l lg:border-line dark:lg:border-line">
+              <div className="flex items-center gap-2 border-b border-line px-4 py-2">
+                <span className="text-[10px] font-bold uppercase tracking-[0.09em] text-muted">
                   Preview
                 </span>
                 {preview.isPending && (
-                  <Loader2 size={12} className="animate-spin text-brand-amber" aria-label="Rendering" />
+                  <Loader2 size={12} className="animate-spin text-fg" aria-label="Rendering" />
                 )}
-                <span className="ml-auto truncate text-[11px] text-brand-black/50 dark:text-brand-cream/45">
+                <span className="ml-auto truncate text-[11px] text-muted">
                   {preview.data?.subject || subject}
                 </span>
               </div>
@@ -814,7 +814,7 @@ export function ComposeModal({
             key here could duplicate a delivery nobody can see yet. */}
         {sendId.outcome === "uncertain" && (
           <div className="shrink-0 px-5 pb-1 pt-1">
-            <div className="flex flex-wrap items-center gap-2 text-xs text-brand-black/70 dark:text-brand-cream/65">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
               <span>
                 {confirmNewSend
                   ? "Confirm this is a new send after checking Sent."
@@ -861,7 +861,7 @@ export function ComposeModal({
                   <Send size={15} />
                 )}
                 {send.isPending ? "Sending…" : "Send"}
-                <kbd className="ml-1 hidden rounded border border-brand-black/20 px-1 text-[10px] font-medium opacity-70 sm:inline">
+                <kbd className="ml-1 hidden rounded border border-line px-1 text-[10px] font-medium opacity-70 sm:inline">
                   {modKey}↵
                 </kbd>
               </Button>
@@ -955,7 +955,7 @@ function WritingAssist({
 /**
  * Pick a template by looking at it.
  *
- * This was a list of names over one line of description — which is the one thing
+ * This was a list of names over one line of description : which is the one thing
  * a template cannot be recognised by. These are designed emails; you know the
  * invoice from the campaign report by its shape, not by reading "Invoice due".
  * So the list stays on the left as the thing you choose from, and the right is
@@ -992,7 +992,7 @@ function TemplatePicker({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-brand-black/60 p-4"
+      className="v2-overlay fixed inset-0 z-[60] flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
       aria-label="Pick a template"
@@ -1003,7 +1003,7 @@ function TemplatePicker({
       }}
     >
       <GlassPanel className="flex h-[80vh] w-full max-w-4xl flex-col overflow-hidden">
-        <header className="flex shrink-0 items-center justify-between border-b border-brand-black/10 px-5 py-3 dark:border-brand-cream/10">
+        <header className="flex shrink-0 items-center justify-between border-b border-line px-5 py-3">
           <h3 className="text-base font-semibold">Pick a template</h3>
           <button
             className="editor-tool h-8 w-8"
@@ -1026,7 +1026,7 @@ function TemplatePicker({
         ) : (
           <div className="grid min-h-0 flex-1 grid-cols-1 sm:grid-cols-[16rem_minmax(0,1fr)]">
             {/* Left: what you are choosing from. */}
-            <ul className="min-h-0 overflow-y-auto border-brand-black/10 p-2 sm:border-r dark:border-brand-cream/10">
+            <ul className="min-h-0 overflow-y-auto border-line p-2 sm:border-r">
               {data.map((t) => {
                 const active = t.id === selected?.id;
                 return (
@@ -1038,14 +1038,14 @@ function TemplatePicker({
                       onDoubleClick={() => setFilling(t)}
                       aria-current={active}
                       className={cn(
-                        "mb-1 w-full rounded-[var(--radius)] border px-3 py-2 text-left transition-colors duration-150 ease-out",
+                        "mb-1 w-full rounded-[var(--radius)] border px-3 py-2 text-left transition-[transform,opacity] duration-150 ease-out",
                         active
-                          ? "border-brand-amber bg-brand-amber/15"
-                          : "border-transparent hover:bg-brand-black/[0.04] dark:hover:bg-brand-cream/[0.06]"
+                          ? "border-fg bg-raise"
+                          : "border-transparent hover:bg-raise "
                       )}
                     >
                       <div className="truncate text-sm font-medium">{t.name}</div>
-                      <div className="truncate text-xs text-brand-black/60 dark:text-brand-cream/55">
+                      <div className="truncate text-xs text-muted">
                         {t.subject || t.description || "(no subject)"}
                       </div>
                     </button>
@@ -1060,7 +1060,7 @@ function TemplatePicker({
                 {selected && <TemplatePreviewPane html={selected.bodyHtml} />}
               </div>
 
-              <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-brand-black/10 px-4 py-3 dark:border-brand-cream/10">
+              <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-line px-4 py-3">
                 <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
                   {selected?.variables.slice(0, 4).map((v) => (
                     <span key={v} className="chip">
@@ -1091,7 +1091,7 @@ function TemplatePicker({
  * Fill in the blanks, then insert a finished message.
  *
  * This is the half of the template system that was missing. A template knew what
- * it needed — `{{client_name}}`, `{{meeting_date}}` — but nothing ever asked for
+ * it needed : `{{client_name}}`, `{{meeting_date}}` : but nothing ever asked for
  * those values, so the composer received raw markup and the user had to hunt
  * through a designed email overwriting placeholder chips by hand. Anything missed
  * was sent literally.
@@ -1134,7 +1134,7 @@ function TemplateFill({
   /* -- Live preview --------------------------------------------------------
      Unfilled fields fall back to the server's example values, so the preview is
      a finished email from the first frame rather than one full of holes. That
-     fallback is deliberately *not* used on insert — see `insert` below.
+     fallback is deliberately *not* used on insert : see `insert` below.
      ----------------------------------------------------------------------- */
 
   const preview = useMutation({
@@ -1180,7 +1180,7 @@ function TemplateFill({
         skipBrandWrap: full?.skipBrandWrap ?? false,
         values,
         lists,
-        // The body only — the brand kit is applied when the message is sent, and
+        // The body only : the brand kit is applied when the message is sent, and
         // wrapping here would put a second letterhead inside the editor.
         wrap: false,
       }),
@@ -1194,7 +1194,7 @@ function TemplateFill({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-brand-black/60 p-4"
+      className="v2-overlay fixed inset-0 z-[60] flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
       aria-label={`Fill in ${template.name}`}
@@ -1205,14 +1205,14 @@ function TemplateFill({
       }}
     >
       <GlassPanel className="flex h-[80vh] w-full max-w-4xl flex-col overflow-hidden">
-        <header className="flex shrink-0 items-center gap-2 border-b border-brand-black/10 px-5 py-3 dark:border-brand-cream/10">
+        <header className="flex shrink-0 items-center gap-2 border-b border-line px-5 py-3">
           <button onClick={onBack} className="reader-action !px-2" aria-label="Back to templates">
             <ChevronLeft aria-hidden size={16} />
           </button>
           <div className="min-w-0 flex-1">
             <h3 className="truncate text-base font-semibold">{template.name}</h3>
-            <p className="truncate text-xs text-brand-black/55 dark:text-brand-cream/50">
-              Fill in the details — the design stays as it is.
+            <p className="truncate text-xs text-muted">
+              Fill in the details. The design stays as it is.
             </p>
           </div>
           <button className="editor-tool h-8 w-8" onClick={onClose} aria-label="Close">
@@ -1221,14 +1221,14 @@ function TemplateFill({
         </header>
 
         <div className="grid min-h-0 flex-1 grid-cols-1 sm:grid-cols-[20rem_minmax(0,1fr)]">
-          <div className="min-h-0 space-y-3 overflow-y-auto border-brand-black/10 p-4 sm:border-r dark:border-brand-cream/10">
+          <div className="min-h-0 space-y-3 overflow-y-auto border-line p-4 sm:border-r">
             {isLoading ? (
               <MutedText>Loading…</MutedText>
             ) : (
               <>
                 {template.variables.map((name) => (
                   <label key={name} className="block">
-                    <span className="mb-1 block text-xs font-medium text-brand-black/70 dark:text-brand-cream/65">
+                    <span className="mb-1 block text-xs font-medium text-muted">
                       {labelFor(name)}
                     </span>
                     <input
@@ -1242,7 +1242,7 @@ function TemplateFill({
 
                 {template.lists.map((name) => (
                   <div key={name}>
-                    <span className="mb-1 block text-xs font-medium text-brand-black/70 dark:text-brand-cream/65">
+                    <span className="mb-1 block text-xs font-medium text-muted">
                       {labelFor(name)}
                     </span>
                     <div className="space-y-1.5">
@@ -1293,10 +1293,10 @@ function TemplateFill({
               )}
             </div>
 
-            <div className="flex shrink-0 items-center gap-2 border-t border-brand-black/10 px-4 py-3 dark:border-brand-cream/10">
-              <span className="min-w-0 flex-1 truncate text-[11px] text-brand-black/55 dark:text-brand-cream/50">
+            <div className="flex shrink-0 items-center gap-2 border-t border-line px-4 py-3">
+              <span className="min-w-0 flex-1 truncate text-[11px] text-muted">
                 {missing.length > 0
-                  ? `${missing.length} still to fill in — the preview shows examples meanwhile.`
+                  ? `${missing.length} still to fill in. The preview shows examples meanwhile.`
                   : "Ready to insert."}
               </span>
               <Button

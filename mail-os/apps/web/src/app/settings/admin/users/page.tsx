@@ -27,7 +27,7 @@ export default function AdminUsersPage() {
   });
   if (!ready) return <SettingsState loading />;
   return <div className={s.page}>
-    <SettingsHeader title="Team and invitations" eyebrow="Settings / Admin" description="The people in your workspace and what they can do." />
+    <SettingsHeader title="Team and invitations" context="Settings / Admin" description="The people in your workspace and what they can do." />
     <Feedback error={updateRole.error} message={updateRole.isSuccess ? "Role updated. That person must sign in again." : null} />
     {users.isPending ? <SettingsState loading /> : users.isError ? <SettingsState error={users.error} retry={() => void users.refetch()} /> : users.data.length === 0 ? <SettingsState empty="No people to show" /> : <div className={s.people}>{users.data.map((person) => <article className={s.person} key={person.id}>
       <div className={s.identity}><Avatar name={person.displayName} /><div><b>{person.displayName}{person.id === me?.id && <small> (you)</small>}</b><p>{person.email}</p></div></div>

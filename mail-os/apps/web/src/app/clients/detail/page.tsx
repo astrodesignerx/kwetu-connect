@@ -5,15 +5,15 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { clientColour, clientsApi, displayDate, replyDuration } from "@/lib/signal-clients";
-import { ClientAvatar, StateBoard, StatusChip } from "@/components/signal";
-import { Button } from "@/components/ui";
+import { clientsApi, displayDate, replyDuration } from "@/lib/signal-clients";
+import { ClientAvatar, StatusChip } from "@/components/signal";
+import { Button, ViewState } from "@/components/ui";
 import { ClientForm } from "@/components/clients/client-form";
 import { ClientProjects } from "@/components/clients/client-projects";
 import s from "./page.module.css";
 
 export default function ClientDetailPage() {
-  return <Suspense fallback={<StateBoard state="loading" label="Loading client" />}><ClientLookup /></Suspense>;
+  return <Suspense fallback={<ViewState loading label="Loading client" />}><ClientLookup /></Suspense>;
 }
 
 function ClientLookup() {
@@ -32,19 +32,17 @@ function ClientWorkspace({ id }: { id: string }) {
     void cache.invalidateQueries({ queryKey: ["client-activity"] });
     router.push("/clients");
   } });
-  if (company.isPending) return <StateBoard state="loading" label="Loading client" />;
+  if (company.isPending) return <ViewState loading label="Loading client" />;
   if (company.isError) return <div role="alert"><p>{company.error.message}</p><Link href="/clients">Back to clients</Link></div>;
   const data = company.data;
-  const hue = clientColour(id);
+  const hue = "var(--muted)";
   const stats = insights.data;
-  const monogram = data.company.name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(word => Array.from(word)[0]).join("").toLocaleUpperCase("en-GB");
   return <div className={s.page} style={{ "--h": hue } as CSSProperties}>
     <header className={s.hero}>
-      <span className={s.monogram} aria-hidden="true">{monogram}</span>
       <Link className={s.back} href="/clients">Back to clients</Link>
       <div className={s.heroRow}>
         <ClientAvatar name={data.company.name} colour={hue} size="large" />
-        <div className={s.grow}><p className={s.eyebrow}>Client workspace</p><h1>{data.company.name}</h1><div className={s.identity}><span>{data.company.domain || "No domain added"}</span>{stats && <StatusChip label={stats.waitingCount > 0 ? "Waiting on us" : "All replied"} colour={hue} />}</div></div>
+        <div className={s.grow}><p className={s.sectionLabel}>Client workspace</p><h1>{data.company.name}</h1><div className={s.identity}><span>{data.company.domain || "No domain added"}</span>{stats && <StatusChip label={stats.waitingCount > 0 ? "Waiting on us" : "All replied"} colour={stats.waitingCount > 0 ? "var(--mail-waiting)" : hue} />}</div></div>
         <div className={s.actions}><Button variant="default" onClick={() => setEditing(!editing)}>{editing ? "Close editor" : "Edit client"}</Button></div>
       </div>
     </header>
@@ -68,7 +66,7 @@ function ClientWorkspace({ id }: { id: string }) {
         const state = stats?.recentThreads.find(t => t.id === thread.id);
         return <li key={thread.id}><time dateTime={thread.lastDate ?? undefined}>{displayDate(thread.lastDate)}</time><span className={s.dot} aria-hidden="true" /><Link href={`/mail?id=${encodeURIComponent(thread.id)}`}>
           <strong>{thread.subject || "(no subject)"}</strong><small>{thread.snippet || thread.participants}</small>
-          {state && <StatusChip label={state.replyState === "ToReply" ? "Waiting on us" : state.replyState === "Awaiting" ? "Awaiting reply" : "Done"} colour={state.replyState === "ToReply" ? "var(--sodium)" : hue} />}
+          {state && <StatusChip label={state.replyState === "ToReply" ? "Waiting on us" : state.replyState === "Awaiting" ? "Awaiting reply" : "Done"} colour={state.replyState === "ToReply" ? "var(--mail-waiting)" : hue} />}
         </Link></li>;
       })}</ol>}
     </section>

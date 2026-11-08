@@ -1,0 +1,50 @@
+pnpm.cmd : $ next build
+At line:2 char:140
++ ... .0.1:3024'; pnpm.cmd build *> ../../../.claude/notes/v2-everywhere/bu ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ next build:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+ Next.js 16.4.3 (Turbopack)
+ Running next.config.ts took 113ms
+
+  Creating an optimized production build ...
+ Compiled successfully in 10.2s
+  Running TypeScript ...
+  Finished TypeScript in 10.8s ...
+  Collecting page data using 15 workers ...
+  Generating static pages using 15 workers (0/24) ...
+  Generating static pages using 15 workers (6/24)
+  Generating static pages using 15 workers (12/24)
+  Generating static pages using 15 workers (18/24)
+ Generating static pages using 15 workers (24/24) in 1553ms
+  Finalizing page optimization ...
+
+Route (app)
+  /
+  /_not-found
+  /apple-icon.png
+  /clients
+  /clients/detail
+  /dev/mail
+  /dev/signal
+  /drafts
+  /icon.svg
+  /login
+  /mail
+  /register
+  /settings
+  /settings/admin/audit
+  /settings/admin/users
+  /settings/brand-kit
+  /settings/mailboxes
+  /settings/mailboxes/connect
+  /settings/profile
+  /settings/templates
+  /settings/templates/edit
+  /settings/templates/new
+
+
+  (Static)  prerendered as static content
+
+Exit code: 0

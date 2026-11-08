@@ -60,7 +60,7 @@ export default function SettingsHubPage() {
           {team.isError && <span className={s.note}>People unavailable</span>}
         </Tile>
         <Tile href="/settings/admin/audit" title="Audit log" half>
-          {audit.data ? <HeatStrip values={audit.data.days.slice(-14).map((day) => day.count)} colour="var(--muted)" label="Administrative activity in the last 14 days" /> : <span className={s.note}>{audit.isError ? "Activity unavailable" : "Loading activity"}</span>}
+          {audit.data ? <div className={s.activity}><HeatStrip values={audit.data.days.slice(-14).map((day) => day.count)} colour="var(--muted)" label="Administrative activity in the last 14 days" /></div> : <span className={s.note}>{audit.isError ? "Activity unavailable" : "Loading activity"}</span>}
           <p className={s.note}>{recent.data?.[0] ? <><time dateTime={recent.data[0].createdAt}>{dateTime(recent.data[0].createdAt)}</time><br />{auditLabel(recent.data[0].action)}</> : recent.isError ? "Latest event unavailable" : "No recorded events"}</p>
         </Tile>
       </>}

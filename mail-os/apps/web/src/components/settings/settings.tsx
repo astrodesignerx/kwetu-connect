@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { StateBoard } from "@/components/signal";
-import { Button } from "@/components/ui";
+import { Button, ViewState } from "@/components/ui";
 import s from "./settings.module.css";
 
-export function SettingsHeader({ title, eyebrow = "Settings", description, action }: {
-  title: string; eyebrow?: string; description?: string; action?: React.ReactNode;
+export function SettingsHeader({ title, context = "Settings", description, action }: {
+  title: string; context?: string; description?: string; action?: React.ReactNode;
 }) {
-  return <header className={s.header}><div><Link className={s.eyebrow} href="/settings">{eyebrow}</Link><h1>{title}</h1>{description && <p>{description}</p>}</div>{action}</header>;
+  return <header className={s.header}><div><Link className={s.sectionLabel} href="/settings">{context}</Link><h1>{title}</h1>{description && <p>{description}</p>}</div>{action}</header>;
 }
 export function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <section className={`${s.panel} ${className}`}>{children}</section>;
@@ -14,15 +13,17 @@ export function Panel({ children, className = "" }: { children: React.ReactNode;
 export function Field({ label, htmlFor, hint, children }: { label: string; htmlFor: string; hint?: string; children: React.ReactNode }) {
   return <div className={s.field}><label htmlFor={htmlFor}>{label}</label>{children}{hint && <small>{hint}</small>}</div>;
 }
-export function SettingsState({ loading, error, empty = "No signal", retry }: {
+export function SettingsState({ loading, error, empty = "Nothing here yet", retry }: {
   loading?: boolean; error?: unknown; empty?: string; retry?: () => void;
 }) {
-  return <div className={s.state}><StateBoard state={loading ? "loading" : "no-signal"} text={error ? "Signal interrupted" : empty} />
-    {error ? <p role="alert">{error instanceof Error ? error.message : "Could not load this view."}</p> : loading ? <p>Getting your workspace ready.</p> : null}
-    {!!error && retry && <Button variant="default" onClick={retry}>Try again</Button>}</div>;
+  return <div className={s.state}>
+    <ViewState loading={loading} label={error ? "This could not load" : loading ? "Getting your workspace ready." : empty} />
+    {!!error && <p role="alert">{error instanceof Error ? error.message : "Please try again."}</p>}
+    {!!error && retry && <Button variant="default" onClick={retry}>Try again</Button>}
+  </div>;
 }
 export function Feedback({ error, message }: { error?: unknown; message?: string | null }) {
-  if (error) return <div className={s.feedback} role="alert"><StateBoard state="no-signal" text="Needs attention" colour="var(--bad)" /><p>{error instanceof Error ? error.message : String(error)}</p></div>;
+  if (error) return <p className={s.feedback} role="alert">{error instanceof Error ? error.message : String(error)}</p>;
   return message ? <p className={s.success} role="status">{message}</p> : null;
 }
 export function Avatar({ name }: { name: string }) {

@@ -1,0 +1,1028 @@
+{
+  "captures": [
+    "mail-reader-1440-light",
+    "more-1440-light",
+    "palette-1440-light",
+    "compose-1440-light",
+    "popover-1440-light",
+    "template-picker-1440-light",
+    "template-fill-1440-light",
+    "toast-1440-light",
+    "mail-reader-1440-dark",
+    "more-1440-dark",
+    "palette-1440-dark",
+    "compose-1440-dark",
+    "popover-1440-dark",
+    "template-picker-1440-dark",
+    "template-fill-1440-dark",
+    "toast-1440-dark",
+    "mail-reader-1280-light",
+    "more-1280-light",
+    "palette-1280-light",
+    "compose-1280-light",
+    "popover-1280-light",
+    "template-picker-1280-light",
+    "template-fill-1280-light",
+    "toast-1280-light",
+    "mail-reader-1280-dark",
+    "more-1280-dark",
+    "palette-1280-dark",
+    "compose-1280-dark",
+    "popover-1280-dark",
+    "template-picker-1280-dark",
+    "template-fill-1280-dark",
+    "toast-1280-dark",
+    "mail-reader-390-light",
+    "more-390-light",
+    "palette-390-light",
+    "compose-390-light",
+    "popover-390-light",
+    "template-picker-390-light",
+    "template-fill-390-light",
+    "mail-reader-390-dark",
+    "more-390-dark",
+    "palette-390-dark",
+    "compose-390-dark",
+    "popover-390-dark",
+    "template-picker-390-dark",
+    "template-fill-390-dark",
+    "reduced-motion-390-dark"
+  ],
+  "failures": [],
+  "requests": [
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/associations",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/org/members",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/assignment",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/notes",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0/read",
+      "scenario": "populated",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/projects/fixture-project/flights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/associations",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/org/members",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/assignment",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/notes",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0/read",
+      "scenario": "populated",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/projects/fixture-project/flights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/associations",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/org/members",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/assignment",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/notes",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0/read",
+      "scenario": "populated",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/projects/fixture-project/flights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/associations",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/org/members",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/assignment",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/notes",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0/read",
+      "scenario": "populated",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/threads",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/projects/fixture-project/flights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/associations",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/org/members",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/assignment",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/notes",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0/read",
+      "scenario": "populated",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/threads",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/projects/fixture-project/flights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/associations",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/org/members",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/assignment",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/threads/fixture-thread-0/notes",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0/read",
+      "scenario": "populated",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads/fixture-thread-0",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/projects/fixture-project/flights",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies/activity",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies/activity",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/brief",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ai/status",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/threads",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/brief",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/insights",
+      "scenario": "populated",
+      "method": "GET"
+    }
+  ],
+  "unknown": [],
+  "forbiddenRequests": [],
+  "consoleErrors": [],
+  "contrast": []
+}

@@ -9,11 +9,11 @@
  * primitives rather than pulled-in widget libraries. A ProseMirror bundle is ~90KB
  * gzipped to buy formatting the recipient's mail client will re-interpret regardless.
  *
- * `document.execCommand` is deprecated and will not be removed — every engine still
+ * `document.execCommand` is deprecated and will not be removed : every engine still
  * ships it, and the supported browsers are Chromium and WebKit based. The known cost is that the HTML
  * it emits is engine-flavoured (`<b>` here, `<span style>` there). That is acceptable
  * because a source view remains available wherever it matters: anyone who needs exact
- * markup — a pasted campaign layout, a fix the toolbar cannot express — edits it
+ * markup : a pasted campaign layout, a fix the toolbar cannot express : edits it
  * directly. Placeholders no longer need it; `encode`/`decode` show those as chips.
  */
 
@@ -84,7 +84,7 @@ export function RichTextEditor({
   onKeyDown?: (e: React.KeyboardEvent) => void;
   className?: string;
   /**
-   * Extra toolbar controls — the "Insert field" menu, the brand kit's header bar
+   * Extra toolbar controls : the "Insert field" menu, the brand kit's header bar
    * button. They live inside the toolbar rather than beside it because they act on
    * the caret, which only this component knows about; they reach it with
    * `useEditorTools`.
@@ -92,7 +92,7 @@ export function RichTextEditor({
   tools?: React.ReactNode;
   /**
    * Optional translation between the value the parent stores and what the surface
-   * displays — templates store `{{client_name}}` and show a named chip.
+   * displays : templates store `{{client_name}}` and show a named chip.
    *
    * Comparison stays in the parent's units on purpose. Browsers rewrite markup
    * around a selection as they please, so comparing rendered HTML would see a
@@ -101,7 +101,7 @@ export function RichTextEditor({
    *
    * Pass module-level functions rather than inline arrows: they are effect
    * dependencies, so a fresh identity each render re-runs the sync check on every
-   * keystroke. It is harmless — the check finds the value unchanged and returns —
+   * keystroke. It is harmless : the check finds the value unchanged and returns :
    * but it is work for nothing.
    */
   encode?: (stored: string) => string;
@@ -109,8 +109,8 @@ export function RichTextEditor({
 }) {
   const surface = useRef<HTMLDivElement>(null);
   // What we last handed the parent, in the parent's units. The surface is
-  // uncontrolled — writing `html` back into it on every keystroke would collapse the
-  // caret to the start of the node — so it is only re-synced when the value changed
+  // uncontrolled : writing `html` back into it on every keystroke would collapse the
+  // caret to the start of the node : so it is only re-synced when the value changed
   // somewhere else (a template, an AI rewrite, a switch back from source view).
   //
   // Starts as null rather than `html`: the surface is empty on mount, so seeding this
@@ -265,7 +265,7 @@ export function RichTextEditor({
             }}
             placeholder="https://example.com"
             aria-label="Link address"
-            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-brand-black/45 dark:placeholder:text-brand-cream/35"
+            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted"
           />
           <ToolButton label="Apply link" onClick={applyLink}>
             <Check size={15} strokeWidth={2.5} />

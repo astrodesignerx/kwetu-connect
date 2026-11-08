@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { resolve } from "node:path";
 
 /**
  * Browser-only hosting.
@@ -9,6 +10,8 @@ import type { NextConfig } from "next";
 const apiUrl = process.env.API_URL ?? "http://localhost:5280";
 
 const nextConfig: NextConfig = {
+  // Keep the independent mail workspace separate from the public site's proxy.
+  turbopack: { root: resolve(__dirname, "../..") },
   transpilePackages: ["@kompanion/types", "@kompanion/api-client"],
 
   async rewrites() {

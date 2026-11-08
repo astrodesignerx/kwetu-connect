@@ -1,26 +1,26 @@
 .page { display: flex; flex-direction: column; gap: 24px; min-width: 0; color: var(--fg); }
-.page h1 { font: 500 clamp(28px, 4vw, 38px)/1.2 var(--f-display); letter-spacing: -.025em; overflow-wrap: anywhere; }
+.page h1 { font: 650 28px/1.2 var(--f-body); letter-spacing: -.025em; overflow-wrap: anywhere; }
 .workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; gap: 22px; }
 .editing { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-.panel { min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.panel { min-width: 0; padding: 24px; border: 0; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); }
 .panel :global(.editor-box) { overflow: hidden; }
 .panel :global(.editor-toolbar) { flex-wrap: wrap; }
 .panel :global(.editor-surface) { overflow-wrap: anywhere; }
 .panel :global(.mf-chip) { border-radius: 20px; background: color-mix(in srgb, var(--jac) 12%, var(--surface)); color: var(--fg); border-color: color-mix(in srgb, var(--jac) 35%, var(--line)); }
-.panel :global(.quote-toggle) { transition: transform var(--t1) var(--ease); }
-.preview { min-width: 0; position: sticky; top: 20px; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--raise); }
-.previewHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; font: 10px var(--f-mono); text-transform: uppercase; color: var(--muted); }
-.device { padding: 12px; margin: 0 auto; width: 100%; animation: arrive var(--t2) var(--ease) both; }
+.panel :global(.quote-toggle) { transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+.preview { min-width: 0; position: sticky; top: 0; border: 0; border-radius: 20px; overflow: hidden; background: var(--surface); box-shadow: var(--mail-shadow); }
+.previewHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; font: 500 12px/1.5 var(--f-body); text-transform: none; color: var(--muted); }
+.device { padding: 12px; margin: 0 auto; width: 100%; animation: arrive var(--t2) var(--ease) backwards; }
 .device[data-device="phone"] { width: min(100%, 360px); }
-.viewport { position: relative; overflow: hidden; height: 540px; width: 100%; border-radius: 10px; background: white; }
+.viewport { position: relative; overflow: hidden; height: 540px; width: 100%; border-radius: 12px; background: white; }
 .frame { position: absolute; inset: 0 auto auto 0; display: block; border: 0; background: white; transform-origin: top left; }
 .previewSubject { padding: 12px 16px; font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
 .previewSubject[role="alert"] { color: var(--bad); }
 .samples { padding: 16px; border: 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-.samples legend { font: 10px var(--f-mono); color: var(--muted); padding: 0 6px; }
+.samples legend { font: 500 12px/1.5 var(--f-body); color: var(--muted); padding: 0 6px; }
 .samples label { display: flex; flex-direction: column; gap: 6px; font-size: 11px; color: var(--muted); }
-.samples input { padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); width: 100%; min-width: 0; font-size: 12px; }
-.samples input:focus-visible { outline: 2px solid var(--jac); outline-offset: 2px; }
+.samples input { padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--fg); width: 100%; min-width: 0; font-size: 12px; }
+.samples input:focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
 @keyframes arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 760px) { .workspace { grid-template-columns: minmax(0, 1fr); } .preview { position: static; } .panel { padding: 16px; } }
-@media (prefers-reduced-motion: reduce) { .device { animation: none; } .panel :global(.quote-toggle) { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .device { animation: none; } .panel :global(.quote-toggle) { transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); } }

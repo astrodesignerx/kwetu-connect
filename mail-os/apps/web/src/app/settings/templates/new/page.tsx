@@ -30,7 +30,7 @@ export default function NewTemplatePage() {
     },
   });
   return <form className={s.page} onSubmit={e => { e.preventDefault(); if (name.trim() && !create.isPending) create.mutate(); }}>
-    <header><p className={s.eyebrow}>New template</p><h1>A message worth keeping.</h1></header>
+    <header><p className={s.sectionLabel}>New template</p><h1>A message worth keeping.</h1></header>
     <section className={s.step}><div className={s.stepLabel}><span>01</span><h2>Name</h2></div><label className={s.name}>What will your team call it?<input autoFocus required value={name} onChange={e => setName(e.target.value)} placeholder="Weekly campaign update" /></label><label className={s.description}>What it&apos;s for (optional)<input value={description} onChange={e => setDescription(e.target.value)} placeholder="Friday updates for live campaigns" /></label></section>
     <fieldset className={s.step}><legend className={s.stepLabel}><span>02</span>Starting point</legend><div className={s.options}>{[{ id: "blank", title: "Blank page", description: "Write it from scratch." }, { id: "update", title: "Personalised update", description: "Begin with client, project and sender fields." }].map(option => <label className={s.option} key={option.id}><input type="radio" name="start" value={option.id} checked={start === option.id} onChange={() => setStart(option.id)} /><strong>{option.title}</strong><small>{option.description}</small></label>)}</div></fieldset>
     {create.isError && <p role="alert" className={s.error}>{create.error.message}</p>}

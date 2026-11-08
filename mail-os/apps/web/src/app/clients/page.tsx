@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui";
-import { StateBoard } from "@/components/signal";
+import { Button, ViewState } from "@/components/ui";
 import { ClientDirectory } from "@/components/clients/client-directory";
 import { ClientForm } from "@/components/clients/client-form";
 import { clientsApi } from "@/lib/signal-clients";
@@ -16,11 +15,11 @@ export default function ClientsPage() {
   const clients = query.data;
   return <div className={s.page}>
     <header className={s.header}>
-      <div><p className={s.eyebrow}>Directory</p><h1>Clients</h1><p className={s.muted}>The people and campaigns behind your conversations.</p></div>
+      <div><p className={s.sectionLabel}>Directory</p><h1>Clients</h1><p className={s.muted}>The people and campaigns behind your conversations.</p></div>
       <Button onClick={() => setCreating(!creating)}>{creating ? "Cancel" : "New client"}</Button>
     </header>
     {creating && <ClientForm onDone={() => { setCreating(false); void cache.invalidateQueries({ queryKey: ["client-activity"] }); }} />}
-    {query.isPending ? <StateBoard state="loading" label="Loading clients" /> : query.isError ? <div className={s.panel} role="alert"><p>Could not load clients.</p><Button variant="default" onClick={() => void query.refetch()}>Try again</Button></div> : clients && <>
+    {query.isPending ? <ViewState loading label="Loading clients" /> : query.isError ? <div className={s.panel} role="alert"><p>Could not load clients.</p><Button variant="default" onClick={() => void query.refetch()}>Try again</Button></div> : clients && <>
       <dl className={s.stats}>
         <div><dd>{clients.length}</dd><dt>clients</dt></div>
         <div><dd>{clients.reduce((n, c) => n + c.projectCount, 0)}</dd><dt>projects</dt></div>

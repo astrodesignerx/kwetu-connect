@@ -1,0 +1,24 @@
+{
+  "commands": {
+    "pnpm.cmd exec tsc --noEmit": "pass, exit 0",
+    "pnpm.cmd build": "pass, exit 0, one production build",
+    "pnpm.cmd exec eslint src": "pass, exit 0",
+    "pnpm.cmd exec vitest run": "pass, exit 0, 123 tests in 20 files",
+    "source grep and punctuation audit": "pass, no matches",
+    "git diff --check": "pass"
+  },
+  "requiredBrowserCombinations": 384,
+  "retainedPngs": 545,
+  "reviewSheets": 18,
+  "browserReports": [
+    "browser-routes.json",
+    "browser-refinements.json",
+    "browser-final-pages.json",
+    "browser-overlays.json",
+    "browser-extra.json"
+  ],
+  "productionBuildCount": 1,
+  "serverStopped": true,
+  "nextCacheRemoved": true,
+  "rootLockfileExcluded": true
+}

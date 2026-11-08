@@ -65,17 +65,17 @@ function AttachmentChip({ attachment }: { attachment: AttachmentDto }) {
       }}
       title={
         state === "error"
-          ? "Download failed — try again"
+          ? "Download failed : try again"
           : `${attachment.fileName} (${formatBytes(attachment.sizeBytes)})`
       }
       className={cn(
         "group flex max-w-[16rem] items-center gap-2 rounded-xl border px-3 py-2 text-left",
         "transition-[transform,background-color,border-color] duration-150 ease-out",
-        "hover:-translate-y-px hover:bg-brand-amber/10 active:translate-y-0",
+        "hover:-translate-y-px hover:bg-raise active:translate-y-0",
         "disabled:cursor-wait disabled:opacity-60",
         state === "error"
           ? "border-red-500/40 bg-red-500/5"
-          : "border-brand-black/10 dark:border-brand-cream/10"
+          : "border-line "
       )}
     >
       <span aria-hidden className="text-base leading-none">
@@ -83,8 +83,8 @@ function AttachmentChip({ attachment }: { attachment: AttachmentDto }) {
       </span>
       <span className="min-w-0">
         <span className="block truncate text-xs font-medium">{attachment.fileName}</span>
-        <span className="block text-[10px] text-brand-black/65 dark:text-brand-cream/60">
-          {state === "error" ? "Failed — retry" : formatBytes(attachment.sizeBytes)}
+        <span className="block text-[10px] text-muted">
+          {state === "error" ? "Failed : retry" : formatBytes(attachment.sizeBytes)}
         </span>
       </span>
     </button>
@@ -106,7 +106,7 @@ function legacyNames(metaJson: string | null): string[] {
 }
 
 /**
- * Downloadable files on a message. Inline cid: parts are excluded — they render in
+ * Downloadable files on a message. Inline cid: parts are excluded : they render in
  * the body.
  *
  * Messages synced before the blob store existed carry HasAttachments and the filenames
@@ -129,15 +129,15 @@ export function AttachmentList({
     if (!hasAttachments) return null;
 
     return (
-      <div className="mt-3 border-t border-brand-black/10 pt-3 dark:border-brand-cream/10">
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-brand-amber/30 bg-brand-amber/[0.08] px-2.5 py-2">
+      <div className="mt-3 border-t border-line pt-3">
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-fg bg-raise px-2.5 py-2">
           <span aria-hidden>📎</span>
-          <span className="text-xs text-brand-black/70 dark:text-brand-cream/70">
+          <span className="text-xs text-muted">
             {names.length > 0
-              ? `${names.join(", ")} — not downloaded yet.`
+              ? `${names.join(", ")} : not downloaded yet.`
               : "This message has an attachment that hasn't been downloaded yet."}
           </span>
-          <span className="text-[11px] text-brand-black/60 dark:text-brand-cream/55">
+          <span className="text-[11px] text-muted">
             An admin can fetch it with{" "}
             <code className="font-mono">backfill-attachments</code>.
           </span>
@@ -147,8 +147,8 @@ export function AttachmentList({
   }
 
   return (
-    <div className="mt-3 border-t border-brand-black/10 pt-3 dark:border-brand-cream/10">
-      <div className="mb-2 text-[10px] uppercase tracking-wide text-brand-black/60 dark:text-brand-cream/55">
+    <div className="mt-3 border-t border-line pt-3">
+      <div className="mb-2 text-[10px] uppercase tracking-wide text-muted">
         {files.length} attachment{files.length === 1 ? "" : "s"}
       </div>
       <div className="flex flex-wrap gap-2">

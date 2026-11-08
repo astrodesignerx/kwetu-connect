@@ -35,7 +35,8 @@ describe("Signal mail screens", () => {
     expect(screen.queryByText(/Habari/)).toBeNull();
     expect(screen.getByRole("link", { name: /Confirm installation/ }).getAttribute("href")).toBe("/mail?id=thread-1");
     expect(screen.getByText("Waiting 2h 0m")).toBeTruthy();
-    expect(screen.getByRole("img", { name: /7 UNREAD, 1 WAITING ON YOU, 4 AWAITING REPLY/ })).toBeTruthy();
+    expect(["unread", "waiting on you", "awaiting reply"].map((label) => screen.getByText(label).parentElement?.textContent))
+      .toEqual(["7unread", "1waiting on you", "4awaiting reply"]);
     expect(screen.getByRole("link", { name: /Westlands/ }).getAttribute("href")).toBe("/clients/detail?id=client-1");
     expect(screen.getByText("1h 0m")).toBeTruthy();
     expect(screen.getByRole("img", { name: /days with replies only/ })).toBeTruthy();
@@ -45,7 +46,7 @@ describe("Signal mail screens", () => {
     brief.mockRejectedValue(new Error("offline"));
     mount(<MorningBrief />);
     expect(await screen.findByRole("alert")).toBeTruthy();
-    expect(screen.queryByText(/UNREAD/)).toBeNull();
+    expect(screen.queryByText("unread")).toBeNull();
     expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy();
   });
 

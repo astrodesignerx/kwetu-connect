@@ -36,7 +36,7 @@ export default function BrandKitPage() {
   if (kit.isError || !effective) return <SettingsState error={kit.error ?? new Error("Email appearance is unavailable.")} retry={() => void kit.refetch()} />;
 
   return <div className={s.page}>
-    <SettingsHeader title="Email appearance" eyebrow="Settings / Workspace" description="A consistent identity on every message you send." />
+    <SettingsHeader title="Email appearance" context="Settings / Workspace" description="A consistent identity on every message you send." />
     <div className={s.layout}>
       <div className={s.controls}><fieldset className={s.editable} disabled={save.isPending} inert={save.isPending}>
         <Panel><h2>Your business</h2><div className={s.fields}>

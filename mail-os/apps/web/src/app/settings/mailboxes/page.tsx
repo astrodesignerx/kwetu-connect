@@ -29,7 +29,7 @@ export default function MailboxesPage() {
   });
 
   return <div className={s.page}>
-    <SettingsHeader title="Mailboxes" eyebrow="Settings / Personal" description="The email accounts your workspace reads and sends from." action={<Link className={s.connect} href="/settings/mailboxes/connect">Connect mailbox</Link>} />
+    <SettingsHeader title="Mailboxes" context="Settings / Personal" description="The email accounts your workspace reads and sends from." action={<Link className={s.connect} href="/settings/mailboxes/connect">Connect mailbox</Link>} />
     {!removing && <Feedback error={disconnect.error} />}
     {mailboxes.isPending ? <SettingsState loading /> : mailboxes.isError ? <SettingsState error={mailboxes.error} retry={() => void mailboxes.refetch()} /> : mailboxes.data.length === 0 ? <SettingsState empty="No mailbox connected" /> : <div className={s.list}>{mailboxes.data.map((mailbox) => <MailboxHealth key={mailbox.id} mailbox={mailbox} onDisconnect={() => { disconnect.reset(); setRemoving(mailbox); }} />)}</div>}
     <Link className={s.add} href="/settings/mailboxes/connect"><span aria-hidden="true">+</span> Connect another mailbox</Link>

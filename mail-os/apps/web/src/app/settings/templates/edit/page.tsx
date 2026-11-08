@@ -3,14 +3,14 @@
 /**
  * Writing a template.
  *
- * The stored shape has not changed — HTML with `{{placeholder}}` names, plus a list
+ * The stored shape has not changed : HTML with `{{placeholder}}` names, plus a list
  * of which names the template declares. What changed is that none of that is typed
  * by hand any more:
  *
  *   - the body is written in the composer's editor, and placeholders show as named
  *     chips ("Client's name") rather than braces, via encode/decode;
  *   - the declared list is derived from the body and subject, so it cannot drift out
- *     of step with what the template actually uses — the field that used to ask for
+ *     of step with what the template actually uses : the field that used to ask for
  *     it, comma-separated and identifier-shaped, is gone;
  *   - the preview refreshes itself instead of waiting for a button.
  */
@@ -20,16 +20,16 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, Code2 } from "lucide-react";
 import { api } from "@/lib/api";
-import { Segmented, StateBoard } from "@/components/signal";
+import { Segmented } from "@/components/signal";
 import { RichTextEditor } from "@/components/editor";
 import { EditorMergeFieldMenu, MergeFieldMenu } from "@/components/merge-field-menu";
-import { Button, ErrorText, Hint, Input, Label } from "@/components/ui";
+import { ViewState, Button, ErrorText, Hint, Input, Label } from "@/components/ui";
 import { exampleFor, fromChips, labelFor, toChips, variablesIn } from "@/lib/merge-fields";
 import type { EmailTemplateDto, EmailTemplateUpsertRequest } from "@kompanion/types";
 import s from "./page.module.css";
 
 export default function TemplateEditorPage() {
-  return <Suspense fallback={<StateBoard state="loading" label="Loading template" />}><EditorLookup /></Suspense>;
+  return <Suspense fallback={<ViewState loading label="Loading template" />}><EditorLookup /></Suspense>;
 }
 
 function EditorLookup() {
@@ -74,7 +74,7 @@ function TemplateEditor({ id }: { id: string }) {
     setEdit((curr) => ({ ...(curr ?? base), [key]: value }));
   }
 
-  if (isLoading) return <StateBoard state="loading" label="Loading template" />;
+  if (isLoading) return <ViewState loading label="Loading template" />;
   if (!effective) return <p role="alert">Could not load this template.</p>;
   const dirty = edit !== null;
 
@@ -83,7 +83,7 @@ function TemplateEditor({ id }: { id: string }) {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold">{effective.name}</h1>
-          <p className="text-sm text-brand-black/60 dark:text-brand-cream/60">
+          <p className="text-sm text-muted">
             Write it once. The tags you drop in get swapped for each client&apos;s real
             details when you send.
           </p>
@@ -114,7 +114,7 @@ function TemplateEditor({ id }: { id: string }) {
                   value={effective.name}
                   onChange={(e) => update("name", e.target.value)}
                 />
-                <Hint>Only you see this — it is how you pick the template later.</Hint>
+                <Hint>Only you see this : it is how you pick the template later.</Hint>
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="tdesc">What it&apos;s for</Label>
@@ -139,7 +139,7 @@ function TemplateEditor({ id }: { id: string }) {
           <section className={s.panel}>
             {/* Not a <label>: the editing surface is a contenteditable div, which a
                 label cannot be associated with. It carries its own aria-label. */}
-            <div className="mb-1.5 text-xs font-medium text-brand-black/60 dark:text-brand-cream/60">
+            <div className="mb-1.5 text-xs font-medium text-muted">
               Message
             </div>
             <div className="editor-box">
@@ -147,7 +147,7 @@ function TemplateEditor({ id }: { id: string }) {
                 html={effective.bodyHtml ?? ""}
                 onHtmlChange={(v) => update("bodyHtml", v)}
                 ariaLabel="Message"
-                placeholder="Hi there — here's this week's update…"
+                placeholder="Hi there : here's this week's update…"
                 encode={toChips}
                 decode={fromChips}
                 className="[--editor-pad-x:1rem] [&_.editor-surface]:min-h-64 [&_.editor-toolbar]:px-3"
@@ -225,7 +225,7 @@ function TemplateEditor({ id }: { id: string }) {
 /**
  * The subject line, with its own insert menu.
  *
- * A plain input, so the placeholder goes in as text rather than a chip — there is
+ * A plain input, so the placeholder goes in as text rather than a chip : there is
  * nowhere to render one. It lands at the caret rather than at the end, because a
  * subject is usually personalised in the middle ("Update on <project>").
  */
@@ -288,14 +288,14 @@ function UsedFields({ tokens }: { tokens: string[] }) {
   if (!tokens.length) {
     return (
       <Hint className="mt-2 block">
-        No tags yet — use <strong>Insert field</strong> above to drop in a client&apos;s
+        No tags yet : use <strong>Insert field</strong> above to drop in a client&apos;s
         name or a project.
       </Hint>
     );
   }
   return (
     <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-      <span className="text-[11px] text-brand-black/50 dark:text-brand-cream/45">
+      <span className="text-[11px] text-muted">
         Fills in per client:
       </span>
       {tokens.map((t) => (

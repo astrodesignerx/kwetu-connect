@@ -360,7 +360,7 @@ function NoMailboxes() {
       <div className="max-w-sm text-center">
         <EmptyMailArt className={`mx-auto mb-4 ${s.emptyMail}`} />
         <h2 className="text-base font-semibold">No mailbox connected yet</h2>
-        <p className="mt-1 text-sm text-brand-black/60 dark:text-brand-cream/60">
+        <p className="mt-1 text-sm text-muted">
           Connect your cPanel mailbox and the last few years of mail will sync into
           this workspace.
         </p>
@@ -455,7 +455,7 @@ function Participants({
 
         <div className="min-w-0 flex-1">
           <div className="truncate text-[13px] font-semibold">{who}</div>
-          <div className="truncate text-[11px] text-brand-black/55 dark:text-brand-cream/50">
+          <div className="truncate text-[11px] text-muted">
             {latest?.fromAddr ?? "(no address)"}
           </div>
         </div>
@@ -474,7 +474,7 @@ function Participants({
           />
         </button>
 
-        <span className="shrink-0 text-[11px] tabular-nums text-brand-black/50 dark:text-brand-cream/45">
+        <span className="shrink-0 text-[11px] tabular-nums text-muted">
           {thread.lastDate
             ? new Date(thread.lastDate).toLocaleDateString(undefined, {
                 day: "numeric",
@@ -486,7 +486,7 @@ function Participants({
       </div>
 
       <MailDisclosure open={open}>
-        <div className="detail-panel mt-2.5 border-t border-brand-black/[0.07] pt-2.5 dark:border-brand-cream/[0.07]">
+        <div className="detail-panel mt-2.5 border-t border-line pt-2.5">
           <dl className="mb-2 grid grid-cols-[3rem_minmax(0,1fr)] gap-x-2 gap-y-1 text-[11px]">
             <AddressRow label="From" value={formatAddress(latest?.fromName, latest?.fromAddr)} />
             <AddressRow label="To" value={latest?.toAddrs} />
@@ -512,8 +512,8 @@ function AddressRow({ label, value }: { label: string; value: string | null | un
   if (!value) return null;
   return (
     <>
-      <dt className="font-semibold text-brand-black/45 dark:text-brand-cream/40">{label}</dt>
-      <dd className="min-w-0 break-words text-brand-black/75 dark:text-brand-cream/70">{value}</dd>
+      <dt className="font-semibold text-muted">{label}</dt>
+      <dd className="min-w-0 break-words text-muted">{value}</dd>
     </>
   );
 }
@@ -553,14 +553,14 @@ function MessageBody({ html, index }: { html: string; index: number }) {
   return (
     <div>
       {hasRemote && !showRemote && (
-        <div className="mb-2 flex flex-wrap items-center gap-2 rounded-lg border border-brand-amber/30 bg-brand-amber/[0.08] px-2.5 py-1.5">
-          <span className="text-xs text-brand-black/70 dark:text-brand-cream/70">
+        <div className="mb-2 flex flex-wrap items-center gap-2 rounded-lg border border-fg bg-raise px-2.5 py-1.5">
+          <span className="text-xs text-muted">
             Remote images blocked to prevent read tracking.
           </span>
           <button
             type="button"
             onClick={() => setShowRemote(true)}
-            className="rounded-md border border-brand-amber/40 px-2 py-0.5 text-[11px] font-semibold transition-colors duration-150 ease-out hover:bg-brand-amber/20"
+            className="rounded-md border border-fg px-2 py-0.5 text-[11px] font-semibold transition-[transform,opacity] duration-150 ease-out hover:bg-raise"
           >
             Show images
           </button>
@@ -570,7 +570,7 @@ function MessageBody({ html, index }: { html: string; index: number }) {
         title={`Message ${index + 1}`}
         srcDoc={frameDocument(html, !showRemote)}
         className={cn(
-          "w-full rounded-lg border border-brand-black/10 bg-white dark:border-brand-cream/10",
+          "w-full rounded-lg border border-line bg-white ",
           tall ? "h-[70vh]" : "h-80"
         )}
         sandbox=""
@@ -581,7 +581,7 @@ function MessageBody({ html, index }: { html: string; index: number }) {
       <button
         type="button"
         onClick={() => setTall((v) => !v)}
-        className="mt-1 rounded-md px-2 py-0.5 text-[11px] font-medium text-brand-black/60 transition-colors duration-150 ease-out hover:bg-brand-black/5 hover:text-brand-black dark:text-brand-cream/55 dark:hover:bg-brand-cream/10 dark:hover:text-brand-cream"
+        className="mt-1 rounded-md px-2 py-0.5 text-[11px] font-medium text-muted transition-[transform,opacity] duration-150 ease-out hover:bg-raise hover:text-fg dark:hover:text-fg"
       >
         {tall ? "Shrink message" : "Expand message"}
       </button>
@@ -608,7 +608,7 @@ function EmptyMailArt({ className, small }: { className?: string; small?: boolea
       aria-hidden
       className={className}
     >
-      <g className="text-brand-black/15 dark:text-brand-cream/15">
+      <g className="text-muted">
         <rect x="14" y="30" width="88" height="50" rx="7" fill="currentColor" />
         <rect x="8" y="22" width="100" height="52" rx="7" fill="currentColor" />
       </g>
@@ -618,20 +618,20 @@ function EmptyMailArt({ className, small }: { className?: string; small?: boolea
         width="76"
         height="52"
         rx="7"
-        className="fill-white dark:fill-brand-black"
+        className="fill-white dark:fill-surface"
         stroke="currentColor"
         strokeOpacity="0.18"
         strokeWidth="1.5"
       />
       <path
         d="M20 18l33.5 24a8 8 0 009 0L96 18"
-        stroke="var(--color-brand-amber)"
+        stroke="var(--muted)"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
       />
-      <circle cx="96" cy="16" r="7" fill="var(--color-brand-amber)" />
+      <circle cx="96" cy="16" r="7" fill="var(--muted)" />
     </svg>
   );
 }

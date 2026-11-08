@@ -186,7 +186,7 @@ export function ReplyDock({
         >
           <CornerUpLeft aria-hidden size={15} className="shrink-0 opacity-60" />
           <span className="truncate">Reply to {correspondent}…</span>
-          <kbd className="ml-auto hidden shrink-0 rounded border border-brand-black/15 px-1 font-mono text-[10px] sm:inline dark:border-brand-cream/20">
+          <kbd className="ml-auto hidden shrink-0 rounded border border-line px-1 font-mono text-[10px] sm:inline">
             r
           </kbd>
         </button>
@@ -213,9 +213,9 @@ export function ReplyDock({
           }
         }}
       >
-        <div className="flex items-center gap-2 border-b border-brand-black/[0.07] px-3 py-1.5 dark:border-brand-cream/[0.07]">
-          <CornerUpLeft aria-hidden size={13} className="shrink-0 text-brand-amber" />
-          <span className="min-w-0 truncate text-[11px] text-brand-black/60 dark:text-brand-cream/55">
+        <div className="flex items-center gap-2 border-b border-line px-3 py-1.5">
+          <CornerUpLeft aria-hidden size={13} className="shrink-0 text-fg" />
+          <span className="min-w-0 truncate text-[11px] text-muted">
             To <span className="font-medium">{correspondent}</span>
           </span>
           <button
@@ -254,7 +254,7 @@ export function ReplyDock({
           {TONES.map((item) => <button key={item.key} type="button" disabled={assist.isPending || send.isPending} aria-pressed={tone === item.key} onClick={() => setTone(item.key)}>{item.label}</button>)}
           <button type="button" disabled={assist.isPending || send.isPending} onClick={() => assist.mutate(body)}>{assist.isPending ? 'Working...' : isBlankHtml(body) ? 'Suggest reply' : 'Rewrite'}</button>
         </div>}
-        <div className="flex items-center gap-2 border-t border-brand-black/[0.07] px-3 py-2 dark:border-brand-cream/[0.07]">
+        <div className="flex items-center gap-2 border-t border-line px-3 py-2">
           <button
             type="button"
             onClick={onSend}
@@ -267,11 +267,11 @@ export function ReplyDock({
               <Send aria-hidden size={14} />
             )}
             {send.isPending ? "Sending…" : "Send"}
-            <kbd className="ml-1 hidden rounded border border-brand-black/20 px-1 text-[10px] font-medium opacity-70 sm:inline">
+            <kbd className="ml-1 hidden rounded border border-line px-1 text-[10px] font-medium opacity-70 sm:inline">
               {modKey}↵
             </kbd>
           </button>
-          <span className="ml-auto truncate text-[10px] text-brand-black/45 dark:text-brand-cream/40">
+          <span className="ml-auto truncate text-[10px] text-muted">
             Quoted history is attached on send
           </span>
         </div>
@@ -284,7 +284,7 @@ export function ReplyDock({
       )}
 
       {sendId.outcome === "uncertain" && (
-        <div className="flex flex-wrap items-center gap-2 px-1 pt-1.5 text-[11px] text-brand-black/70 dark:text-brand-cream/65">
+        <div className="flex flex-wrap items-center gap-2 px-1 pt-1.5 text-[11px] text-muted">
           <span>
             {confirmNewSend
               ? "Confirm this is a new send after checking Sent."

@@ -64,7 +64,7 @@ export function ThreadLinker({ threadId }: { threadId: string }) {
   return (
     <GlassPanel className="p-3">
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-brand-black/60 dark:text-brand-cream/60">
+        <h3 className="text-xs font-semibold text-muted">
           Client
         </h3>
         <button
@@ -79,7 +79,7 @@ export function ThreadLinker({ threadId }: { threadId: string }) {
           <div className="flex items-center justify-between text-sm">
             <a
               href={`/clients/detail?id=${data.company.id}`}
-              className="font-medium text-brand-amber hover:underline"
+              className="font-medium text-fg hover:underline"
             >
               {data.company.name}
             </a>
@@ -93,7 +93,7 @@ export function ThreadLinker({ threadId }: { threadId: string }) {
           </div>
           {data.projects.length > 0 && (
             <div className="space-y-1">
-              <div className="text-[10px] font-semibold uppercase tracking-wide text-brand-black/60 dark:text-brand-cream/55">
+              <div className="text-[10px] font-semibold text-muted">
                 Projects
               </div>
               {data.projects.map((p) => {
@@ -126,8 +126,8 @@ export function ThreadLinker({ threadId }: { threadId: string }) {
         <MutedText>Not tagged to a client yet.</MutedText>
       )}
       {data.contacts.length > 0 && (
-        <div className="mt-3 border-t border-brand-black/5 pt-2 dark:border-brand-cream/5">
-          <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-brand-black/60 dark:text-brand-cream/55">
+        <div className="mt-3 border-t border-line pt-2">
+          <div className="mb-1 text-[10px] font-semibold text-muted">
             Contacts in this thread
           </div>
           <ul className="space-y-0.5 text-xs">
@@ -135,7 +135,7 @@ export function ThreadLinker({ threadId }: { threadId: string }) {
               <li key={c.id}>
                 <span className="font-medium">{c.name ?? c.email}</span>
                 {c.name && (
-                  <span className="ml-1 text-brand-black/65 dark:text-brand-cream/60">
+                  <span className="ml-1 text-muted">
                     {c.email}
                   </span>
                 )}
@@ -158,7 +158,7 @@ function CompanyPicker({
   if (companies.length === 0) {
     return (
       <div className="space-y-2 text-sm">
-        <MutedText>No clients yet — create one first.</MutedText>
+        <MutedText>No clients yet : create one first.</MutedText>
         <Link className="btn-primary !inline-flex" href="/clients">
           Open Clients
         </Link>
@@ -171,11 +171,11 @@ function CompanyPicker({
         <li key={c.id}>
           <button
             onClick={() => onPick(c.id)}
-            className="w-full rounded-xl border border-brand-black/10 p-2 text-left text-sm transition hover:bg-brand-black/5 dark:border-brand-cream/10 dark:hover:bg-brand-cream/10"
+            className="w-full rounded-xl border border-line p-2 text-left text-sm transition hover:bg-raise"
           >
             <div className="font-medium">{c.name}</div>
             {c.domain && (
-              <div className="text-xs text-brand-black/65 dark:text-brand-cream/60">
+              <div className="text-xs text-muted">
                 {c.domain}
               </div>
             )}

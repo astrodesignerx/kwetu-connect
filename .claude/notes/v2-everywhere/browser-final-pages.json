@@ -1,0 +1,904 @@
+{
+  "captures": [
+    "admin-audit-1440-light-populated",
+    "admin-audit-1440-light-empty",
+    "admin-audit-1440-light-error",
+    "admin-audit-1440-light-loading",
+    "admin-audit-1440-dark-populated",
+    "admin-audit-1440-dark-empty",
+    "admin-audit-1440-dark-error",
+    "admin-audit-1440-dark-loading",
+    "admin-audit-1280-light-populated",
+    "admin-audit-1280-light-empty",
+    "admin-audit-1280-light-error",
+    "admin-audit-1280-light-loading",
+    "admin-audit-1280-dark-populated",
+    "admin-audit-1280-dark-empty",
+    "admin-audit-1280-dark-error",
+    "admin-audit-1280-dark-loading",
+    "admin-audit-390-light-populated",
+    "admin-audit-390-light-empty",
+    "admin-audit-390-light-error",
+    "admin-audit-390-light-loading",
+    "admin-audit-390-dark-populated",
+    "admin-audit-390-dark-empty",
+    "admin-audit-390-dark-error",
+    "admin-audit-390-dark-loading",
+    "dev-mail-1440-light-populated",
+    "dev-mail-1440-light-empty",
+    "dev-mail-1440-light-error",
+    "dev-mail-1440-light-loading",
+    "dev-mail-1440-dark-populated",
+    "dev-mail-1440-dark-empty",
+    "dev-mail-1440-dark-error",
+    "dev-mail-1440-dark-loading",
+    "dev-mail-1280-light-populated",
+    "dev-mail-1280-light-empty",
+    "dev-mail-1280-light-error",
+    "dev-mail-1280-light-loading",
+    "dev-mail-1280-dark-populated",
+    "dev-mail-1280-dark-empty",
+    "dev-mail-1280-dark-error",
+    "dev-mail-1280-dark-loading",
+    "dev-mail-390-light-populated",
+    "dev-mail-390-light-empty",
+    "dev-mail-390-light-error",
+    "dev-mail-390-light-loading",
+    "dev-mail-390-dark-populated",
+    "dev-mail-390-dark-empty",
+    "dev-mail-390-dark-error",
+    "dev-mail-390-dark-loading"
+  ],
+  "failures": [],
+  "requests": [
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    }
+  ],
+  "unknown": [],
+  "forbiddenRequests": [],
+  "consoleErrors": [],
+  "contrast": []
+}

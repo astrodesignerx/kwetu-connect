@@ -5,12 +5,11 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Building2, Check, Copy, Search } from "lucide-react";
 import { api } from "@/lib/api";
-import { tintFor } from "@/lib/avatar";
 
 /**
  * What the app knows about the person behind an address.
  *
- * This used to be a popover hanging off every avatar in the thread — which put a
+ * This used to be a popover hanging off every avatar in the thread : which put a
  * click target inside the control that expands a message, so the two competed.
  * It is now the payload of the reader's one "Details" disclosure, next to the
  * raw addressing: same information, one place to ask for it.
@@ -63,14 +62,14 @@ export function ContactDetails({
       {company && (
         <Link
           href={`/clients/detail?id=${company.id}`}
-          className="chip chip-client gap-1.5 !py-1 transition-colors duration-150 ease-out hover:border-brand-amber"
+          className="chip chip-client gap-1.5 !py-1 transition-[transform,opacity] duration-150 ease-out hover:border-fg"
         >
           <span
             aria-hidden
             className="grid h-4 w-4 place-items-center rounded-[4px]"
-            style={{ background: tintFor(company.domain ?? company.name) }}
+            style={{ background: "var(--raise)" }}
           >
-            <Building2 size={10} className="text-brand-black" />
+            <Building2 size={10} className="text-fg" />
           </span>
           {company.name}
         </Link>
@@ -92,7 +91,7 @@ export function ContactDetails({
       {address && (
         <button type="button" onClick={copy} className="reader-action !px-2 !py-1 !text-[11px]">
           {copied ? (
-            <Check aria-hidden size={12} className="text-green-600" />
+            <Check aria-hidden size={12} className="text-fg" />
           ) : (
             <Copy aria-hidden size={12} />
           )}
@@ -101,8 +100,8 @@ export function ContactDetails({
       )}
 
       {!company && (
-        <span className="text-[11px] text-brand-black/45 dark:text-brand-cream/40">
-          Not linked to a client — use the notes panel below.
+        <span className="text-[11px] text-muted">
+          Not linked to a client : use the notes panel below.
         </span>
       )}
     </div>

@@ -1,14 +1,14 @@
 .backdrop { padding: 28px; color: var(--fg); background: rgb(6 7 11 / .65); animation-duration: var(--t3); animation-timing-function: var(--ease); }
 .layout { width: 100%; min-width: 0; }
-.sheet { border-color: var(--line); background: var(--surface); color: var(--fg); border-radius: 24px; max-height: calc(100dvh - 64px); animation-duration: var(--t3); animation-timing-function: var(--ease); }
+.sheet { border: 0; background: var(--surface); color: var(--fg); border-radius: 20px; max-height: calc(100dvh - 64px); animation-duration: var(--t3); animation-timing-function: var(--ease); box-shadow: var(--mail-shadow); }
 .backdrop[data-closing=true], .backdrop[data-closing=true] .sheet { animation-duration: var(--t2); }
 .body { display: flex; flex-direction: column; min-height: 0; }
 .writingLayout { display: grid; grid-template-columns: minmax(0, 1fr) 240px; flex: 1; min-height: 0; overflow-y: auto; }
 .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-.heading { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 20px; border-bottom: 1px solid var(--line); font: 11px var(--f-mono); color: var(--muted); }
+.heading { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 20px; border-bottom: 1px solid var(--line); font: 12px var(--f-body); color: var(--muted); }
 .heading b { font: 600 22px var(--f-display); color: var(--fg); margin-right: auto; }
 .assist { border-left: 1px solid var(--line); background: var(--frame); padding: 24px 18px; display: flex; flex-direction: column; gap: 28px; min-width: 0; }
-.assist h2 { font: 500 10px var(--f-mono); text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin-bottom: 14px; }
+.assist h2 { font: 600 12px var(--f-body); color: var(--muted); margin-bottom: 14px; }
 .assist p { font-size: 12px; line-height: 1.6; color: var(--muted); }
 .assist button { transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
 .assist button:active { transform: translateY(1px); }
@@ -50,4 +50,4 @@
 @keyframes disappear { to { opacity: 0; transform: translateY(-8px); } }
 @keyframes appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (max-width: 760px) { .backdrop { padding: 12px; } .sheet { max-height: calc(100dvh - 44px); } .writingLayout { grid-template-columns: minmax(0, 1fr); } .assist { border-left: 0; border-top: 1px solid var(--line); padding: 18px; gap: 16px; } .heading { padding: 16px; } .sheet :global(.compose-row) { padding-left: 14px; padding-right: 14px; gap: 8px; } .sheet :global(.compose-actionbar) { padding: 10px; gap: 4px; } }
-@media (prefers-reduced-motion: reduce) { .backdrop, .sheet, .summary, .reply, .assist button, .disclosure { animation: none; transition: none; } }
+@media (prefers-reduced-motion: reduce) { .backdrop, .sheet, .summary, .reply, .assist button, .disclosure { animation: none; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); } }

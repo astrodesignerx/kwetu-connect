@@ -57,7 +57,7 @@ export default function ConnectMailboxPage() {
   }
 
   return <div className={s.page}>
-    <SettingsHeader title="Connect your email" eyebrow="Settings / Mailboxes" description="Sign in with the email and password you use for webmail." action={<Link href="/settings/mailboxes" className={s.cancel}>{connectionId ? "Back to mailboxes" : "Cancel"}</Link>} />
+    <SettingsHeader title="Connect your email" context="Settings / Mailboxes" description="Sign in with the email and password you use for webmail." action={<Link href="/settings/mailboxes" className={s.cancel}>{connectionId ? "Back to mailboxes" : "Cancel"}</Link>} />
     <Panel><form onSubmit={(event) => void connect(event)} className={s.form}>
       <div className={s.fields}>
         <Field label="Email address" htmlFor="mb-email"><Input id="mb-email" type="email" autoFocus autoComplete="username" required disabled={locked} value={email} onChange={(event) => setEmail(event.target.value)} /></Field>

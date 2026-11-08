@@ -53,20 +53,20 @@ export function Sidebar({ onCompose, onNavigate, compact = false }: { onCompose:
     <Link href={folderHref("inbox")} className="mail-rail-brand" aria-label="Kwetu OS inbox"><Logo /></Link>
     <nav aria-label="Main">
       {[
-        { label: "Inbox", href: folderHref("inbox"), icon: Mail, active: folder === "inbox", count: counts?.unread },
-        { label: "Assigned to me", href: folderHref("assigned"), icon: UserRound, active: folder === "assigned" },
-        { label: "Drafts", href: "/drafts", icon: FileText },
-        { label: "Sent", href: folderHref("sent"), icon: Send, active: folder === "sent" },
-        { label: "Archive", href: folderHref("archive"), icon: Archive, active: folder === "archive" },
-        { label: "Clients", href: "/clients", icon: Users },
-        { label: "Templates", href: "/settings/templates", icon: Layers },
+        { label: "Inbox", href: folderHref("inbox"), icon: Mail, active: onMail && folder === "inbox", count: counts?.unread },
+        { label: "Assigned to me", href: folderHref("assigned"), icon: UserRound, active: onMail && folder === "assigned" },
+        { label: "Drafts", href: "/drafts", icon: FileText, active: pathname.startsWith("/drafts") },
+        { label: "Sent", href: folderHref("sent"), icon: Send, active: onMail && folder === "sent" },
+        { label: "Archive", href: folderHref("archive"), icon: Archive, active: onMail && folder === "archive" },
+        { label: "Clients", href: "/clients", icon: Users, active: pathname.startsWith("/clients") },
+        { label: "Templates", href: "/settings/templates", icon: Layers, active: pathname.startsWith("/settings/templates") },
       ].map((item) => <Link key={item.label} href={item.href} title={item.label} aria-label={item.label} aria-current={item.active ? "page" : undefined}>
         <item.icon size={18} aria-hidden />{item.count ? <small>{item.count}</small> : null}
       </Link>)}
       <button type="button" onClick={onNavigate} aria-label="Mail folders and mailboxes" title="Mail folders and mailboxes" aria-haspopup="dialog"><MoreHorizontal size={18} aria-hidden /></button>
     </nav>
     <nav className="mail-rail-bottom" aria-label="Account">
-      <Link href="/settings" aria-label="Settings" title="Settings"><Settings size={18} aria-hidden /></Link>
+      <Link href="/settings" aria-label="Settings" title="Settings" aria-current={pathname.startsWith("/settings") && !pathname.startsWith("/settings/templates") ? "page" : undefined}><Settings size={18} aria-hidden /></Link>
       <Link href="/settings/profile" aria-label="Your profile" title={user?.displayName ?? "Your profile"} className="mail-rail-avatar">{initialsFor(user?.displayName ?? user?.email ?? "?")}</Link>
     </nav>
   </aside>;

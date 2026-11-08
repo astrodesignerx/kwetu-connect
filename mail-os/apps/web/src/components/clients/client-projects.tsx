@@ -6,8 +6,8 @@ import type { ProjectDto } from "@kompanion/types";
 import { api } from "@/lib/api";
 import { signalApi, type ProjectFlight } from "@/lib/signal-api";
 import { displayDate, nairobiToday } from "@/lib/signal-clients";
-import { Button } from "@/components/ui";
-import { FlightPlan, StateBoard, StatusChip } from "@/components/signal";
+import { Button, ViewState } from "@/components/ui";
+import { FlightPlan, StatusChip } from "@/components/signal";
 import { FlightForm } from "./flight-form";
 import s from "../../app/clients/detail/page.module.css";
 import f from "./forms.module.css";
@@ -33,7 +33,7 @@ export function ClientProjects({ companyId, projects, colour }: { companyId: str
       <div className={s.sectionHead}><h2>Flight plan</h2><Button size="small" disabled={!projects.length} onClick={() => setFlightEdit("new")}>New flight</Button></div>
       {!projects.length ? <p className={s.muted}>Create a project to book its first flight.</p> : <>
         <label className={s.window}>Six weeks from <input aria-label="Flight plan start date" type="date" value={windowStart} onChange={e => { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) setWindowStart(e.target.value); }} /></label>
-        {queries.some(q => q.isPending) ? <StateBoard state="loading" label="Loading flights" /> : queries.some(q => q.isError) ? <div role="alert"><p>Could not load all project flights.</p><Button variant="default" onClick={() => queries.forEach(q => void q.refetch())}>Try again</Button></div> : flights.length ? <>
+        {queries.some(q => q.isPending) ? <ViewState loading label="Loading flights" /> : queries.some(q => q.isError) ? <div role="alert"><p>Could not load all project flights.</p><Button variant="default" onClick={() => queries.forEach(q => void q.refetch())}>Try again</Button></div> : flights.length ? <>
           <FlightPlan label={`Flight plan from ${windowStart} to ${end}`} startDate={windowStart} today={today} colour={colour} sites={flights.filter(x => x.startDate <= end && x.endDate >= windowStart).map(x => ({ id: x.id, name: x.siteName, startDate: x.startDate, endDate: x.endDate }))} />
           <ul className={s.rows}>{flights.map(flight => <li key={flight.id}>
             <div className={s.grow}><strong>{flight.siteName}</strong><small>{projects.find(p => p.id === flight.projectId)?.name} / {displayDate(flight.startDate)} to {displayDate(flight.endDate)}</small></div>

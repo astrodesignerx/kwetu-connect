@@ -1,13 +1,13 @@
 .page { display: flex; flex-direction: column; gap: 26px; color: var(--fg); min-width: 0; }
 .header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 18px; }
-.header h1 { font: 600 clamp(32px, 5vw, 44px)/1.1 var(--f-display); margin: 8px 0; letter-spacing: -.03em; }
-.eyebrow { font: 10px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+.header h1 { font: 650 28px/1.2 var(--f-body); margin: 8px 0; letter-spacing: -.03em; }
+.sectionLabel { font: 500 12px/1.5 var(--f-body);  text-transform: none; color: var(--faint); }
 .muted { color: var(--muted); font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
 .feature { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); border: 1px solid var(--line); border-radius: 20px; background: var(--surface); overflow: hidden; }
 .featureBody { display: flex; flex-direction: column; align-items: start; gap: 16px; padding: 28px; min-width: 0; }
 .featureBody h2 { font: 500 32px/1.15 var(--f-display); letter-spacing: -.025em; overflow-wrap: anywhere; }
 .featureBody > a { margin-top: auto; }
-.date { color: var(--faint); font: 10px var(--f-mono); }
+.date { color: var(--faint); font: 500 12px/1.5 var(--f-body); }
 .thumbnail { width: 100%; height: 260px; min-width: 0; overflow: hidden; position: relative; background: var(--raise); padding: 18px; }
 .canvas { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 8px; }
 .thumbnail iframe { position: absolute; top: 0; left: 0; border: 0; background: white; pointer-events: none; }
@@ -17,18 +17,23 @@
 .card { min-width: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--surface); }
 .cardBody { display: flex; flex-direction: column; gap: 10px; padding: 20px; }
 .card h2 { font: 600 18px var(--f-display); overflow-wrap: anywhere; }
-.card h2 a:focus-visible { outline: 2px solid var(--jac); outline-offset: 3px; }
+.card h2 a:focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
 .fields { display: flex; gap: 6px; flex-wrap: wrap; }
 .fields span { font-size: 10px; color: var(--muted); border: 1px solid var(--line); border-radius: 20px; padding: 4px 8px; }
 .cardFoot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
 .newCard, .empty { padding: 30px; border: 1px dashed var(--line); border-radius: 16px; display: flex; flex-direction: column; gap: 16px; align-items: center; justify-content: center; text-align: center; color: var(--muted); min-height: 200px; }
 .newCard span { font: 300 40px var(--f-display); }
-.newCard { transition: transform var(--t1) var(--ease); }
+.newCard { transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
 .newCard:hover { transform: translateY(-3px); }
 .empty h2 { font: 500 26px var(--f-display); color: var(--fg); }
-.feature, .grid { animation: arrive var(--t3) var(--ease) both; }
+.feature, .grid { animation: arrive var(--t3) var(--ease) backwards; }
 .grid { animation-delay: 100ms; }
 .error { color: var(--bad); font-size: 13px; }
 @keyframes arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 640px) { .feature, .grid { grid-template-columns: minmax(0, 1fr); } .featureBody { padding: 22px; } .feature .thumbnail { min-height: 260px; height: 260px; } }
-@media (prefers-reduced-motion: reduce) { .feature, .grid { animation: none; } .newCard { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .feature, .grid { animation: none; } .newCard { transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); } }
+
+.feature { border: 0; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); }
+.card { border: 0; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); }
+.empty { border: 0; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); }
+.newCard { border: 0; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); }

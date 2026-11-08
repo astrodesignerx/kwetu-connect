@@ -61,9 +61,9 @@
 .hBarTrack i { display: block; height: 7px; border-radius: 8px; background: var(--h, #6A48D8); transform-origin: left; animation: growX var(--t3, 420ms) var(--ease, cubic-bezier(.16, 1, .3, 1)) both; animation-delay: calc(var(--i, 0) * 50ms); }
 .meter { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
 .meter > span { height: 5px; background: var(--sig-line); border-radius: 3px; overflow: hidden; }
-.meter i { display: block; height: 100%; background: var(--h, #13864D); transform-origin: left; transition: transform var(--t2, 240ms) var(--ease, cubic-bezier(.16, 1, .3, 1)); }
+.meter i { display: block; height: 100%; background: var(--h, #13864D); transform-origin: left; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
 .heatStrip { display: grid; gap: 4px; }
-.heatStrip > span, .heatCell { aspect-ratio: 1; border-radius: 4px; background: color-mix(in oklab, var(--h, #6A48D8) var(--intensity, 0%), var(--sig-raise)); animation: arrive var(--t2, 240ms) var(--ease, cubic-bezier(.16, 1, .3, 1)) both; animation-delay: calc(var(--i, 0) * 4ms); }
+.heatStrip > span, .heatCell { aspect-ratio: 1; border-radius: 4px; background: color-mix(in oklab, var(--h, #6A48D8) var(--intensity, 0%), var(--sig-raise)); animation: arrive var(--t2, 240ms) var(--ease, cubic-bezier(.16, 1, .3, 1)) backwards; animation-delay: calc(var(--i, 0) * 4ms); }
 .heatmapScroll { overflow-x: auto; padding: 4px 2px; max-width: 100%; }
 .heatmap { display: grid; grid-template-rows: 20px repeat(7, auto); gap: 4px; min-width: 260px; }
 .month, .weekday { font: 10px/1.4 var(--f-mono, ui-monospace, monospace); color: var(--sig-muted); }
@@ -112,22 +112,22 @@
 .todayLayer { position: absolute; inset: 0 0 0 150px; pointer-events: none; }
 .today { position: absolute; top: 16px; bottom: 0; width: 2px; background: var(--sodium, #FBB040); }
 .today b { position: absolute; right: 5px; top: -1px; padding: 0 4px; color: var(--sodium-ink, #9A5800); background: var(--sig-surface); font: 10px var(--f-mono, ui-monospace, monospace); white-space: nowrap; }
-.avatar { display: inline-grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: color-mix(in oklab, var(--h, #6A48D8) 18%, var(--sig-surface)); color: color-mix(in oklab, var(--h, #6A48D8) 60%, var(--sig-fg)); border: 1px solid color-mix(in oklab, var(--h, #6A48D8) 45%, var(--sig-line)); font-weight: 600; font-size: 12px; }
+.avatar { display: inline-grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: var(--sig-raise); color: var(--sig-fg); font-weight: 600; font-size: 12px; }
 .avatar[data-size="small"] { width: 24px; height: 24px; font-size: 9px; }
 .avatar[data-size="large"] { width: 56px; height: 56px; font-size: 20px; font-family: var(--f-display, ui-sans-serif, system-ui, sans-serif); }
-.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border-radius: 99px; font-size: 11px; line-height: 1.4; background: color-mix(in oklab, var(--h, #6A48D8) 14%, var(--sig-surface)); color: color-mix(in oklab, var(--h, #6A48D8) 62%, var(--sig-fg)); }
+.chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 4px 9px; border-radius: 99px; font-size: 11px; line-height: 1.4; background: color-mix(in srgb, var(--h, var(--muted)) 9%, var(--sig-surface)); color: var(--h, var(--muted)); }
 .chip i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-.clientTile { display: block; width: 100%; text-decoration: none; border-radius: 18px; border: 1px solid var(--sig-line); background: var(--sig-surface); overflow: hidden; transition: transform var(--t2, 240ms) var(--ease, cubic-bezier(.16, 1, .3, 1)); }
-a.clientTile:hover { transform: translateY(-3px); }
+.clientTile { display: block; width: 100%; text-decoration: none; border-radius: 20px; border: 0; background: var(--sig-surface); box-shadow: var(--mail-shadow); overflow: hidden; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+a.clientTile:hover { transform: translateY(-2px); }
 a.clientTile:active { transform: scale(.99); }
-.clientCover { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 110px; padding: 22px; background: radial-gradient(ellipse at 0 0, color-mix(in oklab, var(--h, #6A48D8) 22%, transparent), transparent 85%), var(--sig-frame); }
-.clientBody { padding: 20px 22px; }
+.clientCover { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 22px 0; }
+.clientBody { padding: 18px 22px 22px; overflow-wrap: anywhere; }
 .clientBody h3 { margin: 0; font: 650 21px/1.15 var(--f-display, ui-sans-serif, system-ui, sans-serif); letter-spacing: -.03em; }
 .clientBody p { margin: 7px 0 0; font-size: 12px; color: var(--sig-muted); }
-.segmented { position: relative; display: grid; grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr)); padding: 3px; border-radius: 11px; background: var(--sig-raise); isolation: isolate; }
-.segmentIndicator { position: absolute; inset: 3px auto 3px 3px; z-index: -1; width: calc((100% - 6px) / var(--n, 1)); border-radius: 8px; background: var(--sig-surface); box-shadow: 0 2px 6px rgb(0 0 0 / .08); transform: translateX(calc(var(--k, 0) * 100%)); transition: transform var(--t2, 240ms) var(--ease, cubic-bezier(.16, 1, .3, 1)); }
-.segmented button { min-width: 0; border: 0; border-radius: 8px; background: transparent; padding: 9px 10px; color: var(--sig-muted); font: 500 12px/1.4 var(--f-body, ui-sans-serif, system-ui, sans-serif); cursor: pointer; overflow-wrap: anywhere; transition: transform var(--t1, 140ms) var(--ease, cubic-bezier(.16, 1, .3, 1)), opacity var(--t1, 140ms) var(--ease, cubic-bezier(.16, 1, .3, 1)); }
-.segmented button[aria-selected="true"] { color: var(--sig-fg); }
+.segmented { position: relative; display: grid; grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr)); padding: 4px; border-radius: 99px; background: var(--sig-surface); box-shadow: var(--mail-shadow); isolation: isolate; }
+.segmentIndicator { position: absolute; inset: 4px auto 4px 4px; z-index: -1; width: calc((100% - 8px) / var(--n, 1)); border-radius: 99px; background: var(--sig-fg); transform: translateX(calc(var(--k, 0) * 100%)); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+.segmented button { min-width: 0; border: 0; border-radius: 8px; background: transparent; padding: 9px 10px; color: var(--sig-muted); font: 500 12px/1.4 var(--f-body, ui-sans-serif, system-ui, sans-serif); cursor: pointer; overflow-wrap: anywhere; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+.segmented button[aria-selected="true"] { color: var(--sig-surface); }
 .segmented button:hover:not(:disabled) { transform: translateY(-1px); }
 .segmented button:active:not(:disabled) { transform: scale(.97); }
 .segmented button:disabled { opacity: .4; cursor: not-allowed; }

@@ -82,12 +82,12 @@ export function ShellContent({ children, variant = "content" }: AppShellProps) {
   ];
   const sidebar = <Sidebar onCompose={compose} onNavigate={() => setDrawer(false)} />;
   return (
-    <div className="signal-frame" data-mail={mailMode || undefined}>
-      <div className="signal-desktop-sidebar">{mailMode ? <Sidebar compact onCompose={compose} onNavigate={() => setDrawer(true)} /> : sidebar}</div>
+    <div className="signal-frame" data-v2>
+      <div className="signal-desktop-sidebar"><Sidebar compact onCompose={compose} onNavigate={() => setDrawer(true)} /></div>
       <div className="signal-workspace">
         <Topbar mail={mailMode} onCompose={compose} onCommand={openPalette} onMenu={() => setDrawer(true)} />
         <main id="main-content" className="signal-canvas">
-          {variant === "app" ? children : <div className="min-w-0 flex-1 overflow-y-auto"><div className="mx-auto w-full max-w-4xl p-5 sm:p-8">{children}</div></div>}
+          {variant === "app" ? children : <div className="v2-scroll"><div className="v2-content">{children}</div></div>}
         </main>
       </div>
       <ShellDialog id="signal-drawer" open={drawer} onClose={() => setDrawer(false)} labelId="signal-drawer-title" className="signal-drawer">

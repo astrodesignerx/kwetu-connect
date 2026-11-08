@@ -102,7 +102,7 @@ export default function LoginPage() {
 
         {/* Honest about the actual recovery path: there is no self-service reset,
             because there is no outbound mail for it. An admin runs the CLI. */}
-        <p className="text-center text-[11px] text-brand-black/60 dark:text-brand-cream/55">
+        <p className="text-center text-[11px] text-muted">
           Forgotten your password? An admin can reset it for you.
         </p>
       </form>

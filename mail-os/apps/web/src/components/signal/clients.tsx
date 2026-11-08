@@ -19,7 +19,7 @@ export type ClientTileProps = { name: string; colour?: string; initials?: string
 
 export function ClientTile({ name, colour = clientColour, initials, description, status, children, href, label }: ClientTileProps) {
   const content = <>
-    <div className={s.clientCover}><ClientAvatar name={name} colour={colour} initials={initials} size="large" />{status && <StatusChip label={status} colour={colour} />}</div>
+    <div className={s.clientCover}><ClientAvatar name={name} colour={colour} initials={initials} size="large" />{status && <StatusChip label={status} colour={status === "Waiting on us" ? "var(--mail-waiting)" : colour} />}</div>
     <div className={s.clientBody}><h3>{name}</h3>{description && <p>{description}</p>}{children}</div>
   </>;
   const props = { className: `${s.root} ${s.clientTile}`, style: hueStyle(colour) };

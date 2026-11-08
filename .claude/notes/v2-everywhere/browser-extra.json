@@ -1,0 +1,218 @@
+{
+  "captures": [
+    "dev-mail-1440-light-populated",
+    "dev-mail-1440-dark-populated",
+    "dev-mail-1280-light-populated",
+    "dev-mail-1280-dark-populated",
+    "dev-mail-390-light-populated",
+    "dev-mail-390-dark-populated"
+  ],
+  "failures": [],
+  "requests": [
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies/activity",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies/activity",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies/activity",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies/activity",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    }
+  ],
+  "unknown": [],
+  "forbiddenRequests": [],
+  "consoleErrors": [],
+  "contrast": [
+    {
+      "theme": "light",
+      "pairs": [
+        {
+          "ink": "--fg",
+          "paper": "--surface",
+          "ratio": 18.58905221860613
+        },
+        {
+          "ink": "--fg",
+          "paper": "--raise",
+          "ratio": 17.04055098137037
+        },
+        {
+          "ink": "--fg",
+          "paper": "--bg",
+          "ratio": 15.992393903289855
+        },
+        {
+          "ink": "--muted",
+          "paper": "--surface",
+          "ratio": 5.7612531040965
+        },
+        {
+          "ink": "--muted",
+          "paper": "--raise",
+          "ratio": 5.281330434838931
+        },
+        {
+          "ink": "--muted",
+          "paper": "--bg",
+          "ratio": 4.956478035229884
+        },
+        {
+          "ink": "--bad",
+          "paper": "--surface",
+          "ratio": 6.299872443911499
+        },
+        {
+          "ink": "--bad",
+          "paper": "--raise",
+          "ratio": 5.775081822038904
+        },
+        {
+          "ink": "--bad",
+          "paper": "--bg",
+          "ratio": 5.419858983594193
+        },
+        {
+          "ink": "--mail-waiting",
+          "paper": "--surface",
+          "ratio": 5.992951133363079
+        },
+        {
+          "ink": "--mail-waiting",
+          "paper": "--raise",
+          "ratio": 5.493727604612238
+        },
+        {
+          "ink": "--mail-waiting",
+          "paper": "--bg",
+          "ratio": 5.155810744992154
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "pairs": [
+        {
+          "ink": "--fg",
+          "paper": "--surface",
+          "ratio": 15.727662016283874
+        },
+        {
+          "ink": "--fg",
+          "paper": "--raise",
+          "ratio": 14.418230912011316
+        },
+        {
+          "ink": "--fg",
+          "paper": "--bg",
+          "ratio": 17.108935398468084
+        },
+        {
+          "ink": "--muted",
+          "paper": "--surface",
+          "ratio": 7.0220869778973665
+        },
+        {
+          "ink": "--muted",
+          "paper": "--raise",
+          "ratio": 6.437452141756687
+        },
+        {
+          "ink": "--muted",
+          "paper": "--bg",
+          "ratio": 7.638797956293871
+        },
+        {
+          "ink": "--bad",
+          "paper": "--surface",
+          "ratio": 7.667350043186121
+        },
+        {
+          "ink": "--bad",
+          "paper": "--raise",
+          "ratio": 7.028992821146474
+        },
+        {
+          "ink": "--bad",
+          "paper": "--bg",
+          "ratio": 8.34073090014863
+        },
+        {
+          "ink": "--mail-waiting",
+          "paper": "--surface",
+          "ratio": 9.551134791871373
+        },
+        {
+          "ink": "--mail-waiting",
+          "paper": "--raise",
+          "ratio": 8.755940123736508
+        },
+        {
+          "ink": "--mail-waiting",
+          "paper": "--bg",
+          "ratio": 10.389958022177705
+        }
+      ]
+    }
+  ]
+}

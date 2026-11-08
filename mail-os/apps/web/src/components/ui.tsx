@@ -41,7 +41,7 @@ export function Label({
   return (
     <label
       className={cn(
-        "text-xs font-medium text-brand-black/60 dark:text-brand-cream/60",
+        "text-xs font-medium text-muted ",
         className
       )}
       {...props}
@@ -51,7 +51,7 @@ export function Label({
 
 export function ErrorText({ children }: { children?: React.ReactNode }) {
   if (!children) return null;
-  return <p className="text-sm text-red-700 dark:text-red-400">{children}</p>;
+  return <p className="text-sm text-bad">{children}</p>;
 }
 
 /**
@@ -70,7 +70,7 @@ export function Hint({
   return (
     <span
       className={cn(
-        "text-[11px] leading-snug text-brand-black/50 dark:text-brand-cream/45",
+        "text-[11px] leading-snug text-muted ",
         className
       )}
     >
@@ -81,6 +81,13 @@ export function Hint({
 
 export function MutedText({ children }: { children?: React.ReactNode }) {
   return (
-    <p className="text-sm text-brand-black/65 dark:text-brand-cream/60">{children}</p>
+    <p className="text-sm text-muted">{children}</p>
   );
+}
+
+export function ViewState({ loading = false, label }: { loading?: boolean; label: string }) {
+  return <div className="view-state" role="status" aria-live="polite" aria-busy={loading}>
+    {loading && <div className="view-state-skeleton" aria-hidden="true"><i /><i /></div>}
+    <p>{label}</p>
+  </div>;
 }

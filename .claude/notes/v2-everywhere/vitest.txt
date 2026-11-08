@@ -1,0 +1,25 @@
+pnpm.cmd : (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to
+become the default in a future major version of Vite:
+At line:2 char:1
++ pnpm.cmd exec vitest run *> ../../../.claude/notes/v2-everywhere/vite ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((!) Your Vite c...ersion of Vite::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"`
+in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.0.5 C:/Users/ether/.t3/worktrees/kwetu-connect/t3-346fa345/mail-os/apps/web
+
+
+ Test Files  20 passed (20)
+      Tests  123 passed (123)
+   Start at  23:21:43
+   Duration  17.68s (environment 77%, import 14%, tests 7%, transform 1%)
+
+Environment  jsdom was created 20 times  161.62s total, 77% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+Exit code: 0

@@ -20,7 +20,7 @@ export function Topbar({ onCommand = () => {}, onMenu = () => {}, onCompose, mai
       <Button variant="ghost" size="icon" className="signal-menu" onClick={onMenu}
         aria-label="Open navigation" aria-haspopup="dialog" aria-controls="signal-drawer"><Menu size={19} /></Button>
       <button className="signal-command-trigger" onClick={onCommand} aria-haspopup="dialog">
-        <Search size={17} aria-hidden /><span>{mail ? "Search mail and clients" : "Search or jump to"}</span><kbd>{mail ? "/" : "Ctrl K"}</kbd>
+        <Search size={17} aria-hidden /><span>Search mail and clients</span><kbd>{mail ? "/" : "Ctrl K"}</kbd>
       </button>
       <div className="signal-topbar-tools">
         <span className="signal-sync" data-state={healthy ? "healthy" : status === "failed" ? "error" : "waiting"}
@@ -29,7 +29,7 @@ export function Topbar({ onCommand = () => {}, onMenu = () => {}, onCompose, mai
         <Button variant="ghost" size="icon" aria-label="Notifications" title="Notifications"
           onClick={() => toast("Notifications are not available yet. New mail appears in Mail.")}><Bell size={18} /></Button>
       </div>
-      {mail && <Button className="mail-new-email" onClick={onCompose}><Plus size={16} aria-hidden /><span>New email</span></Button>}
+      <Button className="mail-new-email" onClick={onCompose}><Plus size={16} aria-hidden /><span>New email</span></Button>
     </header>
   );
 }

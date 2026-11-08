@@ -19,8 +19,8 @@ export function PresencePill({
   );
   if (onlineIds.length === 0) return null;
   return (
-    <div className="flex items-center gap-1 text-[10px] text-brand-black/65 dark:text-brand-cream/60">
-      <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
+    <div className="flex items-center gap-1 text-[10px] text-muted">
+      <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted" />
       <span>{onlineIds.length} online</span>
     </div>
   );
@@ -29,7 +29,7 @@ export function PresencePill({
 /**
  * Surfaces the live-update connection state. Previously a failed hub connection
  * only produced a console warning, so the app looked healthy while silently
- * serving stale mail — this makes the degraded state visible.
+ * serving stale mail : this makes the degraded state visible.
  */
 export function LiveStatusPill() {
   const status = useMailHubStatus();
@@ -49,12 +49,12 @@ export function LiveStatusPill() {
           ? "Not receiving live mail updates. Refresh to fetch the latest, or check that the API is running."
           : undefined
       }
-      className="flex items-center gap-1 text-[10px] text-brand-black/65 dark:text-brand-cream/60"
+      className="flex items-center gap-1 text-[10px] text-muted"
     >
       <span
         className={
-          "inline-block h-1.5 w-1.5 rounded-full transition-colors duration-200 " +
-          (status === "failed" ? "bg-red-500" : "bg-brand-amber animate-pulse")
+          "inline-block h-1.5 w-1.5 rounded-full transition-[transform,opacity] duration-200 " +
+          (status === "failed" ? "bg-red-500" : "bg-fg animate-pulse")
         }
       />
       <span>{label}</span>

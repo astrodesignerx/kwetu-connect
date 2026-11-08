@@ -1,0 +1,3085 @@
+{
+  "captures": [
+    "settings-1440-light-populated",
+    "settings-1440-light-populated-bottom",
+    "settings-1440-light-empty",
+    "settings-1440-light-error",
+    "settings-1440-light-loading",
+    "settings-1440-dark-populated",
+    "settings-1440-dark-populated-bottom",
+    "settings-1440-dark-empty",
+    "settings-1440-dark-error",
+    "settings-1440-dark-loading",
+    "settings-1280-light-populated",
+    "settings-1280-light-populated-bottom",
+    "settings-1280-light-empty",
+    "settings-1280-light-error",
+    "settings-1280-light-loading",
+    "settings-1280-dark-populated",
+    "settings-1280-dark-populated-bottom",
+    "settings-1280-dark-empty",
+    "settings-1280-dark-error",
+    "settings-1280-dark-loading",
+    "settings-390-light-populated",
+    "settings-390-light-populated-bottom",
+    "settings-390-light-empty",
+    "settings-390-light-empty-bottom",
+    "settings-390-light-error",
+    "settings-390-light-loading",
+    "settings-390-dark-populated",
+    "settings-390-dark-populated-bottom",
+    "settings-390-dark-empty",
+    "settings-390-dark-empty-bottom",
+    "settings-390-dark-error",
+    "settings-390-dark-loading",
+    "templates-1440-light-populated",
+    "templates-1440-light-empty",
+    "templates-1440-light-error",
+    "templates-1440-light-loading",
+    "templates-1440-dark-populated",
+    "templates-1440-dark-empty",
+    "templates-1440-dark-error",
+    "templates-1440-dark-loading",
+    "templates-1280-light-populated",
+    "templates-1280-light-empty",
+    "templates-1280-light-error",
+    "templates-1280-light-loading",
+    "templates-1280-dark-populated",
+    "templates-1280-dark-empty",
+    "templates-1280-dark-error",
+    "templates-1280-dark-loading",
+    "templates-390-light-populated",
+    "templates-390-light-populated-bottom",
+    "templates-390-light-empty",
+    "templates-390-light-error",
+    "templates-390-light-loading",
+    "templates-390-dark-populated",
+    "templates-390-dark-populated-bottom",
+    "templates-390-dark-empty",
+    "templates-390-dark-error",
+    "templates-390-dark-loading",
+    "template-edit-1440-light-populated",
+    "template-edit-1440-light-populated-bottom",
+    "template-edit-1440-light-empty",
+    "template-edit-1440-light-empty-bottom",
+    "template-edit-1440-light-error",
+    "template-edit-1440-light-loading",
+    "template-edit-1440-dark-populated",
+    "template-edit-1440-dark-populated-bottom",
+    "template-edit-1440-dark-empty",
+    "template-edit-1440-dark-empty-bottom",
+    "template-edit-1440-dark-error",
+    "template-edit-1440-dark-loading",
+    "template-edit-1280-light-populated",
+    "template-edit-1280-light-populated-bottom",
+    "template-edit-1280-light-empty",
+    "template-edit-1280-light-empty-bottom",
+    "template-edit-1280-light-error",
+    "template-edit-1280-light-loading",
+    "template-edit-1280-dark-populated",
+    "template-edit-1280-dark-populated-bottom",
+    "template-edit-1280-dark-empty",
+    "template-edit-1280-dark-empty-bottom",
+    "template-edit-1280-dark-error",
+    "template-edit-1280-dark-loading",
+    "template-edit-390-light-populated",
+    "template-edit-390-light-populated-bottom",
+    "template-edit-390-light-empty",
+    "template-edit-390-light-empty-bottom",
+    "template-edit-390-light-error",
+    "template-edit-390-light-loading",
+    "template-edit-390-dark-populated",
+    "template-edit-390-dark-populated-bottom",
+    "template-edit-390-dark-empty",
+    "template-edit-390-dark-empty-bottom",
+    "template-edit-390-dark-error",
+    "template-edit-390-dark-loading"
+  ],
+  "failures": [],
+  "requests": [
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes/fixture-mailbox/sync-stats",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes/fixture-mailbox/sync-stats",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes/fixture-mailbox/sync-stats",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes/fixture-mailbox/sync-stats",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes/fixture-mailbox/sync-stats",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes/fixture-mailbox/sync-stats",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mailboxes",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/brand-kit",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/users",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/workspace/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/admin/audit-log/daily",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/previews",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/preview",
+      "scenario": "populated",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/preview",
+      "scenario": "empty",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/preview",
+      "scenario": "populated",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/preview",
+      "scenario": "empty",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/preview",
+      "scenario": "populated",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/preview",
+      "scenario": "empty",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/preview",
+      "scenario": "populated",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/preview",
+      "scenario": "empty",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/preview",
+      "scenario": "populated",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/preview",
+      "scenario": "empty",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/drafts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/thread-counts",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/preview",
+      "scenario": "populated",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "populated",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/preview",
+      "scenario": "empty",
+      "method": "POST"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "empty",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "error",
+      "method": "GET"
+    },
+    {
+      "path": "/api/mail/overview",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/companies",
+      "scenario": "loading",
+      "method": "GET"
+    },
+    {
+      "path": "/api/templates/fixture-template",
+      "scenario": "loading",
+      "method": "GET"
+    }
+  ],
+  "unknown": [],
+  "forbiddenRequests": [],
+  "consoleErrors": [],
+  "contrast": []
+}

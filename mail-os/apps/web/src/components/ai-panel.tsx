@@ -55,7 +55,7 @@ export function AiStatusBanner() {
   const { data } = useQuery({ queryKey: ["ai-status"], queryFn: api.aiStatus });
   if (!data || data.configured) return null;
   return (
-    <div className="rounded-xl border border-brand-yellow/40 bg-brand-yellow/10 px-3 py-2 text-xs text-brand-black/80 dark:text-brand-cream/80">
+    <div className="rounded-xl border border-line bg-raise px-3 py-2 text-xs text-muted">
       AI actions are disabled until an LLM API key is configured on the server.
     </div>
   );

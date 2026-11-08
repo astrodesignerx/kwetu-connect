@@ -4,20 +4,15 @@ import { useState, type ComponentType } from "react";
 import { Eye, EyeOff, Loader2, type LucideProps } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Logo } from "@/components/logo";
-import { LightField } from "@/components/shell/light-field";
 
-export function AuthCard({ title, subtitle, children, footer, welcome = false }: {
+export function AuthCard({ title, subtitle, children, footer }: {
   title: string; subtitle: string; children: React.ReactNode; footer?: React.ReactNode; welcome?: boolean;
 }) {
   return (
     <main className="signal-auth">
-      <section className="signal-auth-scene" aria-label="Kwetu OS">
-        <LightField words={welcome} />
-        <div className="signal-auth-brand"><Logo /><span>Kwetu OS</span></div>
-        <span className="signal-auth-caption">Kwetu Connect Ads</span>
-      </section>
       <section className="signal-auth-form">
         <div className="signal-auth-content">
+          <div className="signal-auth-brand"><Logo /><span>Kwetu OS</span></div>
           <header className="signal-auth-heading"><h1>{title}</h1><p>{subtitle}</p></header>
           {children}
           {footer && <div className="signal-auth-footer">{footer}</div>}
