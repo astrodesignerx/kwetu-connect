@@ -22,14 +22,14 @@ type Plan = {
 };
 // start is days from this week's Monday. Live bookings span the whole week, so the share holds on any day.
 // Blocks and days are spread so mornings and late are light, midday medium and afternoon and evening heavy, with busier weekends.
-// Keep every hour at or under about 94% before the next-week plans below, which add up to 6% on top.
+// Weekday afternoons stay under about 94%, because the next-week Approved plan below adds 6% on top.
 const PLANS: Plan[] = [
   { business: "Eldo Fresh Supermarket", name: "Grace Wanjiru", length: 30, often: 10, days: EVERY_DAY, blocks: ALL, status: "Live", start: -21, weeks: 9, createdDaysAgo: 40, advert: "approved" },
   { business: "Highland Dairies", name: "Peter Kiprop", length: 30, often: 20, days: EVERY_DAY, blocks: ["midday", "afternoon", "evening"], status: "Live", start: -14, weeks: 8, createdDaysAgo: 33, advert: "approved" },
   { business: "Kerio Valley Sacco", name: "Ann Jepkosgei", length: 30, often: 10, days: EVERY_DAY, blocks: ALL, status: "Live", start: -28, weeks: 12, createdDaysAgo: 45, advert: "approved" },
   { business: "Sosiani Pharmacy", name: "David Otieno", length: 20, often: 10, days: EVERY_DAY, blocks: ["morning", "midday", "afternoon"], status: "Live", start: -7, weeks: 6, createdDaysAgo: 24, advert: "approved" },
-  { business: "Rift Motors", name: "Brian Kibet", length: 30, often: 20, days: [1, 2, 4, 5, 6, 0], blocks: ["afternoon", "evening"], status: "Live", start: -14, weeks: 10, createdDaysAgo: 30, advert: "approved" },
-  { business: "Kapsoya Hardware", name: "Mercy Chebet", length: 20, often: 20, days: EVERY_DAY, blocks: ["midday"], status: "Live", start: -7, weeks: 5, createdDaysAgo: 19, advert: "approved" },
+  { business: "Rift Motors", name: "Brian Kibet", length: 30, often: 20, days: EVERY_DAY, blocks: ["afternoon", "evening"], status: "Live", start: -14, weeks: 10, createdDaysAgo: 30, advert: "approved" },
+  { business: "Kapsoya Hardware", name: "Mercy Chebet", length: 15, often: 20, days: WEEKEND, blocks: ["morning", "midday"], status: "Live", start: -7, weeks: 5, createdDaysAgo: 19, advert: "approved" },
   { business: "Mjini Phones", name: "Kevin Mutai", length: 30, often: 10, days: EVERY_DAY, blocks: ["afternoon", "evening", "late"], status: "Live", start: -21, weeks: 8, createdDaysAgo: 36, advert: "approved" },
   { business: "Fikra Insurance", name: "Lucy Achieng", length: 30, often: 10, days: EVERY_DAY, blocks: ["evening", "late"], status: "Live", start: 0, weeks: 6, createdDaysAgo: 12, advert: "approved" },
   { business: "Safari Line Shuttles", name: "Joseph Rono", length: 20, often: 10, days: WEEKDAYS, blocks: ["morning", "evening"], status: "Live", start: -14, weeks: 6, createdDaysAgo: 27, advert: "approved" },
