@@ -1,6 +1,7 @@
 // Short, readable dates for the manager. Inputs are ISO dates (2026-11-14); never use these for URLs, forms or CSV.
 const at = (iso: string) => new Date(iso + "T12:00:00Z");
-const format = (iso: string, options: Intl.DateTimeFormatOptions) => at(iso).toLocaleDateString("en-GB", { ...options, timeZone: "UTC" });
+// Some runtimes spell September "Sept" in en-GB; keep every month at three letters.
+const format = (iso: string, options: Intl.DateTimeFormatOptions) => at(iso).toLocaleDateString("en-GB", { ...options, timeZone: "UTC" }).replace("Sept", "Sep");
 
 /** "14 Nov" */
 export const shortDate = (iso: string) => format(iso, { day: "numeric", month: "short" });

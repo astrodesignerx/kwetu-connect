@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Bell, CalendarBlank, CaretLeft, CaretRight, MagnifyingGlass, Plus, SidebarSimple } from "@phosphor-icons/react";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -14,6 +14,12 @@ const PAGES: [path: string, title: string, note?: string][] = [
   ["/manage/schedule", "Screen schedule", "Approved and Live bookings, with approved adverts only"],
   ["/manage/settings", "Settings", "How the screen is sold. Existing quotes keep their price."],
 ];
+// "Mon 9 Nov 18:42" in Nairobi time.
+function nairobiStamp(iso: string) {
+  const date = new Date(iso);
+  const day = date.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Africa/Nairobi" }).replace(",", "");
+  return day + " " + date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Nairobi" });
+}
 function weekLabel(monday: string) {
   const sunday = addDays(monday, 6);
   const part = (iso: string, opts: Intl.DateTimeFormatOptions) => new Date(iso + "T12:00:00Z").toLocaleDateString("en-GB", { ...opts, timeZone: "UTC" });
@@ -26,6 +32,8 @@ export default function ManagerTopbar({ today, now, notices }: { today: string; 
   const params = useSearchParams();
   const pathname = usePathname();
   const { open, toggle } = useSidebar();
+  const [clock, setClock] = useState(now);
+  useEffect(() => { const timer = setInterval(() => setClock(new Date().toISOString()), 30000); return () => clearInterval(timer); }, []);
   useEffect(() => {
     const focusSearch = (event: KeyboardEvent) => { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); search.current?.focus(); } };
     window.addEventListener("keydown", focusSearch);
@@ -51,8 +59,8 @@ export default function ManagerTopbar({ today, now, notices }: { today: string; 
       <label><MagnifyingGlass size={16} aria-hidden="true" /><Input ref={search} key={params.get("q")} name="q" aria-label={onAdverts ? "Search adverts by reference, business or M-Pesa code" : "Search bookings by reference, business or M-Pesa code"} placeholder={onAdverts ? "Search adverts, references, M-Pesa codes" : "Search bookings, references, M-Pesa codes"} maxLength={150} defaultValue={params.get("q") ?? ""} /></label>
       <kbd>Ctrl K</kbd><button type="submit" className="sr-only focus:not-sr-only">Search</button>
     </form>
-    <span className="v2-datechip"><CalendarBlank size={15} aria-hidden="true" /><b>{new Date(now).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Africa/Nairobi" })}</b></span>
-    <ThemeSwitch variant="icons" />
+    <span className="v2-datechip"><CalendarBlank size={15} aria-hidden="true" /><b>{nairobiStamp(clock)}</b></span>
+    <ThemeSwitch variant="toggle" />
     <Link href="/manage/adverts" className="v2-notifications" aria-label={notices ? `${notices} adverts waiting for review` : "No adverts waiting for review"}><Bell size={17} aria-hidden="true" />{notices > 0 && <i />}</Link>
     <Link href="/book" className="new-quote-button"><Plus size={14} weight="bold" aria-hidden="true" />New quote</Link>
     {overview && <nav className="week-picker" aria-label="Choose week">

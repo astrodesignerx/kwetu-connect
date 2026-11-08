@@ -19,9 +19,11 @@ function setTheme(theme: "dark" | "light") {
   if (document.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) document.startViewTransition(update);
   else update();
 }
+// toggle: one icon button for the manager top bar (2026-11-09).
 // icons: two small sun and moon buttons for the compact book top bar (2026-11-05).
-export default function ThemeSwitch({ variant = "switch" }: { variant?: "switch" | "icons" }) {
+export default function ThemeSwitch({ variant = "switch" }: { variant?: "switch" | "icons" | "toggle" }) {
   const dark = useSyncExternalStore(subscribe, () => document.documentElement.dataset.theme === "dark", () => false);
+  if (variant === "toggle") return <button type="button" className="theme-toggle" aria-label="Theme" title={dark ? "Switch to day" : "Switch to night"} aria-pressed={dark} onClick={() => setTheme(dark ? "light" : "dark")}>{dark ? <Moon size={17} aria-hidden="true" /> : <Sun size={17} aria-hidden="true" />}</button>;
   if (variant === "icons") return <div className="theme-icons" role="group" aria-label="Theme">
     <button type="button" aria-label="Day" title="Day" aria-pressed={!dark} onClick={() => setTheme("light")}><Sun size={14} aria-hidden="true" /></button>
     <button type="button" aria-label="Night" title="Night" aria-pressed={dark} onClick={() => setTheme("dark")}><Moon size={14} aria-hidden="true" /></button>

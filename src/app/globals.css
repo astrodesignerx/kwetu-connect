@@ -2197,8 +2197,10 @@ button.pay-ghost { width: 100%; background: transparent; cursor: pointer; }
 .manager-rail .rail-text, .manager-rail .nav-label { display: block; }
 .manager-rail .rail-text b { font-size: 13px; text-align: left; }
 .manager-rail .rail-text small { font-size: 10px; text-align: left; color: var(--v2-muted); }
-.rail-section-label { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--v2-muted); padding: 12px; }
-.manager-rail .manager-nav { gap: 8px; }
+.manager-rail .manager-nav { gap: 12px; }
+.rail-group { display: grid; gap: 4px; }
+.rail-group-label { font-size: 11px; color: var(--v2-faint); padding: 0 12px 2px; margin: 0; }
+.manager-rail .rail-count { margin-left: auto; font-size: 11px; color: var(--v2-muted); font-variant-numeric: tabular-nums; }
 .manager-rail .manager-nav a, .manager-rail[data-open="true"] .manager-nav a { display: flex; gap: 8px; width: auto; height: 44px; padding: 6px 12px; font-size: 13px; border-radius: 14px; color: var(--foreground); }
 .manager-rail .manager-nav a:hover { background: var(--muted); transform: translateX(2px); }
 .manager-rail .manager-nav a[aria-current="page"] { background: var(--foreground); color: var(--background); box-shadow: var(--v2-shadow); }
@@ -2232,6 +2234,9 @@ button.pay-ghost { width: 100%; background: transparent; cursor: pointer; }
 .v2-notifications { position: relative; width: 40px; padding: 0; }
 .v2-notifications i { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #edb347; right: 8px; top: 7px; }
 .manager-topbar .theme-icons { margin: 0; background: var(--card); height: 40px; }
+.theme-toggle { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 10px; background: var(--card); box-shadow: var(--v2-shadow); color: var(--muted-foreground); transition: background-color var(--duration-base) var(--ease-standard), color var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard); }
+.theme-toggle:hover { color: var(--foreground); transform: translateY(-1px); }
+.theme-toggle:active { transform: scale(.94); }
 .manager-topbar .new-quote-button { height: 40px; padding: 0 16px; }
 .manager-topbar .week-picker { order: 10; margin-left: auto; font-size: 11px; }
 .manager-content { padding: 0 24px 24px; }
@@ -2362,6 +2367,7 @@ button.pay-ghost { width: 100%; background: transparent; cursor: pointer; }
   .manager-topbar .manager-search { width: 100%; order: 9; height: 38px; }
   .manager-topbar .week-picker { width: 100%; margin-top: 2px; justify-content: center; }
   .manager-topbar .theme-icons { margin-left: auto; height: 34px; }
+  .theme-toggle { margin-left: auto; width: 34px; height: 34px; }
   .manager-topbar .new-quote-button { height: 34px; font-size: 11px; padding: 0 12px; }
   .v2-datechip, .v2-topbar-space { display: none; }
   .v2-notifications { width: 34px; height: 34px; }
@@ -2680,7 +2686,7 @@ button.pay-ghost { width: 100%; background: transparent; cursor: pointer; }
 .v2-advert-folder legend { font-size: 11px; }
 .v2-advert-folder .segmented { border-radius: 10px; --seg-pad: 4px; background: var(--v2-sunk); border: 0; }
 .v2-advert-folder .segmented button { border-radius: 6px; height: 32px; font-size: 12px; background: transparent; border: 0; }
-.v2-advert-folder .segment-highlight { border-radius: 6px; background: var(--v2-data-grad); box-shadow: 0 6px 16px -8px var(--v2-glow); }
+.v2-advert-folder .segment-highlight { border-radius: 6px; background: var(--v2-gradient); box-shadow: 0 6px 16px -8px var(--v2-glow); }
 .v2-advert-folder .segmented button[aria-pressed="true"] { color: #1d1006; background: transparent; }
 .booking-controls > .dates-card { flex: 1 0 auto; min-height: 280px; }
 .dates-card .control-title h2 { font-size: 14px; }
