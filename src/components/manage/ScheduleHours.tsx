@@ -12,7 +12,6 @@ const COLOURS = ["#edb347", "#2dd4bf", "#60a5fa", "#a78bfa", "#fb7185", "#a3e635
 export default function ScheduleHours({ schedule, businesses, settings, from, to, now }: { schedule: Schedule; businesses: Record<string, string>; settings: BookingSettings; from: string; to: string; now: string }) {
   const clock = nairobiClock(new Date(now));
   const dates = dateRange(from, to);
-  const [chosen, setChosen] = useState({ date: dates.includes(clock.date) ? clock.date : from, hour: clock.hour });
   const first = Math.min(...Object.values(settings.screenHours).map((day) => day.open));
   const last = Math.max(...Object.values(settings.screenHours).map((day) => day.close));
   const hours = Array.from({ length: Math.max(0, last - first) }, (_, index) => first + index);
@@ -24,6 +23,19 @@ export default function ScheduleHours({ schedule, businesses, settings, from, to
     return [...values].map(([reference, seconds]) => ({ reference, seconds, share: seconds / settings.secondsForSalePerHour, business: businesses[reference] ?? reference }));
   }
   const openAt = (date: string, hour: number) => { const day = settings.screenHours[weekdayOf(date)]; return hour >= day.open && hour < day.close; };
+  // Start on the current hour. At night, or in an hour with no plays, start on the next open hour that has plays,
+  // today first and then the following days, so the donut shows who holds that hour. A closed tile stays closed only when clicked.
+  const [chosen, setChosen] = useState(() => {
+    const date = dates.includes(clock.date) ? clock.date : from;
+    const sameDay = date === clock.date;
+    for (const day of dates.slice(dates.indexOf(date))) {
+      for (const hour of hours) {
+        if (day === date && sameDay && hour < clock.hour) continue;
+        if (openAt(day, hour) && entries(day, hour).length) return { date: day, hour };
+      }
+    }
+    return { date, hour: clock.hour };
+  });
   const rows = dates.map((date) => ({ date, label: new Date(date + "T12:00:00Z").toLocaleDateString("en-GB", { weekday: "short", timeZone: "UTC" }), hours: hours.map((hour) => ({ hour, share: entries(date, hour).reduce((total, entry) => total + entry.share, 0), closed: !openAt(date, hour) })) }));
   const items = entries(chosen.date, chosen.hour);
   const sold = items.reduce((total, entry) => total + entry.share, 0);

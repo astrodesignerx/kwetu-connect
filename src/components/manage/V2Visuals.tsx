@@ -19,12 +19,21 @@ export function FolderCard({ label, value, note, colour = "teal", children }: { 
 export type HourShare = { hour: number; share: number };
 export function CapsuleBars({ hours, currentHour, label = "Planned time sold", onSelect, selectedHour }: { hours: HourShare[]; currentHour?: number; label?: string; onSelect?: (hour: number) => void; selectedHour?: number }) {
   const [local, setLocal] = useState<number | null>(null);
-  const selected = selectedHour ?? local ?? currentHour ?? hours[0]?.hour;
+  const open = currentHour !== undefined && hours.some((item) => item.hour === currentHour);
+  // Outside the open hours the next open hour stands in for "now", so the chart still points at something.
+  const fallback = (currentHour === undefined ? hours[0] : hours.find((item) => item.hour > currentHour) ?? hours[0])?.hour;
+  const selected = selectedHour ?? local ?? (open ? currentHour : fallback);
   const active = hours.find((item) => item.hour === selected);
+  const ringed = open ? currentHour : active ? active.hour : fallback;
+  const index = hours.findIndex((item) => item.hour === active?.hour);
+  const text = active ? `${formatHour(active.hour)}, ${Math.round(active.share * 100)}% sold` : "";
+  const caption = !hours.length ? "Screen closed today" : currentHour !== undefined && !open ? `Screen closed, opens ${formatHour(fallback ?? hours[0].hour)}` : "";
   return <div className="v2-capsule-chart">
-    <p className="v2-chart-readout" aria-live="polite">{active ? `${formatHour(active.hour)} / ${Math.round(active.share * 100)}% sold` : "The screen is closed"}</p>
+    <p className="sr-only" aria-live="polite">{text || caption}</p>
+    <p className="v2-capsule-caption" aria-hidden="true">{caption}</p>
     <div className="v2-capsules" role="group" aria-label={label} style={{ "--hours": Math.max(hours.length, 1) } as CSSProperties}>
-      {hours.map(({ hour, share }) => <button type="button" key={hour} className="v2-capsule" aria-pressed={selected === hour} aria-label={`${formatHour(hour)}, ${Math.round(share * 100)}% sold, planned`} data-past={currentHour !== undefined && hour < currentHour} onClick={() => { setLocal(hour); onSelect?.(hour); }}>
+      {hours.map(({ hour, share }, position) => <button type="button" key={hour} className="v2-capsule" aria-pressed={selected === hour} aria-label={`${formatHour(hour)}, ${Math.round(share * 100)}% sold, planned`} data-level={tileLevel(share)} data-current={ringed === hour} data-past={currentHour !== undefined && hour < currentHour} onClick={() => { setLocal(hour); onSelect?.(hour); }}>
+        {position === index && <em className="v2-capsule-tip" data-edge={position < 2 ? "start" : position > hours.length - 3 ? "end" : undefined} aria-hidden="true">{text}</em>}
         <span className="v2-capsule-track"><i style={{ transform: `scaleY(${Math.max(0.015, Math.min(1, share))})` }} /></span><small>{String(hour).padStart(2, "0")}</small>
       </button>)}
     </div>
