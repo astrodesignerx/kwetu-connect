@@ -110,7 +110,7 @@ export function Sidebar({ onCompose, onNavigate, compact = false }: { onCompose:
               {mailboxes.map((mailbox) => <option key={mailbox.id} value={mailbox.id}>{mailbox.email}</option>)}
             </select>
           </label>
-          <Link className="signal-connect" href="/settings/mailboxes" onClick={onNavigate}><Plus size={13} aria-hidden />Connect a mailbox</Link>
+          <Link className="signal-connect" href="/settings/mailboxes/connect" onClick={onNavigate}><Plus size={13} aria-hidden />Connect a mailbox</Link>
         </details>}
       </div>
       <div className="signal-user-row">

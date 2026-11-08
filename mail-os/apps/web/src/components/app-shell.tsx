@@ -78,7 +78,7 @@ export function ShellContent({ children, variant = "content" }: AppShellProps) {
     { id: "compose", label: "New message", group: "Actions", keywords: "compose write", run: compose },
     { id: "theme", label: "Switch Night / Day", group: "Actions", keywords: "theme dark light", run: toggleTheme },
     { id: "help", label: "Keyboard shortcuts", group: "Actions", run: () => setHelp(true) },
-    { id: "connect", label: "Connect a mailbox", group: "Actions", run: () => router.push("/settings/mailboxes") },
+    { id: "connect", label: "Connect a mailbox", group: "Actions", run: () => router.push("/settings/mailboxes/connect") },
   ];
   const sidebar = <Sidebar onCompose={compose} onNavigate={() => setDrawer(false)} />;
   return (

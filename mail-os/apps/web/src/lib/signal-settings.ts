@@ -54,7 +54,7 @@ export type ConnectStage = "idle" | "connecting" | "connected" | "verifying" | "
 export function connectChecklist(stage: ConnectStage) {
   const connected = ["connected", "verifying", "verified", "verify-error"].includes(stage);
   return [
-    { label: "Find server and sign in securely", detail: "Check your receiving server and mailbox password.",
+    { label: "Find server and sign in securely", detail: "Check your mail servers and mailbox password.",
       state: connected ? "complete" : stage === "connecting" ? "running" : stage === "connect-error" ? "error" : "waiting" },
     { label: "Save connection and queue sync", detail: "Save your details securely and prepare to fetch messages.",
       state: connected ? "complete" : "waiting" },

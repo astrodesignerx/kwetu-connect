@@ -364,7 +364,7 @@ function NoMailboxes() {
           Connect your cPanel mailbox and the last few years of mail will sync into
           this workspace.
         </p>
-        <Link href="/settings/mailboxes" className="btn-primary mt-4 inline-flex">
+        <Link href="/settings/mailboxes/connect" className="btn-primary mt-4 inline-flex">
           Connect a mailbox
         </Link>
       </div>

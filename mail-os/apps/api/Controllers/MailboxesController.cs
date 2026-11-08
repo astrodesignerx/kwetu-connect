@@ -14,6 +14,9 @@ namespace Kompanion.Api.Controllers;
 [Authorize]
 public class MailboxesController : ControllerBase
 {
+    private const string WrongPassword =
+        "That email and password didn't work. Use the password you sign in to webmail with.";
+
     private readonly AppDbContext _db;
     private readonly CredentialVault _vault;
     private readonly MailboxVerifier _verifier;
@@ -53,34 +56,36 @@ public class MailboxesController : ControllerBase
 
         var domain = email.Split('@')[1];
         var imapPort = req.ImapPort ?? 993;
-        var candidateHosts = !string.IsNullOrWhiteSpace(req.ImapHost)
-            ? new[] { req.ImapHost.Trim() }
-            : new[] { $"webmail.{domain}", $"mail.{domain}" };
+        var smtpPort = req.SmtpPort ?? 465;
+        var customImap = !string.IsNullOrWhiteSpace(req.ImapHost);
+        var customSmtp = !string.IsNullOrWhiteSpace(req.SmtpHost);
 
-        string? resolvedHost = null;
-        string? lastError = null;
-        foreach (var host in candidateHosts)
-        {
-            var (ok, error, resolved) = await _verifier.VerifyImapLoginAsync(host, imapPort, email, req.Password, ct);
-            if (ok)
-            {
-                resolvedHost = resolved;
-                break;
-            }
-            lastError = error;
-        }
+        var imap = await _verifier.FindImapHostAsync(
+            customImap ? [req.ImapHost!.Trim()] : MailboxVerifier.ImapCandidates(domain),
+            imapPort, email, req.Password, ct);
+        if (imap.Host is null)
+            return BadRequest(new { error = imap.CredentialsRejected
+                ? WrongPassword
+                : customImap ? imap.Error : $"We couldn't reach a mail server for {domain}. If your provider uses different servers, add them under \"My provider needs specific servers\"." });
 
-        if (resolvedHost is null)
-            return BadRequest(new { error = $"Mailbox verification failed — {lastError}" });
+        // Connecting used to copy the IMAP host here unchecked, which left mailboxes that
+        // could read mail and then fail on the first send.
+        var smtp = await _verifier.FindSmtpHostAsync(
+            customSmtp ? [req.SmtpHost!.Trim()] : MailboxVerifier.SmtpCandidates(domain, imap.Host),
+            smtpPort, email, req.Password, ct);
+        if (smtp.Host is null)
+            return BadRequest(new { error = smtp.CredentialsRejected
+                ? WrongPassword
+                : customSmtp ? smtp.Error : "We could sign in, but couldn't find a server for sending mail. Add your provider's sending server under \"My provider needs specific servers\"." });
 
         var connection = new MailboxConnection
         {
             UserId = userId,
             Email = email,
-            ImapHost = resolvedHost,
+            ImapHost = imap.Host,
             ImapPort = imapPort,
-            SmtpHost = string.IsNullOrWhiteSpace(req.SmtpHost) ? resolvedHost : req.SmtpHost.Trim(),
-            SmtpPort = req.SmtpPort ?? 465,
+            SmtpHost = smtp.Host,
+            SmtpPort = smtpPort,
             EncryptedCredentials = _vault.Protect(req.Password),
             LastVerifiedAt = DateTimeOffset.UtcNow
         };

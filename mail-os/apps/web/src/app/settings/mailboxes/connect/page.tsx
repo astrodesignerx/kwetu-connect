@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -10,8 +11,8 @@ import { Feedback, Field, Panel, SettingsHeader } from "@/components/settings/se
 import s from "./page.module.css";
 
 export default function ConnectMailboxPage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
-  const [provider, setProvider] = useState("cpanel");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [imapHost, setImapHost] = useState("");
@@ -31,9 +32,16 @@ export default function ConnectMailboxPage() {
   }
   async function verify(id: string) {
     setStage("verifying"); setError(null);
-    try { await api.reverifyMailbox(id); setStage("verified"); }
-    catch (failure) { setStage("verify-error"); setError(failure instanceof Error ? failure.message : "Saved connection could not be verified."); }
-    await refresh();
+    try {
+      await api.reverifyMailbox(id);
+      setStage("verified");
+      await refresh();
+      router.replace("/mail");
+    } catch (failure) {
+      setStage("verify-error");
+      setError(failure instanceof Error ? failure.message : "Saved connection could not be verified.");
+      await refresh();
+    }
   }
   async function connect(event: React.FormEvent) {
     event.preventDefault(); setStage("connecting"); setError(null);
@@ -49,14 +57,17 @@ export default function ConnectMailboxPage() {
   }
 
   return <div className={s.page}>
-    <SettingsHeader title="Connect a mailbox" eyebrow="Settings / Mailboxes" description="Use the same details you use for webmail." action={<Link href="/settings/mailboxes" className={s.cancel}>{connectionId ? "Back to mailboxes" : "Cancel"}</Link>} />
-    <div className={s.layout}><Panel><form onSubmit={(event) => void connect(event)} className={s.form}>
-      <fieldset disabled={locked} className={s.providers}><legend>1 / Your provider</legend>{[["cpanel", "cPanel webmail"], ["imap", "Other IMAP"]].map(([value, label]) => <label key={value} data-selected={provider === value}><input type="radio" name="provider" value={value} checked={provider === value} onChange={() => setProvider(value)} /><span>{label}</span></label>)}</fieldset>
-      <p className={s.note}>Password-based IMAP only. Use the server details supplied by your provider.</p>
-      <h2>2 / Sign in</h2><div className={s.fields}><Field label="Email address" htmlFor="mb-email"><Input id="mb-email" type="email" autoComplete="username" required disabled={locked} value={email} onChange={(event) => setEmail(event.target.value)} /></Field><Field label="Mailbox password" htmlFor="mb-password" hint="Stored encrypted by your workspace."><Input id="mb-password" type="password" autoComplete="new-password" required disabled={locked} value={password} onChange={(event) => setPassword(event.target.value)} /></Field></div>
+    <SettingsHeader title="Connect your email" eyebrow="Settings / Mailboxes" description="Sign in with the email and password you use for webmail." action={<Link href="/settings/mailboxes" className={s.cancel}>{connectionId ? "Back to mailboxes" : "Cancel"}</Link>} />
+    <Panel><form onSubmit={(event) => void connect(event)} className={s.form}>
+      <div className={s.fields}>
+        <Field label="Email address" htmlFor="mb-email"><Input id="mb-email" type="email" autoFocus autoComplete="username" required disabled={locked} value={email} onChange={(event) => setEmail(event.target.value)} /></Field>
+        <Field label="Password" htmlFor="mb-password" hint="Stored encrypted by your workspace."><Input id="mb-password" type="password" autoComplete="new-password" required disabled={locked} value={password} onChange={(event) => setPassword(event.target.value)} /></Field>
+      </div>
+      <Feedback error={error} message={stage === "verified" ? "Connected. Opening your inbox." : stage === "verify-error" ? "The mailbox is connected. The additional test needs attention." : null} />
+      {connectionId ? <div className={s.actions}>{stage === "verify-error" && <Button type="button" disabled={busy} onClick={() => void verify(connectionId)}>Retry saved connection test</Button>}<Link href="/settings/mailboxes">View mailbox health</Link></div> : <Button type="submit" disabled={busy}>{busy ? "Connecting..." : "Connect"}</Button>}
+      {stage !== "idle" && <ol className={s.checklist} aria-live="polite">{connectChecklist(stage).map((step, index) => <li key={step.label} data-state={step.state}><span aria-hidden="true">{step.state === "complete" ? "✓" : step.state === "error" ? "!" : index + 1}</span><div><b>{step.label}</b><small>{step.detail}</small></div></li>)}</ol>}
       <details className={s.advanced}><summary>My provider needs specific servers</summary><div className={s.fields}><Field label="Receiving server (IMAP)" htmlFor="imapHost" hint="Port 993, TLS"><Input id="imapHost" disabled={locked} value={imapHost} onChange={(event) => setImapHost(event.target.value)} placeholder="mail.example.com" /></Field><Field label="Sending server (SMTP)" htmlFor="smtpHost" hint="Port 465, TLS. Use the hostname on its certificate."><Input id="smtpHost" disabled={locked} value={smtpHost} onChange={(event) => setSmtpHost(event.target.value)} placeholder="Your provider's SMTP hostname" /></Field></div></details>
-      <Feedback error={error} message={stage === "verified" ? "Mailbox connected and saved credentials verified. Initial sync is queued." : stage === "verify-error" ? "The mailbox is connected. The additional test needs attention." : null} />
-      {connectionId ? <div className={s.actions}>{stage === "verify-error" && <Button type="button" disabled={busy} onClick={() => void verify(connectionId)}>Retry saved connection test</Button>}<Link href="/settings/mailboxes">View mailbox health</Link></div> : <Button type="submit" disabled={busy}>{busy ? "Checking your details..." : "Connect mailbox"}</Button>}
-    </form></Panel><Panel><h2>Connection check</h2><ol className={s.checklist} aria-live="polite">{connectChecklist(stage).map((step, index) => <li key={step.label} data-state={step.state}><span aria-hidden="true">{step.state === "complete" ? "✓" : step.state === "error" ? "!" : index + 1}</span><div><b>{step.label}</b><small>{step.detail}</small><em>{step.state}</em></div></li>)}</ol><p className={s.note}>Checks incoming mail. No test email is sent. Your first sync runs in the background.</p></Panel></div>
+      <p className={s.note}>No test email is sent. Your existing mail syncs in the background.</p>
+    </form></Panel>
   </div>;
 }
