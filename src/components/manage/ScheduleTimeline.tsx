@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { dateRange, formatHour } from "@/lib/booking/hours";
 import { nairobiClock } from "@/lib/dashboard";
+import { dateRange as rangeLabel, dayDate, shortDate } from "@/lib/format/dates";
 import type { BookingSettings } from "@/lib/booking/settings";
 import type { TimelineCell } from "@/lib/manager-schedule";
 
@@ -20,7 +21,7 @@ export default function ScheduleTimeline({ cells, from, to, settings, now }: { c
   const todayBookings = [...new Set(todayCells.flatMap((cell) => cell.bookings.map((booking) => booking.reference)))];
   const percent = (value: number) => `${Math.round(value * 1000) / 10}%`;
   return <div className="schedule-visual">
-    {todayCells.length > 0 && <details className="ns-card schedule-today"><summary>Today&apos;s timeline, {clock.date}<span className="schedule-clock">Now {String(clock.hour).padStart(2, "0")}:{String(Math.floor(clock.second / 60)).padStart(2, "0")} EAT</span></summary><div className="today-expanded">
+    {todayCells.length > 0 && <details className="ns-card schedule-today"><summary>Today&apos;s timeline, {dayDate(clock.date)}<span className="schedule-clock">Now {String(clock.hour).padStart(2, "0")}:{String(Math.floor(clock.second / 60)).padStart(2, "0")} EAT</span></summary><div className="today-expanded">
       <div className="today-axis"><span>{formatHour(open)}</span><span>{formatHour(close)}</span></div>
       <div className="today-tracks">
         {isOpen && <div className="schedule-now-line" style={{ left: `${(hour - open) / (close - open) * 100}%` }} aria-label="Current Nairobi time" />}
@@ -28,9 +29,9 @@ export default function ScheduleTimeline({ cells, from, to, settings, now }: { c
         {!todayBookings.length && <p className="empty-state">KCA time only. No advertiser is scheduled today.</p>}
       </div><p className="pipeline-help">Planned screen hours. The now line shows local time, not measured playback.</p>
     </div></details>}
-    {Array.from({ length: Math.ceil(dates.length / 7) }, (_, index) => dates.slice(index * 7, index * 7 + 7)).map((week) => <section key={week[0]} className="ns-card schedule-week"><h2>{week[0]} to {week[week.length - 1]}</h2>
+    {Array.from({ length: Math.ceil(dates.length / 7) }, (_, index) => dates.slice(index * 7, index * 7 + 7)).map((week) => <section key={week[0]} className="ns-card schedule-week"><h2>{rangeLabel(week[0], week[week.length - 1])}</h2>
       <div className="schedule-week-scroll" role="region" aria-label="Week schedule, scroll to see all days" tabIndex={0}><div className="schedule-week-grid" style={{ gridTemplateColumns: `84px repeat(${week.length}, minmax(120px, 1fr))` }}>
-        <span className="schedule-day-label">Screen hours</span>{week.map((date) => <div className="schedule-day-label" data-today={date === clock.date} key={date}><strong>{new Date(date + "T12:00:00Z").toLocaleDateString("en-GB", { weekday: "short", timeZone: "UTC" })}</strong><span>{date.slice(8)} / {date.slice(5, 7)}</span></div>)}
+        <span className="schedule-day-label">Screen hours</span>{week.map((date) => <div className="schedule-day-label" data-today={date === clock.date} key={date}><strong>{new Date(date + "T12:00:00Z").toLocaleDateString("en-GB", { weekday: "short", timeZone: "UTC" })}</strong><span>{shortDate(date)}</span></div>)}
         {Object.entries(settings.timeBlocks).map(([id, block]) => <div className="schedule-grid-row" key={id}><div className="schedule-block-label"><strong>{block.label}</strong><small>{formatHour(block.startHour)} to<br />{formatHour(block.endHour)}</small></div>{week.map((date) => {
           const cell = cells.find((item) => item.date === date && item.block === id)!;
           const closed = cell.end <= cell.start;

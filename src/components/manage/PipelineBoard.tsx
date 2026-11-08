@@ -8,6 +8,7 @@ import { STATUSES } from "@/lib/booking/status";
 import type { BookingStatus } from "@/lib/booking/capacity";
 import type { BookingListItem } from "@/lib/store/types";
 import { number } from "@/components/booking/QuoteTotals";
+import { dateRange } from "@/lib/format/dates";
 import { X } from "@phosphor-icons/react";
 
 export type PipelineCard = BookingListItem & { waiting: number; approved: number; advertCount: number };
@@ -44,7 +45,7 @@ export default function PipelineBoard({ bookings, query, selected, status }: { b
     <span className="pipeline-card-head"><span className="business-avatar" aria-hidden="true">{booking.business.slice(0, 2).toUpperCase()}</span><span className="pipeline-card-length">{booking.request.lengthSeconds}s</span></span>
     <strong>{booking.business}</strong><small className="reference-link">{booking.reference}</small>
     <span className="pipeline-card-price">KES {number(booking.priceKes)}<small>{number(booking.plays)} plays</small></span>
-    <span className="pipeline-card-dates">{booking.request.startDate}<br />to {booking.request.endDate}</span>
+    <span className="pipeline-card-dates">{dateRange(booking.request.startDate, booking.request.endDate)}</span>
     <span className="pipeline-task">{nextTask(booking)}</span>
     <span className="v2-stage-track" aria-hidden="true">{STATUSES.filter((stage) => stage !== "Cancelled").map((stage, index) => <i key={stage} data-filled={index <= STATUSES.indexOf(booking.status)} />)}</span>
   </Link>;

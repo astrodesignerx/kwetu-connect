@@ -9,6 +9,7 @@ import OverviewBanner from "@/components/manage/OverviewBanner";
 import { BlockRows, CapsuleBars, DarkIsland, FolderCard } from "@/components/manage/V2Visuals";
 import { RevenueChart } from "@/components/workspace/Charts";
 import { number } from "@/components/booking/QuoteTotals";
+import { shortDate } from "@/lib/format/dates";
 
 export default async function WeekPage({ searchParams }: { searchParams: Promise<{ week?: string }> }) {
   await requireStaff();
@@ -35,7 +36,6 @@ export default async function WeekPage({ searchParams }: { searchParams: Promise
   let schedule = null;
   let scheduleError = false;
   try { schedule = await store.schedule(today, today); } catch { scheduleError = true; }
-  const shortDate = (iso: string) => new Date(iso + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
   const toCollect = collect.reduce((sum, booking) => sum + booking.priceKes, 0);
   const sold = weekSold(occupancy, settings);
   const soon = bookings.filter((booking) => ["Quote", "Paid", "Approved"].includes(booking.status) && booking.request.startDate >= today && booking.request.startDate <= addDays(today, 13)).sort((first, second) => first.request.startDate.localeCompare(second.request.startDate)).slice(0, 5);
