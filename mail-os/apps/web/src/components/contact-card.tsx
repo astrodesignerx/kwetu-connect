@@ -58,49 +58,49 @@ export function ContactDetails({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className="flex flex-wrap items-center gap-2">
       {company && (
         <Link
           href={`/clients/detail?id=${company.id}`}
-          className="chip chip-client gap-1.5 !py-1 transition-[transform,opacity] duration-150 ease-out hover:border-fg"
+          className="chip chip-client gap-2 py-1 transition-[transform,opacity] duration-120 ease-standard hover:border-fg"
         >
           <span
             aria-hidden
-            className="grid h-4 w-4 place-items-center rounded-[4px]"
+            className="grid h-4 w-4 place-items-center rounded-tag"
             style={{ background: "var(--raise)" }}
           >
-            <Building2 size={10} className="text-fg" />
+            <Building2 size={14} className="text-fg" />
           </span>
           {company.name}
         </Link>
       )}
 
       {contact && (
-        <span className="chip !py-1">
+        <span className="chip py-1">
           {contact.messageCount} message{contact.messageCount === 1 ? "" : "s"} on file
         </span>
       )}
 
       {address && (
-        <Link href={searchHref()} className="reader-action !px-2 !py-1 !text-[11px]">
-          <Search aria-hidden size={12} />
+        <Link href={searchHref()} className="reader-action reader-action-small">
+          <Search aria-hidden size={14} />
           All mail from this address
         </Link>
       )}
 
       {address && (
-        <button type="button" onClick={copy} className="reader-action !px-2 !py-1 !text-[11px]">
+        <button type="button" onClick={copy} className="reader-action reader-action-small">
           {copied ? (
-            <Check aria-hidden size={12} className="text-fg" />
+            <Check aria-hidden size={14} className="text-fg" />
           ) : (
-            <Copy aria-hidden size={12} />
+            <Copy aria-hidden size={14} />
           )}
           {copied ? "Copied" : "Copy address"}
         </button>
       )}
 
       {!company && (
-        <span className="text-[11px] text-muted">
+        <span className="text-xs text-muted">
           Not linked to a client. Use the notes panel below.
         </span>
       )}

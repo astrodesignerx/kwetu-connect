@@ -68,14 +68,14 @@ export function ThreadLinker({ threadId }: { threadId: string }) {
           Client
         </h3>
         <button
-          className="btn-ghost !px-2 !py-0.5 !text-xs"
+          className="reader-action reader-action-small"
           onClick={() => setPicking((s) => !s)}
         >
           {picking ? "Cancel" : data.company ? "Change" : "Tag to client"}
         </button>
       </div>
       {data.company ? (
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <a
               href={`/clients/detail?id=${data.company.id}`}
@@ -84,7 +84,7 @@ export function ThreadLinker({ threadId }: { threadId: string }) {
               {data.company.name}
             </a>
             <button
-              className="btn-ghost !px-1 !py-0 !text-[11px]"
+              className="tool-link"
               onClick={() => unlinkCompany.mutate()}
               title="Unlink from this client"
             >
@@ -93,7 +93,7 @@ export function ThreadLinker({ threadId }: { threadId: string }) {
           </div>
           {data.projects.length > 0 && (
             <div className="space-y-1">
-              <div className="text-[10px] font-semibold text-muted">
+              <div className="text-xs font-semibold text-muted">
                 Projects
               </div>
               {data.projects.map((p) => {
@@ -102,7 +102,7 @@ export function ThreadLinker({ threadId }: { threadId: string }) {
                   <div key={p.id} className="flex items-center justify-between text-xs">
                     <span>{p.name}</span>
                     <button
-                      className="btn-ghost !px-1 !py-0 !text-[11px]"
+                      className="tool-link"
                       onClick={() =>
                         linked
                           ? unlinkProject.mutate(p.id)
@@ -127,10 +127,10 @@ export function ThreadLinker({ threadId }: { threadId: string }) {
       )}
       {data.contacts.length > 0 && (
         <div className="mt-3 border-t border-line pt-2">
-          <div className="mb-1 text-[10px] font-semibold text-muted">
+          <div className="mb-1 text-xs font-semibold text-muted">
             Contacts in this thread
           </div>
-          <ul className="space-y-0.5 text-xs">
+          <ul className="space-y-1 text-xs">
             {data.contacts.map((c) => (
               <li key={c.id}>
                 <span className="font-medium">{c.name ?? c.email}</span>
@@ -159,7 +159,7 @@ function CompanyPicker({
     return (
       <div className="space-y-2 text-sm">
         <MutedText>No clients yet. Create one first.</MutedText>
-        <Link className="btn-primary !inline-flex" href="/clients">
+        <Link className="signal-button btn-primary signal-button-small" href="/clients">
           Open Clients
         </Link>
       </div>
@@ -171,7 +171,7 @@ function CompanyPicker({
         <li key={c.id}>
           <button
             onClick={() => onPick(c.id)}
-            className="w-full rounded-xl border border-line p-2 text-left text-sm transition hover:bg-raise"
+            className="pick-row"
           >
             <div className="font-medium">{c.name}</div>
             {c.domain && (

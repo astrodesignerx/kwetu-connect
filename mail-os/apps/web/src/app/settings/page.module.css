@@ -1,37 +1,39 @@
-.page { max-width: 1160px; margin: 0 auto; min-width: 0; }
-.banner { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: center; margin-bottom: 24px; }
-.mark { display: grid; place-items: center; width: 52px; height: 52px; border: 0; border-radius: 50%; background: var(--fg); color: var(--surface); font: 650 32px var(--f-body); }
-.workspace { flex: 1; min-width: 150px; }
-.workspace small { font: 500 12px/1.5 var(--f-body); color: var(--muted); text-transform: none;  }
-.workspace h2 { font: 650 25px var(--f-display); margin: 6px 0; overflow-wrap: anywhere; }
-.numbers { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.page { min-width: 0; }
+.banner { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin-bottom: 20px; }
+.workspace { min-width: 148px; }
+.workspace small { color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; }
+.workspace h2 { margin: 4px 0; font-size: 20px; line-height: 28px; font-weight: 600; overflow-wrap: anywhere; }
+.numbers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.tile { display: flex; flex-direction: column; gap: 18px; min-width: 0; padding: 24px; border: 0; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); animation: arrive var(--t3) var(--ease) backwards; overflow-wrap: anywhere; }
-.tile:hover { transform: translateY(-2px); }
+.tile { display: flex; flex-direction: column; gap: 16px; min-width: 0; padding: 24px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); overflow-wrap: anywhere; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+.tile:hover { opacity: .8; }
 .tile:active { transform: scale(.99); }
-.tile:focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
 .tile header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .tile header svg { color: var(--muted); }
-.tile h3 { font: 650 16px var(--f-display); }
-.tile:nth-child(2) { animation-delay: 50ms; }.tile:nth-child(3) { animation-delay: 100ms; }.tile:nth-child(4) { animation-delay: 150ms; }.tile:nth-child(5) { animation-delay: 200ms; }.tile:nth-child(6) { animation-delay: 250ms; }
-.narrow { grid-column: auto; }.wide { grid-column: auto; }.half { grid-column: auto; }
+.tile h3 { font-size: 16px; line-height: 24px; font-weight: 600; }
+.narrow, .wide, .half { grid-column: auto; }
 .person, .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-.person div { min-width: 0; }.person b { display: block; font-size: 14px; }.person small { color: var(--muted); font-size: 12px; }
-.note { color: var(--muted); font-size: 12px; line-height: 1.6; }
-.meta { font-size: 11px; color: var(--muted); }
-.attention { font-size: 12px; color: var(--mail-waiting); }
-.brand { display: flex; gap: 20px; align-items: center; }
-.preview { flex: 1; height: 115px; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; pointer-events: none; }
-.preview iframe { width: 200%; height: 230px; border: 0; transform: scale(.5); transform-origin: top left; }
-.swatches { display: grid; gap: 7px; }.swatches i { display: block; width: 20px; height: 20px; border: 1px solid var(--line); border-radius: 6px; }
-.count { font: 650 32px var(--f-display); display: flex; align-items: baseline; gap: 10px; }.count small { font: 12px var(--f-body); color: var(--muted); }
-.templateList { display: grid; gap: 8px; font-size: 12px; color: var(--muted); padding: 0; list-style: none; }
-.avatars { display: flex; flex-wrap: wrap; gap: 7px; }
-.activity { height: 46px; min-width: 0; }
+.person div { min-width: 0; }
+.person b { display: block; font-size: 14px; line-height: 20px; font-weight: 600; }
+.person small { color: var(--muted); font-size: 13px; line-height: 20px; }
+.note { color: var(--muted); font-size: 13px; line-height: 20px; }
+.meta { color: var(--muted); font-size: 12px; line-height: 16px; }
+.attention { color: var(--fg); font-size: 13px; line-height: 20px; font-weight: 600; }
+.brand { display: flex; align-items: center; gap: 20px; }
+.preview { flex: 1; height: 112px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-control); pointer-events: none; }
+.preview iframe { width: 200%; height: 224px; border: 0; transform: scale(.5); transform-origin: top left; }
+.swatches { display: grid; gap: 8px; }
+.swatches i { display: block; width: 20px; height: 20px; border: 1px solid var(--line); border-radius: var(--radius-tag); }
+.count { display: flex; align-items: baseline; gap: 8px; font-size: 28px; line-height: 36px; font-weight: 600; }
+.count small { color: var(--muted); font-size: 13px; line-height: 20px; font-weight: 400; }
+.templateList { display: grid; gap: 8px; padding: 0; color: var(--muted); font-size: 13px; line-height: 20px; list-style: none; }
+.avatars { display: flex; flex-wrap: wrap; gap: 8px; }
+.activity { height: 48px; min-width: 0; }
 .activity > div { height: 100%; }
 .activity > div > span { aspect-ratio: auto; }
-@keyframes arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-@media (max-width: 700px) { .narrow, .wide, .half { grid-column: 1 / -1; }.numbers { width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }.banner, .tile { padding: 20px; } }
-@media (prefers-reduced-motion: reduce) { .tile { animation: none; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }.tile:hover, .tile:active { transform: none; } }
-
-@media (max-width: 700px) { .numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } .tiles { grid-template-columns: minmax(0, 1fr); } .banner { padding: 0; } }
+@media (max-width: 700px) {
+  .narrow, .wide, .half { grid-column: 1 / -1; }
+  .numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .tiles { grid-template-columns: minmax(0, 1fr); }
+  .tile { padding: 20px; }
+}

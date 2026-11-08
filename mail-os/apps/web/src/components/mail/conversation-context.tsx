@@ -28,7 +28,7 @@ export function ThreadStateControl({ threadId, replyState }: { threadId: string;
 
 export function ConversationChips({ threadId }: { threadId: string }) {
   const { data } = useQuery({ queryKey: ["thread-associations", threadId], queryFn: () => api.getThreadAssociations(threadId) });
-  return <div className={s.chips}>{data?.company && <StatusChip label={data.company.name} colour="var(--muted)" />}{data?.projects.map((project) => <StatusChip key={project.id} label={project.name} colour="var(--muted)" dot={false} />)}</div>;
+  return <div className={s.chips}>{data?.company && <StatusChip label={data.company.name} />}{data?.projects.map((project) => <StatusChip key={project.id} label={project.name} dot={false} />)}</div>;
 }
 
 export function ConversationContext({ threadId, replyState, stateSince, onQuickReply }: { threadId: string; onQuickReply?: (template: EmailTemplateDto) => void } & ThreadState) {
@@ -44,7 +44,7 @@ export function ConversationContext({ threadId, replyState, stateSince, onQuickR
   for (const query of flights) for (const flight of query.data ?? []) stages.push({ id: flight.id, label: flight.siteName, state: flight.endDate < today ? "done" : flight.startDate <= today ? "now" : "next", date: `${flight.startDate} to ${flight.endDate}`, dateTime: flight.startDate });
   return <aside className={`${s.context} scroll-cue`} aria-label="Conversation context">
     <section className={s.contextCard}><h2><Users size={14} aria-hidden />Client</h2>
-      {company ? <div className={s.clientCard}><ClientAvatar name={company.name} colour="var(--muted)" /><div><b>{company.name}</b><p>{company.domain}</p></div><Link href={`/clients/detail?id=${encodeURIComponent(company.id)}`}>Open workspace<ArrowUpRight size={14} aria-hidden /></Link></div> : <p className={s.muted}>{associations.isPending ? "Loading client..." : associations.isError ? "Client links could not load." : "No client linked."}</p>}
+      {company ? <div className={s.clientCard}><ClientAvatar name={company.name} /><div><b>{company.name}</b><p>{company.domain}</p></div><Link href={`/clients/detail?id=${encodeURIComponent(company.id)}`}>Open workspace<ArrowUpRight size={14} aria-hidden /></Link></div> : <p className={s.muted}>{associations.isPending ? "Loading client..." : associations.isError ? "Client links could not load." : "No client linked."}</p>}
       {associations.isError && <button onClick={() => void associations.refetch()}>Try again</button>}
       <button type="button" className={s.contextAction} onClick={() => setEditingLinks((value) => !value)} aria-expanded={editingLinks}>{editingLinks ? "Close links" : company ? "Edit client and project links" : "Link a client"}</button>
       <MailDisclosure open={editingLinks}><ThreadLinker threadId={threadId} /></MailDisclosure>

@@ -79,7 +79,7 @@ function EditorBox({ label, html, onChange, tools }: { label: string; html: stri
 
 function HeaderButton({ background, logoUrl, name }: { background: string; logoUrl: string | null; name: string | null }) {
   const { insertHtml } = useEditorTools();
-  return <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => insertHtml(headerBarHtml({ background, logoUrl, name }))} title="Add a header bar" className="editor-tool w-auto gap-1 px-1.5 text-xs">{logoUrl ? <ImagePlus size={14} /> : <PanelTop size={14} />} Add a bar</button>;
+  return <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => insertHtml(headerBarHtml({ background, logoUrl, name }))} title="Add a header bar" className="editor-tool w-auto gap-1 px-2 text-xs">{logoUrl ? <ImagePlus size={14} /> : <PanelTop size={14} />} Add a bar</button>;
 }
 
 function toRequest(kit: BrandKitDto): BrandKitUpsertRequest {

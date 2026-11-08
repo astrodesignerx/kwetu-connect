@@ -3,14 +3,6 @@ import { handleUnauthorized } from "./api";
 import { useAuthStore } from "./auth-store";
 import type { ProjectFlightInput, ReplyState } from "./signal-api";
 
-export const CLIENT_HUES = ["#A285F4", "#3CC8C0", "#FBB040", "#8DCB5E"] as const;
-
-export function clientColour(id: string): string {
-  let hash = 0;
-  for (const char of id.toLowerCase()) hash = (Math.imul(hash, 31) + char.charCodeAt(0)) >>> 0;
-  return CLIENT_HUES[hash % CLIENT_HUES.length];
-}
-
 export interface ClientActivity {
   id: string; name: string; domain: string | null; projectCount: number; threadCount: number; boardsBooked: number;
   waitingCount: number; status: "WaitingOnUs" | "AllReplied";

@@ -1,14 +1,13 @@
-.page { display: flex; flex-direction: column; gap: 26px; min-width: 0; color: var(--fg); }
-.header { display: flex; align-items: end; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
-.header h1 { font: 650 28px/1.2 var(--f-body); margin: 8px 0; letter-spacing: -.03em; }
-.muted { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.page { display: flex; flex-direction: column; gap: 24px; min-width: 0; color: var(--fg); }
+.header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; }
+.header h1 { margin: 8px 0; font-size: 28px; line-height: 36px; font-weight: 600; }
+.muted { color: var(--muted); font-size: 14px; line-height: 20px; }
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.stats dd { font: 650 28px/1.2 var(--f-body); margin: 0 0 8px; }
-.stats dt { color: var(--muted); font-size: 12px; max-width: 160px; }
-.panel { border: 1px solid var(--line); border-radius: 18px; padding: 22px; background: var(--surface); }
-@media (max-width: 520px) { .stats { gap: 12px; } }
-
-.stats > div { min-width: 0; padding: 22px; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); }
-@media (max-width: 520px) { .stats { grid-template-columns: minmax(0, 1fr); } .stats > div { display: flex; align-items: baseline; gap: 14px; padding: 18px 20px; } }
-
-.panel { border: 0; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); }
+.stats > div { min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+.stats dd { margin: 0 0 8px; font-size: 28px; line-height: 36px; font-weight: 600; }
+.stats dt { max-width: 160px; color: var(--muted); font-size: 13px; line-height: 20px; }
+.panel { display: grid; justify-items: start; gap: 12px; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+@media (max-width: 520px) {
+  .stats { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .stats > div { display: flex; align-items: baseline; gap: 12px; padding: 16px 20px; }
+}

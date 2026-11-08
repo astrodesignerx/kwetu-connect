@@ -563,7 +563,7 @@ export function ComposeModal({
       {/* The wrapper is purely a positioning box: it owns the sheet's size, the
           focus trap and the drag/drop target, so the close pill can float above
           the sheet's top edge without being clipped by the sheet's own
-          `overflow-hidden` (needed for its rounded corners and internal scroll
+          `overflow-hidden` (needed for its rounded-tag corners and internal scroll
           regions). */}
       <div
         ref={sheet}
@@ -589,7 +589,7 @@ export function ComposeModal({
           title="Close (Esc). The draft is kept."
           aria-label="Close compose"
         >
-          <X aria-hidden size={15} strokeWidth={2.4} />
+          <X aria-hidden size={16} />
         </button>
 
         <div className={cn("compose-sheet", s.sheet)}>
@@ -616,7 +616,7 @@ export function ComposeModal({
                 To:
               </label>
               <RecipientField id="compose-to" value={to} onChange={setTo} inputRef={toInput} placeholder="Enter email" />
-              <div className="flex shrink-0 items-center gap-3 pt-0.5">
+              <div className="flex shrink-0 items-center gap-3 pt-1">
                 {!showCc && (
                   <button
                     type="button"
@@ -705,7 +705,8 @@ export function ComposeModal({
                   encode={toChips}
                   decode={fromChips}
                   tools={<EditorMergeFieldMenu />}
-                  className="[--editor-pad-x:1.25rem] [&_.editor-toolbar]:sticky [&_.editor-toolbar]:top-0 [&_.editor-toolbar]:z-10 [&_.editor-toolbar]:bg-surface dark:[&_.editor-toolbar]:bg-surface-dark"
+                  className="[--editor-pad-x:20px]"
+                  stickyToolbar
                 />
               )}
 
@@ -719,8 +720,8 @@ export function ComposeModal({
                     aria-expanded={showQuote}
                   >
                     <ChevronDown
-                      size={13}
-                      className="transition-transform duration-200 ease-out"
+                      size={14}
+                      className="transition-transform duration-200 ease-standard"
                       style={{ transform: showQuote ? "rotate(180deg)" : undefined }}
                     />
                     {showQuote ? "Hide quoted text" : "Show quoted text"}
@@ -730,7 +731,7 @@ export function ComposeModal({
                       title="Quoted conversation"
                       srcDoc={frameDocument(quoted, true)}
                       sandbox=""
-                      className="mt-2 h-64 w-full rounded-xl border border-line bg-white"
+                      className="mt-2 h-64 w-full rounded-control border border-line bg-paper"
                     />
                   )}
                 </div>
@@ -748,7 +749,7 @@ export function ComposeModal({
                       />
                       <div className="min-w-0">
                         <div className="max-w-[16rem] truncate text-xs font-medium">{a.fileName}</div>
-                        <div className="text-[10px] text-muted">
+                        <div className="text-xs text-muted">
                           {formatBytes(a.sizeBytes)}
                         </div>
                       </div>
@@ -756,15 +757,15 @@ export function ComposeModal({
                         type="button"
                         onClick={() => onRemoveAttachment(a.id)}
                         aria-label={`Remove ${a.fileName}`}
-                        className="editor-tool h-6 w-6 hover:!bg-red-500/10 hover:!text-red-500"
+                        className="editor-tool h-6 w-6"
                       >
-                        <X size={13} />
+                        <X size={14} />
                       </button>
                     </div>
                   ))}
                   {uploading > 0 && (
-                    <span className="inline-flex items-center gap-1.5 self-center text-xs text-muted">
-                      <Loader2 size={13} className="animate-spin" />
+                    <span className="inline-flex items-center gap-2 self-center text-xs text-muted">
+                      <Loader2 size={14} className="animate-spin" />
                       Uploading {uploading} file{uploading === 1 ? "" : "s"}…
                     </span>
                   )}
@@ -776,15 +777,15 @@ export function ComposeModal({
 
           {/* ---- Right: live preview ---- */}
           {showPreview && (
-            <aside className="flex min-h-0 flex-col overflow-hidden lg:border-l lg:border-line dark:lg:border-line">
+            <aside className="flex min-h-0 flex-col overflow-hidden lg:border-l lg:border-line">
               <div className="flex items-center gap-2 border-b border-line px-4 py-2">
-                <span className="text-[10px] font-bold uppercase tracking-[0.09em] text-muted">
+                <span className="text-xs font-medium text-muted">
                   Preview
                 </span>
                 {preview.isPending && (
-                  <Loader2 size={12} className="animate-spin text-fg" aria-label="Rendering" />
+                  <Loader2 size={14} className="animate-spin text-fg" aria-label="Rendering" />
                 )}
-                <span className="ml-auto truncate text-[11px] text-muted">
+                <span className="ml-auto truncate text-xs text-muted">
                   {preview.data?.subject || subject}
                 </span>
               </div>
@@ -798,7 +799,7 @@ export function ComposeModal({
                   true
                 )}
                 sandbox=""
-                className="min-h-0 flex-1 border-0 bg-white"
+                className="min-h-0 flex-1 border-0 bg-paper"
               />
             </aside>
           )}
@@ -831,7 +832,7 @@ export function ComposeModal({
                     setConfirmNewSend(true);
                   }
                 }}
-                className="reader-action !px-2 !py-1 !text-[11px]"
+                className="reader-action reader-action-small"
               >
                 {confirmNewSend ? "Confirm new send" : "Start a new send"}
               </button>
@@ -856,12 +857,12 @@ export function ComposeModal({
         <div className="compose-actionbar">
               <Button onClick={onSend} disabled={send.isPending || !sendId.canSend} className="gap-2">
                 {send.isPending ? (
-                  <Loader2 size={15} className="animate-spin" />
+                  <Loader2 size={16} className="animate-spin" />
                 ) : (
-                  <Send size={15} />
+                  <Send size={16} />
                 )}
                 {send.isPending ? "Sending…" : "Send"}
-                <kbd className="ml-1 hidden rounded border border-line px-1 text-[10px] font-medium opacity-70 sm:inline">
+                <kbd className="ml-1 hidden rounded-tag border border-line px-1 text-xs font-medium opacity-70 sm:inline">
                   {modKey}↵
                 </kbd>
               </Button>
@@ -877,9 +878,9 @@ export function ComposeModal({
                 type="button"
                 onClick={() => fileInput.current?.click()}
                 disabled={send.isPending}
-                className="reader-action !px-2.5 !py-2"
+                className="reader-action"
               >
-                <Paperclip aria-hidden size={15} />
+                <Paperclip aria-hidden size={16} />
                 Add
               </button>
 
@@ -901,7 +902,7 @@ export function ComposeModal({
                 title={sourceMode ? "Back to normal writing" : "Edit the code"}
                 aria-label={sourceMode ? "Back to normal writing" : "Edit the code"}
               >
-                {sourceMode ? <Type size={15} /> : <Code2 size={15} />}
+                {sourceMode ? <Type size={16} /> : <Code2 size={16} />}
               </button>
 
               <span className="flex-1" />
@@ -910,7 +911,7 @@ export function ComposeModal({
                 type="button"
                 onClick={discard}
                 disabled={send.isPending}
-                className="editor-tool h-8 w-8 hover:!bg-red-500/10 hover:!text-red-500"
+                className="editor-tool h-8 w-8"
                 title="Discard this draft"
                 aria-label="Discard draft"
               >
@@ -1038,10 +1039,10 @@ function TemplatePicker({
                       onDoubleClick={() => setFilling(t)}
                       aria-current={active}
                       className={cn(
-                        "mb-1 w-full rounded-[var(--radius)] border px-3 py-2 text-left transition-[transform,opacity] duration-150 ease-out",
+                        "mb-1 w-full rounded-control border px-3 py-2 text-left transition-[transform,opacity] duration-120 ease-standard",
                         active
                           ? "border-fg bg-raise"
-                          : "border-transparent hover:bg-raise "
+                          : "border-transparent hover:opacity-64 "
                       )}
                     >
                       <div className="truncate text-sm font-medium">{t.name}</div>
@@ -1056,7 +1057,7 @@ function TemplatePicker({
 
             {/* Right: the email itself. */}
             <div className="flex min-h-0 flex-col">
-              <div className="min-h-0 flex-1 overflow-hidden bg-white">
+              <div className="min-h-0 flex-1 overflow-hidden bg-paper">
                 {selected && <TemplatePreviewPane html={selected.bodyHtml} />}
               </div>
 
@@ -1206,7 +1207,7 @@ function TemplateFill({
     >
       <GlassPanel className="flex h-[80vh] w-full max-w-4xl flex-col overflow-hidden">
         <header className="flex shrink-0 items-center gap-2 border-b border-line px-5 py-3">
-          <button onClick={onBack} className="reader-action !px-2" aria-label="Back to templates">
+          <button onClick={onBack} className="reader-action px-2" aria-label="Back to templates">
             <ChevronLeft aria-hidden size={16} />
           </button>
           <div className="min-w-0 flex-1">
@@ -1234,7 +1235,7 @@ function TemplateFill({
                     <input
                       value={values[name] ?? ""}
                       onChange={(e) => setValue(name, e.target.value)}
-                      className="glass-input !py-1.5 !text-sm"
+                      className="glass-input glass-input-dense"
                       autoComplete="off"
                     />
                   </label>
@@ -1245,13 +1246,13 @@ function TemplateFill({
                     <span className="mb-1 block text-xs font-medium text-muted">
                       {labelFor(name)}
                     </span>
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       {(lists[name] ?? []).map((item, i) => (
-                        <div key={i} className="flex items-center gap-1.5">
+                        <div key={i} className="flex items-center gap-2">
                           <input
                             value={item}
                             onChange={(e) => setItem(name, i, e.target.value)}
-                            className="glass-input !py-1.5 !text-sm"
+                            className="glass-input glass-input-dense"
                             autoComplete="off"
                           />
                           <button
@@ -1261,7 +1262,7 @@ function TemplateFill({
                             className="editor-tool h-7 w-7 shrink-0 disabled:opacity-30"
                             aria-label="Remove item"
                           >
-                            <X size={13} />
+                            <X size={14} />
                           </button>
                         </div>
                       ))}
@@ -1269,9 +1270,9 @@ function TemplateFill({
                     <button
                       type="button"
                       onClick={() => addItem(name)}
-                      className="reader-action mt-1.5 !px-2 !py-1 !text-[11px]"
+                      className="reader-action reader-action-small mt-2"
                     >
-                      <Plus aria-hidden size={12} />
+                      <Plus aria-hidden size={14} />
                       Add another
                     </button>
                   </div>
@@ -1285,7 +1286,7 @@ function TemplateFill({
           </div>
 
           <div className="flex min-h-0 flex-col">
-            <div className="min-h-0 flex-1 overflow-hidden bg-white">
+            <div className="min-h-0 flex-1 overflow-hidden bg-paper">
               {preview.data ? (
                 <TemplatePreviewPane html={preview.data.bodyHtml} />
               ) : (
@@ -1294,7 +1295,7 @@ function TemplateFill({
             </div>
 
             <div className="flex shrink-0 items-center gap-2 border-t border-line px-4 py-3">
-              <span className="min-w-0 flex-1 truncate text-[11px] text-muted">
+              <span className="min-w-0 flex-1 truncate text-xs text-muted">
                 {missing.length > 0
                   ? `${missing.length} still to fill in. The preview shows examples meanwhile.`
                   : "Ready to insert."}

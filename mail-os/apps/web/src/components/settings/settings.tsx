@@ -30,8 +30,9 @@ export function Avatar({ name }: { name: string }) {
   return <span className={s.avatar} aria-hidden="true">{name.trim().split(/\s+/).map((word) => word[0]).slice(0, 2).join("").toUpperCase()}</span>;
 }
 export function HealthLight({ state }: { state: string }) {
-  const colour = state === "Error" ? "var(--bad)" : state === "Syncing" ? "var(--good)" : "var(--warn)";
-  return <span className={s.health}><i style={{ background: colour }} aria-hidden="true" />{state === "Syncing" ? "Healthy" : state === "Error" ? "Needs attention" : state === "Backfilling" ? "Initial sync" : "Waiting for sync"}</span>;
+  // Filled is healthy, a ring is waiting, a struck ring has failed. The words carry the same meaning.
+  const dot = state === "Error" ? "failed" : state === "Syncing" ? "healthy" : "waiting";
+  return <span className={s.health}><i className="status-dot" data-state={dot} aria-hidden="true" />{state === "Syncing" ? "Healthy" : state === "Error" ? "Needs attention" : state === "Backfilling" ? "Initial sync" : "Waiting for sync"}</span>;
 }
 export function Stat({ value, label }: { value: React.ReactNode; label: string }) {
   return <div className={s.stat}><b>{value}</b><small>{label}</small></div>;

@@ -62,17 +62,17 @@ export function MergeFieldMenu({
         title="Insert a detail that gets filled in per client"
         className={cn(
           compact
-            ? cn("editor-tool w-auto gap-1 px-1.5 text-xs font-medium", open && "editor-tool-active")
+            ? cn("editor-tool w-auto gap-1 px-2 text-xs font-medium", open && "editor-tool-active")
             : "mf-trigger",
           !compact && open && "mf-trigger-open"
         )}
       >
-        <Plus size={compact ? 14 : 13} strokeWidth={2.5} />
+        <Plus size={compact ? 14 : 14} />
         {label}
         <ChevronDown
-          size={12}
-          strokeWidth={2.5}
-          className="transition-transform duration-150 ease-out"
+          size={14}
+         
+          className="transition-transform duration-120 ease-standard"
           style={open ? { transform: "rotate(180deg)" } : undefined}
         />
       </button>

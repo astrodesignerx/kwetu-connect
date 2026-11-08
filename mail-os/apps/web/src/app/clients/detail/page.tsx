@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, type CSSProperties } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -35,14 +35,13 @@ function ClientWorkspace({ id }: { id: string }) {
   if (company.isPending) return <ViewState loading label="Loading client" />;
   if (company.isError) return <div role="alert"><p>{company.error.message}</p><Link href="/clients">Back to clients</Link></div>;
   const data = company.data;
-  const hue = "var(--muted)";
   const stats = insights.data;
-  return <div className={s.page} style={{ "--h": hue } as CSSProperties}>
+  return <div className={s.page}>
     <header className={s.hero}>
       <Link className={s.back} href="/clients">Back to clients</Link>
       <div className={s.heroRow}>
-        <ClientAvatar name={data.company.name} colour={hue} size="large" />
-        <div className={s.grow}><p className={s.sectionLabel}>Client workspace</p><h1>{data.company.name}</h1><div className={s.identity}><span>{data.company.domain || "No domain added"}</span>{stats && <StatusChip label={stats.waitingCount > 0 ? "Waiting on us" : "All replied"} colour={stats.waitingCount > 0 ? "var(--mail-waiting)" : hue} />}</div></div>
+        <ClientAvatar name={data.company.name} size="large" />
+        <div className={s.grow}><p className={s.sectionLabel}>Client workspace</p><h1>{data.company.name}</h1><div className={s.identity}><span>{data.company.domain || "No domain added"}</span>{stats && <StatusChip label={stats.waitingCount > 0 ? "Waiting on us" : "All replied"} strong={stats.waitingCount > 0} />}</div></div>
         <div className={s.actions}><Button variant="default" onClick={() => setEditing(!editing)}>{editing ? "Close editor" : "Edit client"}</Button></div>
       </div>
     </header>
@@ -53,11 +52,11 @@ function ClientWorkspace({ id }: { id: string }) {
       <div><dt>Last contact</dt><dd className={s.date}>{displayDate(stats.lastContactAt)}</dd></div>
     </dl>}
     {data.company.notes && <p className={s.notes}>{data.company.notes}</p>}
-    <ClientProjects companyId={id} projects={data.projects} colour={hue} />
+    <ClientProjects companyId={id} projects={data.projects} />
     <section className={s.panel}>
       <div className={s.sectionHead}><h2>People</h2><span className={s.muted}>{data.contacts.length} contacts</span></div>
       {!data.contacts.length ? <p className={s.muted}>Add the client&apos;s email domain to discover people from message addresses.</p> : <ul className={s.rows}>{data.contacts.map(contact => <li key={contact.id}>
-        <ClientAvatar name={contact.name || contact.email} colour={hue} size="small" /><div className={s.grow}><strong>{contact.name || contact.email}</strong><small>{contact.email}</small></div><small className={s.muted}>{contact.messageCount} messages</small>
+        <ClientAvatar name={contact.name || contact.email} size="small" /><div className={s.grow}><strong>{contact.name || contact.email}</strong><small>{contact.email}</small></div><small className={s.muted}>{contact.messageCount} messages</small>
       </li>)}</ul>}
     </section>
     <section className={s.panel}>
@@ -66,7 +65,7 @@ function ClientWorkspace({ id }: { id: string }) {
         const state = stats?.recentThreads.find(t => t.id === thread.id);
         return <li key={thread.id}><time dateTime={thread.lastDate ?? undefined}>{displayDate(thread.lastDate)}</time><span className={s.dot} aria-hidden="true" /><Link href={`/mail?id=${encodeURIComponent(thread.id)}`}>
           <strong>{thread.subject || "(no subject)"}</strong><small>{thread.snippet || thread.participants}</small>
-          {state && <StatusChip label={state.replyState === "ToReply" ? "Waiting on us" : state.replyState === "Awaiting" ? "Awaiting reply" : "Done"} colour={state.replyState === "ToReply" ? "var(--mail-waiting)" : hue} />}
+          {state && <StatusChip label={state.replyState === "ToReply" ? "Waiting on us" : state.replyState === "Awaiting" ? "Awaiting reply" : "Done"} strong={state.replyState === "ToReply"} />}
         </Link></li>;
       })}</ol>}
     </section>

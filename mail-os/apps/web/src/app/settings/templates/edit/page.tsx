@@ -107,7 +107,7 @@ function TemplateEditor({ id }: { id: string }) {
         <div className={s.editing}>
           <section className={s.panel}>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="tname">Template name</Label>
                 <Input
                   id="tname"
@@ -116,7 +116,7 @@ function TemplateEditor({ id }: { id: string }) {
                 />
                 <Hint>Only you see this. It is how you pick the template later.</Hint>
               </div>
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="tdesc">What it&apos;s for</Label>
                 <Input
                   id="tdesc"
@@ -139,7 +139,7 @@ function TemplateEditor({ id }: { id: string }) {
           <section className={s.panel}>
             {/* Not a <label>: the editing surface is a contenteditable div, which a
                 label cannot be associated with. It carries its own aria-label. */}
-            <div className="mb-1.5 text-xs font-medium text-muted">
+            <div className="mb-2 text-xs font-medium text-muted">
               Message
             </div>
             <div className="editor-box">
@@ -150,7 +150,8 @@ function TemplateEditor({ id }: { id: string }) {
                 placeholder="Hi there, here's this week's update…"
                 encode={toChips}
                 decode={fromChips}
-                className="[--editor-pad-x:1rem] [&_.editor-surface]:min-h-64 [&_.editor-toolbar]:px-3"
+                className="[--editor-pad-x:16px]"
+                size="tall"
                 tools={<EditorMergeFieldMenu />}
               />
             </div>
@@ -164,22 +165,22 @@ function TemplateEditor({ id }: { id: string }) {
                 onClick={() => setShowCode((v) => !v)}
                 aria-expanded={showCode}
               >
-                <Code2 size={13} />
+                <Code2 size={14} />
                 {showCode ? "Hide the code" : "Edit the code"}
                 <ChevronDown
-                  size={13}
-                  className="transition-transform duration-200 ease-out"
+                  size={14}
+                  className="transition-transform duration-200 ease-standard"
                   style={showCode ? { transform: "rotate(180deg)" } : undefined}
                 />
               </button>
               {showCode && (
-                <div className="disclosure mt-3 flex flex-col gap-1.5">
+                <div className="disclosure mt-3 flex flex-col gap-2">
                   <textarea
                     value={effective.bodyHtml ?? ""}
                     onChange={(e) => update("bodyHtml", e.target.value)}
                     rows={12}
                     aria-label="Message code"
-                    className="glass-input min-h-56 font-mono !text-xs"
+                    className="glass-input min-h-56 font-mono text-xs"
                   />
                   <Hint>
                     The same message as HTML. Tags are written{" "}
@@ -191,16 +192,16 @@ function TemplateEditor({ id }: { id: string }) {
           </section>
 
           <section className={s.panel}>
-            <label className="flex items-start gap-2.5 text-sm">
+            <label className="flex items-start gap-3 text-sm">
               <input
                 type="checkbox"
-                className="mt-0.5"
+                className="mt-1"
                 checked={effective.skipBrandWrap}
                 onChange={(e) => update("skipBrandWrap", e.target.checked)}
               />
               <span className="text-sm">
                 Send this one plain
-                <Hint className="mt-0.5 block">
+                <Hint className="mt-1 block">
                   Leaves off your logo bar, sign-off, small print and colours. Useful for
                   a short internal note.
                 </Hint>
@@ -260,7 +261,7 @@ function SubjectField({
   }
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-3">
         <Label htmlFor="tsubject">Subject line</Label>
         <MergeFieldMenu label="Insert a tag" onPick={(f) => insert(f.token)} />
@@ -294,12 +295,12 @@ function UsedFields({ tokens }: { tokens: string[] }) {
     );
   }
   return (
-    <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-      <span className="text-[11px] text-muted">
+    <div className="mt-3 flex flex-wrap items-center gap-2">
+      <span className="text-xs text-muted">
         Fills in per client:
       </span>
       {tokens.map((t) => (
-        <span key={t} className="mf-chip mf-chip-static text-[11px]">
+        <span key={t} className="mf-chip mf-chip-static text-xs">
           {labelFor(t)}
         </span>
       ))}

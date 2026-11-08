@@ -32,13 +32,13 @@ export function MorningBrief() {
         <h2 className={s.sectionLabel}>First reply</h2>
         <strong className={s.metric}>{durationLabel(data.firstReply.medianSeconds)}</strong>
         <p className={s.muted}>{data.firstReply.count} replies / {data.firstReply.workingDays} working days / organisation</p>
-        {data.firstReply.daily.some((day) => day.medianSeconds !== null) && <Spark values={data.firstReply.daily.flatMap((day) => day.medianSeconds === null ? [] : [day.medianSeconds])} label="Daily median first reply time in seconds, for days with replies only." colour="var(--jac)" width={210} height={54} />}
+        {data.firstReply.daily.some((day) => day.medianSeconds !== null) && <Spark values={data.firstReply.daily.flatMap((day) => day.medianSeconds === null ? [] : [day.medianSeconds])} label="Daily median first reply time in seconds, for days with replies only." width={210} height={54} />}
       </article>
       <article className={`${s.card} ${s.flights}`}>
         <h2 className={s.sectionLabel}>Next go-lives</h2>
         {data.upcomingFlights.length ? <ul className={s.flightTiles}>{data.upcomingFlights.map((flight) => <li key={flight.id}>
           <Link href={`/clients/detail?id=${encodeURIComponent(flight.clientId)}`}>
-            <span className={s.flightMark} aria-hidden="true"><CalendarDays size={20} /></span>
+            <span className={s.flightMark} aria-hidden="true"><CalendarDays size={18} /></span>
             <b>{flight.siteName}</b><small>{flight.client} / {new Date(`${flight.startDate}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</small>
           </Link>
         </li>)}</ul> : <p className={s.muted}>No upcoming flights.</p>}

@@ -1,3 +1,4 @@
+import { CircleAlert } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 type ButtonVariant = "primary" | "default" | "ghost" | "danger";
@@ -17,11 +18,9 @@ export function Button({
   return <button className={cn("signal-button", styles[variant], `signal-button-${size}`, className)} {...props} />;
 }
 
-export function Chip({ dot = false, hue, className, style, ...props }: React.HTMLAttributes<HTMLSpanElement> & {
-  dot?: boolean; hue?: string;
-}) {
-  return <span className={cn("signal-chip", className)} data-dot={dot}
-    style={{ ...style, ...(hue ? { "--h": hue } : {}) } as React.CSSProperties} {...props} />;
+// A status chip. Strong marks the one state that needs attention, with weight rather than colour.
+export function Chip({ strong = false, className, ...props }: React.HTMLAttributes<HTMLSpanElement> & { strong?: boolean }) {
+  return <span className={cn("signal-chip", className)} data-strong={strong} {...props} />;
 }
 
 // ComponentProps rather than InputHTMLAttributes so `ref` is part of the type. React
@@ -41,7 +40,7 @@ export function Label({
   return (
     <label
       className={cn(
-        "text-xs font-medium text-muted ",
+        "text-xs font-medium text-muted",
         className
       )}
       {...props}
@@ -51,7 +50,7 @@ export function Label({
 
 export function ErrorText({ children }: { children?: React.ReactNode }) {
   if (!children) return null;
-  return <p className="text-sm text-bad">{children}</p>;
+  return <p className="error-line" role="alert"><CircleAlert size={16} aria-hidden />{children}</p>;
 }
 
 /**
@@ -70,7 +69,7 @@ export function Hint({
   return (
     <span
       className={cn(
-        "text-[11px] leading-snug text-muted ",
+        "text-xs text-muted",
         className
       )}
     >

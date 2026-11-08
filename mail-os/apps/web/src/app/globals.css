@@ -2,1653 +2,559 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Kwetu OS is strictly black and white. Every interface colour below is a pure
+   neutral. Meaning is carried by weight, shape and words, never by hue. */
 :root {
   color-scheme: light;
-  --bg: #eceef1;
-  --frame: #eceef1;
+  --bg: #ededed;
   --surface: #ffffff;
-  --raise: #f4f5f7;
-  --line: #e2e4e8;
-  --fg: #121315;
-  --muted: #62666e;
-  --faint: var(--muted);
-  --sodium: var(--fg);
-  --sodium-ink: var(--fg);
-  --on-sodium: var(--surface);
-  --jac: var(--muted);
-  --good: var(--muted);
-  --warn: var(--mail-waiting);
-  --bad: #b52b22;
-  --glow: transparent;
-  --mail-waiting: #995005;
-  --mail-shadow: 0 1px 2px rgb(18 19 21 / .04), 0 10px 30px -18px rgb(18 19 21 / .18);
-  --board-bg: #06070b;
-  --board-fg: #fff7e8;
+  --raise: #f5f5f5;
+  --line: #e3e3e3;
+  --fg: #111111;
+  --muted: #636363;
+  --shadow-menu: 0 1px 2px rgb(0 0 0 / .06), 0 8px 24px rgb(0 0 0 / .08);
+  --shadow-dialog: 0 2px 4px rgb(0 0 0 / .06), 0 24px 64px rgb(0 0 0 / .16);
+  --overlay: rgb(0 0 0 / .48);
   --ease: cubic-bezier(0.2, 0, 0, 1);
   --t1: 120ms;
   --t2: 200ms;
   --t3: 320ms;
-  --spring: var(--ease);
 }
 
 .dark {
   color-scheme: dark;
-  --bg: #0d0e10;
-  --frame: #0d0e10;
-  --surface: #17181b;
-  --raise: #1f2024;
-  --line: #303238;
-  --fg: #f1f1f2;
-  --muted: #a0a3a9;
-  --bad: #ff887d;
-  --mail-waiting: #f2b25c;
-  --mail-shadow: 0 1px 0 rgb(255 255 255 / .03) inset, 0 14px 30px -20px rgb(0 0 0 / .8);
+  --bg: #0d0d0d;
+  --surface: #181818;
+  --raise: #202020;
+  --line: #303030;
+  --fg: #f2f2f2;
+  --muted: #a3a3a3;
+  --shadow-menu: none;
+  --shadow-dialog: none;
+  --overlay: rgb(0 0 0 / .64);
 }
 
+/* Clearing each namespace first means an off-system utility such as bg-red-500 or
+   text-lg does not exist, so it cannot quietly reappear. */
 @theme inline {
+  --color-*: initial;
   --color-bg: var(--bg);
-  --color-frame: var(--frame);
   --color-surface: var(--surface);
-  --color-surface-dark: var(--surface);
   --color-raise: var(--raise);
-  --color-sunken: var(--raise);
-  --color-sunken-dark: var(--raise);
   --color-line: var(--line);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
-  --color-faint: var(--faint);
-  --color-sodium: var(--sodium);
-  --color-sodium-ink: var(--sodium-ink);
-  --color-on-sodium: var(--on-sodium);
-  --color-jac: var(--jac);
-  --color-good: var(--good);
-  --color-warn: var(--warn);
-  --color-bad: var(--bad);
-  --color-glow: var(--glow);
-  --color-board-bg: var(--board-bg);
-  --color-board-fg: var(--board-fg);
+  /* A sheet of paper for rendered email, which assumes white in both themes. */
+  --color-paper: #ffffff;
+  --color-transparent: transparent;
   --font-sans: var(--f-body), system-ui, sans-serif;
-  --font-display: var(--f-display), system-ui, sans-serif;
   --font-mono: var(--f-mono), monospace;
-  --font-led: var(--f-led), monospace;
 }
 
-@theme {
-  /* Brand palette , Kwetu Connect Ads. Do not substitute default Tailwind colors;
-     see design_direction in the project spec. */
-  --color-attention: var(--mail-waiting);
-  --color-brand-yellow: #F9ED32;
-  --color-brand-black: #171717;
-  --color-brand-cream: #FEFBD2;
-  /* White page background in light mode. */
-  --color-brand-paper: #FFFFFF;
+@theme static {
+  --text-*: initial;
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-secondary: 13px;
+  --text-secondary--line-height: 20px;
+  --text-sm: 14px;
+  --text-sm--line-height: 20px;
+  --text-base: 16px;
+  --text-base--line-height: 24px;
+  --text-xl: 20px;
+  --text-xl--line-height: 28px;
+  --text-title: 28px;
+  --text-title--line-height: 36px;
 
+  --font-weight-*: initial;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
 
-  /* Flat surfaces. Every panel in the app used to be translucent over a blurred
-     backdrop, which meant no surface had a colour of its own , each one sampled
-     whatever happened to be behind it, so a card over the thread list and the
-     same card over empty ground were different colours, and text contrast moved
-     with them. These are opaque, and they are the only fills used for panels.
+  --radius-*: initial;
+  --radius-tag: 6px;
+  --radius-control: 10px;
+  --radius-card: 16px;
+  --radius-panel: 20px;
 
-     Dark is a step *above* the page ground rather than below it: raised surfaces
-     catch more light, and #202020 on #171717 separates without a heavy border. */
+  --shadow-*: initial;
 
-  /* Elevation, retuned for flat. Frosted panels needed large, diffuse shadows to
-     read as floating; opaque ones do not, and the same blur on a solid fill just
-     looks like a smudge. Tight and defined instead , the shadow says "above",
-     the border says "edge", and neither is doing the other's job. */
-  --shadow-raised: 0 1px 2px rgb(23 23 23 / 0.05), 0 2px 6px rgb(23 23 23 / 0.05);
-  --shadow-overlay: 0 4px 12px rgb(23 23 23 / 0.1), 0 1px 3px rgb(23 23 23 / 0.06);
-  --shadow-modal: 0 16px 48px rgb(23 23 23 / 0.2), 0 2px 8px rgb(23 23 23 / 0.08);
+  --ease-*: initial;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --default-transition-duration: 120ms;
+  --default-transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
 
-  /* Motion tokens. One curve and three durations for the whole app, so a control
-     added next month moves like the ones already here instead of being hand-tuned.
-     `--ease-soft` is fast in, gentle out , the settle every surface uses. */
-  --ease-soft: var(--ease);
-  --duration-micro: var(--t1);
-  --duration-control: var(--t2);
-  --duration-surface: var(--t3);
+@utility motion-fast {
+  transition-property: transform, opacity;
+  transition-duration: var(--t1);
+  transition-timing-function: var(--ease);
+}
 
-  /* One corner for the whole interface , the thread card's.
-     There is no scale any more. A scale only earns its keep when the steps mean
-     something, and here they did not: a 16px panel next to a 12px card next to a
-     10px row was three arbitrary values reading as sloppiness rather than as
-     hierarchy. Elevation, fill and spacing already say what is on top of what.
-     Change this one number and every corner in the app follows. */
-  --radius: 0.75rem; /* Fields and small controls. */
-
-  /* Tailwind's own scale, collapsed onto that value, so the `rounded-*` utilities
-     already written throughout the components resolve here too and nothing has to
-     be hunted down class by class. `rounded-full` is deliberately untouched: it is
-     a circle or a pill , a shape, not a corner , and it still belongs on avatars,
-     status dots and the toggle switch. */
-  --radius-xs: var(--radius);
-  --radius-sm: var(--radius);
-  --radius-md: var(--radius);
-  --radius-lg: var(--radius);
-  --radius-xl: var(--radius);
-  --radius-2xl: var(--radius);
-  --radius-3xl: var(--radius);
-  --radius-4xl: var(--radius);
+@utility motion-base {
+  transition-property: transform, opacity;
+  transition-duration: var(--t2);
+  transition-timing-function: var(--ease);
 }
 
 @layer base {
-  /* A flat ground. The two fixed amber radial washes that used to sit here were
-     the other half of the frosted look , they existed to give the blur something
-     to pick up. With opaque panels they only tinted the one part of the page that
-     is meant to stay neutral. */
+  html { min-width: 0; }
   body {
-    @apply font-sans antialiased;
+    margin: 0;
+    min-height: 100vh;
     background: var(--bg);
     color: var(--fg);
-    min-height: 100vh;
+    font-family: var(--f-body), system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
   }
+  button { cursor: pointer; }
+  button:disabled { cursor: default; }
+  :focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+  svg.lucide { stroke-width: 1.75; flex-shrink: 0; }
+
+  /* One voice for machine facts: every date, time, keycap and code sample. */
+  time, kbd, code {
+    font-family: var(--f-mono), monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  time { font-size: 12px; line-height: 16px; }
+  code { font-size: 12px; }
+  kbd {
+    display: inline-block;
+    padding: 0 4px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-tag);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 16px;
+    white-space: nowrap;
+  }
+
+  /* Native controls follow the theme and the system corners. */
+  :is(input, textarea, select) { accent-color: var(--fg); }
+  :is(input, textarea)::placeholder { color: var(--muted); opacity: 1; }
+  :is(input, textarea, select):disabled { opacity: .56; cursor: default; }
+  select {
+    appearance: none;
+    padding-right: 32px;
+    background-color: var(--raise);
+    color: var(--fg);
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: calc(100% - 16px) 50%, calc(100% - 12px) 50%;
+    background-size: 4px 4px;
+    background-repeat: no-repeat;
+  }
+  option { background: var(--surface); color: var(--fg); }
+  input[type="date"] { color-scheme: inherit; font-family: var(--f-mono), monospace; }
+  input[type="date"]::-webkit-calendar-picker-indicator { opacity: .64; cursor: pointer; }
+  input[type="checkbox"], input[type="radio"] {
+    appearance: none;
+    display: inline-grid;
+    place-content: center;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    border: 1px solid var(--muted);
+    background: var(--surface);
+    cursor: pointer;
+  }
+  input[type="checkbox"] { border-radius: var(--radius-tag); }
+  input[type="radio"] { border-radius: 50%; }
+  input[type="checkbox"]::after, input[type="radio"]::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    background: var(--fg);
+    opacity: 0;
+    transform: scale(.5);
+    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
+  }
+  input[type="radio"]::after { border-radius: 50%; }
+  input[type="checkbox"]:checked::after, input[type="radio"]:checked::after { opacity: 1; transform: none; }
+  :is(input, textarea):-webkit-autofill {
+    -webkit-text-fill-color: var(--fg);
+    caret-color: var(--fg);
+    box-shadow: 0 0 0 1000px var(--raise) inset;
+    transition: background-color 100000s;
+  }
+  :is(input, textarea):autofill { background: var(--raise); color: var(--fg); }
+
+  /* Scroll bars are hidden everywhere; each scrolling area fades at its edges. */
+  * { scrollbar-width: none; -ms-overflow-style: none; }
+  *::-webkit-scrollbar { display: none; }
 }
 
 @layer components {
-  /* Opaque panel: solid fill, hairline border, tight shadow. The class name is
-     kept because it is used across a dozen components and renaming it would be
-     churn for its own sake , but there is no glass left in it. */
-  .glass-panel { border: 0; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); }
-
-  .glass-input { width: 100%; min-width: 0; min-height: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--raise); padding: 10px 12px; color: var(--fg); font-size: 13px; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
-
-  /* Same autofill override as .auth-input , every saved-credential field in the app
-     otherwise flips to Chrome's near-white background on the dark theme. */
-  .glass-input:-webkit-autofill,
-  .glass-input:-webkit-autofill:hover,
-  .glass-input:-webkit-autofill:focus,
-  .glass-input:-webkit-autofill:active {
-    -webkit-text-fill-color: var(--fg);
-    caret-color: var(--fg);
-    transition: background-color 100000s ease-in-out 0s;
-  }
-
-  .dark .glass-input:-webkit-autofill,
-  .dark .glass-input:-webkit-autofill:hover,
-  .dark .glass-input:-webkit-autofill:focus,
-  .dark .glass-input:-webkit-autofill:active {
-    -webkit-text-fill-color: var(--fg);
-    caret-color: var(--fg);
-  }
-
-  /* Every button gives under the press, on the same curve and duration. This is
-     the smallest of the micro-interactions and the one that does the most: a
-     control that does not move on click reads as unresponsive on a slow network,
-     because the press and the result are separated by the request. */
-  .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 10px 18px; border: 0; border-radius: 99px; background: var(--fg); color: var(--surface); font-size: 13px; font-weight: 600; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
-
-  .btn-primary:hover { transform: translateY(-2px); }
-
-  .btn-primary:active {
-    transform: scale(0.97);
-  }
-
-  .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium hover:bg-raise;
+  /* Buttons. Hover is a veil of the text colour, press is a small give. */
+  .signal-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    max-width: 100%;
+    padding: 0 16px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-control);
+    background: var(--surface);
+    color: var(--fg);
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 500;
+    white-space: nowrap;
+    isolation: isolate;
     transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
-
-  .btn-ghost:active {
-    transform: scale(0.97);
-  }
-
-  .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-red-600/90 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-600 disabled:pointer-events-none disabled:opacity-50;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .btn-danger:active {
-    transform: scale(0.97);
-  }
-
-  .nav-item {
-    @apply relative flex items-center gap-3 rounded-[var(--radius)] px-2.5 py-2 text-sm font-medium text-muted hover:bg-raise hover:text-fg dark:hover:text-fg;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .nav-item:active {
-    transform: scale(0.985);
-  }
-
-  /* Icons in the rail settle into place as the row highlights, rather than the
-     colour switching under a static glyph. */
-  .nav-item svg {
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .nav-item:hover svg {
-    transform: translateX(1px);
-  }
-
-  /* The current destination lifts off the tinted rail rather than tinting further.
-     On a panel that is already a wash of colour, another wash is nearly invisible;
-     a raised white card is unambiguous, and it inverts the usual figure/ground so
-     the selected row reads as the same material as the content beside it. */
-  .nav-item-active {
-    @apply bg-white font-semibold text-fg shadow-sm;
-  }
-
-  /* The icon carries the accent, so the row still says "amber" without a bar. */
-  .nav-item-active svg {
-    @apply text-fg;
-    opacity: 1;
-  }
-
-  /* ---- App shell -------------------------------------------------------
-     One continuous surface divided by hairlines, not a set of floating cards
-     with gutters between them. Full width: a mail client is a workspace, and
-     a max-width cap was throwing away a third of a 1080p screen. Glass is
-     kept for things that genuinely float , modals, popovers , so it still
-     reads as elevation instead of as the default background.
-     --------------------------------------------------------------------- */
-  /* The row beneath the top bar. The frame owns the viewport height and the page
-     ground; this is only the rail-and-content split.
-
-     The two are no longer equal panes divided by a line. Navigation sits directly
-     on the page ground with nothing behind it, and the work , the thread list and
-     the message , is one card lifted off that ground. It reads as "the app, and
-     the controls around it" rather than as three columns of equal importance. */
-  .app-shell {
-    @apply flex w-full min-h-0 flex-1 gap-2 overflow-hidden p-3 pt-1;
-  }
-
-  /* No surface of its own: the rail sits directly on the page ground, and the one
-     card in the layout is the work. Nothing here needs a container to hold it
-     together , the group labels do that, and the active row is the only thing that
-     has to stand out, which it does by lifting off the ground rather than by
-     sitting inside a box. */
-  .app-rail {
-    @apply flex w-56 shrink-0 flex-col overflow-hidden;
-  }
-
-  /* The single container. Everything the page renders lives inside it, so the list
-     and the reader are two halves of one surface instead of two panels that happen
-     to be adjacent. */
-  .app-canvas {
-    @apply flex min-w-0 flex-1 overflow-hidden border border-line bg-surface shadow-raised dark:bg-surface-dark;
-    border-radius: var(--radius);
-  }
-
-  /* Sentence case at readable size, not 10px all-caps. A group label is a signpost
-     you read once; shouting it in tracked capitals gave six words the same visual
-     weight as the destinations underneath them. */
-  .rail-group {
-    @apply px-2.5 pb-1.5 pt-5 text-[11px] font-semibold text-muted;
-  }
-
-  .nav-count {
-    @apply ml-auto text-[11px] tabular-nums text-muted;
-  }
-
-  /* Column divider inside the shell , replaces the gap between panels. */
-  .col-divide {
-    @apply border-l border-line;
-  }
-
-  /* ---- Thread list ------------------------------------------------------ */
-
-  /* Segmented control. The previous chip row wrapped onto a second line at
-     six filters, which left the last one looking orphaned. */
-  .seg-group {
-    @apply flex gap-0.5 rounded-lg bg-raise p-0.5;
-  }
-
-  .seg {
-    @apply flex-1 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium text-muted transition-colors duration-150 ease-out hover:text-fg dark:hover:text-fg;
-  }
-
-  .seg-active {
-    @apply bg-white font-semibold text-fg shadow-sm;
-  }
-
-  /* ---- Thread cards -----------------------------------------------------
-     One card per conversation, with air between them, rather than rows divided
-     by hairlines. A divided list asks you to find the boundaries; a stack of
-     cards has already drawn them, which is what lets each one carry three lines
-     of content , sender, subject, and a real two-line preview , without the
-     block turning into a wall.
-     --------------------------------------------------------------------- */
-
-  .thread-scroll {
-    @apply flex-1 overflow-y-auto px-2.5 py-2.5;
-  }
-
-  .thread-row {
-    @apply relative mb-2 grid w-full grid-cols-[2rem_minmax(0,1fr)] gap-2.5 border border-line bg-surface px-3 py-2.5 text-left dark:bg-sunken-dark;
-    border-radius: var(--radius);
-    /* Only the compositable properties move on hover. */
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .thread-row:hover {
-    @apply border-line bg-sunken dark:bg-surface-dark;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgb(23 23 23 / 0.07);
-  }
-
-  /* Tint plus a coloured edge. The edge is what makes this legible against the
-     hover state , an earlier full-strength amber fill read as a button, and a
-     tint alone was the same weight as hovering. */
-  .thread-row-active,
-  .thread-row-active:hover {
-    @apply border-fg bg-raise;
-    transform: none;
-    box-shadow: var(--mail-shadow);
-  }
-
-  /* Two lines of preview, cut cleanly. A single truncated line rarely contains
-     enough of the message to decide whether to open it. */
-  .thread-snippet {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
-  }
-
-  /* Avatar initials. Deterministic per-address tint, set inline by the caller. */
-  .avatar-initials {
-    @apply grid shrink-0 place-items-center rounded-full font-bold text-fg;
-  }
-
-  .chip {
-    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-line bg-raise px-1.5 py-0.5 text-[10px] font-semibold text-muted;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .chip-client {
-    @apply border-fg bg-raise text-muted;
-  }
-
-  .chip-mine {
-    @apply border-line bg-raise text-muted;
-  }
-
-  /* ---- Auth screens -----------------------------------------------------
-     Depth and motion are done in CSS on transform/opacity only. An animation
-     library would have cost ~50KB gzipped to serve two screens, and the
-     entrance, tilt and focus states are all compositable properties.
-     --------------------------------------------------------------------- */
-
-  .auth-stage {
-    @apply relative flex min-h-screen w-full items-center justify-center overflow-hidden p-6;
-  }
-
-  /* Ambient wash behind the card. Amber is the brand accent, so the glow is the
-     accent doing work rather than decoration bolted on.
-
-     The two layers drift on long, offset cycles. Slow enough that it reads as the
-     light in the room shifting rather than as an animation demanding attention ,
-     and it only runs on the auth screens, which are a moment, not a workspace. */
-  /* One flat amber band across the top of the sign-in screen. What was here before
-     , two breathing radial washes plus an SVG noise layer to stop them banding ,
-     was ambience for a frosted surface to sample. Nothing samples it now, and a
-     16-second scaling gradient behind a login form was motion with no message.
-     A single static band keeps the screen from being a blank sheet without
-     pretending to be lit. */
-  .auth-glow {
-    @apply pointer-events-none absolute inset-x-0 top-0 h-64;
-    background: linear-gradient(to bottom, var(--raise), transparent);
-  }
-
-  .dark .auth-glow {
-    background: linear-gradient(to bottom, var(--raise), transparent);
-  }
-
-  /* Kept as no-ops: the auth pages still render these elements, and removing the
-     rules rather than the markup would leave two unstyled divs. */
-  .auth-glow-2,
-  .auth-grain {
-    display: none;
-  }
-
-  /* The auth card used to be the app's showpiece of glass: a 3D tilt driven by
-     pointer position, a blurred amber sheen tracking the cursor, and a masked rim
-     that lit only the edge nearest it. All three simulated a pane of glass catching
-     light , the one thing a flat surface is not , so all three are gone, along with
-     the JavaScript that fed them --rx/--ry/--mx/--my.
-     `.auth-tilt` is kept as a plain hover-lift so the markup and the entrance
-     animation on the wrapper do not have to change. */
-  .auth-tilt {
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .auth-tilt:hover {
-    transform: translateY(-2px);
-  }
-
-  /* Light mode needs the card to be a lighter surface than its ground: cream on
-     cream measured at a 1.00 contrast ratio , the card was literally the same
-     colour as the page, held apart by nothing but a hairline. */
-  .auth-card {
-    @apply relative overflow-hidden rounded-2xl border border-line bg-surface p-7 dark:bg-surface-dark;
-    box-shadow: var(--shadow-overlay);
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .auth-tilt:hover .auth-card {
-    box-shadow: var(--shadow-modal);
-  }
-
-  /* Outlined mark: a hairline circle with a line icon inside, rather than a filled
-     tile. Shared by the auth cards and the navigation rail; the caller sets the size. */
-  .mail-mark {
-    @apply grid shrink-0 place-items-center rounded-full border text-fg;
-    border-color: var(--line);
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .auth-tilt:hover .mail-mark {
-    border-color: var(--fg);
-  }
-
-  /* Content sits above the spotlight. */
-  .auth-content {
-    @apply relative z-10;
-  }
-
-  /* Entrance: the card settles first, then its contents follow. */
-  .auth-enter {
-    animation: auth-rise 460ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
-  }
-
-  .auth-stagger > * {
-    animation: auth-fade 380ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
-    animation-delay: calc(120ms + var(--i, 0) * 55ms);
-  }
-
-  @keyframes auth-rise {
-    from { opacity: 0; transform: translateY(14px) scale(0.985); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  @keyframes auth-fade {
-    from { opacity: 0; transform: translateY(7px); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  /* Input with a leading icon and an optional trailing control. */
-  .auth-field {
-    @apply relative flex items-center;
-  }
-
-  .auth-field-icon {
-    @apply pointer-events-none absolute left-3 text-muted transition-colors duration-150 ease-out;
-  }
-
-  .auth-field:focus-within .auth-field-icon {
-    @apply text-fg;
-  }
-
-  /* Fields lift very slightly on hover and focus. Small, but it's the difference
-     between a control that responds and one that just changes colour. */
-  .auth-input {
-    @apply h-11 w-full rounded-xl border border-line bg-sunken pl-10 pr-3 text-sm outline-none placeholder:text-muted focus:border-fg focus:bg-surface focus:ring-2 focus:ring-fg dark:bg-sunken-dark dark:focus:bg-surface-dark;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .auth-input:hover:not(:focus) {
-    @apply border-line;
-  }
-
-  .auth-input:focus {
-    transform: translateY(-1px);
-  }
-
-  /* Chrome paints autofilled fields with its own near-white background and dark text,
-     which it applies at a level plain `background-color` cannot reach , on the dark
-     theme the field flipped to white the moment the browser filled it.
-     `-webkit-text-fill-color` is the only way to set the text colour, and the absurd
-     transition delay is the standard way to stop the background ever being painted.
-     A large inset box-shadow would also work but would fight the focus ring. */
-  .auth-input:-webkit-autofill,
-  .auth-input:-webkit-autofill:hover,
-  .auth-input:-webkit-autofill:focus,
-  .auth-input:-webkit-autofill:active {
-    -webkit-text-fill-color: var(--fg);
-    caret-color: var(--fg);
-    transition:
-      background-color 100000s ease-in-out 0s,
-      transform 160ms cubic-bezier(0.2, 0.8, 0.3, 1),
-      border-color 150ms ease-out,
-      box-shadow 150ms ease-out;
-  }
-
-  .dark .auth-input:-webkit-autofill,
-  .dark .auth-input:-webkit-autofill:hover,
-  .dark .auth-input:-webkit-autofill:focus,
-  .dark .auth-input:-webkit-autofill:active {
-    -webkit-text-fill-color: var(--fg);
-    caret-color: var(--fg);
-  }
-
-  .auth-submit {
-    @apply relative flex h-11 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-fg text-sm font-semibold text-surface disabled:pointer-events-none disabled:opacity-70;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .auth-submit:hover {
-    transform: translateY(-1px) scale(1.012);
-  }
-
-  .auth-submit:active {
-    transform: translateY(0) scale(0.988);
-  }
-
-  /* Sweep across the button while a real request is in flight. This one is doing a
-     job , masking latency , rather than decorating an idle control, so unlike the
-     reference design's always-running shimmer it only exists while busy. */
-  .auth-submit[data-busy="true"]::after {
+  .signal-button::before {
     content: "";
-    @apply pointer-events-none absolute inset-0;
-    background: linear-gradient(
-      100deg,
-      transparent 20%,
-      rgb(255 255 255 / 0.55) 50%,
-      transparent 80%
-    );
-    animation: auth-sweep 1.1s ease-in-out infinite;
-  }
-
-  @keyframes auth-sweep {
-    from { transform: translateX(-100%); }
-    to   { transform: translateX(100%); }
-  }
-
-  /* Underline grows from the left on hover, as in the reference design. */
-  .auth-link {
-    @apply relative font-medium text-fg;
-  }
-
-  .auth-link::after {
-    content: "";
-    @apply absolute -bottom-0.5 left-0 h-px w-0 bg-fg;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .auth-link:hover::after,
-  .auth-link:focus-visible::after {
-    @apply w-full;
-  }
-
-  /* ---- Composer ---------------------------------------------------------
-     The compose window is the one screen in this app where the user *makes*
-     something, so it is treated as a document sheet rather than as a dialog: a
-     header that names the conversation, a stack of borderless fields divided by
-     hairlines, a writing surface that owns most of the height, and one fixed
-     action bar. Boxed inputs were pushing the writing area , the actual work ,
-     into a third of the window.
-     --------------------------------------------------------------------- */
-
-  .compose-backdrop {
-    @apply fixed inset-0 z-50 flex items-center justify-center bg-raise p-4 sm:p-6;
-    animation: compose-veil var(--duration-surface) var(--ease-soft) both;
-  }
-
-  /* Exit is a real state, not an unmount: the sheet drops back and the veil clears
-     before the tree goes. Half the duration of the entrance , leaving should feel
-     quicker than arriving. */
-  .compose-backdrop[data-closing="true"] {
-    animation: compose-veil 160ms var(--ease-soft) reverse both;
-  }
-
-  .compose-sheet {
-    @apply relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-2xl border border-line bg-surface dark:bg-surface-dark;
-    box-shadow: var(--shadow-modal);
-    animation: compose-rise 340ms var(--ease-soft) both;
-  }
-
-  .compose-backdrop[data-closing="true"] .compose-sheet {
-    animation: compose-rise 160ms var(--ease-soft) reverse both;
-  }
-
-  @keyframes compose-veil {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-
-  @keyframes compose-rise {
-    from { opacity: 0; transform: translateY(18px) scale(0.985); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  /* Close control, floating above the sheet's top-left corner rather than sitting
-     inside a header bar. There is no header any more: To/Subject start immediately,
-     and the one thing every modal needs , a way out , gets its own small surface
-     instead of a whole row of chrome to carry it. */
-  .compose-close-pill {
-    @apply absolute -right-3 -top-3 z-10 grid h-8 w-8 place-items-center rounded-full border border-line bg-surface text-muted shadow-overlay dark:bg-surface-dark;
-    animation: compose-rise 340ms var(--ease-soft) both;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .compose-close-pill:hover {
-    @apply text-fg;
-    transform: translateY(-1px);
-  }
-
-  .compose-backdrop[data-closing="true"] .compose-close-pill {
-    animation: compose-rise 160ms var(--ease-soft) reverse both;
-  }
-
-  /* Borderless field row. The hairline under it is the only division; the label is a
-     fixed-width gutter so To/Cc/Subject align down a single edge. */
-  .compose-row {
-    @apply flex items-start gap-3 border-b border-line px-5 py-2.5 transition-colors duration-150 ease-out;
-  }
-
-  .compose-row:focus-within {
-    @apply bg-raise;
-  }
-
-  /* Plain and quiet , a field name, not a shouted category label. The previous
-     uppercase, letter-spaced treatment gave "To" and "Subject" the same visual
-     weight as a section heading, in a window with no headings left to match. */
-  .compose-row-label {
-    @apply w-16 shrink-0 pt-1.5 text-sm font-medium text-muted;
-  }
-
-  /* Cc / Bcc, and anything else that reveals more of the same row rather than
-     acting on it. Plain text rather than `.quote-toggle`'s bordered pill , these
-     sit right next to the field they extend, so a pill around them reads as a
-     second control competing with the input, not a peer to its label. */
-  .compose-row-link {
-    @apply text-xs font-medium text-muted;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .compose-row-link:hover {
-    @apply text-fg;
-  }
-
-  .compose-bare-input {
-    @apply min-w-0 flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-muted;
-  }
-
-  /* Locked reply headers. A grey disabled box says "broken"; this says "settled" ,
-     the value reads as text, and the reason is one line away in the header. */
-  .compose-bare-input[readonly] {
-    @apply cursor-default text-muted;
-  }
-
-  .chip-recipient {
-    @apply inline-flex max-w-full items-center gap-1.5 rounded-full border border-line bg-raise py-0.5 pl-0.5 pr-2 text-xs font-medium;
-  }
-
-  /* ---- Editor ---- */
-
-  .editor-toolbar {
-    @apply flex shrink-0 flex-wrap items-center gap-0.5 border-b border-line px-5 py-1.5;
-  }
-
-  .editor-sep {
-    @apply mx-1 h-4 w-px bg-raise;
-  }
-
-  .editor-tool {
-    @apply inline-grid h-7 w-7 grid-flow-col place-items-center rounded-md text-muted;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .editor-tool:hover {
-    @apply bg-raise text-fg;
-  }
-
-  .editor-tool:active {
-    transform: scale(0.9);
-  }
-
-  .editor-tool-active {
-    @apply bg-raise text-fg;
-  }
-
-  .editor-linkbar {
-    @apply flex shrink-0 items-center gap-1 border-b border-line bg-raise px-5 py-1.5;
-    animation: compose-slip var(--duration-control) var(--ease-soft) both;
-  }
-
-  @keyframes compose-slip {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  /* One source of truth for the writing surface's horizontal inset.
-     It used to be set per-caller as `[&_.editor-surface]:px-5`, which the
-     placeholder , a sibling of the surface, absolutely positioned at left:0 ,
-     had no way to read. So the ghost text sat hard against the window edge
-     while the text you typed started 20px in. Callers now set
-     `[--editor-pad-x:1.25rem]` and both read the same value. */
-  .editor-surface {
-    @apply h-full w-full text-sm leading-relaxed outline-none;
-    min-height: 12rem;
-    padding: 0.75rem var(--editor-pad-x, 0rem);
-  }
-
-  .editor-placeholder {
-    @apply pointer-events-none absolute text-sm text-muted;
-    left: var(--editor-pad-x, 0rem);
-    top: 0.75rem;
-  }
-
-  /* Preflight strips list markers and blockquote indent; the editor is prose, so put
-     them back inside the surface only. */
-  .editor-surface ul { @apply my-2 list-disc pl-5; }
-  .editor-surface ol { @apply my-2 list-decimal pl-5; }
-  .editor-surface li { @apply my-0.5; }
-  .editor-surface p  { @apply my-2; }
-  .editor-surface a  { @apply text-fg underline underline-offset-2; }
-  .editor-surface blockquote {
-    @apply my-2 border-l-[3px] border-fg pl-3 text-muted;
-  }
-  .editor-surface img { @apply max-w-full rounded-lg; }
-
-  /* ---- Personalised fields ----------------------------------------------
-     A placeholder as it appears while writing: a named tag rather than
-     {{client_name}}. The element is contenteditable="false", so it selects and
-     deletes as one object , the styling has to make that behaviour look
-     deliberate, hence a filled pill rather than tinted text. */
-  .mf-chip {
-    @apply mx-px inline-block select-none whitespace-nowrap rounded-md border border-fg bg-raise px-1.5 py-px align-baseline text-[0.9em] font-semibold text-muted;
-  }
-
-  /* A field the recipient's copy will fill in is worth seeing at a glance in the
-     preview list too, where chips are read-only. */
-  .mf-chip-static {
-    @apply cursor-default;
-  }
-
-  .mf-trigger {
-    @apply inline-flex items-center gap-1 rounded-lg border border-line px-2 py-1 text-[11px] font-medium text-muted;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .mf-trigger:hover {
-    @apply border-line bg-raise text-fg;
-  }
-
-  .mf-trigger-open {
-    @apply border-fg bg-raise text-fg;
-  }
-
-  .mf-menu {
-    @apply absolute right-0 z-30 mt-1.5 max-h-80 w-72 overflow-y-auto rounded-xl border border-line bg-white p-1.5 shadow-xl;
-    transform-origin: top right;
-    animation: mf-menu-in var(--duration-control) var(--ease-soft) both;
-  }
-
-  @keyframes mf-menu-in {
-    from { opacity: 0; transform: translateY(-4px) scale(0.97); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  .mf-menu-intro {
-    @apply px-2 py-1.5 text-[11px] leading-snug text-muted;
-  }
-
-  .mf-menu-group {
-    @apply border-t border-line pt-1;
-  }
-
-  .mf-menu-title {
-    @apply px-2 pb-0.5 pt-1 text-[10px] font-semibold text-muted;
-  }
-
-  .mf-menu-item {
-    @apply flex w-full items-baseline justify-between gap-3 rounded-lg px-2 py-1.5 text-left text-xs font-medium text-muted;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .mf-menu-item:hover {
-    @apply bg-raise;
-  }
-
-  .mf-menu-example {
-    @apply shrink-0 truncate text-[10px] font-normal text-muted;
-    max-width: 9rem;
-  }
-
-  /* A rich text editor used as a form field rather than as a whole pane: it needs
-     the border the composer gets from the sheet around it. */
-  .editor-box {
-    @apply overflow-hidden rounded-xl border border-line bg-sunken dark:bg-sunken-dark;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .editor-box:focus-within {
-    @apply border-fg;
-    box-shadow: var(--mail-shadow);
-  }
-
-  /* Anything revealed by a disclosure arrives rather than appearing. */
-  .disclosure {
-    animation: compose-slip var(--duration-surface) var(--ease-soft) both;
-  }
-
-  .editor-source {
-    @apply h-full min-h-48 w-full resize-none bg-transparent py-3 font-mono text-xs leading-relaxed outline-none placeholder:text-muted;
-  }
-
-  /* Quoted history: one line at rest, expandable, never editable. Dumping the whole
-     conversation into the field the user types in is what made the old window
-     unusable on any thread longer than one message. */
-  .quote-toggle {
-    @apply inline-flex items-center gap-1.5 rounded-lg border border-line px-2 py-1 text-[11px] font-medium text-muted;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .quote-toggle:hover {
-    @apply border-line bg-raise text-fg;
-  }
-
-  .compose-actionbar {
-    @apply flex shrink-0 flex-wrap items-center gap-2 border-t border-line px-5 py-3;
-  }
-
-  /* Attachment card. Wide enough to show the real filename, with the size as the
-     secondary line , a truncated chip made it impossible to tell two revisions of the
-     same document apart. */
-  .attach-card {
-    @apply flex items-center gap-2.5 rounded-xl border border-line bg-raise py-1.5 pl-2.5 pr-1.5;
-    animation: compose-slip var(--duration-control) var(--ease-soft) both;
-  }
-
-  /* Drop target for dragged files. The whole writing area lights up, because that is
-     where people aim. */
-  .compose-dropzone[data-dragging="true"] {
-    @apply rounded-xl bg-raise outline-2 outline-dashed outline-offset-[-6px] outline-fg;
-  }
-
-  .table-base {
-    @apply w-full text-sm;
-  }
-
-  .table-base thead th {
-    @apply border-b border-line px-3 py-2 text-left text-xs font-semibold text-muted;
-  }
-
-  .table-base tbody td {
-    @apply border-b border-line px-3 py-2.5;
-  }
-}
-
-@layer base {
-  /* Motion is a transition, never a cut , but honor the OS setting by cutting
-     straight to end states for anyone who has asked for that. */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
-
-  /* Keyboard focus must always be visible; several controls previously relied
-     on hover alone. */
-  :focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
-
-  /* ---- Scrollbars -------------------------------------------------------
-     There aren't any.
-
-     The app has several independently scrolling regions , the rail, the thread
-     list, the reader, the composer , and every one of them drew its own bar. Even
-     styled down to a slim amber pill they read as system furniture bolted onto the
-     surface, and four of them at once broke the one-card layout into strips.
-
-     Scrolling itself is untouched: wheel, trackpad, keyboard (arrows, Page Up/Down,
-     Home/End, space) and programmatic scrolling all behave exactly as before. What
-     goes is the painted bar and the drag target on it , which is the trade being
-     made here, and it is only comfortable because this is a desktop app driven by
-     a wheel or a trackpad.
-     --------------------------------------------------------------------- */
-  * {
-    /* Firefox. `none` reserves no gutter either, so nothing reflows. */
-    scrollbar-width: none !important;
-    /* Legacy Edge and IE, harmless everywhere else. */
-    -ms-overflow-style: none;
-  }
-
-  /* Chromium and WebKit based browsers. `display: none`
-     rather than zero width: a 0px bar can still claim a hit area on some
-     platforms, which produces a scrollable strip you cannot see. */
-  *::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-@layer components {
-  /* ---- Template gallery -------------------------------------------------
-     Templates are things you recognise by sight, so each card leads with the
-     email itself rather than its name. The preview is the real rendered HTML
-     in an iframe, scaled down , a screenshot of the thing, not an impression
-     of it.
-     --------------------------------------------------------------------- */
-
-  .tpl-grid {
-    @apply grid gap-4;
-    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-  }
-
-  .tpl-card {
-    @apply relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-raised dark:bg-surface-dark;
-    /* Only transform and box-shadow move, so the hover stays on the compositor. */
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-    animation: auth-fade 380ms var(--ease-soft) both;
-    animation-delay: calc(60ms + var(--i, 0) * 45ms);
-  }
-
-  .tpl-card:hover {
-    @apply border-fg;
-    transform: translateY(-3px);
-    box-shadow: 0 18px 40px rgb(23 23 23 / 0.13), 0 2px 6px rgb(23 23 23 / 0.06);
-  }
-
-  /* The whole card is the edit target , see .tpl-open , so the ring belongs on
-     the card rather than on the small piece of text that carries the link. */
-  .tpl-card:focus-within {
-    @apply border-fg;
-  }
-
-  /* A white sheet regardless of theme: an email is a sheet of paper, and mail
-     HTML brings its own colours that assume one , these six were built to read
-     as real agency mail, dark hero over a light body module, and that has to
-     survive contact with the app's own theme or the preview stops being honest
-     about what actually gets sent.
-
-     What the dark theme gets instead is the *frame*: a hairline top edge (the
-     card's own rounded corner already gave it a bottom one) and a soft shadow
-     cast onto the card below, so the sheet reads as something set deliberately
-     into a dark card rather than a pane that forgot to pick up the theme. */
-  .tpl-preview {
-    @apply relative shrink-0 overflow-hidden bg-white;
-    /* Tall enough to show a greeting, an opening paragraph and the start of the
-       signature , the part that tells one template from another. Taller than that
-       and short emails leave a band of empty sheet. */
-    height: 11.5rem;
-    border-bottom: 1px solid rgb(23 23 23 / 0.1);
-  }
-
-  .dark .tpl-preview {
-    border-top: 1px solid rgb(254 251 210 / 0.1);
-    border-bottom: 1px solid rgb(254 251 210 / 0.1);
-    box-shadow: 0 6px 16px -4px rgb(0 0 0 / 0.5);
-  }
-
-  /* Rendered at a desktop-ish canvas width and scaled to fit, so the preview
-     shows the layout a recipient on a laptop would see. The scale itself is set
-     from the card's measured width , CSS cannot divide a length by a length. */
-  .tpl-preview iframe {
-    @apply absolute left-0 top-0 border-0;
-    transform-origin: top left;
-    /* The preview is decoration for the link that wraps it; it must not swallow
-       clicks or take a tab stop of its own. */
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0;
     pointer-events: none;
-  }
-
-  .tpl-preview::after {
-    /* The canvas is taller than the frame, so the render is cut off. Fading the
-       cut edge reads as "there is more", where a hard line reads as a bug. */
-    content: "";
-    @apply pointer-events-none absolute inset-x-0 bottom-0 h-12;
-    background: linear-gradient(to bottom, rgb(255 255 255 / 0), rgb(255 255 255 / 0.95));
-  }
-
-  .tpl-body {
-    @apply flex min-w-0 flex-1 flex-col gap-1.5 p-3.5;
-  }
-
-  /* Stretches the name's link across the whole card. Keeps one link for the
-     whole target while leaving the accessible name on the actual text. */
-  .tpl-open::after {
-    content: "";
-    @apply absolute inset-0;
-  }
-
-  /* Anything the card offers besides "open me" has to sit above that overlay. */
-  .tpl-actions {
-    @apply relative z-10 flex items-center gap-1;
-  }
-
-  /* Destructive, and one click from a grid of look-alike cards, so it stays
-     quiet until the card is hovered or something in it has focus. */
-  .tpl-delete {
-    @apply rounded-lg px-2 py-1 text-xs font-medium text-muted opacity-0;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .tpl-card:hover .tpl-delete,
-  .tpl-card:focus-within .tpl-delete {
-    @apply opacity-100;
-  }
-
-  .tpl-delete:hover {
-    @apply bg-red-500/10 text-red-600 dark:text-red-400;
-  }
-
-  /* Always reachable by keyboard, whatever the hover state says. */
-  .tpl-delete:focus-visible {
-    @apply opacity-100;
-  }
-}
-
-@layer components {
-  /* ---- Top bar ----------------------------------------------------------
-     The shell used to be a single row: rail on the left, panes on the right,
-     with search living inside the thread list's header and identity crammed
-     into the rail's footer. That put two global concerns , "find anything"
-     and "who am I" , inside a column that is really about one folder of one
-     mailbox, and it meant search vanished entirely on /clients and /settings.
-
-     Now the frame is a column: one bar across the top owning search and
-     identity, and the rail + content row beneath it.
-     --------------------------------------------------------------------- */
-
-  .app-frame {
-    @apply flex h-screen w-full flex-col overflow-hidden bg-brand-paper;
-  }
-
-  /* No bottom rule: the content card below draws its own edge, and a full-width
-     line above a floating card gives the eye two competing horizontals. */
-  /* Asymmetric padding on purpose: the left edge lines the mark up with the rail's
-     items (12px shell padding + 8px nav padding), the right edge lines the account
-     avatar up with the content card's right edge. */
-  .topbar {
-    @apply flex h-14 shrink-0 items-center gap-3 pl-5 pr-3;
-  }
-
-  .topbar-brand {
-    @apply flex w-52 shrink-0 items-center gap-2.5;
-  }
-
-  /* Search is centred in the bar and capped: a field stretched across a 1900px
-     display looks like a mistake, and nobody types a 200-character query. */
-  .topbar-search-wrap {
-    @apply relative mx-auto flex w-full max-w-2xl items-center;
-  }
-
-  .topbar-search {
-    @apply h-9 w-full rounded-[var(--radius)] border border-line bg-sunken pl-9 pr-20 text-sm outline-none placeholder:text-muted dark:bg-sunken-dark;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .topbar-search:focus {
-    @apply border-fg bg-white;
-    box-shadow: var(--mail-shadow);
-  }
-
-  .topbar-search-icon {
-    @apply pointer-events-none absolute left-3 text-muted transition-colors duration-150 ease-out;
-  }
-
-  .topbar-search-wrap:focus-within .topbar-search-icon {
-    @apply text-fg;
-  }
-
-  /* Trailing hint inside the field. Disappears once there is a query, so it never
-     sits behind the user's own text. */
-  .topbar-search-hint {
-    @apply pointer-events-none absolute right-3 hidden items-center gap-1 text-[10px] font-medium text-muted sm:flex;
-  }
-
-  .topbar-icon {
-    @apply relative grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius)] text-muted;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .topbar-icon:hover {
-    @apply bg-raise text-fg;
-  }
-
-  .topbar-icon:active {
-    transform: scale(0.92);
-  }
-
-  .topbar-icon-active {
-    @apply bg-raise text-fg;
-  }
-
-  /* Unread marker on a quick-jump icon. A dot, not a number: the count already
-     has a home on the rail's folder row, and two of them disagree the moment
-     one refetches first. */
-  .topbar-dot {
-    @apply absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-fg ring-2 ring-bg;
-  }
-
-  /* ---- Popover menus ----------------------------------------------------
-     Glass is kept for surfaces that genuinely float, which is the whole reason
-     it still reads as elevation elsewhere in the app.
-     --------------------------------------------------------------------- */
-
-  .menu-pop {
-    @apply z-50 overflow-hidden border border-line bg-surface shadow-overlay dark:bg-surface-dark;
-    border-radius: var(--radius);
-    animation: menu-pop var(--duration-control) var(--ease-soft) both;
-    transform-origin: top right;
-  }
-
-  /* Leaving is a state, not an unmount , and quicker than arriving, the same ratio
-     the compose sheet uses. */
-  .menu-pop[data-closing="true"] {
-    animation: menu-pop-out var(--t1) var(--ease) both;
-  }
-
-  @keyframes menu-pop {
-    from { opacity: 0; transform: translateY(-6px) scale(0.97); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  @keyframes menu-pop-out {
-    to { opacity: 0; transform: translateY(-6px) scale(0.97); }
-  }
-
-  .menu-item {
-    @apply flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm font-medium text-muted;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .menu-item:hover {
-    @apply bg-raise text-fg;
-  }
-
-  .menu-sep {
-    @apply my-1 h-px bg-raise;
-  }
-
-  /* ---- Rail -------------------------------------------------------------- */
-
-  /* The one primary action, at the top of the rail where the reference puts it.
-     Full width so it is impossible to miss, and the only filled amber control in
-     the navigation column , everything else there is a destination, not a verb. */
-  .rail-compose {
-    @apply flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius)] bg-fg text-sm font-semibold text-surface;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .rail-compose:hover {
-    @apply bg-raise;
-    transform: translateY(-1px);
-    box-shadow: var(--mail-shadow);
-  }
-
-  .rail-compose:active {
-    transform: translateY(0) scale(0.985);
-  }
-
-  /* ---- Mailbox tiles ----------------------------------------------------
-     Mailboxes were full-width rows carrying a whole address each, so two of them
-     ate as much of the rail as three folders , for a control you touch when you
-     switch accounts and never otherwise. As squares they are a grid of faces:
-     four to a row, identified by initial and colour, and the row grows sideways
-     instead of downwards as accounts are added.
-     --------------------------------------------------------------------- */
-
-  /* Wrapping row rather than a fixed four-column grid: the tiles are a set size,
-     so the row simply holds as many as fit and spills onto the next. */
-  .mailbox-grid {
-    @apply flex flex-wrap gap-1.5 px-2.5 pt-0.5;
-  }
-
-  .mailbox-tile {
-    @apply relative grid h-[30px] w-[30px] place-items-center overflow-hidden rounded-[var(--radius)] bg-raise text-[12px] font-bold leading-none text-muted;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .mailbox-tile:hover {
-    @apply bg-raise text-muted;
-    transform: translateY(-1px);
-  }
-
-  /* The account you are reading is the accent colour itself. An earlier version
-     gave each mailbox its own generated tint and ringed the active one , but a
-     per-address colour is decoration on a set of two or three tiles, and it left
-     the selection competing with three other hues. Grey for the rest, brand
-     amber for the one in use. */
-  .mailbox-tile[data-active="true"],
-  .mailbox-tile[data-active="true"]:hover {
-    @apply bg-fg text-surface;
-  }
-
-  /* Deliberately not amber: on the active tile an amber badge would vanish into
-     the fill, so the count is carried by contrast instead of by hue. */
-  /* Scaled with the tile: at 30px square a 16px badge covered a third of the face. */
-  .mailbox-tile-badge {
-    @apply absolute right-px top-px min-w-[0.75rem] rounded-full bg-fg px-[3px] text-center text-[8px] font-bold leading-3 tabular-nums text-surface;
-  }
-
-  /* A mailbox that has stopped syncing still shows its mail, so this is a warning
-     on the tile rather than something that removes it from the grid. */
-  .mailbox-tile-warn {
-    @apply absolute bottom-px left-px h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-surface dark:ring-surface-dark;
-  }
-
-  .mailbox-add {
-    @apply grid h-[30px] w-[30px] place-items-center rounded-[var(--radius)] border border-dashed border-line text-muted;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .mailbox-add:hover {
-    @apply border-fg text-fg;
-    transform: translateY(-1px);
-  }
-
-  /* Folder count. Quiet by default; the unread folder earns the filled amber pill
-     because it is the only count that means "there is work here". */
-  .count-badge {
-    @apply ml-auto shrink-0 text-[11px] tabular-nums text-muted;
-  }
-
-  .count-badge-strong {
-    @apply ml-auto shrink-0 rounded-full bg-fg px-1.5 py-px text-[10px] font-bold tabular-nums text-surface;
-  }
-
-  /* ---- Toggle switch ----------------------------------------------------
-     The dark-mode control was a text row that said "Dark mode" and toggled to
-     "Light mode" , so the label described both the current state and the action
-     depending on how you read it. A switch has no such ambiguity.
-     --------------------------------------------------------------------- */
-
-  .switch {
-    @apply relative h-4 w-7 shrink-0 rounded-full bg-raise;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .switch[data-on="true"] {
-    @apply bg-fg;
-  }
-
-  .switch-knob {
-    @apply absolute left-0.5 top-0.5 h-3 w-3 rounded-full bg-white shadow-sm;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .switch[data-on="true"] .switch-knob {
-    transform: translateX(0.75rem);
-  }
-
-  /* ---- Thread list toolbar ---------------------------------------------- */
-
-  .list-toolbar {
-    @apply flex h-12 shrink-0 items-center gap-2.5 border-b border-line px-4;
-  }
-
-  .check-box {
-    @apply grid h-4 w-4 shrink-0 place-items-center rounded border border-line text-[10px] font-bold text-fg;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .check-box:hover {
-    @apply border-fg;
-    transform: scale(1.1);
-  }
-
-  .check-box[data-state="checked"],
-  .check-box[data-state="partial"] {
-    @apply border-fg bg-fg;
-  }
-
-  /* Rows arrive in sequence when the folder changes, so the eye follows the list
-     filling rather than finding a new one already there. Capped with nth-child so
-     row 200 does not wait six seconds for its turn. */
-  .thread-enter {
-    animation: auth-fade 260ms var(--ease-soft) both;
-  }
-
-  .thread-enter:nth-child(n + 13) {
-    animation-delay: 0ms;
-  }
-
-  /* ---- Reader ------------------------------------------------------------ */
-
-  /* Action buttons read as text with a leading icon, not as filled controls: on a
-     thread the message is the content and the toolbar is chrome. Reply keeps the
-     amber because it is what you came to do. */
-  .reader-action {
-    @apply inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .reader-action:hover {
-    @apply bg-raise text-fg;
-  }
-
-  .reader-action:active {
-    transform: scale(0.96);
-  }
-
-  .reader-action-primary {
-    @apply bg-fg font-semibold text-surface;
-  }
-
-  .reader-action-danger:hover {
-    @apply bg-red-500/10 text-red-600 dark:text-red-400;
-  }
-
-  /* The compose window's one AI entry point. Outlined rather than filled, so it
-     reads as "ask for help" beside a Send button that is filled and unambiguous ,
-     the two should not compete for the same emphasis. */
-  .ai-generate-btn {
-    @apply inline-flex items-center gap-1.5 rounded-[var(--radius)] border border-fg bg-raise px-3 py-1.5 text-xs font-semibold text-fg disabled:pointer-events-none disabled:opacity-50;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .ai-generate-btn:hover {
-    @apply border-fg bg-raise;
-    box-shadow: var(--mail-shadow);
-  }
-
-  .ai-generate-btn:active {
-    transform: scale(0.97);
-  }
-
-  /* Disclosed addressing under the participant row. */
-  .detail-panel {
-    animation: compose-slip var(--duration-control) var(--ease-soft) both;
-  }
-
-  /* The who-and-when card, between the AI summary and the messages.
-     It sits in a stack of grey message cards and was one more grey card among
-     them, so the one block that answers "who is this conversation with" read as
-     the first message in it. An amber wash and an amber edge separate it by
-     category rather than by weight , it is the only element in the reader that is
-     about the thread rather than part of it. */
-  .reader-participants {
-    @apply mb-3 border border-fg bg-raise px-3 py-2.5;
-    border-radius: var(--radius);
-  }
-
-  /* ---- Message card ------------------------------------------------------
-     The sender/date bar and the body it discloses.
-     --------------------------------------------------------------------- */
-
-  /* The divider under the header was previously added and removed with the open
-     state , `open && "border-b"`. Toggling a border changes the element's box by
-     1px, so every open and close nudged the layout, and the line appeared a frame
-     before the body did and vanished a frame after it: the stroke that flashed.
-     The border is always here now, and only its colour changes. */
-  .msg-head {
-    @apply flex w-full items-center gap-2.5 border-b border-transparent px-2.5 py-2 text-left;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
-
-  .msg-head[data-open="true"] {
-    @apply border-line;
-  }
-
-  /* The glide. `grid-template-rows: 0fr → 1fr` animates a element to its own
-     natural height without anyone having to measure it first , which matters
-     here because the body contains an iframe whose height the app cannot read
-     (`sandbox=""` denies it scripts, and relaxing that would hand mail HTML
-     same-origin access to the app). */
-  .msg-body {
+    transition: opacity var(--t1) var(--ease);
+  }
+  .signal-button:hover::before { opacity: .08; }
+  .signal-button:active { transform: scale(.98); }
+  .signal-button:disabled { pointer-events: none; opacity: .48; }
+  .btn-primary { border-color: var(--fg); background: var(--fg); color: var(--surface); font-weight: 600; }
+  .btn-default { border-color: var(--line); }
+  .btn-ghost { background: transparent; color: var(--muted); }
+  /* Destructive: outlined, then inverting to a solid fill. The blend flips text and
+     ground together, so the change can fade on opacity alone in either theme. */
+  .btn-danger { border-color: var(--fg); color: var(--fg); }
+  .btn-danger::before { inset: 0; z-index: 1; background: #ffffff; mix-blend-mode: difference; }
+  .btn-danger:hover::before { opacity: 1; }
+  .signal-button-small { min-height: 32px; padding: 0 12px; }
+  .signal-button-icon { width: 40px; height: 40px; padding: 0; flex-shrink: 0; }
+
+  .signal-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 20px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .signal-chip[data-strong="true"] { border-color: var(--fg); color: var(--fg); font-weight: 600; }
+
+  .signal-logo { display: grid; flex-shrink: 0; place-items: center; }
+  .kca-mark {
+    display: block;
+    background: currentColor;
+    -webkit-mask: url("/brand/kca-icon.svg") center / contain no-repeat;
+    mask: url("/brand/kca-icon.svg") center / contain no-repeat;
+  }
+
+  /* Fields */
+  .glass-panel { border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--surface); }
+  .glass-input {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    background: var(--raise);
+    color: var(--fg);
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .glass-input[aria-invalid="true"], .glass-input:user-invalid { border: 2px solid var(--fg); padding: 7px 11px; }
+  .glass-input-dense { min-height: 32px; padding: 4px 8px; }
+
+  /* Shared states */
+  .view-state {
     display: grid;
-    grid-template-rows: 0fr;
+    justify-items: center;
+    gap: 12px;
+    padding: 48px 24px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 20px;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+  .view-state-skeleton { display: grid; gap: 8px; width: min(240px, 100%); }
+  .view-state-skeleton i { height: 8px; border-radius: var(--radius-tag); background: var(--raise); }
+  .view-state-skeleton i:last-child { width: 64%; }
+  .error-line { display: flex; align-items: flex-start; gap: 8px; color: var(--fg); font-size: 13px; line-height: 20px; overflow-wrap: anywhere; }
+  .error-line svg { margin-top: 2px; }
+
+  /* Frame */
+  .signal-frame { display: grid; grid-template-columns: 84px minmax(0, 1fr); height: 100dvh; min-width: 0; overflow: hidden; background: var(--bg); color: var(--fg); }
+  .signal-desktop-sidebar { min-height: 0; }
+  .signal-workspace { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .signal-canvas { display: flex; flex: 1; min-height: 0; min-width: 0; overflow: hidden; padding: 0 20px 20px 4px; }
+  .v2-scroll { flex: 1; min-width: 0; overflow-y: auto; }
+  .v2-content { width: 100%; max-width: 1040px; margin: 0 auto; padding: 20px 0 32px; }
+  .v2-content > * { min-width: 0; }
+
+  /* Rail */
+  .mail-rail { height: 100%; display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 20px 0 16px; overflow-y: auto; }
+  .mail-rail-brand { display: grid; place-items: center; width: 44px; min-height: 32px; }
+  .mail-rail nav { display: grid; gap: 8px; }
+  .mail-rail nav a, .mail-rail nav button { position: relative; display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-control); color: var(--muted); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .mail-rail nav a:hover, .mail-rail nav button:hover { opacity: .64; }
+  .mail-rail nav a:active, .mail-rail nav button:active { transform: scale(.96); }
+  .mail-rail nav a[aria-current=page] { background: var(--fg); color: var(--surface); }
+  .mail-rail small { position: absolute; right: 0; top: 0; display: grid; place-items: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: var(--radius-tag); background: var(--fg); color: var(--surface); font-size: 12px; line-height: 16px; }
+  .mail-rail .mail-rail-bottom { margin-top: auto; padding-top: 12px; }
+  .mail-rail .mail-rail-avatar { border-radius: 50%; background: var(--raise); color: var(--fg); font-size: 12px; font-weight: 600; }
+
+  /* Top bar */
+  .signal-topbar { position: relative; display: flex; align-items: center; gap: 8px; min-height: 72px; padding: 16px 20px 16px 4px; }
+  .signal-command-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 328px;
+    min-width: 0;
+    height: 40px;
+    margin: 0 auto 0 0;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    background: var(--surface);
+    color: var(--muted);
+    text-align: left;
+    font-size: 13px;
     transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
+  .signal-command-trigger:hover { opacity: .8; }
+  .signal-command-trigger:active { transform: scale(.99); }
+  .signal-command-trigger span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .signal-command-trigger kbd { margin-left: auto; flex-shrink: 0; }
+  .signal-topbar-tools { display: flex; align-items: center; gap: 4px; }
+  .signal-menu { display: none; }
 
-  .msg-body[data-open="true"] {
-    grid-template-rows: 1fr;
-  }
+  /* Status dots: filled is healthy, a ring is waiting, a struck ring has failed. */
+  .signal-sync { position: relative; display: inline-block; flex-shrink: 0; width: 8px; height: 8px; margin-inline: 8px; border: 1px solid var(--fg); border-radius: 50%; }
+  .signal-sync[data-state=healthy] { background: var(--fg); }
+  .signal-sync[data-state=error]::after { content: ""; position: absolute; left: 50%; top: -2px; width: 1px; height: 12px; background: var(--fg); transform: rotate(-45deg); }
+  .status-dot { position: relative; display: inline-block; flex-shrink: 0; width: 8px; height: 8px; border: 1px solid var(--fg); border-radius: 50%; }
+  .status-dot[data-state=healthy] { background: var(--fg); }
+  .status-dot[data-state=failed]::after { content: ""; position: absolute; left: 50%; top: -2px; width: 1px; height: 12px; background: var(--fg); transform: rotate(-45deg); }
 
-  /* The row's child must be able to shrink below its content and clip, or the
-     grid track collapses while the content keeps its height and spills. */
-  .msg-body > * {
-    min-height: 0;
-    overflow: hidden;
-  }
+  .mail-new-email { flex-shrink: 0; }
 
-  /* Docked reply. A thread is a conversation, and a conversation ends with a place
-     to answer , the modal composer stays for genuinely new mail, where there is no
-     thread to sit at the bottom of. */
-  .reply-dock {
-    @apply shrink-0 border-t border-line px-5 py-3;
-    animation: compose-slip var(--duration-control) var(--ease-soft) both;
-  }
+  /* Drawer navigation */
+  .signal-sidebar { height: 100%; min-height: 0; min-width: 0; display: flex; flex-direction: column; gap: 20px; padding: 24px 12px 12px; background: var(--surface); }
+  .signal-brand { display: flex; align-items: center; gap: 8px; padding-inline: 8px; font-size: 16px; line-height: 24px; font-weight: 600; }
+  .signal-new-message { width: 100%; justify-content: flex-start; }
+  .signal-primary-nav { display: flex; flex-direction: column; gap: 4px; }
+  .signal-nav-link { position: relative; display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: var(--radius-control); color: var(--muted); font-size: 14px; line-height: 20px; font-weight: 500; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .signal-nav-link:hover { opacity: .64; }
+  .signal-nav-link:active { transform: scale(.98); }
+  .signal-nav-link.is-active { background: var(--fg); color: var(--surface); }
+  .signal-count { margin-left: auto; min-width: 20px; padding: 0 4px; border-radius: var(--radius-tag); background: var(--fg); color: var(--surface); text-align: center; font-family: var(--f-mono), monospace; font-size: 12px; line-height: 20px; font-weight: 500; }
+  .signal-nav-link.is-active .signal-count { background: var(--surface); color: var(--fg); }
+  .signal-sidebar-context { flex: 1; min-height: 0; overflow-y: auto; }
+  .signal-mail-context summary { display: flex; align-items: center; gap: 8px; padding: 0 12px 8px; color: var(--muted); font-size: 12px; line-height: 16px; cursor: pointer; }
+  .signal-mail-context summary::-webkit-details-marker { display: none; }
+  .signal-folder { display: flex; justify-content: space-between; align-items: center; padding: 4px 12px 4px 32px; border-radius: var(--radius-control); color: var(--muted); font-size: 13px; line-height: 24px; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .signal-folder:hover { opacity: .64; }
+  .signal-folder[aria-current=page] { background: var(--fg); color: var(--surface); }
+  .signal-folder small { font-family: var(--f-mono), monospace; font-size: 12px; }
+  .signal-mailbox-label { display: grid; gap: 8px; margin-top: 20px; padding-inline: 12px; color: var(--muted); font-size: 12px; line-height: 16px; }
+  .signal-mailbox-label select { width: 100%; min-width: 0; min-height: 40px; padding-left: 12px; border: 1px solid var(--line); border-radius: var(--radius-control); font-size: 13px; }
+  .signal-connect { display: flex; align-items: center; gap: 4px; padding: 8px 12px; color: var(--muted); font-size: 13px; }
+  .signal-user-row { display: flex; align-items: center; gap: 4px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .signal-user { display: flex; flex: 1; min-width: 0; align-items: center; gap: 8px; }
+  .signal-user-text { flex: 1; min-width: 0; }
+  .signal-user strong, .signal-user small { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .signal-user strong { font-size: 13px; line-height: 20px; font-weight: 600; }
+  .signal-user small { color: var(--muted); font-size: 12px; line-height: 16px; }
+  .signal-avatar { display: grid; width: 32px; height: 32px; flex-shrink: 0; place-items: center; border-radius: 50%; background: var(--raise); color: var(--fg); font-size: 12px; font-weight: 600; }
 
-  .reply-dock-collapsed {
-    @apply flex w-full items-center gap-2.5 rounded-[var(--radius)] border border-line bg-sunken px-4 py-2 text-left text-sm text-muted dark:bg-sunken-dark;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
+  /* Dialogs. Native <dialog> holds focus; the panel animates. */
+  .signal-dialog { position: fixed; inset: 0; width: 100%; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: max(40px, 10vh) 16px 24px; border: 0; background: transparent; color: var(--fg); overflow: auto; }
+  .signal-dialog[open] { display: flex; justify-content: center; align-items: flex-start; }
+  .signal-dialog::backdrop { background: var(--overlay); opacity: 0; transition: opacity var(--t2) var(--ease); }
+  .signal-dialog[data-visible=true]::backdrop { opacity: 1; }
+  .signal-dialog-panel { width: min(560px, 100%); min-width: 0; border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--surface); box-shadow: var(--shadow-dialog); opacity: 0; transform: translateY(12px) scale(.98); transition: transform var(--t2) var(--ease), opacity var(--t2) var(--ease); }
+  .signal-dialog[data-visible=true] > .signal-dialog-panel { opacity: 1; transform: none; }
+  .signal-dialog-body { padding: 24px; }
+  .signal-dialog-body h2 { font-size: 20px; line-height: 28px; font-weight: 600; }
+  .signal-drawer { padding: 0; }
+  .signal-drawer[open] { justify-content: flex-start; }
+  .signal-drawer > .signal-dialog-panel { position: relative; width: min(296px, 85vw); height: 100%; border-width: 0 1px 0 0; border-radius: 0; transform: translateX(-100%); }
+  .signal-drawer[data-visible=true] > .signal-dialog-panel { transform: none; }
+  .signal-drawer .signal-sidebar { padding-top: 32px; }
+  .signal-drawer-close { position: absolute; right: 4px; top: 4px; z-index: 1; }
+  .signal-help > .signal-dialog-panel { padding: 24px; }
+  .signal-help h2 { font-size: 20px; line-height: 28px; font-weight: 600; }
+  .signal-help dl { display: grid; gap: 12px; padding-top: 20px; }
+  .signal-help dl > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 13px; line-height: 20px; }
+  .signal-help dd { color: var(--muted); }
 
-  .reply-dock-collapsed:hover {
-    @apply border-fg bg-surface dark:bg-surface-dark;
-    box-shadow: 0 4px 14px rgb(23 23 23 / 0.06);
-  }
+  .signal-command-input { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); color: var(--muted); }
+  .signal-command-input input { flex: 1; min-width: 0; background: transparent; color: var(--fg); outline: 0; font-size: 16px; line-height: 24px; }
+  .signal-command-list { max-height: min(440px, 60dvh); overflow-y: auto; padding: 8px; }
+  .signal-command-list button { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 12px; border-radius: var(--radius-control); text-align: left; font-size: 13px; line-height: 20px; isolation: isolate; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .signal-command-list button::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--raise); opacity: 0; transition: opacity var(--t1) var(--ease); }
+  .signal-command-list button[aria-selected=true]::before { opacity: 1; }
+  .signal-command-list button:active { transform: scale(.99); }
+  .signal-command-list button span { flex: 1; overflow-wrap: anywhere; }
+  .signal-command-list small { color: var(--muted); font-size: 12px; }
+  .signal-command-help { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 16px; }
 
-  /* ---- Settings hub ------------------------------------------------------
-     Settings had no index at all: the rail linked straight to six sub-pages, so
-     there was no one place that answered "what can I configure?".
-     --------------------------------------------------------------------- */
+  .signal-toast { position: fixed; z-index: 100; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); max-width: calc(100vw - 32px); padding: 12px 16px; border-radius: var(--radius-control); background: var(--fg); color: var(--surface); box-shadow: var(--shadow-menu); font-size: 13px; line-height: 20px; pointer-events: none; opacity: 0; transform: translate(-50%, 12px); transition: transform var(--t2) var(--ease), opacity var(--t2) var(--ease); }
+  .signal-toast[data-visible=true] { opacity: 1; transform: translate(-50%, 0); }
 
-  .hub-grid {
-    @apply grid gap-3;
-    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-  }
+  /* Sign in */
+  .signal-auth { display: grid; place-items: center; min-height: 100dvh; width: 100%; padding: 32px 16px; background: var(--bg); }
+  .signal-auth-form { width: min(440px, 100%); min-width: 0; padding: 32px; border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--surface); }
+  .signal-auth-content { width: 100%; min-width: 0; }
+  .signal-auth-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--fg); }
+  .signal-auth-heading { margin-bottom: 24px; }
+  .signal-auth-heading h1 { font-size: 28px; line-height: 36px; font-weight: 600; }
+  .signal-auth-heading p { margin-top: 4px; font-size: 14px; line-height: 20px; color: var(--muted); }
+  .signal-auth-field { display: flex; min-width: 0; flex-direction: column; gap: 8px; }
+  .signal-auth-field label { font-size: 13px; line-height: 20px; font-weight: 500; color: var(--fg); }
+  .signal-auth-field > p { font-size: 12px; line-height: 16px; color: var(--muted); }
+  .signal-auth-input-wrap { position: relative; display: flex; align-items: center; }
+  .signal-auth-input-wrap > svg { position: absolute; left: 12px; color: var(--muted); pointer-events: none; }
+  .signal-auth-input { width: 100%; min-width: 0; height: 44px; padding: 0 12px 0 36px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--raise); color: var(--fg); font-size: 14px; }
+  .signal-auth-input-mono { font-family: var(--f-mono), monospace; font-size: 13px; }
+  .signal-password { padding-right: 44px; }
+  .signal-password-toggle { position: absolute; right: 4px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-control); color: var(--muted); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .signal-password-toggle:hover { opacity: .64; }
+  .signal-password-toggle:active { transform: scale(.94); }
+  .signal-remember { display: flex; align-items: center; gap: 8px; align-self: flex-start; color: var(--muted); font-size: 13px; line-height: 20px; }
+  .signal-switch { position: relative; display: inline-flex; align-items: center; width: 32px; height: 16px; padding: 2px; border-radius: 999px; background: var(--line); isolation: isolate; }
+  .signal-switch::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--fg); opacity: 0; transition: opacity var(--t1) var(--ease); }
+  .signal-switch[data-on=true]::before { opacity: 1; }
+  .signal-switch > span { width: 12px; height: 12px; border-radius: 50%; background: var(--surface); transition: transform var(--t1) var(--ease); }
+  .signal-switch[data-on=true] > span { transform: translateX(16px); }
+  .signal-auth-submit { width: 100%; height: 44px; font-size: 14px; }
+  .signal-auth-footer { margin-top: 24px; color: var(--muted); font-size: 13px; line-height: 20px; }
+  .auth-link { color: var(--fg); font-weight: 500; text-decoration: underline; text-underline-offset: 4px; transition: opacity var(--t1) var(--ease); }
+  .auth-link:hover { opacity: .64; }
+  .signal-auth-error { display: flex; align-items: flex-start; gap: 8px; color: var(--fg); font-size: 13px; line-height: 20px; overflow-wrap: anywhere; }
+  .signal-auth-error svg { margin-top: 2px; }
+  .signal-loading { animation: signal-spin 1s linear infinite; }
+  @keyframes signal-spin { to { transform: rotate(360deg); } }
 
-  .hub-tile {
-    @apply flex items-start gap-3 border border-line bg-surface p-4 shadow-raised dark:bg-surface-dark;
-    border-radius: var(--radius);
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-    animation: auth-fade 380ms var(--ease-soft) both;
-    animation-delay: calc(40ms + var(--i, 0) * 40ms);
-  }
+  /* Composer */
+  .compose-backdrop { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 28px; background: var(--overlay); color: var(--fg); animation: compose-veil var(--t2) var(--ease) both; }
+  .compose-backdrop[data-closing="true"] { animation: compose-veil var(--t1) var(--ease) reverse both; }
+  .compose-sheet { position: relative; display: flex; flex-direction: column; width: 100%; max-height: calc(100dvh - 64px); overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--surface); color: var(--fg); box-shadow: var(--shadow-dialog); animation: compose-rise var(--t3) var(--ease) both; }
+  .compose-backdrop[data-closing="true"] .compose-sheet { animation: compose-rise var(--t1) var(--ease) reverse both; }
+  .compose-close-pill { position: absolute; top: -12px; right: -12px; z-index: 10; display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--muted); animation: compose-rise var(--t3) var(--ease) both; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .compose-close-pill:hover { opacity: .64; }
+  .compose-close-pill:active { transform: scale(.94); }
+  .compose-backdrop[data-closing="true"] .compose-close-pill { animation: compose-rise var(--t1) var(--ease) reverse both; }
+  @keyframes compose-veil { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes compose-rise { from { opacity: 0; transform: translateY(16px) scale(.98); } to { opacity: 1; transform: none; } }
+  @keyframes compose-slip { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 
-  .hub-tile:hover {
-    @apply border-fg;
-    transform: translateY(-2px);
-    box-shadow: 0 14px 34px rgb(23 23 23 / 0.12);
-  }
+  .compose-row { display: flex; align-items: flex-start; gap: 12px; padding: 8px 20px; border-bottom: 1px solid var(--line); }
+  .compose-row-label { width: 64px; flex-shrink: 0; padding-top: 4px; color: var(--muted); font-size: 13px; line-height: 24px; font-weight: 500; }
+  .compose-row-link { color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; transition: opacity var(--t1) var(--ease); }
+  .compose-row-link:hover { opacity: .64; }
+  .compose-bare-input { flex: 1; min-width: 0; padding: 4px 0; background: transparent; color: var(--fg); font-size: 14px; line-height: 24px; outline: 0; }
+  .compose-bare-input[readonly] { cursor: default; color: var(--muted); }
+  .compose-actionbar { display: flex; flex-shrink: 0; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); }
+  .compose-dropzone[data-dragging="true"] { outline: 2px dashed var(--fg); outline-offset: -8px; border-radius: var(--radius-card); }
+  .attach-card { display: flex; align-items: center; gap: 8px; padding: 4px 4px 4px 12px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--raise); animation: compose-slip var(--t2) var(--ease) both; }
 
-  /* Each tile's icon carries its own tint, which is what makes the grid scannable
-     by colour rather than by reading six labels. */
-  .hub-tile-icon {
-    @apply grid h-10 w-10 shrink-0 place-items-center rounded-xl;
-    transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
-  }
+  /* Editor */
+  .editor-toolbar { display: flex; flex-shrink: 0; flex-wrap: wrap; align-items: center; gap: 4px; padding: 4px 20px; border-bottom: 1px solid var(--line); background: var(--surface); }
+  .editor-toolbar-tight { padding-inline: 12px; }
+  .editor-toolbar-sticky { position: sticky; top: 0; z-index: 10; }
+  .editor-sep { width: 1px; height: 16px; margin-inline: 4px; background: var(--line); }
+  .editor-tool { position: relative; display: inline-grid; grid-auto-flow: column; place-items: center; width: 28px; height: 28px; border-radius: var(--radius-tag); color: var(--muted); font-size: 12px; font-weight: 500; isolation: isolate; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .editor-tool::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--fg); opacity: 0; transition: opacity var(--t1) var(--ease); }
+  .editor-tool:hover::before { opacity: .08; }
+  .editor-tool-active { color: var(--fg); }
+  .editor-tool-active::before { opacity: .12; }
+  .editor-tool:active { transform: scale(.92); }
+  .editor-tool-wide { width: auto; gap: 4px; padding-inline: 8px; }
+  .editor-tool-lg { width: 32px; height: 32px; }
+  .editor-linkbar { display: flex; flex-shrink: 0; align-items: center; gap: 4px; padding: 4px 20px; border-bottom: 1px solid var(--line); background: var(--raise); animation: compose-slip var(--t2) var(--ease) both; }
+  .editor-surface { width: 100%; height: 100%; min-height: 240px; padding: 12px var(--editor-pad-x, 0); background: var(--surface); color: var(--fg); font-size: 14px; line-height: 24px; outline: 0; overflow-wrap: anywhere; }
+  .editor-surface-compact { min-height: 96px; max-height: 224px; overflow-y: auto; }
+  .editor-surface-tall { min-height: 256px; }
+  .editor-placeholder { position: absolute; left: var(--editor-pad-x, 0); top: 12px; color: var(--muted); font-size: 14px; line-height: 24px; pointer-events: none; }
+  .editor-surface ul { margin-block: 8px; padding-left: 20px; list-style: disc; }
+  .editor-surface ol { margin-block: 8px; padding-left: 20px; list-style: decimal; }
+  .editor-surface li { margin-block: 2px; }
+  .editor-surface p { margin-block: 8px; }
+  .editor-surface a { color: var(--fg); text-decoration: underline; text-underline-offset: 2px; }
+  .editor-surface blockquote { margin-block: 8px; padding-left: 12px; border-left: 2px solid var(--fg); color: var(--muted); }
+  .editor-surface img { max-width: 100%; border-radius: var(--radius-control); }
+  .editor-box { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); }
+  .editor-box:focus-within { border-color: var(--fg); }
+  .editor-source { width: 100%; height: 100%; min-height: 192px; padding-block: 12px; resize: none; background: transparent; font-family: var(--f-mono), monospace; font-size: 12px; line-height: 20px; outline: 0; }
+  .quote-toggle { display: inline-flex; align-items: center; gap: 4px; min-height: 28px; padding: 0 8px; border: 1px solid var(--line); border-radius: var(--radius-tag); color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .quote-toggle:hover { opacity: .64; }
 
-  .hub-tile:hover .hub-tile-icon {
-    transform: scale(1.06) rotate(-3deg);
-  }
-}
+  /* Merge fields */
+  .mf-chip { display: inline-block; margin-inline: 1px; padding: 0 4px; border: 1px solid var(--line); border-radius: var(--radius-tag); background: var(--raise); color: var(--fg); font-size: 13px; line-height: 20px; font-weight: 500; white-space: nowrap; user-select: none; }
+  .mf-chip-static { cursor: default; }
+  .mf-trigger { display: inline-flex; align-items: center; gap: 4px; min-height: 28px; padding: 0 8px; border: 1px solid var(--line); border-radius: var(--radius-tag); color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .mf-trigger:hover { opacity: .64; }
+  .mf-trigger-open { border-color: var(--fg); color: var(--fg); }
+  .mf-menu { position: absolute; right: 0; z-index: 30; width: 288px; max-height: 320px; margin-top: 4px; padding: 4px; overflow-y: auto; }
+  .mf-menu-intro { padding: 4px 8px; color: var(--muted); font-size: 12px; line-height: 16px; }
+  .mf-menu-group { padding-top: 4px; border-top: 1px solid var(--line); }
+  .mf-menu-title { padding: 4px 8px 0; color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 600; }
+  .mf-menu-item { position: relative; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; width: 100%; padding: 4px 8px; border-radius: var(--radius-tag); color: var(--fg); text-align: left; font-size: 13px; line-height: 20px; isolation: isolate; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .mf-menu-item::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--raise); opacity: 0; transition: opacity var(--t1) var(--ease); }
+  .mf-menu-item:hover::before { opacity: 1; }
+  .mf-menu-example { flex-shrink: 0; max-width: 144px; overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 16px; }
 
-/* Signal foundation. Existing page classes keep their compatibility tokens. */
-html { min-width: 0; }
-body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body), system-ui, sans-serif; }
-button { cursor: pointer; }
-button:disabled { cursor: default; }
-:focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
-.signal-logo { display: grid; flex-shrink: 0; place-items: center; }
-.signal-button { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; max-width: 100%; padding: 0 16px; border: 0; border-radius: 99px; background: var(--raise); color: var(--fg); font-size: 13px; font-weight: 500; isolation: isolate; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
-.signal-button::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: currentColor; opacity: 0; pointer-events: none; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
-.signal-button:hover::before { opacity: .06; }
-.signal-button:hover { transform: translateY(-1px); }
-.signal-button:active { transform: scale(.97); }
-.signal-button:disabled { pointer-events: none; opacity: .5; }
-.signal-button.btn-primary { background: var(--fg); color: var(--surface); font-weight: 600; box-shadow: none; }
-.signal-button.btn-ghost { border-color: transparent; background: transparent; color: var(--muted); }
-.signal-button.btn-danger { background: color-mix(in oklab, var(--bad) 12%, var(--surface)); border-color: color-mix(in oklab, var(--bad) 35%, var(--line)); color: var(--bad); }
-.signal-button-small { min-height: 30px; padding-inline: 11px; font-size: 12px; }
-.signal-button-icon { width: 36px; height: 36px; padding: 0; flex-shrink: 0; }
-.signal-chip { --h: var(--muted); display: inline-flex; align-items: center; gap: 6px; border-radius: 99px; padding: 3px 9px; white-space: nowrap; font-size: 11.5px; font-weight: 500; background: color-mix(in oklab, var(--h) 15%, transparent); color: color-mix(in oklab, var(--h) 62%, var(--fg)); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
-.signal-chip[data-dot=true]::before { content: ""; width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; background: var(--h); }
-.signal-chip:hover { transform: translateY(-1px); }
-.signal-chip:active { transform: scale(.97); }
-.signal-frame { display: grid; grid-template-columns: 236px minmax(0,1fr); height: 100dvh; min-width: 0; overflow: hidden; background: var(--frame); }
-.signal-desktop-sidebar { min-height: 0; }
-.signal-sidebar { height: 100%; min-height: 0; min-width: 0; display: flex; flex-direction: column; gap: 20px; padding: 24px 14px 14px; background: var(--surface); border-right: 1px solid var(--line); }
-.signal-brand { display: flex; align-items: center; gap: 10px; padding-inline: 6px; font: 700 19px var(--f-display), sans-serif; letter-spacing: -.03em; }
-.signal-new-message { width: 100%; justify-content: flex-start; min-height: 40px; }
-.signal-primary-nav { display: flex; flex-direction: column; gap: 3px; }
-.signal-nav-link { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px; color: var(--muted); font-size: 13.5px; font-weight: 500; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); animation: signal-arrive var(--t3) var(--ease) backwards; animation-delay: calc(var(--i,0) * 50ms); }
-.signal-nav-link:hover { background: var(--raise); color: var(--fg); transform: translateX(2px); }
-.signal-nav-link:active { transform: scale(.98); }
-.signal-nav-link.is-active { color: var(--fg); background: var(--raise); }
-.signal-count { margin-left: auto; min-width: 20px; padding: 1px 6px; text-align: center; border-radius: 6px; background: var(--sodium); color: var(--on-sodium); font: 600 10px/18px var(--f-mono), monospace; }
-.signal-sidebar-context { flex: 1; min-height: 0; overflow-y: auto; }
-.signal-mail-context summary { display: flex; align-items: center; gap: 7px; cursor: pointer; color: var(--muted); font-size: 11px; padding: 0 10px 8px; }
-.signal-mail-context summary::after { content: "+"; margin-left: auto; }
-.signal-mail-context[open] summary::after { content: "-"; }
-.signal-mail-context nav { animation: signal-arrive var(--t2) var(--ease) backwards; }
-.signal-folder { display: flex; justify-content: space-between; padding: 5px 10px 5px 30px; font-size: 12px; color: var(--muted); border-radius: 8px; }
-.signal-folder:hover, .signal-folder[aria-current=page] { background: var(--raise); color: var(--fg); }
-.signal-folder small { font: 10px var(--f-mono), monospace; }
-.signal-mailbox-label { display: grid; gap: 7px; margin-top: 18px; padding-inline: 10px; font-size: 11px; color: var(--muted); }
-.signal-mailbox-label select { width: 100%; min-width: 0; padding: 7px; font-size: 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--raise); color: var(--fg); }
-.signal-connect { display: flex; align-items: center; gap: 5px; padding: 9px 10px; font-size: 11px; color: var(--muted); }
-.signal-user-row { display: flex; align-items: center; gap: 2px; border-top: 1px solid var(--line); padding-top: 14px; }
-.signal-user { display: flex; flex: 1; min-width: 0; align-items: center; gap: 9px; }
-.signal-user > span:nth-child(2) { flex: 1; min-width: 0; }
-.signal-user strong, .signal-user small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.signal-user strong { font-size: 12px; font-weight: 600; }
-.signal-user small { font-size: 10px; color: var(--muted); margin-top: 2px; }
-.signal-user > svg { display: none; }
-.signal-avatar { display: grid; width: 32px; height: 32px; flex-shrink: 0; place-items: center; border-radius: 50%; background: color-mix(in oklab, var(--jac) 18%, var(--surface)); color: var(--fg); font-size: 11px; font-weight: 600; }
-.signal-workspace { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-.signal-topbar { position: relative; display: flex; min-height: 65px; align-items: center; gap: 14px; padding: 12px 22px; border-bottom: 1px solid var(--line); }
-.signal-command-trigger { display: flex; align-items: center; gap: 10px; width: min(420px,55%); min-width: 0; height: 40px; margin-inline: auto; padding: 0 8px 0 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--raise); color: var(--muted); text-align: left; font-size: 13px; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
-.signal-command-trigger:hover { transform: translateY(-1px); }
-.signal-command-trigger:active { transform: scale(.99); }
-.signal-command-trigger span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.signal-command-trigger kbd { margin-left: auto; flex-shrink: 0; }
-.signal-topbar-tools { display: flex; align-items: center; gap: 5px; }
-.signal-menu { display: none; }
-.signal-sync { position: relative; display: inline-block; width: 8px; height: 8px; margin-inline: 6px; border-radius: 50%; background: var(--warn); flex-shrink: 0; }
-.signal-sync[data-state=healthy] { background: var(--good); }
-.signal-sync[data-state=healthy]::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--good); animation: signal-ping 2.4s var(--ease) infinite; }
-.signal-sync[data-state=error] { background: var(--bad); }
-.signal-canvas { display: flex; flex: 1; min-height: 0; min-width: 0; overflow: hidden; }
-.signal-frame kbd { border: 1px solid var(--line); border-bottom-width: 2px; padding: 2px 5px; border-radius: 5px; background: var(--surface); color: var(--muted); font: 10px var(--f-mono), monospace; white-space: nowrap; }
-.signal-dialog { position: fixed; inset: 0; width: 100%; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: max(40px,10vh) 16px 24px; border: 0; background: transparent; color: var(--fg); overflow: auto; }
-.signal-dialog[open] { display: flex; justify-content: center; align-items: flex-start; }
-.signal-dialog::backdrop { background: rgb(6 7 11 / .6); opacity: 0; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
-.signal-dialog[data-visible=true]::backdrop { opacity: 1; }
-.signal-dialog-panel { width: min(560px,100%); min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 24px 80px rgb(0 0 0 / .24); opacity: 0; transform: translateY(12px) scale(.985); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
-.signal-dialog[data-visible=true] > .signal-dialog-panel { opacity: 1; transform: none; }
-.signal-command-input { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); color: var(--muted); }
-.signal-command-input input { flex: 1; min-width: 0; background: transparent; color: var(--fg); outline: 0; font-size: 15px; }
-.signal-command-input:focus-within { box-shadow: inset 0 -2px var(--sodium); }
-.signal-command-list { max-height: min(440px,60dvh); overflow-y: auto; padding: 8px; }
-.signal-command-list button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; border-radius: 10px; text-align: left; font-size: 13px; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
-.signal-command-list button[aria-selected=true] { background: var(--raise); }
-.signal-command-list button:active { transform: scale(.99); }
-.signal-command-list button span { flex: 1; overflow-wrap: anywhere; }
-.signal-command-list small { color: var(--muted); font-size: 10px; }
-.signal-command-help { display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); }
-.signal-drawer { padding: 0; }
-.signal-drawer[open] { justify-content: flex-start; }
-.signal-drawer > .signal-dialog-panel { position: relative; width: min(296px,85vw); height: 100%; border-radius: 0; transform: translateX(-100%); }
-.signal-drawer[data-visible=true] > .signal-dialog-panel { transform: none; }
-.signal-drawer .signal-sidebar { padding-top: 30px; }
-.signal-drawer-close { position: absolute; right: 5px; top: 5px; z-index: 1; }
-.signal-help > .signal-dialog-panel { padding: 22px; }
-.signal-help h2 { font: 700 22px var(--f-display), sans-serif; }
-.signal-help dl { display: grid; gap: 12px; padding-top: 20px; }
-.signal-help dl > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 12px; }
-.signal-help dd { color: var(--muted); }
-.signal-toast { position: fixed; z-index: 100; left: 50%; bottom: max(24px,env(safe-area-inset-bottom)); max-width: calc(100vw - 32px); padding: 12px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--fg); color: var(--surface); box-shadow: 0 8px 24px rgb(0 0 0 / .16); font-size: 13px; pointer-events: none; opacity: 0; transform: translate(-50%,12px); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
-.signal-toast[data-visible=true] { opacity: 1; transform: translate(-50%,0); }
-.signal-auth { display: grid; place-items: center; min-height: 100dvh; width: 100%; padding: 32px 16px; background: var(--bg); }
-.signal-auth-scene { position: relative; overflow: hidden; min-height: 100%; background: var(--board-bg); color: var(--board-fg); }
-.signal-light-field { position: absolute; inset: 0; width: 100%; height: 100%; }
-.signal-auth-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; font: 650 18px var(--f-body), sans-serif; color: var(--fg); }
-.signal-auth-caption { position: absolute; left: 32px; bottom: 30px; font: 11px var(--f-mono), monospace; letter-spacing: .08em; color: rgb(255 247 232 / .45); pointer-events: none; }
-.signal-auth-form { width: min(460px, 100%); min-width: 0; padding: clamp(24px, 5vw, 40px); border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); }
-.signal-auth-content { width: 100%; min-width: 0; }
-.signal-auth-heading { margin-bottom: 32px; animation: signal-arrive var(--t3) var(--ease) backwards; }
-.signal-auth-heading h1 { font: 650 28px/1.2 var(--f-body), sans-serif; letter-spacing: -.03em; }
-.signal-auth-heading p { margin-top: 12px; font-size: 14px; color: var(--muted); }
-.signal-auth-content form { animation: signal-arrive var(--t3) var(--ease) 50ms backwards; }
-.signal-auth-field { display: flex; min-width: 0; flex-direction: column; gap: 7px; }
-.signal-auth-field label { font-size: 12px; font-weight: 500; color: var(--fg); }
-.signal-auth-field > p { font-size: 11px; line-height: 1.5; color: var(--muted); }
-.signal-auth-input-wrap { position: relative; display: flex; align-items: center; }
-.signal-auth-input-wrap > svg { position: absolute; left: 13px; color: var(--muted); pointer-events: none; }
-.signal-auth-input { width: 100%; min-width: 0; height: 46px; padding: 0 14px 0 39px; border: 1px solid var(--line); border-radius: 12px; background: var(--raise); color: var(--fg); font-size: 13px; }
-.signal-auth-input::placeholder { color: var(--muted); }
-.signal-auth-input:focus { outline: 2px solid var(--fg); outline-offset: 3px; }
-.signal-auth-input:-webkit-autofill { -webkit-text-fill-color: var(--fg); caret-color: var(--fg); transition: background-color 100000s; }
-.signal-password { padding-right: 44px; }
-.signal-password-toggle { position: absolute; right: 7px; display: grid; place-items: center; width: 32px; height: 32px; color: var(--muted); border-radius: 7px; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
-.signal-password-toggle:hover { transform: translateY(-1px); }
-.signal-password-toggle:active { transform: scale(.94); }
-.signal-remember { display: flex; align-items: center; gap: 10px; align-self: flex-start; font-size: 12px; color: var(--muted); border-radius: 8px; }
-.signal-switch { position: relative; display: inline-flex; align-items: center; width: 32px; height: 18px; border-radius: 99px; background: var(--line); }
-.signal-switch[data-on=true] { background: var(--sodium); }
-.signal-switch > span { width: 12px; height: 12px; border-radius: 50%; background: var(--surface); transform: translateX(3px); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
-.signal-switch[data-on=true] > span { background: var(--surface); transform: translateX(17px); }
-.signal-auth-submit { height: 46px; width: 100%; font-size: 14px; }
-.signal-auth-footer { margin-top: 28px; font-size: 12px; color: var(--muted); animation: signal-arrive var(--t3) var(--ease) 100ms backwards; }
-.signal-auth .auth-link { color: var(--fg); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--line); }
-.signal-auth .auth-link::after { display: none; }
-.signal-auth .auth-link:hover { text-decoration-color: var(--fg); }
-.signal-auth-error { padding: 10px 12px; border: 1px solid color-mix(in oklab,var(--bad) 35%,var(--line)); border-radius: 10px; background: color-mix(in oklab,var(--bad) 8%,var(--surface)); color: var(--bad); font-size: 12px; }
-.signal-loading { animation: signal-spin 1s var(--ease) infinite; }
-@keyframes signal-spin { to { transform: rotate(360deg); } }
-@keyframes signal-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@keyframes signal-ping { from { opacity: .65; transform: scale(1); } to { opacity: 0; transform: scale(3.2); } }
-@media (max-width: 859px) {
-  .signal-frame { grid-template-columns: minmax(0,1fr); }
-  .signal-desktop-sidebar { display: none; }
-  .signal-menu { display: inline-flex; }
-  .signal-topbar { gap: 8px; padding: 10px 12px; }
-  .signal-command-trigger { flex: 1; width: auto; padding-left: 10px; gap: 7px; }
-  .signal-command-trigger kbd { display: none; }
-  .signal-topbar-tools { gap: 1px; }
-  .signal-topbar-tools .signal-button-icon { width: 32px; }
-  .signal-auth { padding: 20px 12px; }
-  .signal-auth-scene { min-height: 230px; }
-  .signal-auth-brand { margin-bottom: 28px; }
-  .signal-auth-caption { display: none; }
-  .signal-auth-form { padding: 28px 24px; }
-  .signal-auth-heading { margin-bottom: 26px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
-}
+  /* Popovers */
+  .menu-pop { z-index: 50; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); box-shadow: var(--shadow-menu); transform-origin: top right; animation: menu-pop var(--t2) var(--ease) both; }
+  .menu-pop[data-closing="true"] { animation: menu-pop-out var(--t1) var(--ease) both; }
+  @keyframes menu-pop { from { opacity: 0; transform: translateY(-4px) scale(.98); } to { opacity: 1; transform: none; } }
+  @keyframes menu-pop-out { to { opacity: 0; transform: translateY(-4px) scale(.98); } }
+  .v2-overlay { background: var(--overlay); animation: compose-veil var(--t2) var(--ease) both; }
 
-/* Shared V2 fields, arrival rhythm and portal surfaces. */
-.glass-input::placeholder { color: var(--muted); opacity: 1; }
-:is(input, textarea, select) { accent-color: var(--fg); }
-select { color: var(--fg); background-color: var(--raise); }
-option { color: var(--fg); background: var(--surface); }
-input[type="date"] { color-scheme: inherit; }
-:is(input, textarea, select):disabled { opacity: .55; cursor: default; }
-:is(input, textarea):-webkit-autofill { -webkit-text-fill-color: var(--fg); caret-color: var(--fg); box-shadow: 0 0 0 1000px var(--raise) inset; }
-:is(input, textarea):autofill { color: var(--fg); background: var(--raise); }
-.btn-primary:disabled { pointer-events: none; opacity: .5; }
-.signal-dialog-panel { border: 0; border-radius: 20px; box-shadow: var(--mail-shadow); }
-.v2-overlay { background: rgb(6 7 11 / .6); animation: compose-veil var(--t2) var(--ease) both; }
-.signal-sidebar { border-right: 0; }
-.signal-nav-link, .signal-folder { border-radius: 99px; }
-.signal-nav-link.is-active, .signal-folder[aria-current=page] { background: var(--fg); color: var(--surface); }
-.signal-user { overflow-wrap: anywhere; }
-.signal-chip { color: var(--h); background: color-mix(in srgb, var(--h) 9%, var(--surface)); }
-.view-state { display: grid; justify-items: center; gap: 14px; padding: 44px 24px; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); color: var(--muted); font-size: 13px; line-height: 1.6; text-align: center; overflow-wrap: anywhere; animation: signal-arrive var(--t2) var(--ease) backwards; }
-.view-state-skeleton { width: min(240px, 100%); display: grid; gap: 10px; }
-.view-state-skeleton i { height: 9px; border-radius: 99px; background: var(--raise); animation: v2-breathe 1.4s var(--ease) infinite alternate; }
-.view-state-skeleton i:last-child { width: 65%; animation-delay: 120ms; }
-.v2-scroll { flex: 1; min-width: 0; overflow-y: auto; }
-.v2-content { width: 100%; max-width: 1040px; margin: 0 auto; padding: 20px 0 32px; }
-.v2-content > * { min-width: 0; }
-.v2-content h1 { font: 650 28px/1.2 var(--f-body), sans-serif; letter-spacing: -.03em; }
-.v2-content :is(button, a, summary, input, select, textarea) { transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
-.v2-content :is(a, button):active { transform: scale(.98); }
-.v2-content > div > :is(section, header, dl), .v2-content > form > :is(section, header, fieldset) { animation: signal-arrive var(--t3) var(--ease) backwards; }
-.v2-content > div > :nth-child(2) { animation-delay: 40ms; }
-.v2-content > div > :nth-child(3) { animation-delay: 80ms; }
-.v2-content > div > :nth-child(4) { animation-delay: 120ms; }
-@keyframes v2-breathe { from { opacity: .5; } to { opacity: 1; } }
-@media (max-width: 859px) { .v2-content { padding-top: 14px; } }
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-  /* Popover dismissal consumes animationend, even when motion is reduced. */
-  .menu-pop { animation: menu-pop .01ms var(--ease) both !important; }
-  .menu-pop[data-closing="true"] { animation: menu-pop-out .01ms var(--ease) both !important; }
-}
+  /* Reader bits shared with the composer */
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 0 8px; border: 1px solid var(--line); border-radius: var(--radius-tag); background: var(--raise); color: var(--muted); font-size: 12px; line-height: 20px; font-weight: 500; white-space: nowrap; }
+  .chip-client { border-color: var(--fg); color: var(--fg); }
+  .reader-action { position: relative; display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 0 12px; border-radius: var(--radius-control); color: var(--muted); font-size: 13px; line-height: 20px; font-weight: 500; isolation: isolate; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .reader-action::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--fg); opacity: 0; transition: opacity var(--t1) var(--ease); }
+  .reader-action:hover::before { opacity: .08; }
+  .reader-action:active { transform: scale(.96); }
+  .reader-action-primary { background: var(--fg); color: var(--surface); font-weight: 600; }
+  .reader-action-primary::before { background: var(--surface); }
+  .reader-action-small { min-height: 28px; padding: 0 8px; font-size: 12px; line-height: 16px; }
+  .detail-panel { animation: compose-slip var(--t2) var(--ease) both; }
+  .reply-dock { flex-shrink: 0; padding: 12px 20px; border-top: 1px solid var(--line); }
+  .reply-dock-collapsed { position: relative; display: flex; align-items: center; gap: 8px; width: 100%; min-height: 48px; padding: 8px 16px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--raise); color: var(--muted); text-align: left; font-size: 13px; line-height: 20px; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .reply-dock-collapsed:hover { opacity: .8; }
 
-@layer components {
-  @media (max-width: 859px) { .glass-input { font-size: 16px; } }
+  /* Small panels that live in the conversation sidebar. */
+  .tool-block { min-width: 0; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .tool-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+  .tool-title { color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; }
+  .tool-link { color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; transition: opacity var(--t1) var(--ease); }
+  .tool-link:hover { opacity: .64; }
+  .tool-icon { display: grid; place-items: center; width: 24px; height: 24px; border-radius: var(--radius-tag); color: var(--muted); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .tool-icon:hover { opacity: .64; }
+  .tool-icon:active { transform: scale(.92); }
+  .pick-row { position: relative; display: block; width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: var(--radius-control); text-align: left; font-size: 13px; line-height: 20px; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .pick-row:hover { opacity: .72; }
+  .pick-row:active { transform: scale(.99); }
 }
 
 /* Scroll bars are hidden, so each scrolling area fades at any edge that has more
@@ -1670,15 +576,45 @@ input[type="date"] { color-scheme: inherit; }
     animation-timeline: scroll(self inline), scroll(self inline);
     animation-range: 0px 36px, calc(100% - 36px) 100%;
   }
-  /* The fade only tracks scrolling, so it stays on when motion is reduced. */
-  @media (prefers-reduced-motion: reduce) {
-    html body :is(.scroll-cue, .v2-scroll, .signal-command-list, .signal-sidebar-context, .overflow-y-auto):not(:has(.compose-backdrop, .v2-overlay)),
-    html .signal-frame[data-v2] :is(.scroll-cue, .v2-scroll, .signal-command-list, .signal-sidebar-context, .overflow-y-auto):not(:has(.compose-backdrop, .v2-overlay)) {
+}
+
+@media (max-width: 859px) {
+  .signal-frame { grid-template-columns: minmax(0, 1fr); }
+  .signal-desktop-sidebar { display: none; }
+  .signal-menu { display: inline-flex; }
+  .signal-topbar { gap: 8px; min-height: 64px; padding: 12px; }
+  .signal-command-trigger { flex: 1; width: auto; }
+  .signal-command-trigger kbd, .signal-sync { display: none; }
+  .signal-topbar-tools { gap: 0; }
+  .signal-button-icon { width: 44px; height: 44px; }
+  .signal-topbar-tools > button:last-child { display: none; }
+  .mail-new-email { width: 44px; min-height: 44px; padding: 0; }
+  .mail-new-email span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .signal-canvas { padding: 0 12px 12px; }
+  .v2-content { padding-top: 12px; }
+  .signal-auth { padding: 20px 12px; }
+  .signal-auth-form { padding: 24px; }
+  .compose-backdrop { padding: 12px; }
+  .compose-sheet { max-height: calc(100dvh - 44px); }
+  .compose-row { padding: 8px 12px; gap: 8px; }
+  .compose-actionbar { padding: 8px; gap: 4px; }
+  .glass-input, .signal-auth-input, .compose-bare-input, .signal-command-input input, .signal-mailbox-label select, .signal-remember input { font-size: 16px; }
+  .glass-input-dense { font-size: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  /* Popover dismissal waits for animationend, so these still run for an instant. */
+  .menu-pop { animation: menu-pop .01ms var(--ease) both !important; }
+  .menu-pop[data-closing="true"] { animation: menu-pop-out .01ms var(--ease) both !important; }
+  /* The scroll cue tracks scrolling rather than time, so it stays on. */
+  @supports (animation-timeline: scroll()) {
+    html body :is(.scroll-cue, .v2-scroll, .signal-command-list, .signal-sidebar-context, .overflow-y-auto):not(:has(.compose-backdrop, .v2-overlay)) {
       animation: cue-start linear both, cue-end linear both !important;
       animation-timeline: scroll(self block), scroll(self block) !important;
       animation-range: 0px 36px, calc(100% - 36px) 100% !important;
     }
-    html body .scroll-cue-x, html .signal-frame[data-v2] .scroll-cue-x {
+    html body .scroll-cue-x {
       animation: cue-start linear both, cue-end linear both !important;
       animation-timeline: scroll(self inline), scroll(self inline) !important;
       animation-range: 0px 36px, calc(100% - 36px) 100% !important;

@@ -38,6 +38,7 @@ export function ReplyDock({
   onExpand,
   draftHtml,
   onDraftChange,
+  className,
 }: {
   thread: ThreadDetailDto;
   connectionId: string;
@@ -48,6 +49,8 @@ export function ReplyDock({
   onExpand: (ctx: ComposeContext) => void;
   draftHtml?: string;
   onDraftChange?: (html: string) => void;
+  /** Placement from the page that hosts the dock, such as sticking to the foot of the reader. */
+  className?: string;
 }) {
   const queryClient = useQueryClient();
   const [localBody, setLocalBody] = useState("");
@@ -177,16 +180,16 @@ export function ReplyDock({
 
   if (!open) {
     return (
-      <div className="reply-dock">
+      <div className={cn("reply-dock", className)}>
         <button
           type="button"
           onClick={() => setOpen(true)}
           className="reply-dock-collapsed"
           title="Reply (r)"
         >
-          <CornerUpLeft aria-hidden size={15} className="shrink-0 opacity-60" />
+          <CornerUpLeft aria-hidden size={16} className="shrink-0 opacity-60" />
           <span className="truncate">Reply to {correspondent}…</span>
-          <kbd className="ml-auto hidden shrink-0 rounded border border-line px-1 font-mono text-[10px] sm:inline">
+          <kbd className="ml-auto hidden shrink-0 rounded-tag border border-line px-1 font-mono text-xs sm:inline">
             r
           </kbd>
         </button>
@@ -195,7 +198,7 @@ export function ReplyDock({
   }
 
   return (
-    <div className="reply-dock">
+    <div className={cn("reply-dock", className)}>
       <div
         ref={surface}
         className={s.reply}
@@ -213,9 +216,9 @@ export function ReplyDock({
           }
         }}
       >
-        <div className="flex items-center gap-2 border-b border-line px-3 py-1.5">
-          <CornerUpLeft aria-hidden size={13} className="shrink-0 text-fg" />
-          <span className="min-w-0 truncate text-[11px] text-muted">
+        <div className="flex items-center gap-2 border-b border-line px-3 py-2">
+          <CornerUpLeft aria-hidden size={14} className="shrink-0 text-fg" />
+          <span className="min-w-0 truncate text-xs text-muted">
             To <span className="font-medium">{correspondent}</span>
           </span>
           <button
@@ -225,7 +228,7 @@ export function ReplyDock({
             title="Open in the full composer: attachments, templates and preview"
             aria-label="Open in full composer"
           >
-            <Maximize2 size={13} />
+            <Maximize2 size={14} />
           </button>
           <button
             type="button"
@@ -238,7 +241,7 @@ export function ReplyDock({
             title="Discard this reply"
             aria-label="Discard reply"
           >
-            <X size={13} />
+            <X size={14} />
           </button>
         </div>
 
@@ -247,7 +250,8 @@ export function ReplyDock({
           onHtmlChange={setBody}
           ariaLabel="Reply body"
           placeholder="Write your reply…"
-          className="[--editor-pad-x:0.75rem] [&_.editor-surface]:max-h-56 [&_.editor-surface]:min-h-[5rem] [&_.editor-surface]:overflow-y-auto [&_.editor-toolbar]:px-3"
+          className="[--editor-pad-x:12px]"
+          size="compact"
         />
 
         {aiStatus.data?.configured && <div className={s.tones} role="group" aria-label="Reply tone">
@@ -267,24 +271,24 @@ export function ReplyDock({
               <Send aria-hidden size={14} />
             )}
             {send.isPending ? "Sending…" : "Send"}
-            <kbd className="ml-1 hidden rounded border border-line px-1 text-[10px] font-medium opacity-70 sm:inline">
+            <kbd className="ml-1 hidden rounded-tag border border-line px-1 text-xs font-medium opacity-70 sm:inline">
               {modKey}↵
             </kbd>
           </button>
-          <span className="ml-auto truncate text-[10px] text-muted">
+          <span className="ml-auto truncate text-xs text-muted">
             Quoted history is attached on send
           </span>
         </div>
       </div>
 
       {error && (
-        <div className="pt-1.5">
+        <div className="pt-2">
           <ErrorText>{error}</ErrorText>
         </div>
       )}
 
       {sendId.outcome === "uncertain" && (
-        <div className="flex flex-wrap items-center gap-2 px-1 pt-1.5 text-[11px] text-muted">
+        <div className="flex flex-wrap items-center gap-2 px-1 pt-2 text-xs text-muted">
           <span>
             {confirmNewSend
               ? "Confirm this is a new send after checking Sent."
@@ -301,7 +305,7 @@ export function ReplyDock({
                 setConfirmNewSend(true);
               }
             }}
-            className="reader-action !px-2 !py-1 !text-[11px]"
+            className="reader-action reader-action-small"
           >
             {confirmNewSend ? "Confirm new send" : "Start a new send"}
           </button>

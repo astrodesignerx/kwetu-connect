@@ -18,9 +18,9 @@ export function Topbar({ onCommand = () => {}, onMenu = () => {}, onCompose, mai
   return (
     <header className="signal-topbar">
       <Button variant="ghost" size="icon" className="signal-menu" onClick={onMenu}
-        aria-label="Open navigation" aria-haspopup="dialog" aria-controls="signal-drawer"><Menu size={19} /></Button>
+        aria-label="Open navigation" aria-haspopup="dialog" aria-controls="signal-drawer"><Menu size={18} /></Button>
       <button className="signal-command-trigger" onClick={onCommand} aria-haspopup="dialog">
-        <Search size={17} aria-hidden /><span>Search mail and clients</span><kbd>{mail ? "/" : "Ctrl K"}</kbd>
+        <Search size={16} aria-hidden /><span>Search mail and clients</span><kbd>{mail ? "/" : "Ctrl K"}</kbd>
       </button>
       <div className="signal-topbar-tools">
         <span className="signal-sync" data-state={healthy ? "healthy" : status === "failed" ? "error" : "waiting"}

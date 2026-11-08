@@ -45,7 +45,7 @@ export function CommandPalette({ open, onClose, commands, onSearch }: {
     <ShellDialog open={open} onClose={onClose} labelId={`${id}-title`} className="signal-palette">
       <h2 id={`${id}-title`} className="sr-only">Search or jump to</h2>
       <div className="signal-command-input">
-        <Search size={19} aria-hidden />
+        <Search size={18} aria-hidden />
         <input ref={input} autoFocus role="combobox" aria-expanded={open} aria-controls={`${id}-list`}
           aria-activedescendant={items.length ? `${id}-${selected}` : undefined}
           aria-autocomplete="list" aria-label="Search routes, actions or mail"
@@ -59,7 +59,7 @@ export function CommandPalette({ open, onClose, commands, onSearch }: {
               event.preventDefault(); choose(items[selected]);
             }
           }} />
-        <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close command palette"><X size={17} /></Button>
+        <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close command palette"><X size={16} /></Button>
       </div>
       <div role="listbox" id={`${id}-list`} aria-label="Routes and actions" className="signal-command-list">
         {items.map((command, index) => (

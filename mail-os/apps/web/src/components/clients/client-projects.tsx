@@ -12,7 +12,7 @@ import { FlightForm } from "./flight-form";
 import s from "../../app/clients/detail/page.module.css";
 import f from "./forms.module.css";
 
-export function ClientProjects({ companyId, projects, colour }: { companyId: string; projects: ProjectDto[]; colour: string }) {
+export function ClientProjects({ companyId, projects }: { companyId: string; projects: ProjectDto[] }) {
   const cache = useQueryClient();
   const [today] = useState(nairobiToday);
   const [windowStart, setWindowStart] = useState(today);
@@ -34,7 +34,7 @@ export function ClientProjects({ companyId, projects, colour }: { companyId: str
       {!projects.length ? <p className={s.muted}>Create a project to book its first flight.</p> : <>
         <label className={s.window}>Six weeks from <input aria-label="Flight plan start date" type="date" value={windowStart} onChange={e => { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) setWindowStart(e.target.value); }} /></label>
         {queries.some(q => q.isPending) ? <ViewState loading label="Loading flights" /> : queries.some(q => q.isError) ? <div role="alert"><p>Could not load all project flights.</p><Button variant="default" onClick={() => queries.forEach(q => void q.refetch())}>Try again</Button></div> : flights.length ? <>
-          <FlightPlan label={`Flight plan from ${windowStart} to ${end}`} startDate={windowStart} today={today} colour={colour} sites={flights.filter(x => x.startDate <= end && x.endDate >= windowStart).map(x => ({ id: x.id, name: x.siteName, startDate: x.startDate, endDate: x.endDate }))} />
+          <FlightPlan label={`Flight plan from ${windowStart} to ${end}`} startDate={windowStart} today={today} sites={flights.filter(x => x.startDate <= end && x.endDate >= windowStart).map(x => ({ id: x.id, name: x.siteName, startDate: x.startDate, endDate: x.endDate }))} />
           <ul className={s.rows}>{flights.map(flight => <li key={flight.id}>
             <div className={s.grow}><strong>{flight.siteName}</strong><small>{projects.find(p => p.id === flight.projectId)?.name} / {displayDate(flight.startDate)} to {displayDate(flight.endDate)}</small></div>
             <Button size="small" variant="ghost" onClick={() => setFlightEdit(flight)} aria-label={`Edit flight at ${flight.siteName}`}>Edit</Button>
@@ -52,7 +52,7 @@ export function ClientProjects({ companyId, projects, colour }: { companyId: str
         const active = booked.some(x => x.startDate <= today && x.endDate >= today);
         const label = active ? "Live" : booked.some(x => x.startDate > today) ? "Scheduled" : booked.length ? "Completed flights" : "No flights";
         return <li key={project.id}><div className={s.grow}><strong>{project.name}</strong>{project.description && <small>{project.description}</small>}{booked.length > 0 && <small>{displayDate(booked[0].startDate)} to {displayDate(booked.map(x => x.endDate).sort().at(-1)!)}</small>}</div>
-          {!queries.some(q => q.isPending || q.isError) && <StatusChip label={label} colour={colour} />}
+          {!queries.some(q => q.isPending || q.isError) && <StatusChip label={label} />}
           <Button variant="ghost" size="small" onClick={() => setProjectEdit(project)}>Edit</Button><Button variant="ghost" size="small" disabled={removeProject.isPending} onClick={() => { if (confirm(`Delete project ${project.name} and its flights?`)) removeProject.mutate(project.id); }}>Delete</Button>
         </li>;
       })}</ul>}

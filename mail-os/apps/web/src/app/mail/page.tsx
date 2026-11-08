@@ -378,7 +378,7 @@ function ListToolbar({ total, items, selection, onSelectAll, onBulkArchive, bulk
   const allSelected = items.length > 0 && selection.size === items.length;
   return <div className={s.bulkToolbar}>
     <button type="button" role="checkbox" aria-checked={allSelected ? true : selection.size > 0 ? 'mixed' : false} aria-label={allSelected ? 'Deselect all threads' : 'Select all threads'}
-      disabled={!items.length} onClick={() => onSelectAll(!allSelected)} className={s.selectionBox}>{allSelected ? <Check size={12} aria-hidden /> : selection.size ? <Minus size={12} aria-hidden /> : null}</button>
+      disabled={!items.length} onClick={() => onSelectAll(!allSelected)} className={s.selectionBox}>{allSelected ? <Check size={14} aria-hidden /> : selection.size ? <Minus size={14} aria-hidden /> : null}</button>
     <span>{selection.size ? selection.size + ' selected' : total + ' conversations'}</span>
     {selection.size > 0 && <><button type="button" disabled={bulkBusy} onClick={onBulkArchive}>{bulkBusy ? 'Archiving...' : 'Archive'}</button><button type="button" onClick={() => onSelectAll(false)}>Clear selection</button></>}
   </div>;
@@ -415,7 +415,7 @@ function Reader({ thread, selected, mailboxId, syncError, onRetrySync, retrying,
       <ThreadSummary threadId={thread.id} onNextStep={() => onReplyOpenChange(true)} />
       <Participants thread={thread} latest={latest} mailboxId={mailboxId} />
       {thread.messages.map((message, index) => <MessageCard key={message.id} message={message} index={index} defaultOpen={index === thread.messages.length - 1} clientId={thread.clientId} />)}
-      {mailboxId && <ReplyDock thread={thread} connectionId={mailboxId} open={replyOpen} onOpenChange={onReplyOpenChange} draftHtml={draftHtml} onDraftChange={onDraftChange} onExpand={(ctx) => { onReplyOpenChange(false); onExpandReply(ctx); }} />}
+      {mailboxId && <ReplyDock thread={thread} connectionId={mailboxId} open={replyOpen} onOpenChange={onReplyOpenChange} draftHtml={draftHtml} onDraftChange={onDraftChange} className={s.dock} onExpand={(ctx) => { onReplyOpenChange(false); onExpandReply(ctx); }} />}
     </article>
     <ConversationContext threadId={thread.id} replyState={thread.replyState} stateSince={thread.stateSince} needsNudge={thread.needsNudge}
       onQuickReply={mailboxId ? (template) => onExpandReply({ ...replyContextFromThread(mailboxId, thread), prefillBody: template.bodyHtml ?? '', skipBrandWrap: template.skipBrandWrap }) : undefined} />
@@ -447,15 +447,15 @@ function Participants({
       <div className="flex items-center gap-3">
         <span
           aria-hidden
-          className="avatar-initials h-9 w-9 text-[12px]"
+          className="avatar-initials h-9 w-9 text-xs"
           style={{ background: 'var(--raise)' }}
         >
           {initialsFor(who)}
         </span>
 
         <div className="min-w-0 flex-1">
-          <div className="truncate text-[13px] font-semibold">{who}</div>
-          <div className="truncate text-[11px] text-muted">
+          <div className="truncate text-secondary font-semibold">{who}</div>
+          <div className="truncate text-xs text-muted">
             {latest?.fromAddr ?? "(no address)"}
           </div>
         </div>
@@ -464,17 +464,17 @@ function Participants({
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
-          className="reader-action shrink-0 !px-2 !py-1 !text-[11px]"
+          className="reader-action reader-action-small shrink-0"
         >
           Details
           <ChevronRight
             aria-hidden
-            size={12}
-            className={cn("transition-transform duration-200 ease-out", open && "rotate-90")}
+            size={14}
+            className={cn("transition-transform duration-200 ease-standard", open && "rotate-90")}
           />
         </button>
 
-        <span className="shrink-0 text-[11px] tabular-nums text-muted">
+        <span className="shrink-0 text-xs tabular-nums text-muted">
           {thread.lastDate
             ? new Date(thread.lastDate).toLocaleDateString(undefined, {
                 day: "numeric",
@@ -486,8 +486,8 @@ function Participants({
       </div>
 
       <MailDisclosure open={open}>
-        <div className="detail-panel mt-2.5 border-t border-line pt-2.5">
-          <dl className="mb-2 grid grid-cols-[3rem_minmax(0,1fr)] gap-x-2 gap-y-1 text-[11px]">
+        <div className="detail-panel mt-3 border-t border-line pt-3">
+          <dl className="mb-2 grid grid-cols-[3rem_minmax(0,1fr)] gap-x-2 gap-y-1 text-xs">
             <AddressRow label="From" value={formatAddress(latest?.fromName, latest?.fromAddr)} />
             <AddressRow label="To" value={latest?.toAddrs} />
             <AddressRow label="Cc" value={latest?.ccAddrs} />
@@ -528,9 +528,9 @@ function MessageCard({ message, index, defaultOpen }: { message: ThreadDetailDto
   const who = message.fromName || message.fromAddr || 'Unknown';
   return <article className={s.message}>
     <button type="button" className={s.messageHead} onClick={() => setOpen((value) => !value)} aria-expanded={open}>
-      <ClientAvatar name={who} colour="var(--muted)" size="small" />
+      <ClientAvatar name={who} size="small" />
       <span><span className="block truncate text-sm font-semibold">{who}</span><span className={s.snippet}>{open ? 'to ' + (message.toAddrs || '(no recipients)') : message.snippet || '(no preview)'}</span></span>
-      {message.hasAttachments && <Paperclip size={12} aria-label="Has attachments" />}
+      {message.hasAttachments && <Paperclip size={14} aria-label="Has attachments" />}
       <time>{message.date ? new Date(message.date).toLocaleDateString('en-GB') : ''}</time>
       <ChevronRight size={14} aria-hidden style={{ transform: open ? 'rotate(90deg)' : undefined, transition: 'transform var(--t2) var(--ease)' }} />
     </button>
@@ -553,14 +553,14 @@ function MessageBody({ html, index }: { html: string; index: number }) {
   return (
     <div>
       {hasRemote && !showRemote && (
-        <div className="mb-2 flex flex-wrap items-center gap-2 rounded-lg border border-fg bg-raise px-2.5 py-1.5">
+        <div className="mb-2 flex flex-wrap items-center gap-2 rounded-control border border-fg bg-raise px-3 py-2">
           <span className="text-xs text-muted">
             Remote images blocked to prevent read tracking.
           </span>
           <button
             type="button"
             onClick={() => setShowRemote(true)}
-            className="rounded-md border border-fg px-2 py-0.5 text-[11px] font-semibold transition-[transform,opacity] duration-150 ease-out hover:bg-raise"
+            className="rounded-tag border border-fg px-2 py-0.5 text-xs font-semibold transition-[transform,opacity] duration-120 ease-standard hover:opacity-64"
           >
             Show images
           </button>
@@ -570,7 +570,7 @@ function MessageBody({ html, index }: { html: string; index: number }) {
         title={`Message ${index + 1}`}
         srcDoc={frameDocument(html, !showRemote)}
         className={cn(
-          "w-full rounded-lg border border-line bg-white ",
+          "w-full rounded-control border border-line bg-paper ",
           tall ? "h-[70vh]" : "h-80"
         )}
         sandbox=""
@@ -581,7 +581,7 @@ function MessageBody({ html, index }: { html: string; index: number }) {
       <button
         type="button"
         onClick={() => setTall((v) => !v)}
-        className="mt-1 rounded-md px-2 py-0.5 text-[11px] font-medium text-muted transition-[transform,opacity] duration-150 ease-out hover:bg-raise hover:text-fg dark:hover:text-fg"
+        className="mt-1 rounded-tag px-2 py-0.5 text-xs font-medium text-muted transition-[transform,opacity] duration-120 ease-standard hover:opacity-64"
       >
         {tall ? "Shrink message" : "Expand message"}
       </button>
@@ -618,7 +618,7 @@ function EmptyMailArt({ className, small }: { className?: string; small?: boolea
         width="76"
         height="52"
         rx="7"
-        className="fill-white dark:fill-surface"
+        fill="var(--surface)"
         stroke="currentColor"
         strokeOpacity="0.18"
         strokeWidth="1.5"

@@ -60,7 +60,7 @@ function MailboxHealth({ mailbox, onDisconnect }: { mailbox: MailboxDto; onDisco
       <Feedback error={stats.data?.syncError} />
     </div>
     <div className={s.chart}><h3>Messages fetched / last 24 hours</h3>
-      {stats.isPending ? <SettingsState loading /> : stats.isError ? <SettingsState error={stats.error} retry={() => void stats.refetch()} /> : <><HourBars values={utcHourValues(stats.data.hourly)} colour="var(--good)" highlightPeak={false} height={150} label="Fetched messages in the last 24 hours, grouped by UTC hour of day" /><p className={s.note}>Last 24 hours, grouped by UTC hour of day.</p></>}
+      {stats.isPending ? <SettingsState loading /> : stats.isError ? <SettingsState error={stats.error} retry={() => void stats.refetch()} /> : <><HourBars values={utcHourValues(stats.data.hourly)} highlightPeak={false} height={150} label="Fetched messages in the last 24 hours, grouped by UTC hour of day" /><p className={s.note}>Last 24 hours, grouped by UTC hour of day.</p></>}
       <div className={s.actions}><Button variant="default" disabled={sync.isPending || test.isPending} onClick={() => sync.mutate()}>{sync.isPending ? "Queuing..." : "Sync now"}</Button><Button variant="ghost" disabled={test.isPending || sync.isPending} onClick={() => test.mutate()}>{test.isPending ? "Testing..." : "Test connection"}</Button><Button variant="danger" onClick={onDisconnect}>Disconnect</Button></div>
       <Feedback error={test.error ?? sync.error} message={message} />
     </div>

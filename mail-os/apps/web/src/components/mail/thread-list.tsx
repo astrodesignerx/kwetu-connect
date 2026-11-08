@@ -37,11 +37,11 @@ function ThreadRow({ thread: t, active, picked, onSelect, onToggle, index, query
   const who = firstParticipant(t.participants) || '(unknown sender)';
   return <li className={s.row} data-active={active} style={{ animationDelay: Math.min(index, 6) * 50 + 'ms' }}>
     <button className={s.avatarButton} role="checkbox" aria-checked={picked} aria-label={picked ? 'Deselect thread' : 'Select thread'} onClick={onToggle}>
-      {picked ? <Check size={16} aria-hidden /> : <ClientAvatar name={who} colour="var(--muted)" size="small" />}
+      {picked ? <Check size={16} aria-hidden /> : <ClientAvatar name={who} size="small" />}
     </button>
     <button className={s.rowButton} aria-current={active ? 'true' : undefined} onClick={onSelect}>
       <span className={s.rowTop}>{t.hasUnread && <span className={s.unread} aria-label="Unread" />}<b><Highlight text={who} query={query} /></b><time>{t.lastDate ? formatRelative(t.lastDate) : ''}</time></span>
-      <span className={s.subject}><Highlight text={t.subject || '(no subject)'} query={query} /> {t.hasAttachments && <Paperclip size={12} className="inline" aria-label="Has attachments" />}</span>
+      <span className={s.subject}><Highlight text={t.subject || '(no subject)'} query={query} /> {t.hasAttachments && <Paperclip size={14} className="inline" aria-label="Has attachments" />}</span>
       <span className={s.snippet}><Highlight text={t.snippet ?? ''} query={query} /></span>
       <span className={s.rowMeta}><span>{t.clientName || (t.hasAttachments ? 'Files attached' : `${t.messageCount} message${t.messageCount === 1 ? '' : 's'}`)}</span>
         {t.replyState === 'ToReply' && <span className={s.waitingLabel}>Waiting {durationLabel(Math.max(0, (now - new Date(t.stateSince).getTime()) / 1000))}</span>}

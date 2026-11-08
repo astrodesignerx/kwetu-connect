@@ -47,15 +47,6 @@ export function groupThreads<T extends SignalThreadSummary>(items: T[], now = ne
   return groups.filter((group) => group.items.length > 0);
 }
 
-export function clientColour(id?: string | null) {
-  if (!id) return "var(--muted)";
-  // Stable presentation colours, never a fabricated client field.
-  const hues = ["#A285F4", "#3CC8C0", "#FBB040", "#8DCB5E"];
-  let hash = 0;
-  for (const char of id) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
-  return hues[hash % hues.length];
-}
-
 export function durationLabel(seconds: number | null) {
   if (seconds === null) return "No replies yet";
   const minutes = Math.max(1, Math.round(seconds / 60));

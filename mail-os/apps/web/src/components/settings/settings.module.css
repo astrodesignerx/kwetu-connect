@@ -1,22 +1,17 @@
 .header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
-.header h1 { font: 650 28px/1.2 var(--f-body), sans-serif; letter-spacing: -.03em; margin: 8px 0; overflow-wrap: anywhere; }
-.header p, .field small, .state p { color: var(--muted); font-size: 13px; line-height: 1.6; }
-.sectionLabel { font: 500 12px/1.5 var(--f-body), sans-serif; color: var(--muted); }
-.panel { min-width: 0; padding: clamp(20px, 3vw, 28px); border: 0; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); animation: arrive var(--t3) var(--ease) backwards; }
-.panel h2 { font: 650 18px var(--f-body); margin: 0 0 18px; }
-.field { display: flex; min-width: 0; flex-direction: column; gap: 8px; }
-.field label { font-size: 12px; font-weight: 600; }
-.field input { width: 100%; min-width: 0; }
-.state { display: grid; gap: 14px; min-width: 0; text-align: center; }
-.state > div { max-width: 100%; }
-.feedback { display: grid; gap: 10px; margin: 14px 0; color: var(--bad); font-size: 13px; overflow-wrap: anywhere; }
-.feedback > div { max-width: 100%; }
-.success { color: var(--good); font-size: 13px; }
-.avatar { width: 48px; height: 48px; display: inline-grid; place-items: center; flex-shrink: 0; border: 0; border-radius: 50%; background: var(--raise); color: var(--fg); font: 650 16px var(--f-body); }
-.health { display: inline-flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600; }
-.health i { width: 7px; height: 7px; border-radius: 50%; }
-.stat { display: grid; gap: 6px; min-width: 0; padding: 16px 20px; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); }
-.stat b { font: 650 clamp(22px, 3vw, 32px) var(--f-body); overflow-wrap: anywhere; }
-.stat small { font-size: 11px; color: var(--muted); }
-@keyframes arrive { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
-@media (prefers-reduced-motion: reduce) { .panel { animation: none; } }
+.header h1 { margin: 8px 0; font-size: 28px; line-height: 36px; font-weight: 600; overflow-wrap: anywhere; }
+.header p, .field small, .state p { color: var(--muted); font-size: 13px; line-height: 20px; }
+.sectionLabel { color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; }
+.panel { min-width: 0; padding: 24px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+.panel h2 { margin: 0 0 16px; font-size: 16px; line-height: 24px; font-weight: 600; }
+.field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.field label { font-size: 13px; line-height: 20px; font-weight: 500; }
+.state { display: grid; gap: 12px; min-width: 0; text-align: center; }
+.feedback { margin: 12px 0; color: var(--fg); font-size: 13px; line-height: 20px; overflow-wrap: anywhere; }
+.success { color: var(--muted); font-size: 13px; line-height: 20px; }
+.avatar { display: inline-grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: var(--raise); color: var(--fg); font-size: 14px; font-weight: 600; }
+.health { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; line-height: 20px; font-weight: 500; }
+.stat { display: grid; gap: 4px; min-width: 0; }
+.stat b { font-size: 20px; line-height: 28px; font-weight: 600; overflow-wrap: anywhere; }
+.stat small { color: var(--muted); font-size: 13px; line-height: 20px; }
+@media (max-width: 700px) { .panel { padding: 20px; } }

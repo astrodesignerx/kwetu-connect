@@ -70,12 +70,12 @@ function AttachmentChip({ attachment }: { attachment: AttachmentDto }) {
           : `${attachment.fileName} (${formatBytes(attachment.sizeBytes)})`
       }
       className={cn(
-        "group flex max-w-[16rem] items-center gap-2 rounded-xl border px-3 py-2 text-left",
-        "transition-[transform,background-color,border-color] duration-150 ease-out",
-        "hover:-translate-y-px hover:bg-raise active:translate-y-0",
+        "group flex max-w-[16rem] items-center gap-2 rounded-control border px-3 py-2 text-left",
+        "transition-[transform,opacity] duration-120 ease-standard",
+        "hover:opacity-64 active:scale-[.98]",
         "disabled:cursor-wait disabled:opacity-60",
         state === "error"
-          ? "border-red-500/40 bg-red-500/5"
+          ? "border-fg border-2 px-[11px] py-[7px]"
           : "border-line "
       )}
     >
@@ -84,7 +84,7 @@ function AttachmentChip({ attachment }: { attachment: AttachmentDto }) {
       </span>
       <span className="min-w-0">
         <span className="block truncate text-xs font-medium">{attachment.fileName}</span>
-        <span className="block text-[10px] text-muted">
+        <span className="block text-xs text-muted">
           {state === "error" ? "Failed. Retry" : formatBytes(attachment.sizeBytes)}
         </span>
       </span>
@@ -131,14 +131,14 @@ export function AttachmentList({
 
     return (
       <div className="mt-3 border-t border-line pt-3">
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-fg bg-raise px-2.5 py-2">
+        <div className="flex flex-wrap items-center gap-2 rounded-control border border-fg bg-raise px-3 py-2">
           <span aria-hidden><Paperclip size={14} /></span>
           <span className="text-xs text-muted">
             {names.length > 0
               ? `${names.join(", ")}: not downloaded yet.`
               : "This message has an attachment that hasn't been downloaded yet."}
           </span>
-          <span className="text-[11px] text-muted">
+          <span className="text-xs text-muted">
             An admin can fetch it with{" "}
             <code className="font-mono">backfill-attachments</code>.
           </span>
@@ -149,7 +149,7 @@ export function AttachmentList({
 
   return (
     <div className="mt-3 border-t border-line pt-3">
-      <div className="mb-2 text-[10px] uppercase tracking-wide text-muted">
+      <div className="mb-2 text-xs text-muted">
         {files.length} attachment{files.length === 1 ? "" : "s"}
       </div>
       <div className="flex flex-wrap gap-2">

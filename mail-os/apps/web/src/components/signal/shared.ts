@@ -2,8 +2,7 @@ import type { CSSProperties } from "react";
 
 export type SignalStyle = CSSProperties & { [key: `--${string}`]: string | number };
 
-export const clientColour = "var(--jac, #6A48D8)";
-
-export function hueStyle(colour = clientColour): SignalStyle {
+// Only the LED specimens in the development gallery take a colour; the app itself is black and white.
+export function hueStyle(colour = "#f2f2f2"): SignalStyle {
   return { "--h": colour };
 }

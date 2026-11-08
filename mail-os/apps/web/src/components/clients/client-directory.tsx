@@ -18,18 +18,16 @@ export function ClientDirectory({ clients }: { clients: ClientActivity[] }) {
     {!clients.length ? <p className={s.empty}>No clients yet. Create a client to bring their projects and conversations together.</p> : !filtered.length ? <p className={s.empty}>No clients match that search.</p> :
       <div id="client-results" className={view === "grid" ? s.grid : s.list} data-view={view} key={view}>
         {filtered.map((client, index) => {
-          const hue = "var(--muted)";
-          const statusColour = client.status === "WaitingOnUs" ? "var(--mail-waiting)" : hue;
           const status = client.status === "WaitingOnUs" ? "Waiting on us" : "All replied";
           const href = `/clients/detail?id=${encodeURIComponent(client.id)}`;
-          const spark = <Spark values={client.weeks.map(w => w.conversations)} colour={hue} width={100} height={32} label={`Weekly conversations: ${client.weeks.map(w => `${w.startDate}: ${w.conversations}`).join(", ")}`} />;
+          const spark = <Spark values={client.weeks.map(w => w.conversations)} width={100} height={32} label={`Weekly conversations: ${client.weeks.map(w => `${w.startDate}: ${w.conversations}`).join(", ")}`} />;
           return <div key={client.id} className={s.item} style={{ "--i": Math.min(index, 8) } as CSSProperties}>
-            {view === "grid" ? <ClientTile name={client.name} colour={hue} status={status} description={client.domain ?? undefined} href={href}>
+            {view === "grid" ? <ClientTile name={client.name} status={status} description={client.domain ?? undefined} href={href}>
               <div className={s.meta}><span>{client.threadCount} conversations</span>{spark}</div>
             </ClientTile> : <Link href={href} className={s.row}>
-              <ClientAvatar name={client.name} colour={hue} />
+              <ClientAvatar name={client.name} />
               <div className={s.identity}><strong>{client.name}</strong><small>{client.domain || `${client.projectCount} projects`}</small></div>
-              <div className={s.trend}>{spark}</div><StatusChip label={status} colour={statusColour} />
+              <div className={s.trend}>{spark}</div><StatusChip label={status} strong={client.status === "WaitingOnUs"} />
             </Link>}
           </div>;
         })}

@@ -73,7 +73,7 @@ export function Sidebar({ onCompose, onNavigate, compact = false }: { onCompose:
   return (
     <aside className="signal-sidebar" aria-label="Kwetu OS navigation">
       <Link href="/mail" className="signal-brand" onClick={onNavigate}><Logo /><span>Kwetu OS</span></Link>
-      <Button className="signal-new-message" onClick={onCompose}><Plus size={17} aria-hidden />New message</Button>
+      <Button className="signal-new-message" onClick={onCompose}><Plus size={16} aria-hidden />New message</Button>
       <nav aria-label="Main" className="signal-primary-nav">
         {DESTINATIONS.map((route, index) => {
           const active = route.href === "/settings"
@@ -110,14 +110,14 @@ export function Sidebar({ onCompose, onNavigate, compact = false }: { onCompose:
               {mailboxes.map((mailbox) => <option key={mailbox.id} value={mailbox.id}>{mailbox.email}</option>)}
             </select>
           </label>
-          <Link className="signal-connect" href="/settings/mailboxes/connect" onClick={onNavigate}><Plus size={13} aria-hidden />Connect a mailbox</Link>
+          <Link className="signal-connect" href="/settings/mailboxes/connect" onClick={onNavigate}><Plus size={14} aria-hidden />Connect a mailbox</Link>
         </details>}
       </div>
       <div className="signal-user-row">
         <Link href="/settings/profile" className="signal-user" onClick={onNavigate} title="Open profile">
           <span className="signal-avatar">{initialsFor(user?.displayName ?? user?.email ?? "?")}</span>
           <span><strong>{user?.displayName ?? "Your account"}</strong><small>{user?.email}</small></span>
-          <UserRound size={15} aria-hidden />
+          <UserRound size={16} aria-hidden />
         </Link>
         <Button variant="ghost" size="icon" title="Sign out" aria-label="Sign out" onClick={() => {
           endSession(queryClient); onNavigate();

@@ -106,7 +106,7 @@ function RegisterForm() {
             value={inviteToken}
             onChange={(e) => setInviteToken(e.target.value)}
             placeholder="Paste the code from your invite link"
-            className="!pr-3 font-mono !text-xs"
+            className="pr-3 font-mono text-xs"
           />
         )}
 
@@ -151,7 +151,7 @@ function RegisterForm() {
 
         <AuthSubmit busy={busy} busyLabel="Creating account…">
           {mode === "bootstrap" ? "Create admin account" : "Create account"}
-          <ArrowRight aria-hidden size={15} />
+          <ArrowRight aria-hidden size={16} />
         </AuthSubmit>
       </form>
     </AuthCard>

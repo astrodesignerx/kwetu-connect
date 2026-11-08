@@ -12,7 +12,6 @@ import { ShellDialog } from "@/components/shell/dialog";
 import { toggleTheme } from "@/components/shell/theme";
 import { Button } from "@/components/ui";
 import { X } from "lucide-react";
-import "@/components/mail/mail-shell.css";
 
 export interface AppShellProps { children: React.ReactNode; variant?: "app" | "content" }
 

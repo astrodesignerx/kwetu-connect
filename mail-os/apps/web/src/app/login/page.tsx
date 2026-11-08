@@ -96,12 +96,12 @@ export default function LoginPage() {
 
         <AuthSubmit busy={busy} busyLabel="Signing in…">
           Sign in
-          <ArrowRight aria-hidden size={15} />
+          <ArrowRight aria-hidden size={16} />
         </AuthSubmit>
 
         {/* Honest about the actual recovery path: there is no self-service reset,
             because there is no outbound mail for it. An admin runs the CLI. */}
-        <p className="text-center text-[11px] text-muted">
+        <p className="text-center text-xs text-muted">
           Forgotten your password? An admin can reset it for you.
         </p>
       </form>

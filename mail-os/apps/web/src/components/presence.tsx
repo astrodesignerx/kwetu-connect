@@ -19,8 +19,8 @@ export function PresencePill({
   );
   if (onlineIds.length === 0) return null;
   return (
-    <div className="flex items-center gap-1 text-[10px] text-muted">
-      <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted" />
+    <div className="flex items-center gap-1 text-xs text-muted">
+      <span className="status-dot" data-state="healthy" aria-hidden="true" />
       <span>{onlineIds.length} online</span>
     </div>
   );
@@ -49,14 +49,9 @@ export function LiveStatusPill() {
           ? "Not receiving live mail updates. Refresh to fetch the latest, or check that the API is running."
           : undefined
       }
-      className="flex items-center gap-1 text-[10px] text-muted"
+      className="flex items-center gap-1 text-xs text-muted"
     >
-      <span
-        className={
-          "inline-block h-1.5 w-1.5 rounded-full transition-[transform,opacity] duration-200 " +
-          (status === "failed" ? "bg-red-500" : "bg-fg animate-pulse")
-        }
-      />
+      <span className="status-dot" data-state={status === "failed" ? "failed" : "waiting"} aria-hidden="true" />
       <span>{label}</span>
     </div>
   );

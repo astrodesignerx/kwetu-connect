@@ -41,7 +41,7 @@ export default function SettingsHubPage() {
       <Tile href="/settings/mailboxes" title="Mailboxes" wide>
         {mailboxes.isPending ? <span className={s.note}>Loading your connections</span> : mailboxes.isError ? <span className={s.note}>Connections unavailable</span> : firstMailbox ? <>
           <div className={s.meta}>{sync.data && <HealthLight state={sync.data.syncState} />}<span>{firstMailbox.email}</span><span>{sync.data ? sync.data.conversationCount + " conversations" : ""}</span></div>
-          {sync.data ? <><HourBars values={utcHourValues(sync.data.hourly)} colour="var(--good)" highlightPeak={false} label="Fetched messages in the last 24 hours, grouped by UTC hour of day" height={68} /><span className={s.note}>Last 24 hours by UTC hour / {sync.data.messagesSynced} fetched</span></> : <span className={s.note}>{sync.isError ? "Sync history unavailable" : "Loading sync history"}</span>}
+          {sync.data ? <><HourBars values={utcHourValues(sync.data.hourly)} highlightPeak={false} label="Fetched messages in the last 24 hours, grouped by UTC hour of day" height={68} /><span className={s.note}>Last 24 hours by UTC hour / {sync.data.messagesSynced} fetched</span></> : <span className={s.note}>{sync.isError ? "Sync history unavailable" : "Loading sync history"}</span>}
         </> : <span className={s.note}>Connect your first mailbox</span>}
         {data.mailboxHealth.needsAttention > 0 && <span className={s.attention}>{data.mailboxHealth.needsAttention === 1 ? "1 workspace connection needs attention" : `${data.mailboxHealth.needsAttention} workspace connections need attention`}</span>}
       </Tile>
@@ -60,7 +60,7 @@ export default function SettingsHubPage() {
           {team.isError && <span className={s.note}>People unavailable</span>}
         </Tile>
         <Tile href="/settings/admin/audit" title="Audit log" half>
-          {audit.data ? <div className={s.activity}><HeatStrip values={audit.data.days.slice(-14).map((day) => day.count)} colour="var(--muted)" label="Administrative activity in the last 14 days" /></div> : <span className={s.note}>{audit.isError ? "Activity unavailable" : "Loading activity"}</span>}
+          {audit.data ? <div className={s.activity}><HeatStrip values={audit.data.days.slice(-14).map((day) => day.count)} label="Administrative activity in the last 14 days" /></div> : <span className={s.note}>{audit.isError ? "Activity unavailable" : "Loading activity"}</span>}
           <p className={s.note}>{recent.data?.[0] ? <><time dateTime={recent.data[0].createdAt}>{dateTime(recent.data[0].createdAt)}</time><br />{auditLabel(recent.data[0].action)}</> : recent.isError ? "Latest event unavailable" : "No recorded events"}</p>
         </Tile>
       </>}
@@ -69,5 +69,5 @@ export default function SettingsHubPage() {
 }
 
 function Tile({ href, title, wide, half, children }: { href: string; title: string; wide?: boolean; half?: boolean; children: React.ReactNode }) {
-  return <Link href={href} className={[s.tile, wide ? s.wide : half ? s.half : s.narrow].join(" ")}><header><h3>{title}</h3><ArrowUpRight size={17} aria-hidden="true" /></header>{children}</Link>;
+  return <Link href={href} className={[s.tile, wide ? s.wide : half ? s.half : s.narrow].join(" ")}><header><h3>{title}</h3><ArrowUpRight size={16} aria-hidden="true" /></header>{children}</Link>;
 }

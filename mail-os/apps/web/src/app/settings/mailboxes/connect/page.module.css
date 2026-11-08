@@ -1,9 +1,19 @@
-.page { max-width: 520px; margin: 0 auto; min-width: 0; }
-.form { display: grid; gap: 20px; }.form > button { justify-self: stretch; }
+.page { min-width: 0; }
+.form { display: grid; gap: 20px; max-width: 520px; }
+.form > button { justify-self: stretch; }
 .fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
-.note { color: var(--muted); font-size: 12px; line-height: 1.7; margin: 0; }.cancel { color: var(--muted); font-size: 13px; }
-.advanced { border-top: 1px solid var(--line); padding-top: 16px; }.advanced summary { cursor: pointer; font-size: 12px; }.advanced[open] > div { margin-top: 20px; animation: arrive var(--t2) var(--ease) backwards; }
-.checklist { display: grid; gap: 18px; margin: 0; padding: 0; list-style: none; animation: arrive var(--t2) var(--ease) backwards; }.checklist li { display: flex; gap: 12px; align-items: start; }.checklist li > span { display: grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; border: 1px solid var(--line); border-radius: 50%; font: 11px var(--f-mono); color: var(--muted); }.checklist b { display: block; font-size: 12px; }.checklist small { display: block; margin-top: 6px; color: var(--muted); font-size: 11px; line-height: 1.6; }.checklist [data-state="complete"] > span { color: var(--good); border-color: var(--good); }.checklist [data-state="error"] > span { color: var(--bad); border-color: var(--bad); }.checklist [data-state="running"] > span { color: var(--sodium-ink); animation: pulse 1.4s var(--ease) infinite; }.actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 12px; }
-@keyframes pulse { 50% { opacity: .35; transform: scale(.9); } }
-@keyframes arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-@media (prefers-reduced-motion: reduce) { .advanced[open] > div, .checklist, .checklist [data-state="running"] > span { animation: none; } }
+.note { margin: 0; color: var(--muted); font-size: 13px; line-height: 20px; }
+.cancel { color: var(--muted); font-size: 14px; line-height: 20px; transition: opacity var(--t1) var(--ease); }
+.cancel:hover { opacity: .64; }
+.advanced { padding-top: 16px; border-top: 1px solid var(--line); }
+.advanced summary { font-size: 13px; line-height: 20px; cursor: pointer; }
+.advanced[open] > div { margin-top: 20px; }
+.checklist { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.checklist li { display: flex; align-items: start; gap: 12px; }
+.checkMark { display: grid; place-items: center; flex-shrink: 0; width: 28px; height: 28px; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); font-family: var(--f-mono), monospace; font-size: 12px; }
+.checklist b { display: block; font-size: 13px; line-height: 20px; font-weight: 500; }
+.checklist small { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; line-height: 20px; }
+.checklist [data-state="complete"] .checkMark { border-color: var(--fg); background: var(--fg); color: var(--surface); }
+.checklist [data-state="error"] .checkMark { border: 2px solid var(--fg); color: var(--fg); }
+.checklist [data-state="running"] .checkMark { border-color: var(--fg); color: var(--fg); }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 13px; line-height: 20px; }

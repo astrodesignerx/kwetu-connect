@@ -76,6 +76,8 @@ export function RichTextEditor({
   tools,
   encode,
   decode,
+  size = "default",
+  stickyToolbar = false,
 }: {
   html: string;
   onHtmlChange: (html: string) => void;
@@ -106,6 +108,10 @@ export function RichTextEditor({
    */
   encode?: (stored: string) => string;
   decode?: (shown: string) => string;
+  /** compact: a short surface that scrolls (the reply dock). tall: a long writing area (templates). */
+  size?: "default" | "compact" | "tall";
+  /** Keeps the formatting bar in view while a long message scrolls under it. */
+  stickyToolbar?: boolean;
 }) {
   const surface = useRef<HTMLDivElement>(null);
   // What we last handed the parent, in the parent's units. The surface is
@@ -218,7 +224,7 @@ export function RichTextEditor({
 
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col", className)}>
-      <div className="editor-toolbar">
+      <div className={cn("editor-toolbar", size !== "default" && "editor-toolbar-tight", stickyToolbar && "editor-toolbar-sticky")}>
         {MARKS.map(({ cmd, label, Icon, key }) => (
           <ToolButton
             key={cmd}
@@ -226,24 +232,24 @@ export function RichTextEditor({
             active={active[cmd]}
             onClick={() => run(cmd)}
           >
-            <Icon size={15} strokeWidth={2.25} />
+            <Icon size={16} />
           </ToolButton>
         ))}
         <span className="editor-sep" aria-hidden />
         <ToolButton label="Insert link" active={linkOpen} onClick={openLink}>
-          <Link2 size={15} strokeWidth={2.25} />
+          <Link2 size={16} />
         </ToolButton>
         {LISTS.map(({ cmd, label, Icon }) => (
           <ToolButton key={cmd} label={label} active={active[cmd]} onClick={() => run(cmd)}>
-            <Icon size={15} strokeWidth={2.25} />
+            <Icon size={16} />
           </ToolButton>
         ))}
         <ToolButton label="Quote" onClick={() => run("formatBlock", "blockquote")}>
-          <Quote size={15} strokeWidth={2.25} />
+          <Quote size={16} />
         </ToolButton>
         <span className="editor-sep" aria-hidden />
         <ToolButton label="Clear formatting" onClick={() => run("removeFormat")}>
-          <RemoveFormatting size={15} strokeWidth={2.25} />
+          <RemoveFormatting size={16} />
         </ToolButton>
         {tools && (
           <>
@@ -268,10 +274,10 @@ export function RichTextEditor({
             className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted"
           />
           <ToolButton label="Apply link" onClick={applyLink}>
-            <Check size={15} strokeWidth={2.5} />
+            <Check size={16} />
           </ToolButton>
           <ToolButton label="Cancel link" onClick={() => setLinkOpen(false)}>
-            <X size={15} strokeWidth={2.5} />
+            <X size={16} />
           </ToolButton>
         </div>
       )}
@@ -292,7 +298,7 @@ export function RichTextEditor({
           onBlur={publish}
           onPaste={onPaste}
           onKeyDown={onKeyDown}
-          className="editor-surface"
+          className={cn("editor-surface", size === "compact" && "editor-surface-compact", size === "tall" && "editor-surface-tall")}
         />
       </div>
     </div>

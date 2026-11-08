@@ -46,7 +46,7 @@ export default function DraftsPage() {
             <h2>{draft.subject || '(no subject)'}</h2>
             <p>{draft.bodyText || htmlToText(draft.bodyHtml ?? '') || 'No message yet.'}</p>
             <span className={s.recipient}>From {mailboxById.get(draft.mailboxConnectionId)?.email}</span>
-            <span className={s.footer}><time dateTime={draft.updatedAt}>{new Date(draft.updatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</time><StatusChip label={readiness.label} colour={readiness.ready ? 'var(--good)' : 'var(--warn)'} /></span>
+            <span className={s.footer}><time dateTime={draft.updatedAt}>{new Date(draft.updatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</time><StatusChip label={readiness.label} strong={!readiness.ready} /></span>
           </button>
           <button className={s.discard} disabled={remove.isPending} onClick={() => remove.mutate(draft.id)}>Discard</button>
         </li>;

@@ -1,12 +1,23 @@
-.page { max-width: 1160px; margin: 0 auto; display: grid; gap: 24px; min-width: 0; }.page > header { margin-bottom: 0; }
+.page { display: grid; gap: 20px; min-width: 0; }
 .people { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; }
-.person { min-width: 0; display: grid; align-content: start; gap: 18px; padding: 22px; border: 1px solid var(--line); background: var(--surface); border-radius: 18px; animation: arrive var(--t3) var(--ease) backwards; }.person:nth-child(2) { animation-delay: 50ms; }.person:nth-child(3) { animation-delay: 100ms; }
-.identity { display: flex; align-items: center; gap: 12px; min-width: 0; }.identity > div { min-width: 0; overflow-wrap: anywhere; }.identity b { font-size: 14px; }.identity p { font-size: 11px; color: var(--muted); margin-top: 5px; }.identity small { color: var(--muted); font-weight: 400; }
-.meta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }.meta > span:last-child { font-size: 11px; color: var(--muted); }
-.note { font-size: 11px; color: var(--muted); line-height: 1.7; }.person button { justify-self: start; }
-.matrix { min-width: 0; }.matrix table { width: 100%; border-collapse: collapse; table-layout: fixed; }.matrix th, .matrix td { padding: 14px 6px; border-bottom: 1px solid var(--line); text-align: left; font-size: 12px; overflow-wrap: anywhere; }.matrix th { font-weight: 500; }.matrix th:first-child { width: 54%; }.matrix thead th { color: var(--muted); font: 500 12px/1.5 var(--f-body); }.matrix td { color: var(--muted); }
-@keyframes arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-@media (max-width: 500px) { .matrix th, .matrix td { padding: 12px 3px; font-size: 10px; }.matrix th:first-child { width: 46%; } }
-@media (prefers-reduced-motion: reduce) { .person { animation: none; } }
-
-.person { border: 0; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); }
+.person { display: grid; align-content: start; gap: 16px; min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+.identity { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.identity > div { min-width: 0; overflow-wrap: anywhere; }
+.identity b { font-size: 14px; line-height: 20px; font-weight: 600; }
+.identity p { margin-top: 4px; color: var(--muted); font-size: 13px; line-height: 20px; }
+.identity small { color: var(--muted); font-size: 13px; font-weight: 400; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.metaText { color: var(--muted); font-size: 13px; line-height: 20px; }
+.note { color: var(--muted); font-size: 13px; line-height: 20px; }
+.personAction { justify-self: start; }
+.matrix { min-width: 0; }
+.matrix table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.matrix th, .matrix td { padding: 12px 4px; border-bottom: 1px solid var(--line); text-align: left; font-size: 13px; line-height: 20px; overflow-wrap: anywhere; }
+.matrix th { font-weight: 500; }
+.matrix th:first-child { width: 54%; }
+.matrix thead th { color: var(--muted); font-size: 12px; line-height: 16px; }
+.matrix td { color: var(--muted); }
+@media (max-width: 500px) {
+  .matrix th, .matrix td { padding: 12px 4px; font-size: 12px; line-height: 16px; }
+  .matrix th:first-child { width: 46%; }
+}

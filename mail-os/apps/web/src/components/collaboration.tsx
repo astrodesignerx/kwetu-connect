@@ -36,7 +36,7 @@ export function ThreadAssignee({ threadId }: { threadId: string }) {
           Assignment
         </h3>
         <button
-          className="btn-ghost !px-2 !py-0.5 !text-xs"
+          className="reader-action reader-action-small"
           onClick={() => setPicking((s) => !s)}
         >
           {picking ? "Cancel" : assignment ? "Reassign" : "Assign"}
@@ -45,7 +45,7 @@ export function ThreadAssignee({ threadId }: { threadId: string }) {
       {picking ? <AssigneePicker members={members ?? []} onPick={(id) => assign.mutate(id)} /> : assignment ? (
         <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 text-sm">
           <span className="min-w-0 break-words">{assignment.userDisplayName || assignment.userEmail}</span>
-          <button className="btn-ghost !text-xs" onClick={() => assign.mutate('00000000-0000-0000-0000-000000000000')} aria-label="Unassign">Unassign</button>
+          <button className="tool-link" onClick={() => assign.mutate('00000000-0000-0000-0000-000000000000')} aria-label="Unassign">Unassign</button>
         </div>
       ) : <MutedText>Not assigned.</MutedText>}
       {assign.isError && <p role="alert" className="text-xs">Could not change the assignment. Try again.</p>}
@@ -69,7 +69,7 @@ function AssigneePicker({
         <li key={m.id}>
           <button
             onClick={() => onPick(m.id)}
-            className="w-full rounded-xl border border-line p-2 text-left text-sm transition hover:bg-raise"
+            className="pick-row"
           >
             <div className="font-medium">{m.displayName}</div>
             <div className="text-xs text-muted">
@@ -125,18 +125,18 @@ export function ThreadNotes({ threadId, contextTools = true }: { threadId: strin
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex w-full items-center gap-2 px-5 py-2 text-left transition-[transform,opacity] duration-150 ease-out hover:bg-raise"
+        className="flex w-full items-center gap-2 px-5 py-2 text-left transition-[transform,opacity] duration-120 ease-standard hover:opacity-64"
       >
         <StickyNote
           aria-hidden
-          size={13}
+          size={14}
           className="shrink-0 text-muted"
         />
-        <span className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.07em] text-muted">
+        <span className="shrink-0 text-xs font-medium text-muted">
           Team notes
         </span>
         {(
-          <span className="shrink-0 rounded-full bg-raise px-1.5 text-[10px] font-bold tabular-nums text-muted">
+          <span className="shrink-0 rounded-tag bg-raise px-1 text-xs font-semibold tabular-nums text-muted">
             {isLoading ? "..." : notesError ? "?" : count}
           </span>
         )}
@@ -144,7 +144,7 @@ export function ThreadNotes({ threadId, contextTools = true }: { threadId: strin
         {/* Collapsed, the bar still carries the most recent note, so the common case
             : glancing to see whether a colleague has said anything : needs no click. */}
         {!open && (
-          <span className="min-w-0 flex-1 truncate text-[11px] text-muted">
+          <span className="min-w-0 flex-1 truncate text-xs text-muted">
             {isLoading
               ? "Loading…"
               : latest
@@ -156,7 +156,7 @@ export function ThreadNotes({ threadId, contextTools = true }: { threadId: strin
         <span
           aria-hidden
           className={cn(
-            "ml-auto shrink-0 text-[10px] text-muted transition-transform duration-200 ease-out ",
+            "ml-auto shrink-0 text-xs text-muted transition-transform duration-200 ease-standard ",
             open && "rotate-90"
           )}
         >
@@ -172,13 +172,13 @@ export function ThreadNotes({ threadId, contextTools = true }: { threadId: strin
               bookkeeping above the message itself, on every thread. They belong
               with the notes: all three are things the team says about a
               conversation rather than part of the conversation. */}
-          {contextTools && <div className="mb-3 grid gap-2.5 sm:grid-cols-2">
+          {contextTools && <div className="mb-3 grid gap-3 sm:grid-cols-2">
             <ThreadAssignee threadId={threadId} />
             <ThreadLinker threadId={threadId} />
           </div>}
 
           {count > 0 && (
-            <ul className="mb-2 flex flex-col gap-1.5">
+            <ul className="mb-2 flex flex-col gap-2">
               {notes!.map((n) => (
                 <li key={n.id} className="group flex items-baseline gap-2 text-xs">
                   <span className="shrink-0 font-semibold">
@@ -187,14 +187,14 @@ export function ThreadNotes({ threadId, contextTools = true }: { threadId: strin
                   <span className="min-w-0 flex-1 whitespace-pre-wrap text-muted">
                     {n.body}
                   </span>
-                  <span className="shrink-0 text-[10px] tabular-nums text-muted">
+                  <span className="shrink-0 text-xs tabular-nums text-muted">
                     {new Date(n.createdAt).toLocaleDateString()}
                   </span>
                   <button
                     type="button"
                     onClick={() => remove.mutate(n.id)}
                     aria-label="Delete note"
-                    className="shrink-0 rounded px-1 text-[10px] text-muted opacity-0 transition-opacity duration-150 ease-out hover:text-red-500 focus-visible:opacity-100 group-hover:opacity-100"
+                    className="shrink-0 rounded-tag px-1 text-xs text-muted opacity-0 transition-opacity duration-120 ease-standard focus-visible:opacity-100 group-hover:opacity-100"
                   >
                     ✕
                   </button>
@@ -214,12 +214,12 @@ export function ThreadNotes({ threadId, contextTools = true }: { threadId: strin
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="Add a note for your team…"
-              className="glass-input !py-1.5 !text-xs"
+              className="glass-input glass-input-dense"
             />
             <Button
               type="submit"
               disabled={!body.trim() || create.isPending}
-              className="shrink-0 !px-2.5 !py-1.5 !text-xs"
+              className="shrink-0"
             >
               {create.isPending ? "Posting…" : "Post"}
             </Button>

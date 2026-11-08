@@ -76,11 +76,11 @@ export function invitationExpiry(expiresAt: string, status: string, now = Date.n
 }
 
 export function auditKind(action: string) {
-  if (action.includes("invitation")) return { label: "Invite", colour: "var(--warn)" };
-  if (action.includes("role")) return { label: "Role", colour: "var(--jac)" };
-  if (action.includes("login") || action.includes("password") || action.includes("auth")) return { label: "Security", colour: "var(--good)" };
-  if (action.includes("brand") || action.includes("template") || action.includes("state")) return { label: "Settings", colour: "var(--fg)" };
-  return { label: "Access", colour: "var(--muted)" };
+  if (action.includes("invitation")) return { label: "Invite" };
+  if (action.includes("role")) return { label: "Role" };
+  if (action.includes("login") || action.includes("password") || action.includes("auth")) return { label: "Security" };
+  if (action.includes("brand") || action.includes("template") || action.includes("state")) return { label: "Settings" };
+  return { label: "Access" };
 }
 
 export function utcHourValues(hourly: SyncStats["hourly"]) {
