@@ -686,7 +686,7 @@
   }
 
   .editor-tool {
-    @apply grid h-7 w-7 place-items-center rounded-md text-muted;
+    @apply inline-grid h-7 w-7 grid-flow-col place-items-center rounded-md text-muted;
     transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease);
   }
 
@@ -1455,7 +1455,6 @@
 /* Signal foundation. Existing page classes keep their compatibility tokens. */
 html { min-width: 0; }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body), system-ui, sans-serif; }
-button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: default; }
 :focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
@@ -1646,4 +1645,8 @@ input[type="date"] { color-scheme: inherit; }
   /* Popover dismissal consumes animationend, even when motion is reduced. */
   .menu-pop { animation: menu-pop .01ms var(--ease) both !important; }
   .menu-pop[data-closing="true"] { animation: menu-pop-out .01ms var(--ease) both !important; }
+}
+
+@layer components {
+  @media (max-width: 859px) { .glass-input { font-size: 16px; } }
 }

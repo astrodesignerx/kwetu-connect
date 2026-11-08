@@ -39,7 +39,7 @@ export default function ProfilePage() {
   return <div className={s.page}>
     <SettingsHeader title="Profile" context="Settings / Personal" description="How you appear to your team and how you sign in." />
     <div className={s.layout}>
-      <aside className={s.pass}><small>Kwetu OS / Staff</small><Avatar name={user?.displayName ?? ""} /><div><h2>{user?.displayName}</h2><p>{user?.role}</p></div><dl><dt>Username</dt><dd>@{user?.username}</dd><dt>Email</dt><dd>{user?.email}</dd><dt>Member since</dt><dd>{user?.createdAt ? new Date(user.createdAt).toLocaleDateString("en-GB", { month: "long", year: "numeric" }) : "Not available"}</dd></dl><div className={s.barcode} aria-hidden="true" /></aside>
+      <aside className={s.pass}><small>Kwetu OS / Staff</small><Avatar name={user?.displayName ?? ""} /><div><h2>{user?.displayName}</h2><p>{user?.role}</p></div><dl><dt>Username</dt><dd>@{user?.username}</dd><dt>Email</dt><dd>{user?.email}</dd><dt>Member since</dt><dd>{user?.createdAt ? new Date(user.createdAt).toLocaleDateString("en-GB", { month: "long", year: "numeric" }) : "Not available"}</dd></dl></aside>
       <div className={s.forms}>
         <Panel><form className={s.form} onSubmit={(event) => void save(event, "details")}><h2>Details</h2><div className={s.fields}>
           <Field label="Display name" htmlFor="displayName"><Input id="displayName" value={displayName} onChange={(event) => setDisplayName(event.target.value)} required /></Field>

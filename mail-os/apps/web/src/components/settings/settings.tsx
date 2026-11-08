@@ -5,7 +5,7 @@ import s from "./settings.module.css";
 export function SettingsHeader({ title, context = "Settings", description, action }: {
   title: string; context?: string; description?: string; action?: React.ReactNode;
 }) {
-  return <header className={s.header}><div><Link className={s.sectionLabel} href="/settings">{context}</Link><h1>{title}</h1>{description && <p>{description}</p>}</div>{action}</header>;
+  return <header className={s.header}><div>{context && <Link className={s.sectionLabel} href="/settings">{context}</Link>}<h1>{title}</h1>{description && <p>{description}</p>}</div>{action}</header>;
 }
 export function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <section className={`${s.panel} ${className}`}>{children}</section>;

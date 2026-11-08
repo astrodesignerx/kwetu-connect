@@ -31,7 +31,7 @@ export default function AdminUsersPage() {
     <Feedback error={updateRole.error} message={updateRole.isSuccess ? "Role updated. That person must sign in again." : null} />
     {users.isPending ? <SettingsState loading /> : users.isError ? <SettingsState error={users.error} retry={() => void users.refetch()} /> : users.data.length === 0 ? <SettingsState empty="No people to show" /> : <div className={s.people}>{users.data.map((person) => <article className={s.person} key={person.id}>
       <div className={s.identity}><Avatar name={person.displayName} /><div><b>{person.displayName}{person.id === me?.id && <small> (you)</small>}</b><p>{person.email}</p></div></div>
-      <div className={s.meta}><Chip hue={person.role === "Admin" ? "var(--jac)" : "var(--muted)"}>{person.role}</Chip><span>{person.mailboxCount} mailboxes</span></div>
+      <div className={s.meta}><Chip hue={person.role === "Admin" ? "var(--jac)" : "var(--muted)"}>{person.role}</Chip><span>{person.mailboxCount} {person.mailboxCount === 1 ? "mailbox" : "mailboxes"}</span></div>
       <small className={s.note}>Last sign-in {dateTime(person.lastLoginAt)}</small>
       {person.id !== me?.id && <Button variant="ghost" disabled={updateRole.isPending} onClick={() => updateRole.mutate({ id: person.id, role: person.role === "Admin" ? "Member" : "Admin" })}>{person.role === "Admin" ? "Change to member" : "Make admin"}</Button>}
     </article>)}</div>}

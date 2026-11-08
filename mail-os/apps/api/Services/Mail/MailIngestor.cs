@@ -765,7 +765,7 @@ public class MailIngestor
                 .ToArray();
 
             var from = mime.From?.Mailboxes.FirstOrDefault();
-            var date = mime.Date == default ? (DateTimeOffset?)null : mime.Date;
+            var date = mime.Date == default ? (DateTimeOffset?)null : mime.Date.ToUniversalTime();
 
             if (from is not null)
                 contactSeeds.Add(new ContactSeed(from.Address, from.Name, date ?? DateTimeOffset.UtcNow));

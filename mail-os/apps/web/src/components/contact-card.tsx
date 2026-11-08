@@ -101,7 +101,7 @@ export function ContactDetails({
 
       {!company && (
         <span className="text-[11px] text-muted">
-          Not linked to a client : use the notes panel below.
+          Not linked to a client. Use the notes panel below.
         </span>
       )}
     </div>

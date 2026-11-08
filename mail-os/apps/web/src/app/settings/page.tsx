@@ -28,7 +28,7 @@ export default function SettingsHubPage() {
   if (workspace.isError) return <SettingsState error={workspace.error} retry={() => void workspace.refetch()} />;
   const data = workspace.data;
   return <div className={s.page}>
-    <SettingsHeader title="Settings" description="Your workspace, in good order." />
+    <SettingsHeader title="Settings" context="" description="Your workspace, in good order." />
     <section className={s.banner}>
       <span className={s.mark} aria-hidden="true">k</span><div className={s.workspace}><small>Workspace</small><h2>{data.workspaceName}</h2></div>
       <div className={s.numbers}><Stat value={data.memberCount} label="people" /><Stat value={data.mailboxCount} label="mailboxes" /><Stat value={data.templateCount} label="templates" /><Stat value={data.sendsLast30Days} label="sends / last 30 days" /></div>
@@ -43,7 +43,7 @@ export default function SettingsHubPage() {
           <div className={s.meta}>{sync.data && <HealthLight state={sync.data.syncState} />}<span>{firstMailbox.email}</span><span>{sync.data ? sync.data.conversationCount + " conversations" : ""}</span></div>
           {sync.data ? <><HourBars values={utcHourValues(sync.data.hourly)} colour="var(--good)" highlightPeak={false} label="Fetched messages in the last 24 hours, grouped by UTC hour of day" height={68} /><span className={s.note}>Last 24 hours by UTC hour / {sync.data.messagesSynced} fetched</span></> : <span className={s.note}>{sync.isError ? "Sync history unavailable" : "Loading sync history"}</span>}
         </> : <span className={s.note}>Connect your first mailbox</span>}
-        {data.mailboxHealth.needsAttention > 0 && <span className={s.attention}>{data.mailboxHealth.needsAttention} workspace connections need attention</span>}
+        {data.mailboxHealth.needsAttention > 0 && <span className={s.attention}>{data.mailboxHealth.needsAttention === 1 ? "1 workspace connection needs attention" : `${data.mailboxHealth.needsAttention} workspace connections need attention`}</span>}
       </Tile>
       <Tile href="/settings/brand-kit" title="Email appearance" half>
         {kit.data ? <div className={s.brand}><div className={s.preview}><iframe tabIndex={-1} title="Saved email appearance" sandbox="" srcDoc={renderBrandPreview(kit.data)} /></div><span className={s.swatches}>{[kit.data.primaryColor, kit.data.accentColor, kit.data.textColor, kit.data.backgroundColor].map((colour, index) => <i key={index} style={{ background: colour || "var(--raise)" }} title={colour || "Default"} />)}</span></div> : <span className={s.note}>{kit.isError ? "Appearance unavailable" : "Loading appearance"}</span>}

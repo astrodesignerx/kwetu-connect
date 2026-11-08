@@ -114,7 +114,7 @@ function TemplateEditor({ id }: { id: string }) {
                   value={effective.name}
                   onChange={(e) => update("name", e.target.value)}
                 />
-                <Hint>Only you see this : it is how you pick the template later.</Hint>
+                <Hint>Only you see this. It is how you pick the template later.</Hint>
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="tdesc">What it&apos;s for</Label>
@@ -147,7 +147,7 @@ function TemplateEditor({ id }: { id: string }) {
                 html={effective.bodyHtml ?? ""}
                 onHtmlChange={(v) => update("bodyHtml", v)}
                 ariaLabel="Message"
-                placeholder="Hi there : here's this week's update…"
+                placeholder="Hi there, here's this week's update…"
                 encode={toChips}
                 decode={fromChips}
                 className="[--editor-pad-x:1rem] [&_.editor-surface]:min-h-64 [&_.editor-toolbar]:px-3"
@@ -198,9 +198,9 @@ function TemplateEditor({ id }: { id: string }) {
                 checked={effective.skipBrandWrap}
                 onChange={(e) => update("skipBrandWrap", e.target.checked)}
               />
-              <span>
+              <span className="text-sm">
                 Send this one plain
-                <Hint>
+                <Hint className="mt-0.5 block">
                   Leaves off your logo bar, sign-off, small print and colours. Useful for
                   a short internal note.
                 </Hint>
@@ -288,7 +288,7 @@ function UsedFields({ tokens }: { tokens: string[] }) {
   if (!tokens.length) {
     return (
       <Hint className="mt-2 block">
-        No tags yet : use <strong>Insert field</strong> above to drop in a client&apos;s
+        No tags yet. Use <strong>Insert field</strong> above to drop in a client&apos;s
         name or a project.
       </Hint>
     );

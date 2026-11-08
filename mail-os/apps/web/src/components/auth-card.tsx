@@ -6,7 +6,7 @@ import { cn } from "@/lib/cn";
 import { Logo } from "@/components/logo";
 
 export function AuthCard({ title, subtitle, children, footer }: {
-  title: string; subtitle: string; children: React.ReactNode; footer?: React.ReactNode; welcome?: boolean;
+  title: string; subtitle: string; children: React.ReactNode; footer?: React.ReactNode;
 }) {
   return (
     <main className="signal-auth">

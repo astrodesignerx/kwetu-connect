@@ -1,6 +1,6 @@
 .page { max-width: 1120px; margin: 0 auto; min-width: 0; display: grid; gap: 22px; }.page > header { margin-bottom: 0; }
 .note { color: var(--muted); font-size: 11px; margin-top: 10px; }
-.activity { width: 100%; max-width: 520px; }
+.activity { width: 100%; }
 .filters { display: flex; gap: 8px; flex-wrap: wrap; }.filters button { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 7px 14px; font-size: 12px; color: var(--muted); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }.filters [aria-pressed="true"] { background: var(--fg); color: var(--surface); }.filters button:hover { transform: translateY(-2px); }.filters button:focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
 .timeline { display: grid; gap: 30px; animation: arrive var(--t2) var(--ease) backwards; }
 .day h2 { font: 11px var(--f-mono); text-transform: none; color: var(--muted); margin-bottom: 14px; }.day ol { display: grid; gap: 8px; list-style: none; padding: 0; }.day li { display: grid; grid-template-columns: 45px 34px minmax(0, 1fr); gap: 16px; padding: 18px; border: 0; border-radius: 20px; background: var(--surface); box-shadow: var(--mail-shadow); }.day time { font: 10px var(--f-mono); color: var(--faint); padding-top: 8px; }

@@ -1,7 +1,7 @@
 .page { color: var(--fg); min-width: 0; }
 .header { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 30px; }
 .header h1 { font: 650 28px/1.2 var(--f-body); letter-spacing: -.04em; margin-bottom: 8px; }
-.header p { font: 11px var(--f-mono); color: var(--muted); }
+.header p { font: 13px/1.5 var(--f-body); color: var(--muted); }
 .header a { margin-left: auto; background: var(--sodium); color: var(--on-sodium); padding: 10px 16px; border-radius: 99px; font-size: 13px; }
 .sheets { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 24px; }
 .sheet { display: flex; flex-direction: column; min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 24px; animation: arrive var(--t3) var(--ease) backwards; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
@@ -9,7 +9,7 @@
 .open { flex: 1; min-width: 0; text-align: left; }
 .recipient { font: 12px/1.5 var(--f-body); color: var(--muted); display: block; overflow-wrap: anywhere; }
 .sheet h2 { font: 650 18px/1.3 var(--f-body); letter-spacing: -.02em; margin: 16px 0 10px; overflow-wrap: anywhere; }
-.sheet p { font-size: 13px; line-height: 1.8; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; min-height: 92px; }
+.sheet p { font-size: 13px; line-height: 1.8; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .footer { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); font: 10px var(--f-mono); color: var(--muted); }
 .discard { font-size: 11px; color: var(--muted); margin-top: 16px; text-align: right; }
 .discard:hover { color: var(--bad); }

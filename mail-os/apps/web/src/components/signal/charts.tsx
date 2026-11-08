@@ -18,7 +18,7 @@ export function Spark({ values, label, colour = clientColour, width = 132, heigh
   const last = points.at(-1);
   return (
     <svg className={`${s.root} ${s.spark}`} width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={hueStyle(colour)} role="img" aria-label={label}>
-      {last && <>
+      {last && points.length > 1 && <>
         <path className={s.sparkArea} d={`${line} L${last.x},${h} L${points[0].x},${h} Z`} />
         <path className={s.sparkLine} d={line} />
         <circle cx={last.x} cy={last.y} r="3.5" />

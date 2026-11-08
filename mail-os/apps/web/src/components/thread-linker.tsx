@@ -158,7 +158,7 @@ function CompanyPicker({
   if (companies.length === 0) {
     return (
       <div className="space-y-2 text-sm">
-        <MutedText>No clients yet : create one first.</MutedText>
+        <MutedText>No clients yet. Create one first.</MutedText>
         <Link className="btn-primary !inline-flex" href="/clients">
           Open Clients
         </Link>

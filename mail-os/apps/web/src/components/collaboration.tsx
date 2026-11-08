@@ -149,7 +149,7 @@ export function ThreadNotes({ threadId, contextTools = true }: { threadId: strin
               ? "Loading…"
               : latest
                 ? `${latest.authorDisplayName || latest.authorEmail}: ${latest.body}`
-                : "None yet : visible to your team, never sent to the client."}
+                : "None yet. Visible to your team, never sent to the client."}
           </span>
         )}
 

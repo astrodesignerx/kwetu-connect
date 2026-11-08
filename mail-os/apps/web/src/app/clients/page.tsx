@@ -15,7 +15,7 @@ export default function ClientsPage() {
   const clients = query.data;
   return <div className={s.page}>
     <header className={s.header}>
-      <div><p className={s.sectionLabel}>Directory</p><h1>Clients</h1><p className={s.muted}>The people and campaigns behind your conversations.</p></div>
+      <div><h1>Clients</h1><p className={s.muted}>The people and campaigns behind your conversations.</p></div>
       <Button onClick={() => setCreating(!creating)}>{creating ? "Cancel" : "New client"}</Button>
     </header>
     {creating && <ClientForm onDone={() => { setCreating(false); void cache.invalidateQueries({ queryKey: ["client-activity"] }); }} />}

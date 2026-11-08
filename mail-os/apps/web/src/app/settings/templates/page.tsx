@@ -19,7 +19,7 @@ export default function TemplatesPage() {
   } });
   const latest = templates[0];
   return <div className={s.page}>
-    <header className={s.header}><div><p className={s.sectionLabel}>Message library</p><h1>Templates</h1><p className={s.muted}>Messages your team sends again and again.</p></div><Link href="/settings/templates/new" className="btn-primary">New template</Link></header>
+    <header className={s.header}><div><h1>Templates</h1><p className={s.muted}>Messages your team sends again and again.</p></div><Link href="/settings/templates/new" className="btn-primary">New template</Link></header>
     {query.isPending ? <ViewState loading label="Loading templates" /> : query.isError ? <div role="alert"><p>Could not load templates.</p><Button variant="default" onClick={() => void query.refetch()}>Try again</Button></div> : !latest ? <div className={s.empty}><h2>Your next message starts here.</h2><p className={s.muted}>Create a template for an update, proposal or handover.</p><Link href="/settings/templates/new" className="btn-primary">New template</Link></div> : <>
       <section className={s.feature}>
         <div className={s.featureBody}><p className={s.sectionLabel}>Most recently edited</p><h2>{latest.name}</h2><p className={s.muted}>{latest.description || latest.subject || "Ready to personalise."}</p><span className={s.date}>Edited {displayDate(latest.updatedAt)}</span><Link href={`/settings/templates/edit?id=${encodeURIComponent(latest.id)}`} className="btn-primary">Edit template</Link><Button variant="ghost" size="small" disabled={remove.isPending} onClick={() => { if (confirm(`Delete template ${latest.name}?`)) remove.mutate(latest.id); }}>Delete template</Button></div>

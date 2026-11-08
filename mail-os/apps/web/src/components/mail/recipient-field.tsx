@@ -32,7 +32,7 @@ export function RecipientField({ id, value, onChange, inputRef, placeholder }: {
       <span>{recipient}</span><button type="button" aria-label={`Remove ${recipient}`} onClick={() => onChange(list.filter((_, i) => i !== index).join(", "))}>×</button>
     </span>)}
     <input id={id} ref={ref} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} autoComplete="off"
-      className={s.recipientInput} data-chipped={!editing && list.length > 0} onFocus={() => setEditing(true)} onBlur={() => setEditing(false)} />
+      className={`${s.recipientInput} rounded-lg`} data-chipped={!editing && list.length > 0} onFocus={() => setEditing(true)} onBlur={() => setEditing(false)} />
     {!editing && list.length > 0 && <button className={s.addRecipient} type="button" onClick={() => ref.current?.focus()}>Edit recipients</button>}
   </div>;
 }

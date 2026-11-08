@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Archive, FileAudio, FileImage, FileSpreadsheet, FileText, FileVideo, Loader2, Paperclip, Presentation } from "lucide-react";
 import type { AttachmentDto } from "@kompanion/types";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -12,18 +13,18 @@ export function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function iconFor(contentType: string | null, fileName: string): string {
+function iconFor(contentType: string | null, fileName: string): React.ReactNode {
   const type = contentType?.toLowerCase() ?? "";
   const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
-  if (type.startsWith("image/")) return "🖼️";
-  if (type === "application/pdf" || ext === "pdf") return "📕";
-  if (type.startsWith("audio/")) return "🎵";
-  if (type.startsWith("video/")) return "🎬";
-  if (["zip", "rar", "7z", "gz", "tar"].includes(ext)) return "🗜️";
-  if (["doc", "docx", "odt"].includes(ext)) return "📄";
-  if (["xls", "xlsx", "csv", "ods"].includes(ext)) return "📊";
-  if (["ppt", "pptx", "odp"].includes(ext)) return "📽️";
-  return "📎";
+  if (type.startsWith("image/")) return <FileImage size={16} />;
+  if (type === "application/pdf" || ext === "pdf") return <FileText size={16} />;
+  if (type.startsWith("audio/")) return <FileAudio size={16} />;
+  if (type.startsWith("video/")) return <FileVideo size={16} />;
+  if (["zip", "rar", "7z", "gz", "tar"].includes(ext)) return <Archive size={16} />;
+  if (["doc", "docx", "odt"].includes(ext)) return <FileText size={16} />;
+  if (["xls", "xlsx", "csv", "ods"].includes(ext)) return <FileSpreadsheet size={16} />;
+  if (["ppt", "pptx", "odp"].includes(ext)) return <Presentation size={16} />;
+  return <Paperclip size={16} />;
 }
 
 /**
@@ -65,7 +66,7 @@ function AttachmentChip({ attachment }: { attachment: AttachmentDto }) {
       }}
       title={
         state === "error"
-          ? "Download failed : try again"
+          ? "Download failed. Try again"
           : `${attachment.fileName} (${formatBytes(attachment.sizeBytes)})`
       }
       className={cn(
@@ -79,12 +80,12 @@ function AttachmentChip({ attachment }: { attachment: AttachmentDto }) {
       )}
     >
       <span aria-hidden className="text-base leading-none">
-        {state === "busy" ? "⏳" : iconFor(attachment.contentType, attachment.fileName)}
+        {state === "busy" ? <Loader2 size={16} className="signal-loading" /> : iconFor(attachment.contentType, attachment.fileName)}
       </span>
       <span className="min-w-0">
         <span className="block truncate text-xs font-medium">{attachment.fileName}</span>
         <span className="block text-[10px] text-muted">
-          {state === "error" ? "Failed : retry" : formatBytes(attachment.sizeBytes)}
+          {state === "error" ? "Failed. Retry" : formatBytes(attachment.sizeBytes)}
         </span>
       </span>
     </button>
@@ -131,10 +132,10 @@ export function AttachmentList({
     return (
       <div className="mt-3 border-t border-line pt-3">
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-fg bg-raise px-2.5 py-2">
-          <span aria-hidden>📎</span>
+          <span aria-hidden><Paperclip size={14} /></span>
           <span className="text-xs text-muted">
             {names.length > 0
-              ? `${names.join(", ")} : not downloaded yet.`
+              ? `${names.join(", ")}: not downloaded yet.`
               : "This message has an attachment that hasn't been downloaded yet."}
           </span>
           <span className="text-[11px] text-muted">
