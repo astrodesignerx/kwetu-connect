@@ -3,9 +3,11 @@ import { requireStaff } from "@/lib/auth/server";
 import { getStore } from "@/lib/store";
 import { todayInNairobi } from "@/lib/store/validation";
 import { addDays, isValidDate, weekdayOf } from "@/lib/booking/hours";
-import { blockShares, hourShares, weeklyTotals, weekSold, nairobiClock } from "@/lib/dashboard";
+import { blockShares, currentPlaylist, hourShares, onAirStatus, weeklyTotals, weekSold, nairobiClock } from "@/lib/dashboard";
+import type { PlaylistItem, Schedule } from "@/lib/booking/playlist";
 import { ArrowRight, Play } from "@phosphor-icons/react/dist/ssr";
 import OverviewBanner from "@/components/manage/OverviewBanner";
+import NowNext, { type NowNextRow } from "@/components/manage/NowNext";
 import { BlockRows, CapsuleBars, DarkIsland, FolderCard } from "@/components/manage/V2Visuals";
 import { RevenueChart } from "@/components/workspace/Charts";
 import { number } from "@/components/booking/QuoteTotals";
@@ -36,6 +38,30 @@ export default async function WeekPage({ searchParams }: { searchParams: Promise
   let schedule = null;
   let scheduleError = false;
   try { schedule = await store.schedule(today, today); } catch { scheduleError = true; }
+  const businesses = Object.fromEntries(bookings.map((booking) => [booking.reference, booking.business]));
+  const plays = (items: PlaylistItem[], item: PlaylistItem) => item.kind === "advert" ? items.filter((other) => other.kind === "advert" && other.bookingId === item.bookingId).length : null;
+  const rowOf = (items: PlaylistItem[], item: PlaylistItem, tag: NowNextRow["tag"]): NowNextRow => ({ id: item.kind === "advert" ? item.bookingId : "kca", name: item.kind === "advert" ? businesses[item.bookingId] ?? item.bookingId : "KCA time", tag, length: item.seconds, plays: plays(items, item) });
+  const hourItems = (from: Schedule, date: string, hour: number) => { const row = from.rows.find((item) => item.startDate <= date && item.endDate >= date && hour >= item.startHour && hour < item.endHour); return from.playlists.find((playlist) => playlist.name === row?.playlist)?.items ?? []; };
+  let nowNext: NowNextRow[] = [];
+  if (schedule) {
+    if (onAirStatus(settings, now).onAir) {
+      const items = hourItems(schedule, today, clock.hour);
+      const { current, next } = currentPlaylist(schedule, today, clock.hour, clock.second);
+      nowNext = [current && rowOf(items, current, "playing"), next && rowOf(items, next, "next")].filter((row): row is NowNextRow => !!row);
+    } else {
+      // Screen closed: show the first two adverts of the next open hour.
+      for (let offset = 0; offset <= 7 && !nowNext.length; offset++) {
+        const day = addDays(today, offset);
+        const screen = settings.screenHours[weekdayOf(day)];
+        if (!screen || screen.open >= screen.close || (offset === 0 && clock.hour >= screen.open)) continue;
+        let source: Schedule | null = schedule;
+        if (offset > 0) { try { source = await store.schedule(day, day); } catch { source = null; } }
+        const items = source ? hourItems(source, day, screen.open) : [];
+        nowNext = items.filter((item) => item.kind === "advert").slice(0, 2).map((item, index) => rowOf(items, item, index ? "next" : "first"));
+        break;
+      }
+    }
+  }
   const toCollect = collect.reduce((sum, booking) => sum + booking.priceKes, 0);
   const sold = weekSold(occupancy, settings);
   const soon = bookings.filter((booking) => ["Quote", "Paid", "Approved"].includes(booking.status) && booking.request.startDate >= today && booking.request.startDate <= addDays(today, 13)).sort((first, second) => first.request.startDate.localeCompare(second.request.startDate)).slice(0, 5);
@@ -52,7 +78,7 @@ export default async function WeekPage({ searchParams }: { searchParams: Promise
   const eveningShare = (items: typeof rows[number]["hours"]) => { const open = items.filter((hour) => hour.hour >= 18 && !hour.closed); return open.length ? open.reduce((sum, hour) => sum + hour.share, 0) / open.length : 0; };
   const tonight = eveningShare(hours.map((hour) => ({ ...hour, closed: false })));
   return <section className="v2-overview">
-    <div className="v2-overview-top"><OverviewBanner sold={tonight} needs={needs.length} live={live.length} schedule={schedule} businesses={Object.fromEntries(bookings.map((booking) => [booking.reference, booking.business]))} settings={settings} now={now.toISOString()} error={scheduleError} /><DarkIsland className="v2-today-card"><div className="v2-card-heading"><h2>Today by hour<small>{shortDate(today)}, planned</small></h2><span className="soft-pill">Now {String(clock.hour).padStart(2, "0")}:{String(Math.floor(clock.second / 60)).padStart(2, "0")}</span></div><CapsuleBars hours={hours} currentHour={clock.hour} /><Link href="/manage/schedule" className="v2-inline-link">Open the planned playlist<ArrowRight size={13} aria-hidden="true" /></Link></DarkIsland></div>
+    <div className="v2-overview-top"><OverviewBanner sold={tonight} needs={needs.length} live={live.length} schedule={schedule} businesses={businesses} settings={settings} now={now.toISOString()} error={scheduleError} /><DarkIsland className="v2-today-card"><div className="v2-card-heading"><h2>Today by hour<small>{shortDate(today)}, planned</small></h2><span className="soft-pill">Now {String(clock.hour).padStart(2, "0")}:{String(Math.floor(clock.second / 60)).padStart(2, "0")}</span></div><CapsuleBars hours={hours} currentHour={clock.hour} /><NowNext rows={nowNext} empty={scheduleError ? "The playlist could not be loaded." : undefined} /><Link href="/manage/schedule" className="v2-inline-link">Open the planned playlist<ArrowRight size={13} aria-hidden="true" /></Link></DarkIsland></div>
     <div className="v2-overview-folders">
       <FolderCard label="Screen time sold" value={<>{Math.round(sold * 100)}<small>% this week</small></>} note="Of saleable screen time" colour="amber"><div className="v2-sold-meter" aria-hidden="true"><i style={{ transform: `scaleX(${Math.min(1, sold)})` }} /></div><Link href="/manage/schedule" className="v2-folder-link" aria-label="Open screen schedule" /></FolderCard>
       <FolderCard label="Booked this week" value={<><small>KES</small>{number(total.kes)}</>} note={`${total.count} created bookings, cancelled excluded`}><div className="v2-folder-chart"><RevenueChart weeks={weeks} /></div></FolderCard>

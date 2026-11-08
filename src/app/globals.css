@@ -1031,9 +1031,12 @@ button.time-cell:active { transform: scale(.98); }
 .revenue-tile .muted, .collect-tile .muted, .week-ring-tile .muted { font-size: 10px; margin-top: 8px; }
 .revenue-chart { margin-top: auto; padding-top: 16px; }
 .revenue-chart svg { width: 100%; height: 80px; overflow: visible; }
-.chart-area { fill: #edb34718; }
-.chart-line { fill: none; stroke: var(--primary); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1; animation: line-draw var(--duration-surface) var(--ease-out); }
+.chart-area { fill: var(--v2-e2); fill-opacity: .1; }
+.chart-line { fill: none; stroke: var(--v2-e2); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1; animation: line-draw var(--duration-surface) var(--ease-out); }
 .revenue-chart figcaption { color: var(--muted-foreground); font-size: 9px; }
+.chart-drop { stroke: var(--muted-foreground); stroke-width: 1; stroke-dasharray: 2 3; opacity: .7; }
+.chart-dot { fill: var(--v2-e1); stroke: var(--v2-e2); stroke-width: 2; }
+@media (prefers-reduced-motion: reduce) { .chart-line { animation: none; stroke-dasharray: none; } }
 .tile-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
 .tile-heading > strong { font-size: 22px; }
 .amber { color: var(--amber-text); }
@@ -2424,6 +2427,16 @@ button.pay-ghost { width: 100%; background: transparent; cursor: pointer; }
 .v2-today-card { display: flex; flex-direction: column; }
 .v2-today-card .v2-capsule-chart { flex: 1; }
 .v2-today-card .v2-capsules { height: 114px; gap: 4px; }
+.v2-now-next, .v2-now-next-empty { margin: 14px 0 0; padding: 12px 0 0; border-top: 1px solid var(--border); }
+.v2-now-next { list-style: none; display: grid; gap: 8px; }
+.v2-now-next li { display: grid; grid-template-columns: 8px minmax(0,1fr) auto; gap: 10px; align-items: center; font-size: 12px; color: var(--muted-foreground); }
+.v2-now-next span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2-now-next b { color: var(--foreground); font-weight: 600; }
+.v2-now-next i { width: 8px; height: 8px; border-radius: 50%; background: var(--v2-h2); }
+.v2-now-next [data-tag="playing"] i { background: var(--v2-e2); box-shadow: 0 0 8px color-mix(in srgb, var(--v2-e2) 60%, transparent); }
+.v2-now-next [data-tag="first"] i { background: var(--v2-e1); }
+.v2-now-next small { font: 11px var(--font-geist-mono), monospace; font-variant-numeric: tabular-nums; }
+.v2-now-next-empty { font-size: 12px; color: var(--muted-foreground); }
 .v2-today-card .soft-pill { color: var(--v2-amber-text); background: #edb34722; font-size: 10px; white-space: nowrap; }
 .v2-inline-link { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; margin-top: 12px; }
 .v2-overview-folders { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
@@ -2434,8 +2447,7 @@ button.pay-ghost { width: 100%; background: transparent; cursor: pointer; }
 .v2-folder-chart .revenue-chart { margin: 0; }
 .v2-folder-chart .revenue-chart svg { height: 30px; width: 70px; }
 .v2-folder-chart figcaption { display: none; }
-.v2-folder-chart .chart-line { stroke: var(--v2-teal); stroke-dasharray: none; animation: none; }
-.v2-folder-chart .chart-area { fill: color-mix(in srgb, var(--v2-teal) 20%, transparent); }
+.v2-folder-chart .chart-line { stroke-dasharray: none; animation: none; }
 /* Screen time sold: a small amber meter in the same top-right slot as the other cards' visuals. */
 .v2-sold-meter { position: absolute; right: 16px; top: 54px; height: 9px; width: 58px; border-radius: 4px; overflow: hidden; background: color-mix(in srgb, var(--v2-amber) 22%, transparent); }
 .v2-sold-meter i { display: block; height: 100%; background: var(--v2-data-grad); transform-origin: left; transition: transform var(--duration-base) var(--ease-standard); }
@@ -2501,8 +2513,7 @@ button.pay-ghost { width: 100%; background: transparent; cursor: pointer; }
 .v2-booked-value > strong { display: block; font-size: 24px; letter-spacing: -.025em; margin-top: 8px; position: relative; z-index: 1; }
 .v2-booked-value .revenue-chart { margin: 4px -16px -16px; }
 .v2-booked-value svg { width: 100%; height: 65px; }
-.v2-booked-value .chart-line { stroke: var(--v2-e2); stroke-dasharray: none; animation: none; }
-.v2-booked-value .chart-area { fill: color-mix(in srgb, var(--v2-e2) 20%, transparent); }
+.v2-booked-value .chart-line { stroke-dasharray: none; animation: none; }
 .v2-booked-value figcaption { text-align: right; padding: 2px 16px 8px; font-size: 9px; }
 .pipeline-board { grid-template-columns: repeat(5,minmax(150px,1fr)); gap: 12px; }
 .pipeline-scroll { overflow: visible; }
