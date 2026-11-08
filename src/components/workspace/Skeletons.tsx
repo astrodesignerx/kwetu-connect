@@ -82,7 +82,6 @@ export function OverviewSkeleton() {
 
 export function BookingsSkeleton() {
   return <section className="pipeline-page" role="status" aria-label="Loading bookings">
-    <div className="sk-stack" aria-hidden="true"><Line w="160px" /><Line w="220px" h="28px" /><Line w="280px" /></div>
     <div className="sk-row" aria-hidden="true">{[0, 1, 2, 3, 4].map((i) => <Line key={i} w="80px" h="30px" />)}</div>
     <div className="pipeline-scroll" aria-hidden="true"><div className="pipeline-board">{Array.from({ length: 5 }, (_, i) => <div className="pipeline-column sk-stack" key={i}><Line w="70%" /><Line w="50%" /><Panel h="190px" /><Panel h="190px" /></div>)}</div></div>
     <span className="sr-only">Loading bookings</span>
@@ -92,7 +91,6 @@ export function BookingsSkeleton() {
 export function StaffPageSkeleton({ label, cards = 2 }: { label: string; cards?: number }) {
   return <section className="space-y-6" role="status" aria-label={"Loading " + label}>
     <div aria-hidden="true" className="space-y-6">
-      <Line w="220px" h="28px" />
       {Array.from({ length: cards }, (_, i) => <div key={i} className="ns-card sk-card-col"><Line w="30%" />{Array.from({ length: 5 }, (_, j) => <Panel key={j} h="36px" />)}</div>)}
     </div>
     <span className="sr-only">Loading {label}</span>

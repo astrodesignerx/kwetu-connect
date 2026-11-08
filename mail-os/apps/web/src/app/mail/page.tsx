@@ -46,7 +46,7 @@ const PAGE_SIZE = 50;
 const FOLDER_LABELS: Record<string, string> = {
   inbox: "Inbox",
   unread: "Unread",
-  assigned: "Assigned to me",
+  assigned: "Assigned",
   sent: "Sent",
   archive: "Archive",
   all: "All mail",
@@ -312,7 +312,7 @@ function MailView() {
   return (
     <div className={s.root}>
       {(move.isError || bulkArchive.isError || setRead.isError) && <p className={s.quiet} role="alert">The mail action could not finish. Try again using its control.</p>}
-      <div className={s.workspace} data-conversation={!!threadId} data-search={!!activeQuery}>
+      <div className={`${s.workspace} scroll-cue`} data-conversation={!!threadId} data-search={!!activeQuery}>
         {threadId && (
           threadError ? <div className={`${s.quiet} ${s.readerState}`} role="alert">Could not open this conversation. <button onClick={() => void refetchThread()}>Try again</button><button onClick={() => setParam('id', null)}>Back to inbox</button></div> :
           <Reader thread={thread} selected={selected} mailboxId={thread?.mailboxConnectionId ?? currentMailboxId} mailboxEmail={threadMailbox?.email}
@@ -325,7 +325,7 @@ function MailView() {
             onCompose={() => currentMailboxId && setCompose({ mode: 'new', connectionId: currentMailboxId })}
             onBack={() => setParam('id', null)} />
         )}
-          <section className={s.list} aria-label={activeQuery ? 'Search results' : 'Messages'}>
+          <section className={`${s.list} scroll-cue`} aria-label={activeQuery ? 'Search results' : 'Messages'}>
             {activeQuery ? <><h1 className={s.searchHeading}>{activeQuery}</h1><div className={s.searchTools}><button aria-pressed="true">Conversations {threadTotal}</button><button onClick={() => setParams({ q: null, id: null })}>Clear search</button></div></> :
               <div className={s.listHead}><h1 className={s.heading}>{FOLDER_LABELS[folder] ?? 'Mail'}</h1>
                 <Segmented options={[{ value: 'inbox', label: 'All' }, { value: 'unread', label: 'Unread' }, { value: 'assigned', label: 'Assigned' }]}
@@ -393,7 +393,7 @@ function Reader({ thread, selected, mailboxId, syncError, onRetrySync, retrying,
   if (!thread) return <div className={`${s.quiet} ${s.readerState}`} role="status">{selected ? 'Opening conversation...' : 'Loading conversation...'}</div>;
   const latest = thread.messages[thread.messages.length - 1];
   const who = latest?.fromName || latest?.fromAddr || 'Unknown sender';
-  return <div className={s.conversation} key={thread.id}>
+  return <div className={`${s.conversation} scroll-cue`} key={thread.id}>
     <article className={s.reader}>
       <div className={s.readerTop}>
         <button type="button" className={s.backButton} onClick={onBack} aria-label="Back to inbox"><ArrowLeft size={16} aria-hidden /></button>

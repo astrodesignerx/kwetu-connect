@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import ManagerNav from "./ManagerNav";
 import { useSidebar } from "./useSidebar";
@@ -17,7 +18,7 @@ export default function ManagerSidebar({ adverts, email, signOut, children }: { 
   const closeOnPhone = () => { if (open && window.matchMedia("(max-width: 767px)").matches) toggle(); };
   const name = email.split("@")[0];
   return <><button type="button" className="rail-dismiss" data-open={open} aria-label="Close navigation" onClick={close} tabIndex={-1} /><aside id="manager-sidebar" className="manager-rail" data-open={open}>
-    <div className="rail-top"><Link href="/manage" className="rail-logo" aria-label="KCA manager">K</Link><span className="rail-text"><b>KCA Manager</b><small>Kisumu Ndogo Rd screen</small></span><button type="button" className="rail-close" aria-label="Close sidebar" onClick={close}><X size={17} aria-hidden="true" /></button></div>
+    <div className="rail-top"><Link href="/manage" className="workspace-logo" aria-label="Kwetu Connect manager home"><Image src="/logo-main.svg" width={120} height={40} alt="Kwetu Connect Advertising" className="logo-night" priority /><Image src="/logo-dark.svg" width={120} height={40} alt="Kwetu Connect Advertising" className="logo-day" priority /></Link><button type="button" className="rail-close" aria-label="Close sidebar" onClick={close}><X size={17} aria-hidden="true" /></button></div>
     <p className="rail-section-label">Workspace</p><ManagerNav adverts={adverts} expanded={open} onNavigate={closeOnPhone} />
     <div className="rail-onair">{children}</div>
     <div className="rail-account">

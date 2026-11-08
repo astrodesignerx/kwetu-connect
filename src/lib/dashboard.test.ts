@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { currentPlaylist, hourShares, nairobiClock, onAirStatus, weeklyTotals, weekSold } from "./dashboard";
+import { blockShares, currentPlaylist, hourShares, nairobiClock, onAirStatus, weeklyTotals, weekSold } from "./dashboard";
 import { DEFAULT_SETTINGS } from "./booking/settings";
 import { occupancyByDayBlock } from "./booking/occupancy";
 import type { BookingListItem } from "./store/types";
@@ -15,6 +15,13 @@ describe("screen on-air status", () => {
   it("uses custom opening hours, not fixed copy", () => { const settings = { ...DEFAULT_SETTINGS, screenHours: { 2: { open: 9, close: 14 } } }; expect(onAirStatus(settings, new Date("2026-11-03T04:00:00Z")).label).toBe("Screen off air, back at 09:00"); });
   it("handles midnight closing as 24:00", () => { expect(onAirStatus(DEFAULT_SETTINGS, new Date("2026-11-06T20:59:59Z")).onAir).toBe(true); expect(onAirStatus(DEFAULT_SETTINGS, new Date("2026-11-06T21:00:00Z")).onAir).toBe(false); });
   it("handles an entirely closed screen", () => { expect(onAirStatus({ ...DEFAULT_SETTINGS, screenHours: {} }, new Date("2026-11-03T08:00:00Z")).label).toBe("Screen off air, hours not set"); });
+});
+describe("sold shares by time block", () => {
+  const day = (hours: { hour: number; share: number; closed?: boolean }[]) => ({ date: "2026-11-03", label: "Tue", hours });
+  it("averages only the open hours inside each block", () => { const [morning] = blockShares([day([{ hour: 6, share: .2 }, { hour: 7, share: .4 }, { hour: 8, share: 1, closed: true }, { hour: 10, share: 1 }])], DEFAULT_SETTINGS); expect(morning.id).toBe("morning"); expect(morning.cells[0].share).toBeCloseTo(.3); });
+  it("marks a block closed on a day with no open hours", () => { const rows = blockShares([day([{ hour: 6, share: .5 }]), { ...day([]), date: "2026-11-04", label: "Wed" }], DEFAULT_SETTINGS); expect(rows[0].cells.map((cell) => cell.share)).toEqual([.5, null]); });
+  it("keeps a fully unsold block at zero, not closed", () => { expect(blockShares([day([{ hour: 18, share: 0 }])], DEFAULT_SETTINGS)[0].cells[0].share).toBe(0); });
+  it("leaves out blocks closed all week and keeps block order", () => { expect(blockShares([day([{ hour: 22, share: .1 }, { hour: 6, share: .1 }])], DEFAULT_SETTINGS).map((block) => block.id)).toEqual(["morning", "late"]); });
 });
 describe("weekly totals", () => {
   it("returns seven real weeks including zero totals", () => { const totals = weeklyTotals([booking()], "2026-11-02"); expect(totals).toHaveLength(7); expect(totals[0]).toEqual({ from: "2026-09-21", count: 0, kes: 0 }); expect(totals[6]).toEqual({ from: "2026-11-02", count: 1, kes: 3200 }); });

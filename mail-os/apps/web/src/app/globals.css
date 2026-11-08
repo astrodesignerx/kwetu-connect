@@ -905,7 +905,7 @@
      --------------------------------------------------------------------- */
   * {
     /* Firefox. `none` reserves no gutter either, so nothing reflows. */
-    scrollbar-width: none;
+    scrollbar-width: none !important;
     /* Legacy Edge and IE, harmless everywhere else. */
     -ms-overflow-style: none;
   }
@@ -1628,7 +1628,7 @@ input[type="date"] { color-scheme: inherit; }
 .view-state-skeleton { width: min(240px, 100%); display: grid; gap: 10px; }
 .view-state-skeleton i { height: 9px; border-radius: 99px; background: var(--raise); animation: v2-breathe 1.4s var(--ease) infinite alternate; }
 .view-state-skeleton i:last-child { width: 65%; animation-delay: 120ms; }
-.v2-scroll { flex: 1; min-width: 0; overflow-y: auto; scrollbar-gutter: stable; }
+.v2-scroll { flex: 1; min-width: 0; overflow-y: auto; }
 .v2-content { width: 100%; max-width: 1040px; margin: 0 auto; padding: 20px 0 32px; }
 .v2-content > * { min-width: 0; }
 .v2-content h1 { font: 650 28px/1.2 var(--f-body), sans-serif; letter-spacing: -.03em; }
@@ -1649,4 +1649,39 @@ input[type="date"] { color-scheme: inherit; }
 
 @layer components {
   @media (max-width: 859px) { .glass-input { font-size: 16px; } }
+}
+
+/* Scroll bars are hidden, so each scrolling area fades at any edge that has more
+   content past it. The fade follows the scroll position and vanishes at the end. */
+@property --cue-start { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --cue-end { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@keyframes cue-start { from { --cue-start: 0px; } to { --cue-start: 36px; } }
+@keyframes cue-end { from { --cue-end: 36px; } to { --cue-end: 0px; } }
+@supports (animation-timeline: scroll()) {
+  :is(.scroll-cue, .v2-scroll, .signal-command-list, .signal-sidebar-context, .overflow-y-auto):not(:has(.compose-backdrop, .v2-overlay)) {
+    mask-image: linear-gradient(to bottom, transparent, #000 var(--cue-start), #000 calc(100% - var(--cue-end)), transparent);
+    animation: cue-start linear both, cue-end linear both;
+    animation-timeline: scroll(self block), scroll(self block);
+    animation-range: 0px 36px, calc(100% - 36px) 100%;
+  }
+  .scroll-cue-x {
+    mask-image: linear-gradient(to right, transparent, #000 var(--cue-start), #000 calc(100% - var(--cue-end)), transparent);
+    animation: cue-start linear both, cue-end linear both;
+    animation-timeline: scroll(self inline), scroll(self inline);
+    animation-range: 0px 36px, calc(100% - 36px) 100%;
+  }
+  /* The fade only tracks scrolling, so it stays on when motion is reduced. */
+  @media (prefers-reduced-motion: reduce) {
+    html body :is(.scroll-cue, .v2-scroll, .signal-command-list, .signal-sidebar-context, .overflow-y-auto):not(:has(.compose-backdrop, .v2-overlay)),
+    html .signal-frame[data-v2] :is(.scroll-cue, .v2-scroll, .signal-command-list, .signal-sidebar-context, .overflow-y-auto):not(:has(.compose-backdrop, .v2-overlay)) {
+      animation: cue-start linear both, cue-end linear both !important;
+      animation-timeline: scroll(self block), scroll(self block) !important;
+      animation-range: 0px 36px, calc(100% - 36px) 100% !important;
+    }
+    html body .scroll-cue-x, html .signal-frame[data-v2] .scroll-cue-x {
+      animation: cue-start linear both, cue-end linear both !important;
+      animation-timeline: scroll(self inline), scroll(self inline) !important;
+      animation-range: 0px 36px, calc(100% - 36px) 100% !important;
+    }
+  }
 }

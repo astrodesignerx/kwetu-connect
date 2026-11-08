@@ -12,7 +12,7 @@ The mail view has a compact rail, neutral cards, centred reader, context cards, 
 
 ## Decisions
 
-V2 styling is scoped to /mail and the development fixture. Existing non-mail pages retain their shell. The complete folder/mailbox navigation remains available through More. Existing assignment, notes, conversation/flight tracking, summary controls and client linking remain functional. No unsupported client totals are invented. The morning brief uses wrapping counts instead of a low-contrast moving ticker. Existing Geist typography is retained.
+V2 styling now covers every page (merged into local main at 0f150d5; this replaces the earlier scope of /mail and the development fixture only). The complete folder/mailbox navigation remains available through More. Existing assignment, notes, conversation/flight tracking, summary controls and client linking remain functional. No unsupported client totals are invented. The morning brief uses wrapping counts instead of a low-contrast moving ticker. Existing Geist typography is retained.
 
 This replaces the old October progress chronology as this worktree's current answer. Historical reports and handoffs are preserved in .claude/notes and .claude/handoffs.
 

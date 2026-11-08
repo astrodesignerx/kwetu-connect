@@ -24,7 +24,7 @@ export const DESTINATIONS = [
 export const FOLDERS = [
   { key: "inbox", label: "Inbox", count: "inbox" },
   { key: "unread", label: "Unread", count: "unread" },
-  { key: "assigned", label: "Assigned to me", count: "mine" },
+  { key: "assigned", label: "Assigned", count: "mine" },
   { key: "sent", label: "Sent", count: "sent" },
   { key: "archive", label: "Archive", count: "archive" },
   { key: "all", label: "All mail", count: "all" },
@@ -54,7 +54,7 @@ export function Sidebar({ onCompose, onNavigate, compact = false }: { onCompose:
     <nav aria-label="Main">
       {[
         { label: "Inbox", href: folderHref("inbox"), icon: Mail, active: onMail && folder === "inbox", count: counts?.unread },
-        { label: "Assigned to me", href: folderHref("assigned"), icon: UserRound, active: onMail && folder === "assigned" },
+        { label: "Assigned", href: folderHref("assigned"), icon: UserRound, active: onMail && folder === "assigned" },
         { label: "Drafts", href: "/drafts", icon: FileText, active: pathname.startsWith("/drafts") },
         { label: "Sent", href: folderHref("sent"), icon: Send, active: onMail && folder === "sent" },
         { label: "Archive", href: folderHref("archive"), icon: Archive, active: onMail && folder === "archive" },

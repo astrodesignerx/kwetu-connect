@@ -4,9 +4,9 @@ import type { Occupancy } from "@/lib/booking/occupancy";
 import { BLOCK_ORDER, DAY_ORDER, type Selection, type SelectionAction } from "@/lib/booking/selection";
 import { cellKey, requestCells } from "@/lib/booking/hours";
 
-/** A tick that draws itself in. */
-function Tick() {
-  return <svg className="cell-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>;
+/** A play badge: the advert plays in this slot. */
+function PlayBadge() {
+  return <svg className="cell-play" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" /><path d="M9 6.8v10.4l8.8-5.2z" /></svg>;
 }
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -47,9 +47,9 @@ export default function Timetable({ settings, occupancy, selection, onSelect, he
           const name = `${DAYS[day]} ${time.label.toLowerCase()}, ${heat ? `${Math.round(cell.soldShare * 100)}% sold` : state}`;
           return onSelect ? <button type="button" key={day} className={`time-cell is-${tone}`} aria-label={name} aria-pressed={selected}
             onClick={() => onSelect({ kind: "cell", day, block })}>
-            <span className="cell-mark" aria-hidden="true">{selected && <Tick />}</span>
+            <span className="cell-mark" aria-hidden="true">{selected && <PlayBadge />}</span>
           </button> : <span key={day} role="img" className={`time-cell is-${tone}`} aria-label={name}>
-            {heat ? <span aria-hidden="true">{Math.round(cell.soldShare * 100)}%</span> : selected ? <span className="cell-mark" aria-hidden="true"><Tick /></span> : null}
+            {heat ? <span aria-hidden="true">{Math.round(cell.soldShare * 100)}%</span> : selected ? <span className="cell-mark" aria-hidden="true"><PlayBadge /></span> : null}
           </span>;
         })}
       </Fragment>;

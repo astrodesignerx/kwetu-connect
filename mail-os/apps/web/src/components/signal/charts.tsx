@@ -112,7 +112,7 @@ export function Heatmap({ values, today, label, weeks = 12, colour = clientColou
   const grid = heatmapGrid(today, weeks);
   const ceiling = Math.max(0, finite(max ?? Math.max(0, ...grid.columns.flat().filter((cell) => !cell.future).map((cell) => finite(values[cell.date] ?? 0)))));
   const style: SignalStyle = { ...hueStyle(colour), gridTemplateColumns: `24px repeat(${grid.columns.length}, minmax(0, 1fr))` };
-  return <div className={`${s.root} ${s.heatmapScroll}`} tabIndex={0} role="region" aria-label={label}>
+  return <div className={`${s.root} ${s.heatmapScroll} scroll-cue-x`} tabIndex={0} role="region" aria-label={label}>
     <div className={s.heatmap} style={style}>
       {grid.months.map((month, index) => <span key={month.date} className={s.month} style={{ gridColumn: `${month.week + 2} / ${grid.months[index + 1] ? grid.months[index + 1].week + 2 : grid.columns.length + 2}`, gridRow: 1 }}>{month.label}</span>)}
       {weekdays.map((day, index) => <span key={index} className={s.weekday} style={{ gridColumn: 1, gridRow: index + 2 }} aria-hidden="true">{day}</span>)}

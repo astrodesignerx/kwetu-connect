@@ -29,3 +29,26 @@ export default function NextSteps({ request, settings, advert = "none" }: { requ
     {first && last && <li data-state="pending"><CheckIcon state="pending" /><div><span key={first.date + first.hour}>First play {first.date}, {first.hour}</span><small>Last play {last.date}</small></div></li>}
   </ol>;
 }
+
+/**
+ * "What happens next" card (2026-11-07): takes the "No advert yet?" card's slot once an advert is added,
+ * so the controls column keeps its shape. Advert first, then book and pay, KCA's check and the first play.
+ * Styles: .next-card in src/app/globals.css.
+ */
+export function NextStepsCard({ request, settings, advert }: { request: BookingRequest; settings: BookingSettings; advert: Exclude<AdvertStep, "none"> }) {
+  const hours = bookedHours(request, settings).sort();
+  const first = hours.length ? when(hours[0]) : null;
+  const advertIcon = advert === "ready" ? "pass" : advert === "fix" ? "warn" : "running";
+  return <div className="next-card-body">
+    <h2>What happens next</h2>
+    <ol className="check-list next-card-steps">
+      <li data-state={advertIcon}><CheckIcon state={advertIcon} /><div>
+        <span key={advert}>{advert === "ready" ? "Advert added" : advert === "fix" ? "Advert needs a fix" : "Checking advert"}</span>
+        <small key={advert + "-note"}>{advert === "ready" ? "Passed the checks" : advert === "fix" ? "Fix it, or send it later" : "One moment"}</small>
+      </div></li>
+      <li data-state="current"><span className="check-icon is-current" aria-hidden="true" /><div><span>Book and pay</span><small>{"M‑Pesa or card"}</small></div></li>
+      <li data-state="pending"><CheckIcon state="pending" /><div><span>KCA checks it</span><small>In 1 working day</small></div></li>
+      {first && <li data-state="pending"><CheckIcon state="pending" /><div><span>First play</span><small key={first.date + first.hour}>{first.date}, {first.hour}</small></div></li>}
+    </ol>
+  </div>;
+}

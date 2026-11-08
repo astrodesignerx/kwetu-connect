@@ -1,4 +1,4 @@
-import { addDays, bookedHours, cellKey, requestCells, weekdayOf, type BookingRequest } from "@/lib/booking/hours";
+import { bookedHours, cellKey, requestCells, weekdayOf, type BookingRequest } from "@/lib/booking/hours";
 import type { BlockId, BookingSettings } from "@/lib/booking/settings";
 import { BLOCK_ORDER, DAY_ORDER, type Selection } from "@/lib/booking/selection";
 import type { QuoteSuccess } from "@/lib/booking/quote";
@@ -8,14 +8,6 @@ export type { AdvertStep } from "./NextSteps";
 import type { AdvertStep } from "./NextSteps";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-export function WeeklyPlays({ request, settings }: { request: BookingRequest; settings: BookingSettings }) {
-  const endDate = [request.endDate, addDays(request.startDate, 6)].sort()[0];
-  const hours = bookedHours({ ...request, endDate }, settings);
-  const plays = DAY_ORDER.map((day) => hours.filter((hour) => weekdayOf(hour.slice(0, 10)) === day).length * request.howOften);
-  const max = Math.max(1, ...plays);
-  return <section className="v2-weekly-plays"><div><h2>Plays in your first week</h2><span>{number(plays.reduce((sum, value) => sum + value, 0))} planned</span></div><ol aria-label="First seven days of planned plays">{DAY_ORDER.map((day, index) => <li key={day} title={`${DAY_NAMES[day]}: ${number(plays[index])} plays`} data-playing={plays[index] > 0}><span className="sr-only">{DAY_NAMES[day]}, {number(plays[index])} planned plays</span><span className="v2-week-track" aria-hidden="true"><i style={{ transform: `scaleY(${plays[index] / max})` }} /></span><small aria-hidden="true">{DAY_NAMES[day][0]}</small></li>)}</ol></section>;
-}
 
 /** The week at a glance: one tile per day, five bars from Morning to Late, lit where the advert plays. */
 export function WeekStrip({ selection, labels }: { selection: Selection; labels: Record<BlockId, { label: string }> }) {

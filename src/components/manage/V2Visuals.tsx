@@ -8,9 +8,9 @@ export function DarkIsland({ children, className = "" }: { children: ReactNode; 
   return <section className={"v2-card v2-dark " + className}>{children}</section>;
 }
 
-export function FolderCard({ label, value, note, colour = "teal", children, photo = false }: { label: string; value: ReactNode; note: string; colour?: string; children?: ReactNode; photo?: boolean }) {
-  const Icon = photo ? ChartBar : colour === "violet" ? Clock : colour === "green" ? Play : Coins;
-  return <section className={"v2-folder" + (photo ? " v2-folder-photo" : "")} data-colour={colour}>
+export function FolderCard({ label, value, note, colour = "teal", children }: { label: string; value: ReactNode; note: string; colour?: string; children?: ReactNode }) {
+  const Icon = colour === "amber" ? ChartBar : colour === "violet" ? Clock : colour === "green" ? Play : Coins;
+  return <section className="v2-folder" data-colour={colour}>
     <div className="v2-folder-label"><i aria-hidden="true"><Icon size={14} /></i>{label}</div>
     <div className="v2-folder-value">{value}</div><p>{note}</p>{children}
   </section>;
@@ -48,7 +48,35 @@ export function HourTiles({ rows, onSelect, selected, today }: { rows: HourTileR
         return <button type="button" key={hour} className="v2-hour-tile" data-level={closed || !value.share ? 0 : value.share < .4 ? 1 : value.share < .8 ? 2 : 3} data-closed={closed} aria-pressed={chosen === key} aria-label={`${row.label} ${formatHour(hour)}, ${closed ? "screen closed" : Math.round(value.share * 100) + "% sold, planned"}`} onClick={() => { setLocal(key); onSelect?.(row.date, hour); }} />;
       })}</div>)}
     </div>
-    <div className="v2-tile-legend"><span><i data-level="0" />Open</span><span><i data-level="1" />Below 40%</span><span><i data-level="2" />40 to 79%</span><span><i data-level="3" />80% or more</span><span><i data-closed="true" />Closed</span></div>
+    <TileLegend />
+  </div>;
+}
+
+const tileLevel = (share: number) => !share ? 0 : share < .4 ? 1 : share < .8 ? 2 : 3;
+function TileLegend() {
+  return <div className="v2-tile-legend"><span><i data-level="0" />Open</span><span><i data-level="1" />Below 40%</span><span><i data-level="2" />40 to 79%</span><span><i data-level="3" />80% or more</span><span><i data-closed="true" />Closed</span></div>;
+}
+
+export type BlockRow = { id: string; label: string; startHour: number; endHour: number; cells: { date: string; label: string; share: number | null }[] };
+export function BlockRows({ blocks, today }: { blocks: BlockRow[]; today?: string }) {
+  const [chosen, setChosen] = useState("");
+  const days = blocks[0]?.cells ?? [];
+  const describe = (block: BlockRow, cell: BlockRow["cells"][number]) => `${cell.label} ${block.label.toLowerCase()}, ${cell.share === null ? "screen closed" : Math.round(cell.share * 100) + "% sold, planned"}`;
+  const active = blocks.flatMap((block) => block.cells.map((cell) => ({ block, cell }))).find(({ block, cell }) => `${block.id}${cell.date}` === chosen);
+  const pad = (hour: number) => String(hour).padStart(2, "0");
+  return <div className="v2-hour-grid">
+    <div className="v2-tile-readout" aria-live="polite">{active ? describe(active.block, active.cell) : "Choose a block to see planned time sold"}</div>
+    <div className="v2-block-rows" style={{ "--days": days.length } as CSSProperties} role="group" aria-label="Planned time sold by day and time block">
+      <span />{days.map((day) => <span className="v2-block-day" key={day.date} data-today={today === day.date}>{day.label}</span>)}
+      {blocks.map((block) => <div className="v2-tile-row" key={block.id}>
+        <span className="v2-block-label"><i data-block={block.id} aria-hidden="true" /><span><b>{block.label}</b><small>{pad(block.startHour)} to {pad(block.endHour)}</small></span></span>
+        {block.cells.map((cell) => {
+          const key = `${block.id}${cell.date}`;
+          return <button type="button" key={cell.date} className="v2-block-cell" data-level={cell.share === null ? 0 : tileLevel(cell.share)} data-closed={cell.share === null} aria-pressed={chosen === key} aria-label={describe(block, cell)} onClick={() => setChosen(key)}>{cell.share === null ? "" : `${Math.round(cell.share * 100)}%`}</button>;
+        })}
+      </div>)}
+    </div>
+    <TileLegend />
   </div>;
 }
 

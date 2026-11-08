@@ -7,7 +7,7 @@ import type { BookingSettings } from "@/lib/booking/settings";
 import type { Schedule } from "@/lib/booking/playlist";
 import { CapsuleBars, DarkIsland, HourTiles } from "./V2Visuals";
 
-const COLOURS = ["#ffb547", "#2dd4bf", "#60a5fa", "#a78bfa", "#fb7185", "#a3e635", "#fb923c"];
+const COLOURS = ["#edb347", "#2dd4bf", "#60a5fa", "#a78bfa", "#fb7185", "#a3e635", "#fb923c"];
 export default function ScheduleHours({ schedule, businesses, settings, from, to, now }: { schedule: Schedule; businesses: Record<string, string>; settings: BookingSettings; from: string; to: string; now: string }) {
   const clock = nairobiClock(new Date(now));
   const dates = dateRange(from, to);

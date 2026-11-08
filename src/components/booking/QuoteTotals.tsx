@@ -30,17 +30,18 @@ function DiscountRing({ plays, settings }: { plays: number; settings: BookingSet
   const current = steps.filter((step) => step.minPlays <= plays).at(-1)!;
   const next = steps.find((step) => step.minPlays > plays);
   const progress = next ? Math.max(0, Math.min(1, (plays - current.minPlays) / (next.minPlays - current.minPlays))) : 1;
-  return <div className="v2-discount-ring" role="img" aria-label={next ? `${number(next.minPlays - plays)} more plays for ${next.percent}% off` : "Highest discount reached"}><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="#ffffff14" strokeWidth="7" /><circle cx="50" cy="50" r="42" fill="none" stroke="#ff8a3d" strokeWidth="7" pathLength="100" strokeDasharray={`${progress * 100} 100`} strokeLinecap="round" /></svg><div><b key={plays}>{number(plays)}</b><small>plays</small></div><p>{next ? <><b>{number(next.minPlays - plays)}</b> more for {next.percent}% off</> : `${current.percent}% off, highest tier`}</p></div>;
+  return <div className="v2-discount-ring" role="img" aria-label={next ? `${number(next.minPlays - plays)} more plays for ${next.percent}% off` : "Highest discount reached"}><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="#ffffff14" strokeWidth="7" /><circle cx="50" cy="50" r="42" fill="none" stroke="#edb347" strokeWidth="7" pathLength="100" strokeDasharray={`${progress * 100} 100`} strokeLinecap="round" /></svg><div><b key={plays}>{number(plays)}</b><small>plays</small></div><p>{next ? <><b>{number(next.minPlays - plays)}</b> more for {next.percent}% off</> : `${current.percent}% off, highest tier`}</p></div>;
 }
 export type PlanTile = { icon: keyof typeof tileIcons; value: string; note: string; tone?: string };
 // Line icons for the plan tiles; drawn with currentColor so the tile tone sets their colour.
+// Class names mark the moving parts that animate on hover (see .tile-* in globals.css).
 const tileIcons = {
-  length: <><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2.5 2M9 2h6" /></>,
-  often: <><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></>,
-  dates: <><rect x="3.5" y="5" width="17" height="15.5" rx="3" /><path d="M3.5 10h17M8 3v4M16 3v4" /></>,
-  advert: <><rect x="2.5" y="5" width="19" height="12" rx="2" /><path d="M8 21h8M12 14V8M9 11l3-3 3 3" /></>,
-  "advert-ok": <><rect x="2.5" y="5" width="19" height="12" rx="2" /><path d="M8 21h8M8.5 11l2.5 2.5 4.5-4.5" /></>,
-  "advert-fix": <><rect x="2.5" y="5" width="19" height="12" rx="2" /><path d="M8 21h8M12 8v3.5M12 14h.01" /></>,
+  length: <><circle cx="12" cy="13" r="8" /><path className="tile-hand" d="M12 9v4l2.5 2" /><path className="tile-button" d="M9 2h6" /></>,
+  often: <g className="tile-cycle"><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></g>,
+  dates: <><rect x="3.5" y="5" width="17" height="15.5" rx="3" /><path d="M3.5 10h17" /><path className="tile-ring" d="M8 3v4" /><path className="tile-ring" d="M16 3v4" /><path className="tile-day" d="M12 15.25h.01" /></>,
+  advert: <><rect x="2.5" y="5" width="19" height="12" rx="2" /><path d="M8 21h8" /><path className="tile-arrow" d="M12 14V8M9 11l3-3 3 3" /></>,
+  "advert-ok": <><rect x="2.5" y="5" width="19" height="12" rx="2" /><path d="M8 21h8" /><path className="tile-tick" pathLength={1} d="M8.5 11l2.5 2.5 4.5-4.5" /></>,
+  "advert-fix": <><rect x="2.5" y="5" width="19" height="12" rx="2" /><path d="M8 21h8" /><path className="tile-alert" d="M12 8v3.5M12 14h.01" /></>,
 };
 /** Quote card, concept B "Split" (2026-11-05): price and plays side by side, plan as chips, compact ladder. */
 export default function QuoteTotals({ result, settings, weeks, chips, tiles, eyebrow, lead, gap, children, v2 = false }: {

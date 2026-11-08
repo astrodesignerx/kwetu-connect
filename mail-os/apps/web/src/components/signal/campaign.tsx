@@ -22,7 +22,7 @@ export type FlightPlanProps = { sites: readonly FlightSite[]; startDate: SignalD
 export function FlightPlan({ sites, startDate, today, label, colour = clientColour, todayLabel = "Today" }: FlightPlanProps) {
   const start = dayNumber(startDate);
   const marker = todayPosition(today, startDate);
-  return <div className={`${s.root} ${s.flightScroll}`} tabIndex={0} role="region" aria-label={label}>
+  return <div className={`${s.root} ${s.flightScroll} scroll-cue-x`} tabIndex={0} role="region" aria-label={label}>
     <div className={s.flight} style={hueStyle(colour)}>
       <div className={s.flightHeader}><span /><div>{Array.from({ length: 6 }, (_, week) => <span key={week}>{shortDate(start + week * 7)}</span>)}</div></div>
       {sites.map((site, index) => {

@@ -5,7 +5,9 @@ import { todayInNairobi } from "./validation";
 export class MemoryStore extends BaseStore {
   readonly mode = "memory" as const;
   // KCA_DEMO_DATA=1 starts the demo with made-up bookings (about 79% of this week sold).
-  private data: StoreData = process.env.KCA_DEMO_DATA === "1" ? demoData(todayInNairobi()) : emptyData();
+  // KCA_DEMO_DATA=month70 fills the whole calendar month to about 70% instead.
+  private data: StoreData = process.env.KCA_DEMO_DATA === "1" ? demoData(todayInNairobi())
+    : process.env.KCA_DEMO_DATA === "month70" ? demoData(todayInNairobi(), "month70") : emptyData();
   private queue: Promise<unknown> = Promise.resolve();
   protected async read() { await this.queue; return structuredClone(this.data); }
   protected async transaction<T>(change: (data: StoreData) => T): Promise<T> {

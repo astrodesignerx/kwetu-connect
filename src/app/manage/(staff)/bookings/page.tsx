@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { requireStaff } from "@/lib/auth/server";
 import { getStore } from "@/lib/store";
 import { STATUSES } from "@/lib/booking/status";
@@ -35,8 +34,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
   const cards = bookings.map((booking, index) => ({ ...booking, advertCount: details[index]?.adverts.length ?? 0, waiting: details[index]?.adverts.filter((ad) => ad.decision === "waiting").length ?? 0, approved: details[index]?.adverts.filter((ad) => ad.decision === "approved").length ?? 0 }));
   const today = todayInNairobi();
   const monday = addDays(today, -((weekdayOf(today) + 6) % 7));
-  return <section className="pipeline-page"><div className="pipeline-heading"><div className="bookings-title"><h1>Bookings</h1><p>{all.length} bookings / every drag move is confirmed</p></div><Link href="/manage/adverts" className="quiet-button">Open advert desk</Link></div>
-    <p className="pipeline-help">Open a card to view details and change status. You can also drag a card to a stage, then confirm the move.</p>
+  return <section className="pipeline-page">
     <BookingFilters key={JSON.stringify(filter)} filter={filter} counts={counts}>
       <div className="v2-bookings-summary"><StageShareBar stages={STATUSES.filter((status) => status !== "Cancelled").map((label) => ({ label, count: counts[label] ?? 0 }))} /><section className="v2-card v2-booked-value"><h2>Booked value</h2><strong>KES {number(all.filter((booking) => booking.status !== "Cancelled").reduce((total, booking) => total + booking.priceKes, 0))}</strong><RevenueChart weeks={weeklyTotals(all, monday)} /></section></div>
       {filter.from && filter.to && filter.from > filter.to && <p role="alert">The end date is before the start date.</p>}

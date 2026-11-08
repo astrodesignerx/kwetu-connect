@@ -6,7 +6,8 @@ import { emptyData, type StoreData } from "./base";
 
 /**
  * Made-up bookings for showing the manager area to a client: about 79% of this
- * week's saleable time sold. Memory mode only (KCA_DEMO_DATA=1); it never touches Supabase.
+ * week's saleable time sold (KCA_DEMO_DATA=1), or about 70% of the whole calendar month
+ * (KCA_DEMO_DATA=month70). Memory mode only; it never touches Supabase.
  * Every business, name and phone number here is invented.
  */
 const ALL: BlockId[] = ["morning", "midday", "afternoon", "evening", "late"];
@@ -47,14 +48,29 @@ const PLANS: Plan[] = [
 ];
 const STEPS: BookingStatus[] = ["Quote", "Paid", "Approved", "Live", "Finished"];
 
-export function demoData(today: string): StoreData {
+// The "month70" scenario leaves these out (together about 9% of a week), so the Live bookings
+// sell about 70% of every week, then stretches each Live booking over the whole calendar month.
+const LEFT_OUT_FOR_MONTH70 = new Set(["Mjini Phones", "Chebisaas Academy", "Mwangaza Supplies"]);
+export type DemoScenario = "week" | "month70";
+
+export function demoData(today: string, scenario: DemoScenario = "week"): StoreData {
   const data = emptyData();
   const monday = addDays(today, -((weekdayOf(today) + 6) % 7));
+  // Monday on or before the 1st, and Sunday on or after the last day, so every week of the month is covered.
+  const monthStart = today.slice(0, 8) + "01";
+  const monthEnd = addDays(addDays(monthStart, 31).slice(0, 8) + "01", -1);
+  const monthMonday = addDays(monthStart, -((weekdayOf(monthStart) + 6) % 7));
+  const monthSunday = addDays(monthEnd, (7 - weekdayOf(monthEnd)) % 7);
   const at = (daysAgo: number, hour = 9) => new Date(Date.parse(addDays(today, -daysAgo) + "T00:00:00Z") + (hour - 3) * 3600000).toISOString();
   PLANS.forEach((plan, index) => {
+    if (scenario === "month70" && LEFT_OUT_FOR_MONTH70.has(plan.business)) return;
     const n = index + 1;
     const request: BookingRequest = { lengthSeconds: plan.length, howOften: plan.often, days: plan.days, blocks: plan.blocks,
       startDate: addDays(monday, plan.start), endDate: addDays(monday, plan.start + plan.weeks * 7 - 1) };
+    if (scenario === "month70" && plan.status === "Live") {
+      if (request.startDate > monthMonday) request.startDate = monthMonday;
+      if (request.endDate < monthSunday) request.endDate = monthSunday;
+    }
     const priced = quote(request, DEFAULT_SETTINGS);
     if (!priced.ok) throw new Error(`Demo booking ${plan.business} does not price: ${priced.errors.join(" ")}`);
     const created = at(plan.createdDaysAgo, 8 + (n % 9));

@@ -1,4 +1,5 @@
 import { addDays, bookedHours, formatHour, weekdayOf } from "./booking/hours";
+import { BLOCK_ORDER } from "./booking/selection";
 import type { BookingSettings } from "./booking/settings";
 import type { BookingListItem } from "./store/types";
 import type { Occupancy } from "./booking/occupancy";
@@ -41,6 +42,17 @@ export function hourShares(bookings: BookingListItem[], date: string, settings: 
     }
   }
   return Array.from({ length: screen.close - screen.open }, (_, index) => ({ hour: screen.open + index, share: (seconds.get(screen.open + index) ?? 0) / settings.secondsForSalePerHour }));
+}
+/** Averages a week of hourly shares into one figure per day for each time block. A block closed all week is left out. */
+export function blockShares(days: { date: string; label: string; hours: { hour: number; share: number; closed?: boolean }[] }[], settings: BookingSettings) {
+  return BLOCK_ORDER.map((id) => {
+    const block = settings.timeBlocks[id];
+    const cells = days.map(({ date, label, hours }) => {
+      const open = hours.filter((item) => !item.closed && item.hour >= block.startHour && item.hour < block.endHour);
+      return { date, label, share: open.length ? open.reduce((sum, item) => sum + item.share, 0) / open.length : null };
+    });
+    return { id, label: block.label, startHour: block.startHour, endHour: block.endHour, cells };
+  }).filter((block) => block.cells.some((cell) => cell.share !== null));
 }
 export function weekSold(occupancy: Occupancy, settings: BookingSettings) {
   let sold = 0;

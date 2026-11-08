@@ -5,6 +5,7 @@ import { addDays, formatHour, weekdayOf } from "@/lib/booking/hours";
 import { scheduleCells } from "@/lib/manager-schedule";
 import ScheduleTimeline from "@/components/manage/ScheduleTimeline";
 import Link from "next/link";
+import { CaretLeft, CaretRight, FilmStrip } from "@phosphor-icons/react/dist/ssr";
 import ScheduleHours from "@/components/manage/ScheduleHours";
 export default async function SchedulePage({ searchParams }: { searchParams: Promise<{ from?: string; to?: string }> }) {
   await requireStaff();
@@ -18,11 +19,13 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
   let error = "";
   try { schedule = await store.schedule(from, to); } catch (e) { if (!(e instanceof StoreError)) throw e; error = e.message; }
   const query = new URLSearchParams({ from, to });
-  return <section className="pipeline-page schedule-page"><div className="pipeline-heading"><div><p className="eyebrow">Planned on screen</p><h1>Screen schedule</h1></div><Link href="/manage/adverts" className="quiet-button">Review adverts</Link></div><p className="pipeline-help">Approved and Live bookings, with approved adverts only.</p>
-    <details className="v2-date-range"><summary>Custom date range</summary><form method="get" className="staff-form staff-card grid items-end gap-3 sm:grid-cols-3"><label>From<input name="from" type="date" required defaultValue={from} /></label><label>To<input name="to" type="date" required defaultValue={to} /></label><button className="staff-button">Build schedule</button></form></details>
+  return <section className="pipeline-page schedule-page"><div className="pipeline-toolbar">
+      {schedule && <nav className="week-picker" aria-label="Schedule weeks"><Link href={"/manage/schedule?from=" + addDays(from, -7) + "&to=" + addDays(from, -1)} aria-label="Previous week"><CaretLeft size={14} aria-hidden="true" /></Link><Link href="/manage/schedule">This week</Link><Link href={"/manage/schedule?from=" + addDays(from, 7) + "&to=" + addDays(from, 13)} aria-label="Next week"><CaretRight size={14} aria-hidden="true" /></Link></nav>}
+      <details className="v2-date-range"><summary>Custom date range</summary><form method="get" className="staff-form staff-card grid items-end gap-3 sm:grid-cols-3"><label>From<input name="from" type="date" required defaultValue={from} /></label><label>To<input name="to" type="date" required defaultValue={to} /></label><button className="staff-button">Build schedule</button></form></details>
+      <div className="pipeline-actions"><Link href="/manage/adverts" className="quiet-button"><FilmStrip size={14} aria-hidden="true" />Review adverts</Link></div>
+    </div>
     {error && <p role="alert">{error}</p>}
     {schedule && <div key={query.toString()} className="animate-quote-in space-y-6 motion-reduce:animate-none">
-      <nav className="schedule-week-nav" aria-label="Schedule weeks"><Link className="quiet-button" href={"/manage/schedule?from=" + addDays(from, -7) + "&to=" + addDays(from, -1)}>Previous week</Link><Link className="quiet-button" href="/manage/schedule">This week</Link><Link className="quiet-button" href={"/manage/schedule?from=" + addDays(from, 7) + "&to=" + addDays(from, 13)}>Next week</Link></nav>
       <ScheduleHours schedule={schedule} businesses={Object.fromEntries(bookings.map((booking) => [booking.reference, booking.business]))} from={from} to={to} settings={settings} now={new Date().toISOString()} />
       <details className="staff-card"><summary>Expanded timelines and block bookings</summary><ScheduleTimeline cells={scheduleCells(schedule, bookings, settings, from, to)} from={from} to={to} settings={settings} now={new Date().toISOString()} /></details>
       <div className="flex flex-wrap gap-3"><a className="staff-button" href={`/manage/schedule/download?${query}&file=playlists.csv`}>Download playlists.csv</a><a className="staff-button" href={`/manage/schedule/download?${query}&file=schedule.csv`}>Download schedule.csv</a></div>

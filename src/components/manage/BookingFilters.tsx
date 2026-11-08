@@ -6,6 +6,7 @@ import type { BookingFilter } from "@/lib/store/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { FilmStrip } from "@phosphor-icons/react";
 export default function BookingFilters({ filter, counts, children }: { filter: BookingFilter & { q: string; adverts: boolean }; counts: Record<string, number>; children: ReactNode }) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
@@ -17,7 +18,7 @@ export default function BookingFilters({ filter, counts, children }: { filter: B
     if (filter.adverts) query.set("adverts", "1");
     return query;
   };
-  return <><nav className="status-filters" aria-label="Filter by status">{["", ...STATUSES].map((status) => {
+  return <><div className="pipeline-toolbar"><nav className="status-filters" aria-label="Filter by status">{["", ...STATUSES].map((status) => {
     const query = base();
     if (status) query.set("status", status);
     return <Link key={status} href={"/manage/bookings?" + query} aria-current={(filter.status ?? "") === status ? "page" : undefined}>{status || "All"} <span>{counts[status] ?? 0}</span></Link>;
@@ -27,5 +28,5 @@ export default function BookingFilters({ filter, counts, children }: { filter: B
     const query = new URLSearchParams();
     for (const name of ["status", "from", "to", "q", "adverts"]) { const value = String(data.get(name) ?? ""); if (value) query.set(name, value); }
     startTransition(() => router.push("/manage/bookings?" + query));
-  }}><input type="hidden" name="status" value={filter.status ?? ""} />{filter.adverts && <input type="hidden" name="adverts" value="1" />}<label>Reference, business or payment code<Input name="q" placeholder="Search bookings" defaultValue={filter.q} type="search" maxLength={150} /></label><label>From<Input type="date" name="from" defaultValue={filter.from} /></label><label>To<Input type="date" name="to" defaultValue={filter.to} /></label><Button disabled={pending}>{pending ? "Filtering..." : "Filter"}</Button>{(filter.q || filter.from || filter.to || filter.status) && <Link href="/manage/bookings" className="quiet-button">Clear</Link>}</form><div className="staff-results" data-pending={pending} aria-busy={pending}>{children}</div></>;
+  }}><input type="hidden" name="status" value={filter.status ?? ""} />{filter.adverts && <input type="hidden" name="adverts" value="1" />}{filter.q && <input type="hidden" name="q" value={filter.q} />}<label>From<Input type="date" name="from" defaultValue={filter.from} /></label><label>To<Input type="date" name="to" defaultValue={filter.to} /></label><Button disabled={pending}>{pending ? "Filtering..." : "Filter"}</Button>{(filter.q || filter.from || filter.to || filter.status) && <Link href="/manage/bookings" className="quiet-button">Clear</Link>}</form><div className="pipeline-actions"><Link href="/manage/adverts" className="quiet-button"><FilmStrip size={14} aria-hidden="true" />Open advert desk</Link></div></div><div className="staff-results" data-pending={pending} aria-busy={pending}>{children}</div></>;
 }

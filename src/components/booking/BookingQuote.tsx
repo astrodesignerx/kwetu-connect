@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { addDays, earliestStartDate } from "@/lib/booking/hours";
 import { readAnswers, buildQuery, normaliseDays, normaliseBlocks, type Answers } from "@/lib/booking/answers";
 import { occupancyByDayBlock, type Occupancy } from "@/lib/booking/occupancy";
-import { BLOCK_ORDER, DAY_ORDER, fromCells, openSelection, scheduleLines, toggleSelection } from "@/lib/booking/selection";
+import { fromCells, openSelection, scheduleLines, toggleSelection } from "@/lib/booking/selection";
 import { suggestPlan } from "@/lib/booking/plan";
 import { quote } from "@/lib/booking/quote";
 import type { BookingSettings } from "@/lib/booking/settings";
@@ -14,7 +14,8 @@ import BookingForm, { ChangeForm } from "./BookingForm";
 import AdvertUpload, { advertReady, type AdvertState } from "./AdvertUpload";
 import SegmentedChoice from "./SegmentedChoice";
 import DatesCalendar from "./DatesCalendar";
-import QuoteDetails, { WeeklyPlays } from "./QuoteDetails";
+import QuoteDetails, { WeekStrip } from "./QuoteDetails";
+import { NextStepsCard } from "./NextSteps";
 import { WHATSAPP_NUMBER } from "@/lib/contact";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -106,7 +107,7 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
     { icon: advertState === "ready" ? "advert-ok" : advertState === "fix" ? "advert-fix" : "advert", value: "Advert",
       note: { none: "not added yet", checking: "checking", ready: "checked", fix: "needs fixing" }[advertState], tone: advertState },
   ];
-  const lead = schedule.length ? <WeeklyPlays request={picked} settings={settings} />
+  const lead = schedule.length ? <WeekStrip selection={picked} labels={settings.timeBlocks} />
     : <p className="quote-schedule"><span>Pick boxes in the grid</span></p>;
   // Below the smallest order: show how far off it is, and one-tap changes that reach it.
   const shortBy = result.ok && result.belowMinimum ? settings.minOrderKes - result.priceKes : 0;
@@ -144,8 +145,7 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
             <div className="plays-stepper" role="group" aria-labelledby="plays-label">
               <div><span id="plays-label">Plays an hour</span><p>{oftenOption?.label}</p></div>
               <button type="button" aria-label="Fewer plays an hour" disabled={oftenIndex <= 0} onClick={() => change({ howOften: oftenSteps[oftenIndex - 1] })}><Minus size={16} aria-hidden="true" /></button>
-              <div className="v2-frequency-caps" role="group" aria-label="Plays an hour">{oftenSteps.map((plays) => <button type="button" key={plays} aria-pressed={answers.howOften === plays} aria-label={`${plays} plays an hour`} onClick={() => change({ howOften: plays })}><span aria-hidden="true" style={{ height: `${10 + plays / Math.max(...oftenSteps) * 34}px` }} data-lit={plays <= answers.howOften} /><small>{plays}</small></button>)}</div>
-              <span className="sr-only" aria-live="polite">{answers.howOften} plays an hour</span>
+              <strong key={answers.howOften} aria-live="polite">{answers.howOften}</strong>
               <button type="button" aria-label="More plays an hour" disabled={oftenIndex >= oftenSteps.length - 1} onClick={() => change({ howOften: oftenSteps[oftenIndex + 1] })}><Plus size={16} aria-hidden="true" /></button>
             </div>
           </Card>
@@ -165,11 +165,12 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
             <div className="no-advert-head"><span className="no-advert-icon" aria-hidden="true"><PaintBrush size={18} weight="bold" /></span><div><h2>No advert yet?</h2><p>We can design it for you, sized for the screen.</p></div></div>
             <a className="ui-button ui-button-outline no-advert-link" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi KCA, I don't have an advert yet. Can you design a ${answers.lengthSeconds} second advert for me?`)}`} target="_blank" rel="noopener noreferrer"><WhatsappLogo size={16} weight="fill" aria-hidden="true" />Ask KCA to make it</a>
           </Card>}
+          {/* Once an advert is added, "What happens next" takes the same slot, so the column keeps its shape. */}
+          {advert && advertState !== "none" && <Card className="next-card"><NextStepsCard request={picked} settings={settings} advert={advertState} /></Card>}
         </div>
         <AdvertUpload lengthSeconds={answers.lengthSeconds} advert={advert} onChange={setAdvert} />
         <div className="booking-grid-panel timetable-panel">
-          <div className="timetable-heading"><div><h1>Pick your hours</h1><p>Your advert plays only in the boxes you pick, {answers.howOften} times an hour.</p></div><TimetableLegend /></div>
-          <div className="v2-quick-picks" role="group" aria-label="Quick hour picks"><span>Quick picks</span>{[{ label: "Every morning", days: DAY_ORDER, blocks: ["morning"] }, { label: "Evenings", days: DAY_ORDER, blocks: ["evening"] }, { label: "Weekends", days: [6, 0], blocks: BLOCK_ORDER }, { label: "Clear", days: [], blocks: [] }].map((pick) => <button type="button" key={pick.label} onClick={() => change(fromCells(pick.days.flatMap((day) => BLOCK_ORDER.filter((block) => pick.blocks.includes(block) && occupancy[day][block].open).map((block) => `${day}-${block}`))))}>{pick.label}</button>)}</div>
+          <div className="timetable-heading"><div><h1>Pick your hours</h1></div><TimetableLegend /></div>
           <Timetable settings={settings} occupancy={occupancy} pending={!availabilityKnown} selection={answers} onSelect={(action) => change(toggleSelection(answers, action, (day, block) => occupancy[day][block].open))} />
           <div className="availability-message" role="status">
             {!rangeValid ? "Choose dates in order, up to 366 days apart." : !availabilityCurrent ? "Updating busy hours..." : availability.error}
