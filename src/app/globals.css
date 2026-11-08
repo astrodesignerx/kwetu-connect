@@ -2197,9 +2197,9 @@ button.pay-ghost { width: 100%; background: transparent; cursor: pointer; }
 .manager-rail .rail-text, .manager-rail .nav-label { display: block; }
 .manager-rail .rail-text b { font-size: 13px; text-align: left; }
 .manager-rail .rail-text small { font-size: 10px; text-align: left; color: var(--v2-muted); }
-.manager-rail .manager-nav { gap: 12px; }
+.manager-rail .manager-nav, .manager-rail[data-open="true"] .manager-nav { gap: 24px; }
 .rail-group { display: grid; gap: 4px; }
-.rail-group-label { font-size: 11px; color: var(--v2-faint); padding: 0 12px 2px; margin: 0; }
+.rail-group-label { font-size: 11px; color: var(--v2-faint); padding: 0 12px 4px; margin: 0; }
 .manager-rail .rail-count { margin-left: auto; font-size: 11px; color: var(--v2-muted); font-variant-numeric: tabular-nums; }
 .manager-rail .manager-nav a, .manager-rail[data-open="true"] .manager-nav a { display: flex; gap: 8px; width: auto; height: 44px; padding: 6px 12px; font-size: 13px; border-radius: 14px; color: var(--foreground); }
 .manager-rail .manager-nav a:hover { background: var(--muted); transform: translateX(2px); }
@@ -2350,7 +2350,7 @@ button.pay-ghost { width: 100%; background: transparent; cursor: pointer; }
 .v2-stage-shares strong { font-size: 23px; }
 .v2-stage-shares small { margin-left: 6px; font-size: 11px; color: var(--muted-foreground); font-weight: 400; }
 .v2-stage-shares i { height: 28px; border-radius: 10px; background: var(--stage); }
-.v2-stage-shares [data-stage="Quote"] i { background: repeating-linear-gradient(135deg, var(--v2-hatch) 0 2px, transparent 2px 6px), color-mix(in srgb, var(--stage) 40%, transparent); }
+.v2-stage-shares i[data-stage="Quote"] { background: repeating-linear-gradient(135deg, var(--v2-hatch) 0 2px, transparent 2px 6px), color-mix(in srgb, var(--stage) 40%, transparent); }
 @media (max-width: 1279px) and (min-width: 768px) {
   .manager-app, .manager-app:has(.manager-rail[data-open="true"]) { grid-template-columns: 214px minmax(0,1fr); }
   .manager-content { padding-inline: 16px; }
