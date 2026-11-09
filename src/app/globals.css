@@ -1721,7 +1721,8 @@ button.day-heading:hover, button.block-heading:hover { background: var(--accent)
 .settings-hint, .settings-sub { font-size: 11px; color: var(--muted-foreground); }
 .settings-impact { display: grid; gap: 8px; padding: 12px; border-radius: 12px; background: color-mix(in srgb, var(--primary) 9%, transparent); font-size: 12px; }
 .settings-example { display: flex; justify-content: space-between; gap: 8px; }
-.settings-example s { color: var(--muted-foreground); }
+.settings-example > span:last-child { display: flex; flex-direction: column; align-items: flex-end; flex: none; white-space: nowrap; text-align: right; }
+.settings-example s { color: var(--muted-foreground); font-size: 0.85em; }
 .settings-example b[data-changed="true"] { color: var(--amber-text); }
 .settings-error { color: var(--destructive); }
 .settings-status:empty { display: none; }
