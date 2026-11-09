@@ -15,9 +15,10 @@ function usePopover() {
     if (!open) return;
     const outside = (event: PointerEvent) => { if (!box.current?.contains(event.target as Node)) setOpen(false); };
     const escape = (event: KeyboardEvent) => { if (event.key === "Escape") { event.stopPropagation(); setOpen(false); box.current?.querySelector<HTMLButtonElement>("button")?.focus(); } };
+    // Window, in the capture phase, runs before the dialog's own Escape listener on document.
     document.addEventListener("pointerdown", outside);
-    document.addEventListener("keydown", escape, true);
-    return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape, true); };
+    window.addEventListener("keydown", escape, true);
+    return () => { document.removeEventListener("pointerdown", outside); window.removeEventListener("keydown", escape, true); };
   }, [open]);
   return [open, setOpen, box] as const;
 }
@@ -61,11 +62,11 @@ export default function BookingHeader({ business, reference, status, action, mov
         : <button type="button" className="v2-primary" onClick={() => goTo(action.kind === "payment" ? "Payment" : "Contact")}>{action.label}</button>)}
       {!closed && <div className="v2-pop" ref={moveBox}>
         <button type="button" className="v2-secondary" aria-expanded={moveOpen} onClick={() => { setMoveOpen(!moveOpen); setMoreOpen(false); }}>Move to<CaretDown size={12} aria-hidden="true" /></button>
-        {moveOpen && <div className="v2-pop-panel v2-pop-move" role="group" aria-label="Move to another stage">{children}</div>}
+        {moveOpen && <div className="v2-pop-panel v2-pop-move" role="group" aria-label="Move to another stage" onClick={(event) => { if ((event.target as HTMLElement).closest("a")) setMoveOpen(false); }}>{children}</div>}
       </div>}
       {(compact || !closed) && <div className="v2-pop" ref={moreBox}>
         <button type="button" className="v2-secondary v2-more" aria-expanded={moreOpen} aria-label="More" onClick={() => { setMoreOpen(!moreOpen); setMoveOpen(false); }}><DotsThree size={18} weight="bold" aria-hidden="true" /></button>
-        {moreOpen && <div className="v2-pop-panel v2-pop-menu">
+        {moreOpen && <div className="v2-pop-panel v2-pop-menu" onClick={(event) => { if ((event.target as HTMLElement).closest("a")) setMoreOpen(false); }}>
           {compact && <Link href={"/manage/bookings/" + reference}>Open full booking</Link>}
           {!closed && <Link href={moveUrl("Cancelled")} scroll={false} data-danger="true">Cancel booking</Link>}
         </div>}

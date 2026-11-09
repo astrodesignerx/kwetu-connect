@@ -53,7 +53,7 @@ export default function BookingDetail({ detail, settings, demo, today, moveBase,
         {!detail.capacity.ok && <CapacityNotice capacity={detail.capacity} />}
       </div></div></>;
   const header = <BookingHeader business={a.business} reference={reference} status={b.status} action={nextAction({ reference, status: b.status, paymentNote: b.paymentNote, request: r }, adverts, today)} moveBase={moveBase} compact={compact}>
-    <StatusControls key={b.updatedAt} detail={detail} settings={settings} today={today} />
+    <StatusControls key={b.updatedAt} detail={detail} settings={settings} today={today} moveBase={moveBase} />
   </BookingHeader>;
   return <article className={"booking-detail v2-tabbed-booking" + (compact ? " is-compact" : "")}><BookingDetailTabs key={reference} header={header} confirm={confirm} panels={[summary, advertPanel, payment, contact, historyPanel].map((panel, index) => <Fragment key={index}>{panel}</Fragment>)} /></article>;
 }
