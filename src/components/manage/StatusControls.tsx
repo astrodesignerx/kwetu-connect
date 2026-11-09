@@ -16,7 +16,7 @@ export default function StatusControls({ detail, settings, today, moveBase }: { 
   // With moveBase each choice opens the confirm step, which is where the cancel note is asked for.
   if (moveBase !== undefined) return <div className="v2-move-list">{targets.map((to) => {
     const result = canMove(b.status, to, { ...b, note: "asked at the confirm step", settings, capacity: detail.capacity }, detail.adverts, today);
-    return result.ok ? <Link key={to} className="staff-button" href={moveBase + (moveBase.endsWith("?") ? "" : "&") + "moveTo=" + to} scroll={false}>Move to {to}</Link> : <p key={to}>{to}: {result.reason}</p>;
+    return result.ok ? <Link key={to} className="staff-button" data-danger={to === "Cancelled" || undefined} href={moveBase + (moveBase.endsWith("?") ? "" : "&") + "moveTo=" + to} scroll={false}>Move to {to}</Link> : <p key={to}>{to}: {result.reason}</p>;
   })}</div>;
   return <form action={action} className="staff-form space-y-4">
     <input type="hidden" name="reference" value={b.reference} />

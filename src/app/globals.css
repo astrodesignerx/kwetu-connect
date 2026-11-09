@@ -3091,6 +3091,7 @@ button.pay-ghost { width: 100%; background: transparent; cursor: pointer; }
 .pipeline-card { grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 12px; }
 .v2-move-list { display: grid; gap: 8px; }
 .v2-move-list .staff-button { display: flex; justify-content: center; text-decoration: none; }
+.v2-move-list .staff-button[data-danger="true"] { background: color-mix(in srgb, var(--destructive) 10%, transparent); color: var(--destructive); border: 1px solid color-mix(in srgb, var(--destructive) 28%, transparent); box-shadow: none; }
 .v2-move-list p { font-size: 12px; line-height: 1.4; color: var(--muted-foreground); }
 .pipeline-card-head { display: flex; align-items: center; gap: 8px; }
 .pipeline-card-head strong { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 1.3; }
