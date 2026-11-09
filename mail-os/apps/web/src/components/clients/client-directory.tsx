@@ -3,7 +3,7 @@
 import { Search, Users } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { plural } from "@/lib/format";
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { ClientAvatar, ClientTile, Segmented, StatusChip } from "@/components/signal";
 import { type ClientActivity } from "@/lib/signal-clients";
@@ -20,10 +20,10 @@ export function ClientDirectory({ clients }: { clients: ClientActivity[] }) {
     </div>
     {!clients.length ? <EmptyState icon={Users} title="No clients yet" text="Create a client to bring their projects and conversations together" /> : !filtered.length ? <EmptyState icon={Search} title="No clients match that search" text="Try part of the name or the email domain" /> :
       <div id="client-results" className={view === "grid" ? s.grid : s.list} data-view={view} key={view}>
-        {filtered.map((client, index) => {
+        {filtered.map((client) => {
           const status = client.status === "WaitingOnUs" ? "Waiting on us" : "All replied";
           const href = `/clients/detail?id=${encodeURIComponent(client.id)}`;
-          return <div key={client.id} className={s.item} style={{ "--i": Math.min(index, 8) } as CSSProperties}>
+          return <div key={client.id} className={s.item}>
             {view === "grid" ? <ClientTile name={client.name} status={status} description={client.domain ?? undefined} href={href}>
               <div className={s.meta}><span>{plural(client.threadCount, "conversation")}</span></div>
             </ClientTile> : <Link href={href} className={s.row}>

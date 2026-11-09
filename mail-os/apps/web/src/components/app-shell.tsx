@@ -21,7 +21,13 @@ export function AppShell(props: AppShellProps) {
   return <Suspense fallback={<div className="signal-frame" />}><ShellContent {...props} /></Suspense>;
 }
 
+// True until the shell has shown its content once in this tab. Section layouts
+// remount the shell on navigation, so the flag lives outside the component.
+let shellEntered = false;
+
 export function ShellContent({ children, variant = "content" }: AppShellProps) {
+  const [enter] = useState(() => !shellEntered);
+  useEffect(() => { shellEntered = true; }, []);
   const router = useRouter();
   const pathname = usePathname();
   const mailMode = pathname === "/mail" || pathname === "/dev/mail";
@@ -85,7 +91,7 @@ export function ShellContent({ children, variant = "content" }: AppShellProps) {
       <div className="signal-desktop-sidebar"><Sidebar compact onCompose={compose} onNavigate={() => setDrawer(true)} /></div>
       <div className="signal-workspace">
         <Topbar mail={mailMode} primaryCompose={(mailMode || pathname.startsWith("/drafts")) && overview?.mailboxes.length !== 0} onCompose={compose} onCommand={openPalette} onMenu={() => setDrawer(true)} />
-        <main id="main-content" className="signal-canvas">
+        <main id="main-content" className="signal-canvas" data-enter={enter}>
           {variant === "app" ? children : <div className="v2-scroll"><div className="v2-content">{children}</div></div>}
         </main>
       </div>

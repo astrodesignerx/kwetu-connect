@@ -302,6 +302,8 @@
   .signal-frame { display: grid; grid-template-columns: 84px minmax(0, 1fr); height: 100dvh; min-width: 0; overflow: hidden; background: var(--bg); color: var(--fg); }
   .signal-desktop-sidebar { min-height: 0; }
   .signal-workspace { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .signal-canvas[data-enter=true] { animation: content-in var(--t3) var(--ease) both; }
+  @keyframes content-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
   .signal-canvas { display: flex; flex: 1; min-height: 0; min-width: 0; overflow: hidden; padding: 0 20px 20px 4px; }
   .v2-scroll { flex: 1; min-width: 0; overflow-y: auto; }
   .v2-content { width: 100%; max-width: 1040px; margin: 0 auto; padding: 20px 0 32px; }

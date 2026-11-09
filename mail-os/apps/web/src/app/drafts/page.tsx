@@ -43,9 +43,9 @@ export default function DraftsPage() {
       <PageHeader title="Drafts" description={loading ? "Loading drafts..." : failed ? "Drafts unavailable" : `${drafts.length} saved, ${drafts.filter((draft) => draftReadiness(draft).ready).length} ready to send`} />
       {remove.isError && <ErrorText>Could not discard this draft. Try again.</ErrorText>}
       {failed && <ErrorState title="Drafts could not load" onRetry={() => { void overview.refetch(); void saved.refetch(); }} />}
-      {loading ? <p className={s.quiet} role="status">Opening your saved messages...</p> : drafts.length ? <ul className={s.sheets}>{drafts.map((draft, index) => {
+      {loading ? <p className={s.quiet} role="status">Opening your saved messages...</p> : drafts.length ? <ul className={s.sheets}>{drafts.map((draft) => {
         const readiness = draftReadiness(draft);
-        return <li className={s.sheet} key={draft.id} style={{ animationDelay: Math.min(index, 6) * 50 + 'ms' }}>
+        return <li className={s.sheet} key={draft.id}>
           <button className={s.open} onClick={() => setEditing(loadDraftToContext(draft.mailboxConnectionId, draft))}>
             <span className={s.recipient}>{draft.toAddrs ? `To ${draft.toAddrs}` : draft.ccAddrs ? `Cc ${draft.ccAddrs}` : draft.bccAddrs ? `Bcc ${draft.bccAddrs}` : '(no recipient)'}</span>
             <h2>{draft.subject || '(no subject)'}</h2>

@@ -9,10 +9,10 @@ Branch: t3/0d3ac476 (worktree C:/Users/ether/.t3/worktrees/kwetu-connect/t3-0d3a
 | 2 Navigation and actions | done | 06e8ade, review fixes 1d6d126 |
 | 3 Words and formats | done | 4ecb04e |
 | 4 Screens | done | e95b661 |
-| 5 Schedule | done | see git log |
-| 6 Motion | not started | |
+| 5 Schedule | done | 61c096e |
+| 6 Motion | done | see git log |
 
-Next: Phase 6 (motion: no loops on non-live things, entrance once, lift only on link cards), then the full browser matrix and the final report.
+Next: rerun the full browser matrix (it stopped on a disk dip, see below), review the new captures, then the final report. All six phases are committed.
 
 Known gaps carried from Phase 1 (fixed in later phases): a few TSX class names (emptyMail, newCard, trend, flightTiles, flightMark, mark, add, connect, conversationTools) have no module rule yet; they are replaced by the empty state, page header and screen work in Phases 2 and 4. Module rules nothing references yet are pruned at the end of Phase 4 with prune.mjs.
 
@@ -57,8 +57,21 @@ Tools here: `audit.mjs` (source audit), `prune.mjs` (dead module rules), `tw-swe
 - `flight-shot.mjs` screenshots the plan alone with a long site name and two clipped flights (needs the 3024 server).
 - Morning brief go-lives are plain rows (done in Phase 4). No new cards, no LED effects.
 
+## Phase 6 notes
+
+- Loops: only busy spinners spin (Loader2, `.signal-loading`). The status ping, skeleton breathing and presence pulse were already gone after Phase 1. The LED marquee and blinking dots remain only in `components/signal/boards.tsx`, which only the dev gallery uses.
+- Entrance: `main.signal-canvas` gets `data-enter=true` only on the first shell mount in a tab (module flag in app-shell.tsx), so the content rises in once and section changes cut straight to the page. Charts, flight bars and empty states no longer animate on mount. User-triggered open and close (dialogs, drawer, popovers, disclosures, compose, attachments) keep their transitions; reduced motion still cuts to the end state.
+- Hover lift only on link cards (client tiles and rows). Dead stagger styles removed.
+- The browser check now asserts the entrance plays on first load, does not replay after navigating, and that an idle page has no infinite animation.
+
 ## How to check
 
 - Build and serve with fixture env (PowerShell, from mail-os/apps/web): `$env:API_URL="http://127.0.0.1:59999"; $env:NEXT_PUBLIC_API_URL="http://127.0.0.1:3024"; $env:NEXT_PUBLIC_HUB_URL="http://127.0.0.1:3024"; pnpm.cmd build`, then `next start -p 3024 --hostname 127.0.0.1` with the same API_URL.
 - From the repo root: `node .claude/notes/v2-bw/browser-check.mjs` (CHECK_ROUTES, CHECK_SCENARIOS, CHECK_WIDTHS, CHECK_THEMES, CHECK_REPORT narrow it; CHECK_DEV=1 adds /dev/mail, which only exists under next dev). Screenshots land in `.claude/notes/v2-bw/screenshots` and are not committed.
 - Stop port 3024 and delete `mail-os/apps/web/.next` after each check.
+
+## Stopped 2026-11-09: disk dipped below 1.5 GB during the final browser run
+
+The final production build passed (`build.txt`). The full matrix (1440, 1280 and 390, both themes, four states, then overlays, reduced motion, motion and contrast) stopped itself after 198 captures, because the run checks free space before every capture and C: briefly read under 1.5 GB. A minute later C: had 13.95 GB free again, so something outside this job used and released about 12 GB. The 198 captures (clients, client detail, drafts, settings, profile, mailboxes, connect, part of brand-kit) had 0 colour, 0 small-text and 0 overflow failures, no console errors and no requests outside the fixture. Port 3024 is stopped and `.next` is deleted.
+
+To resume: confirm C: has space, build and serve as under "How to check", then run `CHECK_ROUTES=brand-kit,templates,template-new,template-edit,admin-users,admin-audit,login,register,mail,overlays,reduced-motion,motion,contrast node .claude/notes/v2-bw/browser-check.mjs` from the repo root, rebuild the contact sheets with `python .claude/notes/v2-bw/contact-sheets.py`, and review them. The Phase 4 run already covered every route at 1440 and 390 in both themes with 0 failures (333 captures); what is outstanding is 1280 px and the new motion assertion.

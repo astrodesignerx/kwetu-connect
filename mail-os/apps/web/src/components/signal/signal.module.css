@@ -7,7 +7,7 @@
 .spark circle { fill: var(--fg); stroke: var(--surface); stroke-width: 2; }
 
 .miniBars { display: grid; align-items: end; gap: 4px; }
-.miniBars > span { background: var(--muted); opacity: .48; transform-origin: bottom; animation: growY var(--t3) var(--ease) both; animation-delay: calc(var(--i, 0) * 16ms); }
+.miniBars > span { background: var(--muted); opacity: .48; }
 .miniBars > .peak { background: var(--fg); opacity: 1; }
 .hourAxis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 8px; color: var(--muted); font-family: var(--f-mono), monospace; font-size: 12px; line-height: 16px; }
 
@@ -16,7 +16,7 @@
 .hBars li > span:first-child { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .hBars b { text-align: right; font-family: var(--f-mono), monospace; font-size: 12px; font-weight: 500; }
 .hBarTrack { display: block; background: var(--raise); }
-.hBarTrack i { display: block; height: 8px; background: var(--fg); transform-origin: left; animation: growX var(--t3) var(--ease) both; animation-delay: calc(var(--i, 0) * 48ms); }
+.hBarTrack i { display: block; height: 8px; background: var(--fg); }
 
 .meter { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
 .meter > span { height: 4px; overflow: hidden; background: var(--line); }
@@ -75,7 +75,7 @@
 .flightRow { height: 48px; align-items: center; border-bottom: 1px solid var(--line); }
 .flightSite { align-self: stretch; min-width: 0; overflow: hidden; padding: 12px 12px 0 0; font-size: 13px; line-height: 20px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
 .flightTrack { position: relative; height: 100%; background: linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / calc(100% / 6) 100%; border-right: 1px solid var(--line); }
-.flightBar { position: absolute; top: 12px; height: 24px; overflow: hidden; padding: 4px 8px; border-radius: var(--radius-tag); background: var(--fg); color: var(--surface); font-family: var(--f-mono), monospace; font-size: 12px; line-height: 16px; white-space: nowrap; text-overflow: ellipsis; animation: flightIn var(--t3) var(--ease) both; animation-delay: calc(var(--i, 0) * 48ms); }
+.flightBar { position: absolute; top: 12px; height: 24px; overflow: hidden; padding: 4px 8px; border-radius: var(--radius-tag); background: var(--fg); color: var(--surface); font-family: var(--f-mono), monospace; font-size: 12px; line-height: 16px; white-space: nowrap; text-overflow: ellipsis; }
 .flightBar[data-from-before=true] { border-top-left-radius: 0; border-bottom-left-radius: 0; }
 .flightBar[data-runs-on=true] { border-top-right-radius: 0; border-bottom-right-radius: 0; }
 .todayLayer { position: absolute; inset: 0 0 0 var(--site); pointer-events: none; }
@@ -112,9 +112,6 @@ a.clientTile:active { transform: scale(.99); }
 .segmented button:active:not(:disabled) { transform: scale(.97); }
 .segmented button:disabled { opacity: .4; cursor: not-allowed; }
 
-@keyframes growY { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
-@keyframes flightIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
-@keyframes growX { from { transform: scaleX(0); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
 @keyframes blink { 0%, 100% { opacity: .32; } 50% { opacity: 1; } }
 @keyframes marquee { to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) {

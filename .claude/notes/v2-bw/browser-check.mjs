@@ -287,6 +287,24 @@ try {
     } catch (error) { results.failures.push({ kind: 'reduced-motion', message: error.message }); }
     finally { await context.close(); }
   }
+  // Motion: the main content enters once per app load, not again on navigation, and
+  // nothing loops except busy spinners.
+  if (!selection || selection.includes('motion')) {
+    const { context, page } = await makePage({ width: 1440, theme: 'light', scenario: 'populated' });
+    try {
+      await page.goto(origin + '/clients', { waitUntil: 'networkidle' });
+      assert.equal(await page.locator('main[data-enter=true]').count(), 1, 'first load should play the entrance');
+      await page.locator('.mail-rail a[aria-label=Settings]').click();
+      await page.waitForURL('**/settings');
+      await page.locator('main').waitFor();
+      await page.waitForTimeout(400);
+      assert.equal(await page.locator('main[data-enter=true]').count(), 0, 'navigation should not replay the entrance');
+      const loops = await page.evaluate(() => document.getAnimations().filter(a => a.effect?.getComputedTiming().iterations === Infinity).map(a => a.animationName ?? 'animation'));
+      assert.deepEqual(loops, [], 'no looping animation on an idle page');
+      results.captures.push('motion-check');
+    } catch (error) { results.failures.push({ kind: 'motion', message: error.message }); }
+    finally { await context.close(); }
+  }
   if (!selection || selection.includes('contrast')) for (const theme of ['light', 'dark']) {
     const { context, page } = await makePage({ width: 1440, theme, scenario: 'populated' });
     try {

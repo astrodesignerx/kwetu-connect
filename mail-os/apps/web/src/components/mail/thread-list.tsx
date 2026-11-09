@@ -35,9 +35,9 @@ function Highlight({ text, query }: { text: string; query?: string }) {
   return <>{text.slice(0, index)}<mark>{text.slice(index, index + query.length)}</mark><Highlight text={text.slice(index + query.length)} query={query} /></>;
 }
 
-function ThreadRow({ thread: t, active, picked, onSelect, onToggle, index, query, now }: { thread: SignalThreadSummary; active: boolean; picked: boolean; onSelect: () => void; onToggle: () => void; index: number; query?: string; now: number }) {
+function ThreadRow({ thread: t, active, picked, onSelect, onToggle, query, now }: { thread: SignalThreadSummary; active: boolean; picked: boolean; onSelect: () => void; onToggle: () => void; index: number; query?: string; now: number }) {
   const who = firstParticipant(t.participants) || '(unknown sender)';
-  return <li className={s.row} data-active={active} style={{ animationDelay: Math.min(index, 6) * 50 + 'ms' }}>
+  return <li className={s.row} data-active={active}>
     <button className={s.avatarButton} role="checkbox" aria-checked={picked} aria-label={picked ? 'Deselect thread' : 'Select thread'} onClick={onToggle}>
       {picked ? <Check size={16} aria-hidden /> : <ClientAvatar name={who} size="small" />}
     </button>

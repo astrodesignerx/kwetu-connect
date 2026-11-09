@@ -75,7 +75,7 @@ export function Sidebar({ onCompose, onNavigate, compact = false }: { onCompose:
       <Link href="/mail" className="signal-brand" onClick={onNavigate}><Logo /><span>Kwetu OS</span></Link>
       <Button className="signal-new-message" onClick={onCompose}><Plus size={16} aria-hidden />New email</Button>
       <nav aria-label="Main" className="signal-primary-nav">
-        {DESTINATIONS.map((route, index) => {
+        {DESTINATIONS.map((route) => {
           const active = route.href === "/settings"
             ? pathname.startsWith("/settings") && !pathname.startsWith("/settings/templates")
             : pathname.startsWith(route.href);
@@ -83,7 +83,7 @@ export function Sidebar({ onCompose, onNavigate, compact = false }: { onCompose:
             : route.href === "/clients" ? clients?.length : undefined;
           return <Link key={route.href} href={route.href === "/mail" ? folderHref("inbox") : route.href}
             onClick={onNavigate} aria-current={active ? "page" : undefined}
-            style={{ "--i": index } as React.CSSProperties} className={cn("signal-nav-link", active && "is-active")}>
+            className={cn("signal-nav-link", active && "is-active")}>
             <route.icon size={18} aria-hidden /><span>{route.label}</span>
             {route.href === "/drafts" && <DraftCount />}
             {count !== undefined && count > 0 && <span className="signal-count">{count}</span>}
