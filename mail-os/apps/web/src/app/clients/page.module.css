@@ -1,7 +1,4 @@
-.page { display: flex; flex-direction: column; gap: 24px; min-width: 0; color: var(--fg); }
-.header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; }
-.header h1 { margin: 8px 0; font-size: 28px; line-height: 36px; font-weight: 600; }
-.muted { color: var(--muted); font-size: 14px; line-height: 20px; }
+.page { --page-header-gap: 0px; display: flex; flex-direction: column; gap: 24px; min-width: 0; color: var(--fg); }
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .stats > div { min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
 .stats dd { margin: 0 0 8px; font-size: 28px; line-height: 36px; font-weight: 600; }

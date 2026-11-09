@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import s from "./page.module.css";
+import { PageHeader } from "@/components/page-header";
 import { StatusChip } from "@/components/signal";
 import { draftReadiness } from "@/lib/signal-mail";
 import { htmlToText } from "@/lib/mail-frame";
@@ -35,7 +35,7 @@ export default function DraftsPage() {
   if (!ready) return null;
   return (
     <div className={s.page}>
-      <header className={s.header}><div><h1>Drafts</h1><p>{loading ? "Loading drafts..." : failed ? "Drafts unavailable" : `${drafts.length} saved / ${drafts.filter((draft) => draftReadiness(draft).ready).length} ready`}</p></div><Link href="/mail?compose=1">New message</Link></header>
+      <PageHeader title="Drafts" description={loading ? "Loading drafts..." : failed ? "Drafts unavailable" : `${drafts.length} saved / ${drafts.filter((draft) => draftReadiness(draft).ready).length} ready`} />
       {remove.isError && <p role="alert">Could not discard this draft. Try again.</p>}
       {failed && <p role="alert" className={s.quiet}>Drafts could not load. <button onClick={() => { void overview.refetch(); void saved.refetch(); }}>Try again</button></p>}
       {loading ? <p className={s.quiet} role="status">Opening your saved messages...</p> : drafts.length ? <ul className={s.sheets}>{drafts.map((draft, index) => {

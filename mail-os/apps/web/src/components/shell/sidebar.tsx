@@ -60,13 +60,13 @@ export function Sidebar({ onCompose, onNavigate, compact = false }: { onCompose:
         { label: "Archive", href: folderHref("archive"), icon: Archive, active: onMail && folder === "archive" },
         { label: "Clients", href: "/clients", icon: Users, active: pathname.startsWith("/clients") },
         { label: "Templates", href: "/settings/templates", icon: Layers, active: pathname.startsWith("/settings/templates") },
-      ].map((item) => <Link key={item.label} href={item.href} title={item.label} aria-label={item.label} aria-current={item.active ? "page" : undefined}>
-        <item.icon size={18} aria-hidden />{item.count ? <small>{item.count}</small> : null}
+      ].map((item) => <Link key={item.label} href={item.href} aria-label={item.label} aria-current={item.active ? "page" : undefined}>
+        <item.icon size={18} aria-hidden /><span>{item.label}</span>{item.count ? <small>{item.count}</small> : null}
       </Link>)}
-      <button type="button" onClick={onNavigate} aria-label="Mail folders and mailboxes" title="Mail folders and mailboxes" aria-haspopup="dialog"><MoreHorizontal size={18} aria-hidden /></button>
+      <button type="button" onClick={onNavigate} aria-label="Mail folders and mailboxes" aria-haspopup="dialog"><MoreHorizontal size={18} aria-hidden /><span>More</span></button>
     </nav>
     <nav className="mail-rail-bottom" aria-label="Account">
-      <Link href="/settings" aria-label="Settings" title="Settings" aria-current={pathname.startsWith("/settings") && !pathname.startsWith("/settings/templates") ? "page" : undefined}><Settings size={18} aria-hidden /></Link>
+      <Link href="/settings" aria-label="Settings" aria-current={pathname.startsWith("/settings") && !pathname.startsWith("/settings/templates") ? "page" : undefined}><Settings size={18} aria-hidden /><span>Settings</span></Link>
       <Link href="/settings/profile" aria-label="Your profile" title={user?.displayName ?? "Your profile"} className="mail-rail-avatar">{initialsFor(user?.displayName ?? user?.email ?? "?")}</Link>
     </nav>
   </aside>;

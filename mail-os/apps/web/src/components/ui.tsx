@@ -2,20 +2,27 @@ import { CircleAlert } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 type ButtonVariant = "primary" | "default" | "ghost" | "danger";
+type ButtonSize = "default" | "small" | "icon";
+
+const VARIANT_CLASS: Record<ButtonVariant, string> = {
+  primary: "btn-primary",
+  default: "btn-default",
+  ghost: "btn-ghost",
+  danger: "btn-danger",
+};
+
+/** The classes of a button, for a link that should look like one. */
+export function buttonClass(variant: ButtonVariant = "primary", size: ButtonSize = "default", className?: string) {
+  return cn("signal-button", VARIANT_CLASS[variant], `signal-button-${size}`, className);
+}
 
 export function Button({
   variant = "primary",
   size = "default",
   className,
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; size?: "default" | "small" | "icon" }) {
-  const styles: Record<ButtonVariant, string> = {
-    primary: "btn-primary",
-    default: "btn-default",
-    ghost: "btn-ghost",
-    danger: "btn-danger",
-  };
-  return <button className={cn("signal-button", styles[variant], `signal-button-${size}`, className)} {...props} />;
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; size?: ButtonSize }) {
+  return <button className={buttonClass(variant, size, className)} {...props} />;
 }
 
 // A status chip. Strong marks the one state that needs attention, with weight rather than colour.

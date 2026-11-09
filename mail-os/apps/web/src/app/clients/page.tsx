@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, ViewState } from "@/components/ui";
+import { PageHeader } from "@/components/page-header";
 import { ClientDirectory } from "@/components/clients/client-directory";
 import { ClientForm } from "@/components/clients/client-form";
 import { clientsApi } from "@/lib/signal-clients";
@@ -14,10 +15,8 @@ export default function ClientsPage() {
   const query = useQuery({ queryKey: ["client-activity"], queryFn: ({ signal }) => clientsApi.activity(signal) });
   const clients = query.data;
   return <div className={s.page}>
-    <header className={s.header}>
-      <div><h1>Clients</h1><p className={s.muted}>The people and campaigns behind your conversations.</p></div>
-      <Button onClick={() => setCreating(!creating)}>{creating ? "Cancel" : "New client"}</Button>
-    </header>
+    <PageHeader title="Clients" description="The people and campaigns behind your conversations"
+      action={<Button variant={creating ? "default" : "primary"} onClick={() => setCreating(!creating)}>{creating ? "Cancel" : "New client"}</Button>} />
     {creating && <ClientForm onDone={() => { setCreating(false); void cache.invalidateQueries({ queryKey: ["client-activity"] }); }} />}
     {query.isPending ? <ViewState loading label="Loading clients" /> : query.isError ? <div className={s.panel} role="alert"><p>Could not load clients.</p><Button variant="default" onClick={() => void query.refetch()}>Try again</Button></div> : clients && <>
       <dl className={s.stats}>

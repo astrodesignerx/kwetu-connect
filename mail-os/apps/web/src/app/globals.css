@@ -306,17 +306,24 @@
   .v2-content { width: 100%; max-width: 1040px; margin: 0 auto; padding: 20px 0 32px; }
   .v2-content > * { min-width: 0; }
 
-  /* Rail */
-  .mail-rail { height: 100%; display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 20px 0 16px; overflow-y: auto; }
-  .mail-rail-brand { display: grid; place-items: center; width: 44px; min-height: 32px; }
-  .mail-rail nav { display: grid; gap: 8px; }
-  .mail-rail nav a, .mail-rail nav button { position: relative; display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-control); color: var(--muted); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
-  .mail-rail nav a:hover, .mail-rail nav button:hover { opacity: .64; }
+  /* Rail: flat icon-over-label items. The active item is a solid fill of the text colour. */
+  .mail-rail { height: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px 8px 16px; overflow-y: auto; }
+  .mail-rail-brand { display: grid; place-items: center; width: 44px; min-height: 32px; flex-shrink: 0; }
+  .mail-rail nav { display: grid; justify-items: center; gap: 4px; }
+  .mail-rail nav a, .mail-rail nav button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 68px; min-height: 56px; padding: 8px 4px; border-radius: var(--radius-control); color: var(--muted); isolation: isolate; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .mail-rail nav a::before, .mail-rail nav button::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--fg); opacity: 0; transition: opacity var(--t1) var(--ease); }
+  .mail-rail nav a:hover::before, .mail-rail nav button:hover::before { opacity: .06; }
   .mail-rail nav a:active, .mail-rail nav button:active { transform: scale(.96); }
-  .mail-rail nav a[aria-current=page] { background: var(--fg); color: var(--surface); }
-  .mail-rail small { position: absolute; right: 0; top: 0; display: grid; place-items: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: var(--radius-tag); background: var(--fg); color: var(--surface); font-size: 12px; line-height: 16px; }
+  .mail-rail nav a[aria-current=page] { color: var(--surface); }
+  .mail-rail nav a[aria-current=page]::before { opacity: 1; }
+  .mail-rail nav span { max-width: 100%; overflow: hidden; font-size: 12px; line-height: 16px; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; }
+  .mail-rail nav a[aria-current=page] span { font-weight: 600; }
+  .mail-rail small { position: absolute; right: 8px; top: 4px; display: grid; place-items: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: var(--radius-tag); background: var(--fg); color: var(--surface); font-family: var(--f-mono), monospace; font-size: 12px; line-height: 16px; }
+  .mail-rail nav a[aria-current=page] small { background: var(--surface); color: var(--fg); }
   .mail-rail .mail-rail-bottom { margin-top: auto; padding-top: 12px; }
-  .mail-rail .mail-rail-avatar { border-radius: 50%; background: var(--raise); color: var(--fg); font-size: 12px; font-weight: 600; }
+  .mail-rail nav .mail-rail-avatar { width: 36px; min-height: 36px; height: 36px; margin-top: 8px; padding: 0; border-radius: 50%; background: var(--raise); color: var(--fg); font-size: 12px; font-weight: 600; }
+  .mail-rail nav .mail-rail-avatar::before { content: none; }
+  .mail-rail nav .mail-rail-avatar:hover { opacity: .72; }
 
   /* Top bar */
   .signal-topbar { position: relative; display: flex; align-items: center; gap: 8px; min-height: 72px; padding: 16px 20px 16px 4px; }
@@ -457,7 +464,7 @@
   .compose-backdrop[data-closing="true"] { animation: compose-veil var(--t1) var(--ease) reverse both; }
   .compose-sheet { position: relative; display: flex; flex-direction: column; width: 100%; max-height: calc(100dvh - 64px); overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--surface); color: var(--fg); box-shadow: var(--shadow-dialog); animation: compose-rise var(--t3) var(--ease) both; }
   .compose-backdrop[data-closing="true"] .compose-sheet { animation: compose-rise var(--t1) var(--ease) reverse both; }
-  .compose-close-pill { position: absolute; top: -12px; right: -12px; z-index: 10; display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--muted); animation: compose-rise var(--t3) var(--ease) both; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .compose-close-pill { position: absolute; top: -12px; right: -12px; z-index: 10; display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); color: var(--muted); animation: compose-rise var(--t3) var(--ease) both; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
   .compose-close-pill:hover { opacity: .64; }
   .compose-close-pill:active { transform: scale(.94); }
   .compose-backdrop[data-closing="true"] .compose-close-pill { animation: compose-rise var(--t1) var(--ease) reverse both; }

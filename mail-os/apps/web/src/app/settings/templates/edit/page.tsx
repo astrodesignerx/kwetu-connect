@@ -16,7 +16,7 @@
  */
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, Code2 } from "lucide-react";
 import { api } from "@/lib/api";
@@ -27,6 +27,7 @@ import { ViewState, Button, ErrorText, Hint, Input, Label } from "@/components/u
 import { exampleFor, fromChips, labelFor, toChips, variablesIn } from "@/lib/merge-fields";
 import type { EmailTemplateDto, EmailTemplateUpsertRequest } from "@kompanion/types";
 import s from "./page.module.css";
+import { PageHeader } from "@/components/page-header";
 
 export default function TemplateEditorPage() {
   return <Suspense fallback={<ViewState loading label="Loading template" />}><EditorLookup /></Suspense>;
@@ -38,7 +39,6 @@ function EditorLookup() {
 }
 
 function TemplateEditor({ id }: { id: string }) {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ["template", id],
@@ -80,28 +80,18 @@ function TemplateEditor({ id }: { id: string }) {
 
   return (
     <div className={s.page}>
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold">{effective.name}</h1>
-          <p className="text-sm text-muted">
-            Write it once. The tags you drop in get swapped for each client&apos;s real
-            details when you send.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="ghost" onClick={() => router.push("/settings/templates")}>
-            Back
-          </Button>
+      <PageHeader context="Templates" contextHref="/settings/templates" title={effective.name || "Untitled template"}
+        description="Write it once. The tags you drop in are swapped for each client's real details when you send"
+        action={<>
           {dirty && (
             <Button variant="ghost" onClick={() => setEdit(null)} disabled={save.isPending}>
               Undo my changes
             </Button>
           )}
           <Button onClick={() => save.mutate({ ...effective, variables })} disabled={save.isPending || !dirty || !effective.name.trim()}>
-            {save.isPending ? "Saving…" : dirty ? "Save" : "Saved"}
+            {save.isPending ? "Saving..." : dirty ? "Save" : "Saved"}
           </Button>
-        </div>
-      </header>
+        </>} />
 
       <div className={s.workspace}>
         <div className={s.editing}>

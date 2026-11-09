@@ -1,7 +1,4 @@
 .page { min-width: 0; color: var(--fg); }
-.header { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-bottom: 24px; }
-.header h1 { margin-bottom: 8px; font-size: 28px; line-height: 36px; font-weight: 600; }
-.header p { color: var(--muted); font-size: 14px; line-height: 20px; }
 .sheets { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 16px; }
 .sheet { display: flex; flex-direction: column; min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
 .open { flex: 1; min-width: 0; text-align: left; transition: opacity var(--t1) var(--ease); }

@@ -1,4 +1,4 @@
-.page { display: grid; gap: 20px; min-width: 0; }
+.page { --page-header-gap: 0px; display: grid; gap: 24px; min-width: 0; }
 .note { margin-top: 8px; color: var(--muted); font-size: 13px; line-height: 20px; }
 .activity { width: 100%; }
 .filters { display: flex; flex-wrap: wrap; gap: 8px; }

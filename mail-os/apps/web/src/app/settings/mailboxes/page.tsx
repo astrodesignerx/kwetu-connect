@@ -7,7 +7,7 @@ import type { MailboxDto } from "@kompanion/types";
 import { api } from "@/lib/api";
 import { settingsApi, utcHourValues } from "@/lib/signal-settings";
 import { HourBars } from "@/components/signal";
-import { Button } from "@/components/ui";
+import { Button, buttonClass } from "@/components/ui";
 import { ShellDialog } from "@/components/shell/dialog";
 import { Feedback, HealthLight, Panel, SettingsHeader, SettingsState, Stat, dateTime } from "@/components/settings/settings";
 import s from "./page.module.css";
@@ -29,10 +29,9 @@ export default function MailboxesPage() {
   });
 
   return <div className={s.page}>
-    <SettingsHeader title="Mailboxes" context="Settings / Personal" description="The email accounts your workspace reads and sends from." action={<Link className={s.connect} href="/settings/mailboxes/connect">Connect mailbox</Link>} />
+    <SettingsHeader title="Mailboxes" context="Settings / Personal" description="The email accounts your workspace reads and sends from." action={mailboxes.data?.length ? <Link className={buttonClass()} href="/settings/mailboxes/connect">Connect mailbox</Link> : undefined} />
     {!removing && <Feedback error={disconnect.error} />}
-    {mailboxes.isPending ? <SettingsState loading /> : mailboxes.isError ? <SettingsState error={mailboxes.error} retry={() => void mailboxes.refetch()} /> : mailboxes.data.length === 0 ? <SettingsState empty="No mailbox connected" /> : <div className={s.list}>{mailboxes.data.map((mailbox) => <MailboxHealth key={mailbox.id} mailbox={mailbox} onDisconnect={() => { disconnect.reset(); setRemoving(mailbox); }} />)}</div>}
-    <Link className={s.add} href="/settings/mailboxes/connect"><span aria-hidden="true">+</span> Connect another mailbox</Link>
+    {mailboxes.isPending ? <SettingsState loading /> : mailboxes.isError ? <SettingsState error={mailboxes.error} retry={() => void mailboxes.refetch()} /> : mailboxes.data.length === 0 ? <div className={s.empty}><SettingsState empty="No mailbox connected" /><Link className={buttonClass()} href="/settings/mailboxes/connect">Connect mailbox</Link></div> : <div className={s.list}>{mailboxes.data.map((mailbox) => <MailboxHealth key={mailbox.id} mailbox={mailbox} onDisconnect={() => { disconnect.reset(); setRemoving(mailbox); }} />)}</div>}
     <ShellDialog open={!!removing} onClose={() => { if (!disconnect.isPending) setRemoving(null); }} labelId="disconnect-title">
       <h2 id="disconnect-title">Disconnect this mailbox?</h2>
       <p className={s.dialogText}>{removing?.email} and its synced mail will leave this workspace. Messages stay on your mail server. You can reconnect later.</p>
@@ -61,7 +60,7 @@ function MailboxHealth({ mailbox, onDisconnect }: { mailbox: MailboxDto; onDisco
     </div>
     <div className={s.chart}><h3>Messages fetched / last 24 hours</h3>
       {stats.isPending ? <SettingsState loading /> : stats.isError ? <SettingsState error={stats.error} retry={() => void stats.refetch()} /> : <><HourBars values={utcHourValues(stats.data.hourly)} highlightPeak={false} height={150} label="Fetched messages in the last 24 hours, grouped by UTC hour of day" /><p className={s.note}>Last 24 hours, grouped by UTC hour of day.</p></>}
-      <div className={s.actions}><Button variant="default" disabled={sync.isPending || test.isPending} onClick={() => sync.mutate()}>{sync.isPending ? "Queuing..." : "Sync now"}</Button><Button variant="ghost" disabled={test.isPending || sync.isPending} onClick={() => test.mutate()}>{test.isPending ? "Testing..." : "Test connection"}</Button><Button variant="danger" onClick={onDisconnect}>Disconnect</Button></div>
+      <div className={s.actions}><Button variant="default" disabled={sync.isPending || test.isPending} onClick={() => sync.mutate()}>{sync.isPending ? "Queuing..." : "Sync now"}</Button><Button variant="ghost" disabled={test.isPending || sync.isPending} onClick={() => test.mutate()}>{test.isPending ? "Testing..." : "Test connection"}</Button><Button variant="danger" onClick={onDisconnect}>Disconnect mailbox</Button></div>
       <Feedback error={test.error ?? sync.error} message={message} />
     </div>
   </div></Panel>;

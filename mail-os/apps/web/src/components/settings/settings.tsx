@@ -1,11 +1,11 @@
-import Link from "next/link";
+import { PageHeader } from "@/components/page-header";
 import { Button, ViewState } from "@/components/ui";
 import s from "./settings.module.css";
 
 export function SettingsHeader({ title, context = "Settings", description, action }: {
   title: string; context?: string; description?: string; action?: React.ReactNode;
 }) {
-  return <header className={s.header}><div>{context && <Link className={s.sectionLabel} href="/settings">{context}</Link>}<h1>{title}</h1>{description && <p>{description}</p>}</div>{action}</header>;
+  return <PageHeader title={title} context={context || undefined} contextHref="/settings" description={description} action={action} />;
 }
 export function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <section className={`${s.panel} ${className}`}>{children}</section>;

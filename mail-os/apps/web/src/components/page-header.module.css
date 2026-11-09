@@ -1,0 +1,10 @@
+/* Pages that space their children with a gap set --page-header-gap to 0. */
+.header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: var(--page-header-gap, 24px); }
+.text { flex: 1 1 320px; min-width: 0; }
+.context { min-height: 16px; color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; }
+.context a { transition: opacity var(--t1) var(--ease); }
+.context a:hover { opacity: .64; }
+.title { margin-top: 8px; font-size: 28px; line-height: 36px; font-weight: 600; overflow-wrap: anywhere; }
+.description { margin-top: 4px; color: var(--muted); font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 8px; color: var(--muted); font-size: 13px; line-height: 20px; overflow-wrap: anywhere; }
+.action { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }

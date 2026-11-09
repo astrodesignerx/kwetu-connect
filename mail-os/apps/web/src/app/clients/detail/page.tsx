@@ -11,6 +11,7 @@ import { Button, ViewState } from "@/components/ui";
 import { ClientForm } from "@/components/clients/client-form";
 import { ClientProjects } from "@/components/clients/client-projects";
 import s from "./page.module.css";
+import { PageHeader } from "@/components/page-header";
 
 export default function ClientDetailPage() {
   return <Suspense fallback={<ViewState loading label="Loading client" />}><ClientLookup /></Suspense>;
@@ -37,14 +38,9 @@ function ClientWorkspace({ id }: { id: string }) {
   const data = company.data;
   const stats = insights.data;
   return <div className={s.page}>
-    <header className={s.hero}>
-      <Link className={s.back} href="/clients">Back to clients</Link>
-      <div className={s.heroRow}>
-        <ClientAvatar name={data.company.name} size="large" />
-        <div className={s.grow}><p className={s.sectionLabel}>Client workspace</p><h1>{data.company.name}</h1><div className={s.identity}><span>{data.company.domain || "No domain added"}</span>{stats && <StatusChip label={stats.waitingCount > 0 ? "Waiting on us" : "All replied"} strong={stats.waitingCount > 0} />}</div></div>
-        <div className={s.actions}><Button variant="default" onClick={() => setEditing(!editing)}>{editing ? "Close editor" : "Edit client"}</Button></div>
-      </div>
-    </header>
+    <PageHeader context="Clients" contextHref="/clients" title={data.company.name}
+      meta={<><span>{data.company.domain || "No domain added"}</span>{stats && <StatusChip label={stats.waitingCount > 0 ? "Waiting on us" : "All replied"} strong={stats.waitingCount > 0} />}</>}
+      action={<Button variant="default" onClick={() => setEditing(!editing)}>{editing ? "Close editor" : "Edit client"}</Button>} />
     {editing && <ClientForm initial={data.company} onDone={() => setEditing(false)} />}
     {insights.isPending ? <p className={s.muted} role="status">Loading client insights...</p> : insights.isError ? <div role="alert" className={s.error}>Could not load insights. <Button variant="ghost" onClick={() => void insights.refetch()}>Try again</Button></div> : stats && <dl className={s.kpis}>
       <div><dt>Boards booked</dt><dd>{stats.boardsBooked}</dd><small>{displayDate(stats.startDate)} to {displayDate(stats.endDate)}</small></div>
