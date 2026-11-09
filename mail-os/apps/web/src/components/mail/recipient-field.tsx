@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useRef, useState, type RefObject } from "react";
 import s from "./compose.module.css";
 
@@ -29,7 +30,7 @@ export function RecipientField({ id, value, onChange, inputRef, placeholder }: {
   const list = recipients(value);
   return <div className={s.recipients}>
     {!editing && list.map((recipient, index) => <span className={s.recipient} key={`${recipient}:${index}`}>
-      <span>{recipient}</span><button type="button" aria-label={`Remove ${recipient}`} onClick={() => onChange(list.filter((_, i) => i !== index).join(", "))}>×</button>
+      <span>{recipient}</span><button type="button" aria-label={`Remove ${recipient}`} onClick={() => onChange(list.filter((_, i) => i !== index).join(", "))}><X size={14} aria-hidden /></button>
     </span>)}
     <input id={id} ref={ref} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} autoComplete="off"
       className={`${s.recipientInput} rounded-control`} data-chipped={!editing && list.length > 0} onFocus={() => setEditing(true)} onBlur={() => setEditing(false)} />

@@ -10,7 +10,7 @@
 .advanced[open] > div { margin-top: 20px; }
 .checklist { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
 .checklist li { display: flex; align-items: start; gap: 12px; }
-.checkMark { display: grid; place-items: center; flex-shrink: 0; width: 28px; height: 28px; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); font-family: var(--f-mono), monospace; font-size: 12px; }
+.checkMark { display: grid; place-items: center; flex-shrink: 0; width: 28px; height: 28px; border: 1px solid var(--line); border-radius: var(--radius-tag); color: var(--muted); font-family: var(--f-mono), monospace; font-size: 12px; }
 .checklist b { display: block; font-size: 13px; line-height: 20px; font-weight: 500; }
 .checklist small { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; line-height: 20px; }
 .checklist [data-state="complete"] .checkMark { border-color: var(--fg); background: var(--fg); color: var(--surface); }

@@ -1,5 +1,7 @@
 "use client";
 
+import { ErrorText } from "@/components/ui";
+import { ErrorState } from "@/components/empty-state";
 import { useState } from "react";
 import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import type { ProjectDto } from "@kompanion/types";
@@ -34,7 +36,7 @@ export function ClientProjects({ companyId, projects }: { companyId: string; pro
       <div className={s.sectionHead}><h2>Flight plan</h2><Button size="small" disabled={!projects.length} onClick={() => setFlightEdit("new")}>New flight</Button></div>
       {!projects.length ? <p className={s.muted}>Create a project to book its first flight</p> : <>
         <label className={s.window}>Six weeks from <input aria-label="Flight plan start date" type="date" value={windowStart} onChange={e => { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) setWindowStart(e.target.value); }} /></label>
-        {queries.some(q => q.isPending) ? <ViewState loading label="Loading flights" /> : queries.some(q => q.isError) ? <div role="alert"><p>Could not load all project flights</p><Button variant="default" onClick={() => queries.forEach(q => void q.refetch())}>Try again</Button></div> : flights.length ? <>
+        {queries.some(q => q.isPending) ? <ViewState loading label="Loading flights" /> : queries.some(q => q.isError) ? <ErrorState bare title="Could not load all project flights" onRetry={() => queries.forEach(q => void q.refetch())} /> : flights.length ? <>
           <FlightPlan label={`Flight plan from ${windowStart} to ${end}`} startDate={windowStart} today={today} sites={flights.filter(x => x.startDate <= end && x.endDate >= windowStart).map(x => ({ id: x.id, name: x.siteName, startDate: x.startDate, endDate: x.endDate }))} />
           <ul className={s.rows}>{flights.map(flight => <li key={flight.id}>
             <div className={s.grow}><strong>{flight.siteName}</strong><small>{projects.find(p => p.id === flight.projectId)?.name} / <time dateTime={flight.startDate}>{formatDateRange(flight.startDate, flight.endDate)}</time></small></div>
@@ -43,7 +45,7 @@ export function ClientProjects({ companyId, projects }: { companyId: string; pro
           </li>)}</ul>
         </> : <p className={s.muted}>No flights booked yet</p>}
       </>}
-      {removeFlight.isError && <p className={s.error} role="alert">{removeFlight.error.message}</p>}
+      {removeFlight.isError && <ErrorText>{removeFlight.error.message}</ErrorText>}
     </section>
     {flightEdit && <FlightForm key={flightEdit === "new" ? "new" : flightEdit.id} projects={projects} initial={flightEdit === "new" ? undefined : flightEdit} onDone={() => setFlightEdit(null)} />}
     <section className={s.panel}>
@@ -57,7 +59,7 @@ export function ClientProjects({ companyId, projects }: { companyId: string; pro
           <Button variant="ghost" size="small" onClick={() => setProjectEdit(project)}>Edit</Button><Button variant="ghost" size="small" disabled={removeProject.isPending} onClick={() => { if (confirm(`Delete project ${project.name} and its flights?`)) removeProject.mutate(project.id); }}>Delete</Button>
         </li>;
       })}</ul>}
-      {removeProject.isError && <p role="alert" className={s.error}>{removeProject.error.message}</p>}
+      {removeProject.isError && <ErrorText>{removeProject.error.message}</ErrorText>}
     </section>
     {projectEdit && <ProjectForm key={projectEdit === "new" ? "new" : projectEdit.id} companyId={companyId} initial={projectEdit === "new" ? undefined : projectEdit} onDone={() => { setProjectEdit(null); refresh(); }} />}
   </>;
@@ -73,7 +75,7 @@ function ProjectForm({ companyId, initial, onDone }: { companyId: string; initia
   }, onSuccess: onDone });
   return <form className={f.form} onSubmit={e => { e.preventDefault(); if (name.trim() && !save.isPending) save.mutate(); }}>
     <h2>{initial ? "Edit project" : "New project"}</h2><div className={f.fields}><label>Name<input autoFocus required value={name} onChange={e => setName(e.target.value)} /></label><label>Description<input value={description} onChange={e => setDescription(e.target.value)} /></label></div>
-    {save.isError && <p role="alert" className={f.error}>{save.error.message}</p>}
+    {save.isError && <ErrorText>{save.error.message}</ErrorText>}
     <div className={f.actions}><Button type="button" variant="ghost" onClick={onDone} disabled={save.isPending}>Cancel</Button><Button disabled={!name.trim() || save.isPending}>{save.isPending ? "Saving..." : "Save project"}</Button></div>
   </form>;
 }

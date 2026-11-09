@@ -1,5 +1,8 @@
 "use client";
 
+import { ErrorText } from "@/components/ui";
+import { Layers } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -21,7 +24,7 @@ export default function TemplatesPage() {
   const latest = templates[0];
   return <div className={s.page}>
     <PageHeader title="Templates" description="Messages your team sends again and again" action={latest ? <Link href="/settings/templates/new" className={buttonClass()}>New template</Link> : undefined} />
-    {query.isPending ? <ViewState loading label="Loading templates" /> : query.isError ? <div role="alert"><p>Could not load templates</p><Button variant="default" onClick={() => void query.refetch()}>Try again</Button></div> : !latest ? <div className={s.empty}><h2>No templates yet</h2><p className={s.muted}>Create a template for an update, proposal or handover</p><Link href="/settings/templates/new" className={buttonClass()}>New template</Link></div> : <>
+    {query.isPending ? <ViewState loading label="Loading templates" /> : query.isError ? <div role="alert"><p>Could not load templates</p><Button variant="default" onClick={() => void query.refetch()}>Try again</Button></div> : !latest ? <EmptyState icon={Layers} title="No templates yet" text="Create a template for an update, proposal or handover" action={<Link href="/settings/templates/new" className={buttonClass()}>New template</Link>} /> : <>
       <section className={s.feature}>
         <div className={s.featureBody}><p className={s.sectionLabel}>Most recently edited</p><h2>{latest.name}</h2><p className={s.muted}>{latest.description || latest.subject || "Ready to personalise"}</p><span className={s.date}>Edited <time dateTime={latest.updatedAt}>{displayDate(latest.updatedAt)}</time></span><Link href={`/settings/templates/edit?id=${encodeURIComponent(latest.id)}`} className={buttonClass("default")}>Edit template</Link><Button variant="ghost" size="small" disabled={remove.isPending} onClick={() => { if (confirm(`Delete template ${latest.name}?`)) remove.mutate(latest.id); }}>Delete template</Button></div>
         <TemplateThumbnail html={latest.bodyHtml} name={latest.name} />
@@ -31,6 +34,6 @@ export default function TemplatesPage() {
         <div className={s.cardBody}><h2><Link href={`/settings/templates/edit?id=${encodeURIComponent(t.id)}`}>{t.name}</Link></h2><p className={s.muted}>{t.subject || t.description || "(no subject)"}</p><div className={s.fields}>{t.variables.slice(0, 3).map(v => <span key={v}>{labelFor(v)}</span>)}{t.variables.length > 3 && <span>+{t.variables.length - 3} fields</span>}</div><div className={s.cardFoot}><time className={s.date} dateTime={t.updatedAt}>{displayDate(t.updatedAt)}</time><Button variant="ghost" size="small" disabled={remove.isPending} onClick={() => { if (confirm(`Delete template ${t.name}?`)) remove.mutate(t.id); }}>Delete</Button></div></div>
       </article>)}</div>
     </>}
-    {remove.isError && <p role="alert" className={s.error}>{remove.error.message}</p>}
+    {remove.isError && <ErrorText>{remove.error.message}</ErrorText>}
   </div>;
 }

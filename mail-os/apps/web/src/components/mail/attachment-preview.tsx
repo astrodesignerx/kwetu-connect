@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorText } from "@/components/ui";
 import { useEffect, useId, useRef, useState } from "react";
 import type { AttachmentDto } from "@kompanion/types";
 import { api } from "@/lib/api";
@@ -30,7 +31,7 @@ export function AttachmentPreview({ attachment }: { attachment: AttachmentDto })
       } catch { if (alive.current) setError(true); }
       finally { if (alive.current) setBusy(false); }
     }}>{busy ? "Loading preview..." : `Preview ${attachment.fileName}`}</button>
-    {error && <p role="alert">Preview could not load. Try downloading the file.</p>}
+    {error && <ErrorText>Preview could not load. Try downloading the file.</ErrorText>}
     <ShellDialog open={open} onClose={() => { setOpen(false); setUrl(null); }} labelId={titleId}>
       <div className={s.previewPanel}><h2 id={titleId}>{attachment.fileName}</h2>
         <button type="button" onClick={() => { setOpen(false); setUrl(null); }}>Close preview</button>

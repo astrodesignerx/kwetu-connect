@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorText } from "@/components/ui";
 import Link from "next/link";
 import { useState } from "react";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -23,7 +24,7 @@ export function ThreadStateControl({ threadId, replyState }: { threadId: string;
     },
   });
   return <div><button className={s.stateAction} aria-label={replyState === "Done" ? "Reopen" : "Mark done"} aria-pressed={replyState === "Done"} disabled={change.isPending} onClick={() => change.mutate()}><span className={s.toggle} aria-hidden /><span>{change.isPending ? "Saving..." : replyState === "Done" ? "Reopen" : "Mark done"}</span><small>{replyState === "Done" ? "Done" : replyState === "Awaiting" ? "Awaiting reply" : "Needs reply"}</small></button>
-    {change.isError && <p role="alert">Could not change the conversation state. Try again.</p>}
+    {change.isError && <ErrorText>Could not change the conversation state. Try again.</ErrorText>}
   </div>;
 }
 
@@ -55,14 +56,14 @@ export function ConversationContext({ threadId, replyState, stateSince, onQuickR
       {flights.some((query) => query.isPending) && <p role="status" className={s.muted}>Loading flights...</p>}
       {flights.some((query) => query.isError) && <p role="alert" className={s.muted}>Flights could not load. <button onClick={() => flights.forEach((query) => void query.refetch())}>Try again</button></p>}
     </section>
-    <section className={`${s.contextCard} ${s.conversationTools}`}><h2><Check size={14} aria-hidden />This conversation</h2>
+    <section className={s.contextCard}><h2><Check size={14} aria-hidden />This conversation</h2>
       <ThreadStateControl threadId={threadId} replyState={replyState} />
       <ThreadAssignee threadId={threadId} />
       <ThreadNotes threadId={threadId} contextTools={false} />
     </section>
     <section className={s.contextCard}><h2><Layers size={14} aria-hidden />Quick replies<small>From templates</small></h2>
       {templates.isPending ? <p className={s.muted} role="status">Loading templates...</p> : templates.isError ? <p className={s.muted} role="alert">Templates could not load. <button onClick={() => void templates.refetch()}>Try again</button></p> : templates.data?.length ? <div className={s.quickReplies}>{templates.data.map((template) => <button key={template.id} disabled={!onQuickReply || quickReply.isPending} onClick={() => quickReply.mutate(template.id)}>{template.name}<ChevronRight size={14} aria-hidden /></button>)}</div> : <p className={s.muted}>No templates yet. <Link href="/settings/templates">Manage templates</Link></p>}
-      {quickReply.isError && <p role="alert" className={s.muted}>This template could not open. Try again.</p>}
+      {quickReply.isError && <ErrorText>This template could not open. Try again.</ErrorText>}
     </section>
   </aside>;
 }

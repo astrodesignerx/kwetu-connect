@@ -2,72 +2,75 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRight } from "lucide-react";
+import { ChevronRight, Layers, Mail, Palette, ScrollText, UserRound, Users, type LucideIcon } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
-import { settingsApi, utcHourValues, auditLabel } from "@/lib/signal-settings";
-import { renderBrandPreview } from "@/lib/brand-preview";
-import { HeatStrip, HourBars } from "@/components/signal";
-import { Avatar, HealthLight, SettingsHeader, SettingsState, Stat, dateTime } from "@/components/settings/settings";
+import { plural } from "@/lib/format";
+import { settingsApi, auditLabel } from "@/lib/signal-settings";
+import { SettingsHeader, SettingsState, dateTime } from "@/components/settings/settings";
 import s from "./page.module.css";
 
 export default function SettingsHubPage() {
   const user = useAuthStore((state) => state.user);
   const isAdmin = user?.role === "Admin";
   const workspace = useQuery({ queryKey: ["workspace-overview"], queryFn: ({ signal }) => settingsApi.overview(signal) });
-  const mailboxes = useQuery({ queryKey: ["mailboxes"], queryFn: api.listMailboxes });
-  const firstMailbox = mailboxes.data?.[0];
-  const sync = useQuery({ queryKey: ["sync-stats", firstMailbox?.id], queryFn: ({ signal }) => settingsApi.syncStats(firstMailbox!.id, signal), enabled: !!firstMailbox });
   const kit = useQuery({ queryKey: ["brand-kit"], queryFn: api.getBrandKit });
-  const templates = useQuery({ queryKey: ["templates"], queryFn: api.listTemplates });
-  const team = useQuery({ queryKey: ["admin-users"], queryFn: api.adminListUsers, enabled: isAdmin });
-  const audit = useQuery({ queryKey: ["admin-audit-daily"], queryFn: ({ signal }) => settingsApi.dailyAudit(signal), enabled: isAdmin });
   const recent = useQuery({ queryKey: ["admin-audit"], queryFn: api.adminAuditLog, enabled: isAdmin });
 
   if (workspace.isPending) return <SettingsState loading />;
   if (workspace.isError) return <SettingsState error={workspace.error} retry={() => void workspace.refetch()} />;
   const data = workspace.data;
+  const attention = data.mailboxHealth.needsAttention;
+  const parts = kit.data ? [kit.data.headerHtml && "header", kit.data.signatureHtml && "signature", kit.data.footerHtml && "footer"].filter(Boolean) as string[] : [];
+  const latest = recent.data?.[0];
   return <div className={s.page}>
-    <SettingsHeader title="Settings" context="" />
-    <section className={s.banner}>
-      <span className={s.mark} aria-hidden="true">k</span><div className={s.workspace}><small>Workspace</small><h2>{data.workspaceName}</h2></div>
-      <div className={s.numbers}><Stat value={data.memberCount} label="people" /><Stat value={data.mailboxCount} label="mailboxes" /><Stat value={data.templateCount} label="templates" /><Stat value={data.sendsLast30Days} label="sends / last 30 days" /></div>
-    </section>
-    <div className={s.tiles}>
-      <Tile href="/settings/profile" title="Profile">
-        <div className={s.person}><Avatar name={user?.displayName ?? ""} /><div><b>{user?.displayName}</b><small>{user?.role}</small></div></div>
-        <p className={s.note}>@{user?.username}<br />Password guidance in your profile</p>
-      </Tile>
-      <Tile href="/settings/mailboxes" title="Mailboxes" wide>
-        {mailboxes.isPending ? <span className={s.note}>Loading your connections</span> : mailboxes.isError ? <span className={s.note}>Connections unavailable</span> : firstMailbox ? <>
-          <div className={s.meta}>{sync.data && <HealthLight state={sync.data.syncState} />}<span>{firstMailbox.email}</span><span>{sync.data ? sync.data.conversationCount + " conversations" : ""}</span></div>
-          {sync.data ? <><HourBars values={utcHourValues(sync.data.hourly)} highlightPeak={false} label="Fetched messages in the last 24 hours, grouped by UTC hour of day" height={68} /><span className={s.note}>Last 24 hours by UTC hour / {sync.data.messagesSynced} fetched</span></> : <span className={s.note}>{sync.isError ? "Sync history unavailable" : "Loading sync history"}</span>}
-        </> : <span className={s.note}>Connect your first mailbox</span>}
-        {data.mailboxHealth.needsAttention > 0 && <span className={s.attention}>{data.mailboxHealth.needsAttention === 1 ? "1 workspace connection needs attention" : `${data.mailboxHealth.needsAttention} workspace connections need attention`}</span>}
-      </Tile>
-      <Tile href="/settings/brand-kit" title="Email appearance" half>
-        {kit.data ? <div className={s.brand}><div className={s.preview}><iframe tabIndex={-1} title="Saved email appearance" sandbox="" srcDoc={renderBrandPreview(kit.data)} /></div><span className={s.swatches}>{[kit.data.primaryColor, kit.data.accentColor, kit.data.textColor, kit.data.backgroundColor].map((colour, index) => <i key={index} data-user-colour style={{ background: colour || "var(--raise)" }} title={colour || "Default"} />)}</span></div> : <span className={s.note}>{kit.isError ? "Appearance unavailable" : "Loading appearance"}</span>}
-      </Tile>
-      <Tile href="/settings/templates" title="Templates" half>
-        <strong className={s.count}>{data.templateCount}<small>saved templates</small></strong>
-        <ul className={s.templateList}>{templates.data?.slice(0, 3).map((template) => <li key={template.id}>{template.name}</li>)}</ul>
-        {templates.isError && <span className={s.note}>Template list unavailable</span>}
-      </Tile>
+    <SettingsHeader title="Settings" context=""
+      description={`${data.workspaceName}: ${plural(data.memberCount, "person", "people")}, ${plural(data.mailboxCount, "mailbox", "mailboxes")}, ${plural(data.templateCount, "template")}, ${plural(data.sendsLast30Days, "send")} in the last 30 days`} />
+    <nav className={s.list} aria-label="Settings">
+      <Row href="/settings/profile" icon={UserRound} title="Profile">
+        {user ? `${user.displayName}, ${user.role}` : "Your name, sign-in and password"}
+      </Row>
+      <Row href="/settings/mailboxes" icon={Mail} title="Mailboxes">
+        {data.mailboxCount === 0 ? "No mailbox connected" : <>
+          {plural(data.mailboxCount, "mailbox", "mailboxes")} connected
+          {attention > 0 ? <>, <b>{attention === 1 ? "1 needs attention" : `${attention} need attention`}</b></> : ", all syncing"}
+        </>}
+      </Row>
+      <Row href="/settings/brand-kit" icon={Palette} title="Email appearance">
+        {kit.isPending ? "Loading appearance" : kit.isError || !kit.data ? "Appearance unavailable" : <>
+          <span className={s.swatches} aria-hidden="true">{[kit.data.primaryColor, kit.data.accentColor, kit.data.textColor, kit.data.backgroundColor].map((colour, index) => <i key={index} data-user-colour style={{ background: colour || "var(--raise)" }} />)}</span>
+          {parts.length ? `${capitalise(listOf(parts))} set` : "Plain email, no header or signature"}
+        </>}
+      </Row>
+      <Row href="/settings/templates" icon={Layers} title="Templates">
+        {data.templateCount === 0 ? "No templates yet" : plural(data.templateCount, "saved template")}
+      </Row>
       {isAdmin && <>
-        <Tile href="/settings/admin/users" title="Team" half>
-          <div className={s.avatars}>{team.data?.slice(0, 5).map((person) => <Avatar key={person.id} name={person.displayName} />)}</div>
-          <span className={s.note}>{data.pendingInvitations} pending invitations</span>
-          {team.isError && <span className={s.note}>People unavailable</span>}
-        </Tile>
-        <Tile href="/settings/admin/audit" title="Audit log" half>
-          {audit.data ? <div className={s.activity}><HeatStrip values={audit.data.days.slice(-14).map((day) => day.count)} label="Administrative activity in the last 14 days" /></div> : <span className={s.note}>{audit.isError ? "Activity unavailable" : "Loading activity"}</span>}
-          <p className={s.note}>{recent.data?.[0] ? <><time dateTime={recent.data[0].createdAt}>{dateTime(recent.data[0].createdAt)}</time><br />{auditLabel(recent.data[0].action)}</> : recent.isError ? "Latest event unavailable" : "No recorded events"}</p>
-        </Tile>
+        <Row href="/settings/admin/users" icon={Users} title="Team">
+          {plural(data.memberCount, "person", "people")}
+          {!!data.pendingInvitations && <>, {plural(data.pendingInvitations, "pending invitation")}</>}
+        </Row>
+        <Row href="/settings/admin/audit" icon={ScrollText} title="Audit log">
+          {latest ? <>{auditLabel(latest.action)}, <time dateTime={latest.createdAt}>{dateTime(latest.createdAt)}</time></> : recent.isPending ? "Loading events" : recent.isError ? "Latest event unavailable" : "No recorded events"}
+        </Row>
       </>}
-    </div>
+    </nav>
   </div>;
 }
 
-function Tile({ href, title, wide, half, children }: { href: string; title: string; wide?: boolean; half?: boolean; children: React.ReactNode }) {
-  return <Link href={href} className={[s.tile, wide ? s.wide : half ? s.half : s.narrow].join(" ")}><header><h3>{title}</h3><ArrowUpRight size={16} aria-hidden="true" /></header>{children}</Link>;
+function Row({ href, icon: Icon, title, children }: { href: string; icon: LucideIcon; title: string; children: React.ReactNode }) {
+  return <Link href={href} className={s.row}>
+    <Icon size={18} aria-hidden="true" className={s.icon} />
+    <span className={s.title}>{title}</span>
+    <span className={s.status}>{children}</span>
+    <ChevronRight size={16} aria-hidden="true" className={s.chevron} />
+  </Link>;
+}
+
+function listOf(items: string[]) {
+  return items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
+}
+
+function capitalise(text: string) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }

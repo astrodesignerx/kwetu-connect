@@ -1,5 +1,6 @@
+import { EmptyState, ErrorState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
-import { Button, ViewState } from "@/components/ui";
+import { Button, ErrorText, ViewState } from "@/components/ui";
 import s from "./settings.module.css";
 import { formatDateTime } from "@/lib/format";
 
@@ -17,14 +18,16 @@ export function Field({ label, htmlFor, hint, children }: { label: string; htmlF
 export function SettingsState({ loading, error, empty = "Nothing here yet", retry }: {
   loading?: boolean; error?: unknown; empty?: string; retry?: () => void;
 }) {
+  if (error) return <ErrorState title="This could not load" message={error instanceof Error ? error.message : "Please try again"} onRetry={retry} />;
+  if (!loading) return <EmptyState title={empty} />;
   return <div className={s.state}>
-    <ViewState loading={loading} label={error ? "This could not load" : loading ? "Getting your workspace ready" : empty} />
+    <ViewState loading={loading} label={error ? "This could not load" : "Loading"} />
     {!!error && <p role="alert">{error instanceof Error ? error.message : "Please try again"}</p>}
     {!!error && retry && <Button variant="default" onClick={retry}>Try again</Button>}
   </div>;
 }
 export function Feedback({ error, message }: { error?: unknown; message?: string | null }) {
-  if (error) return <p className={s.feedback} role="alert">{error instanceof Error ? error.message : String(error)}</p>;
+  if (error) return <div className={s.feedback}><ErrorText>{error instanceof Error ? error.message : String(error)}</ErrorText></div>;
   return message ? <p className={s.success} role="status">{message}</p> : null;
 }
 export function Avatar({ name }: { name: string }) {

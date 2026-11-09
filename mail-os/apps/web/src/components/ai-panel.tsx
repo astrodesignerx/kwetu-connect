@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CornerUpLeft, Sparkles } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { MailDisclosure } from "@/components/mail/disclosure";
@@ -21,19 +22,21 @@ export function ThreadSummary({ threadId, onNextStep }: { threadId: string; onNe
   if (!aiStatus.data?.configured) return null;
 
   return (
-    <section className={s.summary} aria-label="AI summary">
-      <div>
+    <section className={s.summary} data-filled={!!summary} aria-label="AI summary">
+      <div className={s.summaryActions}>
         <button
           type="button"
+          className="reader-action"
           onClick={() => {
             if (!generate.isPending) generate.mutate();
           }}
           disabled={generate.isPending}
         >
+          <Sparkles size={16} aria-hidden />
           {generate.isPending ? "Summarising..." : summary ? "Refresh summary" : "Summarise thread"}
         </button>
         {summary && (
-          <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open}>
+          <button type="button" className="reader-action" onClick={() => setOpen((value) => !value)} aria-expanded={open}>
             {open ? "Less detail" : "Full summary"}
           </button>
         )}
@@ -45,7 +48,7 @@ export function ThreadSummary({ threadId, onNextStep }: { threadId: string; onNe
       )}
       {summary && <><p>{summary.replace(/^\s*[-*\d.)]+\s*/, "").split(/\n|(?<=[.!?])\s/)[0]}</p>
         <MailDisclosure open={open}><pre>{summary}</pre></MailDisclosure>
-        {onNextStep && <button type="button" onClick={onNextStep}>Draft a reply</button>}
+        {onNextStep && <button type="button" className="reader-action" onClick={onNextStep}><CornerUpLeft size={16} aria-hidden />Draft a reply</button>}
       </>}
     </section>
   );

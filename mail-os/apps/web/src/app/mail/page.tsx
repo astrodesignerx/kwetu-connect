@@ -1,6 +1,8 @@
 "use client";
 
-import { formatDate, formatDateTime, formatShortDate, formatWhen } from '@/lib/format';
+import { ErrorState } from "@/components/empty-state";
+import { EmptyState } from "@/components/empty-state";
+import { formatDateTime, formatShortDate, formatWhen, plural } from '@/lib/format';
 import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
@@ -8,7 +10,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tansta
 import type { ThreadDetailDto, ThreadSummaryDto } from "@kompanion/types";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
-import { Button } from "@/components/ui";
+import { Button, ErrorText, buttonClass } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import { initialsFor } from "@/lib/avatar";
 import { frameDocument } from "@/lib/mail-frame";
@@ -32,6 +34,7 @@ import {
   Minus,
   ChevronRight,
   CornerUpLeft,
+  Mail,
   MailOpen,
   Paperclip,
   Trash2,
@@ -304,7 +307,7 @@ function MailView() {
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  if (overviewError) return <div className={s.quiet} role="alert">Mailboxes could not load. <button onClick={() => void reloadOverview()}>Try again</button></div>;
+  if (overviewError) return <div className={s.noMailbox}><ErrorState title="Mailboxes could not load" message="Check your connection, then try again" onRetry={() => void reloadOverview()} /></div>;
 
   if (mailboxes.length === 0 && overview) {
     return <NoMailboxes />;
@@ -312,10 +315,10 @@ function MailView() {
 
   return (
     <div className={s.root}>
-      {(move.isError || bulkArchive.isError || setRead.isError) && <p className={s.quiet} role="alert">The mail action could not finish. Try again using its control.</p>}
+      {(move.isError || bulkArchive.isError || setRead.isError) && <div className={s.actionError}><ErrorText>The mail action could not finish. Try again using its control.</ErrorText></div>}
       <div className={`${s.workspace} scroll-cue`} data-conversation={!!threadId} data-search={!!activeQuery}>
         {threadId && (
-          threadError ? <div className={`${s.quiet} ${s.readerState}`} role="alert">Could not open this conversation. <button onClick={() => void refetchThread()}>Try again</button><button onClick={() => setParam('id', null)}>Back to inbox</button></div> :
+          threadError ? <ErrorState className={s.readerState} title="Could not open this conversation" message="It may have moved. Try again or go back to the inbox." action={<div className={s.errorActions}><Button variant="default" onClick={() => void refetchThread()}>Try again</Button><Button variant="ghost" onClick={() => setParam('id', null)}>Back to inbox</Button></div>} /> :
           <Reader thread={thread} selected={selected} mailboxId={thread?.mailboxConnectionId ?? currentMailboxId} mailboxEmail={threadMailbox?.email}
             syncError={threadMailbox?.syncError ?? null} onRetrySync={() => threadMailbox && syncNow.mutate(threadMailbox.id)} retrying={syncNow.isPending}
             onMarkUnread={markUnread}
@@ -332,10 +335,10 @@ function MailView() {
                 <Segmented options={[{ value: 'inbox', label: 'All' }, { value: 'unread', label: 'Unread' }, { value: 'assigned', label: 'Assigned' }]}
                   value={folder === 'unread' || folder === 'assigned' ? folder : 'inbox'} onChange={(value) => setParams({ folder: value, id: null })} label="Filter messages" />
               </div>}
-            <ListToolbar total={threadTotal} items={threadItems} selection={visibleSelection}
+            <ListToolbar total={threadTotal} loading={threadsLoading} items={threadItems} selection={visibleSelection}
               onSelectAll={(all) => setSelection(all ? new Set(threadItems.map((item) => item.id)) : new Set())}
               onBulkArchive={() => bulkArchive.mutate([...visibleSelection])} bulkBusy={bulkArchive.isPending} />
-            {threadsError ? <div className={s.quiet} role="alert">Messages could not load. <button onClick={() => void refetchThreads()}>Try again</button></div> :
+            {threadsError ? <ErrorState bare title="Messages could not load" onRetry={() => void refetchThreads()} /> :
               <ThreadList items={threadItems} loading={threadsLoading} selectedId={threadId} onSelect={(id) => setParam('id', id)} selection={visibleSelection}
                 onToggleSelect={toggleSelect} total={threadTotal} hasMore={!!hasNextPage} loadingMore={isFetchingNextPage} onLoadMore={() => void fetchNextPage()} query={activeQuery} />}
           </section>
@@ -357,30 +360,22 @@ function MailView() {
 
 function NoMailboxes() {
   return (
-    <div className="flex min-w-0 flex-1 items-center justify-center p-8">
-      <div className="max-w-sm text-center">
-        <EmptyMailArt className={`mx-auto mb-4 ${s.emptyMail}`} />
-        <h2 className="text-base font-semibold">No mailbox connected yet</h2>
-        <p className="mt-1 text-sm text-muted">
-          Connect your cPanel mailbox and the last few years of mail will sync into
-          this workspace.
-        </p>
-        <Link href="/settings/mailboxes/connect" className="btn-primary mt-4 inline-flex">
-          Connect a mailbox
-        </Link>
-      </div>
+    <div className={s.noMailbox}>
+      <EmptyState icon={Mail} title="No mailbox connected"
+        text="Connect your cPanel mailbox and your mail syncs into this workspace"
+        action={<Link href="/settings/mailboxes/connect" className={buttonClass()}>Connect a mailbox</Link>} />
     </div>
   );
 }
 
-function ListToolbar({ total, items, selection, onSelectAll, onBulkArchive, bulkBusy }: {
-  total: number; items: ThreadSummaryDto[]; selection: Set<string>; onSelectAll: (all: boolean) => void; onBulkArchive: () => void; bulkBusy: boolean;
+function ListToolbar({ total, loading, items, selection, onSelectAll, onBulkArchive, bulkBusy }: {
+  total: number; loading: boolean; items: ThreadSummaryDto[]; selection: Set<string>; onSelectAll: (all: boolean) => void; onBulkArchive: () => void; bulkBusy: boolean;
 }) {
   const allSelected = items.length > 0 && selection.size === items.length;
   return <div className={s.bulkToolbar}>
     <button type="button" role="checkbox" aria-checked={allSelected ? true : selection.size > 0 ? 'mixed' : false} aria-label={allSelected ? 'Deselect all threads' : 'Select all threads'}
       disabled={!items.length} onClick={() => onSelectAll(!allSelected)} className={s.selectionBox}>{allSelected ? <Check size={14} aria-hidden /> : selection.size ? <Minus size={14} aria-hidden /> : null}</button>
-    <span>{selection.size ? selection.size + ' selected' : total + ' conversations'}</span>
+    <span>{selection.size ? selection.size + ' selected' : loading ? 'Loading' : plural(total, 'conversation')}</span>
     {selection.size > 0 && <><button type="button" disabled={bulkBusy} onClick={onBulkArchive}>{bulkBusy ? 'Archiving...' : 'Archive'}</button><button type="button" onClick={() => onSelectAll(false)}>Clear selection</button></>}
   </div>;
 }
@@ -393,7 +388,6 @@ function Reader({ thread, selected, mailboxId, syncError, onRetrySync, retrying,
 }) {
   if (!thread) return <div className={`${s.quiet} ${s.readerState}`} role="status">{selected ? 'Opening conversation...' : 'Loading conversation...'}</div>;
   const latest = thread.messages[thread.messages.length - 1];
-  const who = latest?.fromName || latest?.fromAddr || 'Unknown sender';
   return <div className={`${s.conversation} scroll-cue`} key={thread.id}>
     <article className={s.reader}>
       <div className={s.readerTop}>
@@ -401,21 +395,16 @@ function Reader({ thread, selected, mailboxId, syncError, onRetrySync, retrying,
         <ConversationChips threadId={thread.id} />
         <time dateTime={thread.lastDate ?? undefined}>{formatShortDate(thread.lastDate)}</time>
       </div>
-      <header className={s.sender}>
-        <span className={s.senderAvatar} aria-hidden>{initialsFor(who)}</span>
-        <b>{who}</b><span>{latest?.fromAddr}</span>
-      <div className={s.actions}>
-        <Button variant="ghost" onClick={() => onReplyOpenChange(true)}><CornerUpLeft size={14} />Reply</Button>
-        <Button variant="ghost" onClick={onMarkUnread} aria-label="Mark unread"><MailOpen size={16} /></Button>
-        <Button variant="ghost" onClick={onArchive} disabled={moving} aria-label="Archive"><Archive size={16} /></Button>
-        <Button variant="ghost" onClick={onDelete} disabled={moving} aria-label="Delete"><Trash2 size={16} /></Button>
-      </div>
-      </header>
-      {syncError && <div className={s.quiet} role="alert">This mailbox stopped syncing: {syncError} <Button variant="ghost" onClick={onRetrySync} disabled={retrying}>Retry</Button></div>}
       <h1>{thread.subject || '(no subject)'}</h1>
+      {syncError && <div className={s.syncError}><ErrorText>This mailbox stopped syncing: {syncError}</ErrorText><Button variant="default" size="small" onClick={onRetrySync} disabled={retrying}>Retry</Button></div>}
       <ThreadSummary threadId={thread.id} onNextStep={() => onReplyOpenChange(true)} />
-      <Participants thread={thread} latest={latest} mailboxId={mailboxId} />
-      {thread.messages.map((message, index) => <MessageCard key={message.id} message={message} index={index} defaultOpen={index === thread.messages.length - 1} clientId={thread.clientId} />)}
+      <Participants thread={thread} latest={latest} mailboxId={mailboxId} actions={<>
+        <button type="button" className="reader-action" onClick={() => onReplyOpenChange(true)}><CornerUpLeft size={16} aria-hidden />Reply</button>
+        <button type="button" className={`reader-action ${s.iconAction}`} onClick={onMarkUnread} aria-label="Mark unread" title="Mark unread"><MailOpen size={16} aria-hidden /></button>
+        <button type="button" className={`reader-action ${s.iconAction}`} onClick={onArchive} disabled={moving} aria-label="Archive" title="Archive"><Archive size={16} aria-hidden /></button>
+        <button type="button" className={`reader-action ${s.iconAction}`} onClick={onDelete} disabled={moving} aria-label="Delete" title="Delete"><Trash2 size={16} aria-hidden /></button>
+      </>} />
+      {thread.messages.map((message, index) => <MessageCard key={message.id} message={message} index={index} defaultOpen={index === thread.messages.length - 1} showSender={index !== thread.messages.length - 1} clientId={thread.clientId} />)}
       {mailboxId && <ReplyDock thread={thread} connectionId={mailboxId} open={replyOpen} onOpenChange={onReplyOpenChange} draftHtml={draftHtml} onDraftChange={onDraftChange} className={s.dock} onExpand={(ctx) => { onReplyOpenChange(false); onExpandReply(ctx); }} />}
     </article>
     <ConversationContext threadId={thread.id} replyState={thread.replyState} stateSince={thread.stateSince} needsNudge={thread.needsNudge}
@@ -435,61 +424,45 @@ function Participants({
   thread,
   latest,
   mailboxId,
+  actions,
 }: {
   thread: ThreadDetailDto;
   latest: ThreadDetailDto["messages"][number] | undefined;
   mailboxId: string | null;
+  actions: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
-  const who = latest?.fromName || latest?.fromAddr || "Unknown";
+  const who = latest?.fromName || latest?.fromAddr || "Unknown sender";
 
   return (
-    <section className="reader-participants">
-      <div className="flex items-center gap-3">
-        <span
-          aria-hidden
-          className="avatar-initials h-9 w-9 text-xs"
-          style={{ background: 'var(--raise)' }}
-        >
-          {initialsFor(who)}
-        </span>
-
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-secondary font-semibold">{who}</div>
-          <div className="truncate text-xs text-muted">
-            {latest?.fromAddr ?? "(no address)"}
-          </div>
+    <section className={s.senderRow} aria-label="Sender">
+      <div className={s.senderLine}>
+        <span aria-hidden className={s.senderAvatar}>{initialsFor(who)}</span>
+        <div className={s.senderText}>
+          <b>{who}</b>
+          <span>{latest?.fromAddr ?? "(no address)"}</span>
         </div>
-
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          className="reader-action reader-action-small shrink-0"
-        >
-          Details
-          <ChevronRight
-            aria-hidden
-            size={14}
-            className={cn("transition-transform duration-200 ease-standard", open && "rotate-90")}
-          />
-        </button>
-
-        <time className="shrink-0 text-muted" dateTime={thread.lastDate ?? undefined}>
-          {formatDate(thread.lastDate)}
-        </time>
+        <div className={s.actions}>
+          {actions}
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            className="reader-action"
+          >
+            Details
+            <ChevronRight aria-hidden size={14} className={s.chevron} data-open={open} />
+          </button>
+        </div>
       </div>
 
       <MailDisclosure open={open}>
-        <div className="detail-panel mt-3 border-t border-line pt-3">
-          <dl className="mb-2 grid grid-cols-[3rem_minmax(0,1fr)] gap-x-2 gap-y-1 text-xs">
+        <div className={`detail-panel ${s.details}`}>
+          <dl className={s.addressGrid}>
             <AddressRow label="From" value={formatAddress(latest?.fromName, latest?.fromAddr)} />
             <AddressRow label="To" value={latest?.toAddrs} />
             <AddressRow label="Cc" value={latest?.ccAddrs} />
-            <AddressRow
-              label="Date"
-              value={latest?.date ? formatDateTime(latest.date) : null}
-            />
+            <AddressRow label="Date" value={latest?.date ? formatDateTime(latest.date) : null} />
           </dl>
           <ContactDetails
             threadId={thread.id}
@@ -507,8 +480,8 @@ function AddressRow({ label, value }: { label: string; value: string | null | un
   if (!value) return null;
   return (
     <>
-      <dt className="font-semibold text-muted">{label}</dt>
-      <dd className="min-w-0 break-words text-muted">{value}</dd>
+      <dt>{label}</dt>
+      <dd>{value}</dd>
     </>
   );
 }
@@ -518,16 +491,17 @@ function formatAddress(name: string | null | undefined, addr: string | null | un
   return addr ?? name ?? null;
 }
 
-function MessageCard({ message, index, defaultOpen }: { message: ThreadDetailDto['messages'][number]; index: number; defaultOpen: boolean; clientId?: string | null }) {
+function MessageCard({ message, index, defaultOpen, showSender }: { message: ThreadDetailDto['messages'][number]; index: number; defaultOpen: boolean; showSender: boolean; clientId?: string | null }) {
   const [open, setOpen] = useState(defaultOpen);
   const who = message.fromName || message.fromAddr || 'Unknown';
+  const to = 'to ' + (message.toAddrs || '(no recipients)');
   return <article className={s.message}>
-    <button type="button" className={s.messageHead} onClick={() => setOpen((value) => !value)} aria-expanded={open}>
-      <ClientAvatar name={who} size="small" />
-      <span><span className="block truncate text-sm font-semibold">{who}</span><span className={s.snippet}>{open ? 'to ' + (message.toAddrs || '(no recipients)') : message.snippet || '(no preview)'}</span></span>
+    <button type="button" className={s.messageHead} onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label={showSender ? undefined : `Message ${to}`}>
+      {showSender && <ClientAvatar name={who} size="small" />}
+      <span className={s.messageWho}>{showSender && <span className={s.messageName}>{who}</span>}<span className={s.messageSnippet}>{open || !showSender ? to : message.snippet || '(no preview)'}</span></span>
       {message.hasAttachments && <Paperclip size={14} aria-label="Has attachments" />}
       <time dateTime={message.date ?? undefined}>{formatWhen(message.date)}</time>
-      <ChevronRight size={14} aria-hidden style={{ transform: open ? 'rotate(90deg)' : undefined, transition: 'transform var(--t2) var(--ease)' }} />
+      <ChevronRight size={14} aria-hidden className={s.chevron} data-open={open} />
     </button>
     <MailDisclosure open={open}><div className={s.messageBody}>
       {message.bodyHtml ? <MessageBody html={message.bodyHtml} index={index} /> : <pre>{message.bodyText || '(no content)'}</pre>}
@@ -584,49 +558,3 @@ function MessageBody({ html, index }: { html: string; index: number }) {
   );
 }
 
-/**
- * Empty-state art: a stack of envelopes, the newest lifted off the pile.
- *
- * The reader's empty state used to be the character "▤" at 30% opacity, which
- * reads as a rendering failure rather than as "nothing selected yet". Drawn
- * inline rather than shipped as an asset. It is nine shapes, and it has to pick
- * up the brand amber and the current text colour in both themes.
- */
-function EmptyMailArt({ className, small }: { className?: string; small?: boolean }) {
-  const w = small ? 76 : 116;
-  return (
-    <svg
-      width={w}
-      height={w * 0.72}
-      viewBox="0 0 116 84"
-      fill="none"
-      aria-hidden
-      className={className}
-    >
-      <g className="text-muted">
-        <rect x="14" y="30" width="88" height="50" rx="7" fill="currentColor" />
-        <rect x="8" y="22" width="100" height="52" rx="7" fill="currentColor" />
-      </g>
-      <rect
-        x="20"
-        y="10"
-        width="76"
-        height="52"
-        rx="7"
-        fill="var(--surface)"
-        stroke="currentColor"
-        strokeOpacity="0.18"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M20 18l33.5 24a8 8 0 009 0L96 18"
-        stroke="var(--muted)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      <circle cx="96" cy="16" r="7" fill="var(--muted)" />
-    </svg>
-  );
-}

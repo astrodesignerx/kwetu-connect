@@ -15,6 +15,7 @@
  *   - the preview refreshes itself instead of waiting for a button.
  */
 
+import { ErrorState } from "@/components/empty-state";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -23,7 +24,8 @@ import { api } from "@/lib/api";
 import { Segmented } from "@/components/signal";
 import { RichTextEditor } from "@/components/editor";
 import { EditorMergeFieldMenu, MergeFieldMenu } from "@/components/merge-field-menu";
-import { ViewState, Button, ErrorText, Hint, Input, Label } from "@/components/ui";
+import Link from "next/link";
+import { ViewState, Button, ErrorText, Hint, Input, Label, buttonClass } from "@/components/ui";
 import { exampleFor, fromChips, labelFor, toChips, variablesIn } from "@/lib/merge-fields";
 import type { EmailTemplateDto, EmailTemplateUpsertRequest } from "@kompanion/types";
 import s from "./page.module.css";
@@ -75,7 +77,7 @@ function TemplateEditor({ id }: { id: string }) {
   }
 
   if (isLoading) return <ViewState loading label="Loading template" />;
-  if (!effective) return <p role="alert">Could not load this template</p>;
+  if (!effective) return <ErrorState title="Could not load this template" message="It may have been deleted" action={<Link href="/settings/templates" className={buttonClass("default")}>Back to templates</Link>} />;
   const dirty = edit !== null;
 
   return (

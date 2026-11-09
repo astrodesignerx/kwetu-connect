@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorText } from "@/components/ui";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -8,7 +9,7 @@ import { Button, MutedText } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import { ThreadLinker } from "@/components/thread-linker";
 import { MailDisclosure } from "@/components/mail/disclosure";
-import { StickyNote } from "lucide-react";
+import { StickyNote, X } from "lucide-react";
 import { formatDateTime } from "@/lib/format";
 
 export function ThreadAssignee({ threadId }: { threadId: string }) {
@@ -49,7 +50,7 @@ export function ThreadAssignee({ threadId }: { threadId: string }) {
           <button className="tool-link" onClick={() => assign.mutate('00000000-0000-0000-0000-000000000000')} aria-label="Unassign">Unassign</button>
         </div>
       ) : <MutedText>Not assigned</MutedText>}
-      {assign.isError && <p role="alert" className="text-xs">Could not change the assignment. Try again.</p>}
+      {assign.isError && <ErrorText>Could not change the assignment. Try again.</ErrorText>}
     </GlassPanel>
   );
 }
@@ -195,9 +196,9 @@ export function ThreadNotes({ threadId, contextTools = true }: { threadId: strin
                     type="button"
                     onClick={() => remove.mutate(n.id)}
                     aria-label="Delete note"
-                    className="shrink-0 rounded-tag px-1 text-xs text-muted opacity-0 transition-opacity duration-120 ease-standard focus-visible:opacity-100 group-hover:opacity-100"
+                    className="tool-icon opacity-0 focus-visible:opacity-100 group-hover:opacity-100"
                   >
-                    ✕
+                    <X size={14} aria-hidden />
                   </button>
                 </li>
               ))}

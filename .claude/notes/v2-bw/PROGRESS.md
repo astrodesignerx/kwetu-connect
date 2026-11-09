@@ -7,12 +7,12 @@ Branch: t3/0d3ac476 (worktree C:/Users/ether/.t3/worktrees/kwetu-connect/t3-0d3a
 |---|---|---|
 | 1 Foundations | done | 8dced57 |
 | 2 Navigation and actions | done | 06e8ade, review fixes 1d6d126 |
-| 3 Words and formats | done | see git log |
-| 4 Screens | not started | |
+| 3 Words and formats | done | 4ecb04e |
+| 4 Screens | done | see git log |
 | 5 Schedule | not started | |
 | 6 Motion | not started | |
 
-Next: Phase 4 (reader header, summary button, settings list, filler charts, shared empty state, native controls, new template form).
+Next: Phase 5 (the flight plan on the client page), then Phase 6 (motion), then the full browser matrix and final report.
 
 Known gaps carried from Phase 1 (fixed in later phases): a few TSX class names (emptyMail, newCard, trend, flightTiles, flightMark, mark, add, connect, conversationTools) have no module rule yet; they are replaced by the empty state, page header and screen work in Phases 2 and 4. Module rules nothing references yet are pruned at the end of Phase 4 with prune.mjs.
 
@@ -37,6 +37,17 @@ Tools here: `audit.mjs` (source audit), `prune.mjs` (dead module rules), `tw-swe
 - Copy: Login "Sign in", "Morning brief" with the date as meta, slogans removed, "No drafts", "No templates yet", one-sentence labels and messages lose their trailing period (multi-sentence messages keep theirs), slash machine labels rewritten in words, plurals through plural().
 - One-off sweep scripts: p3-*.py in this folder.
 - Tests changed (copy only): drafts-page.test.tsx "3 saved, 1 ready to send"; client-directory.test.tsx "No clients match that search"; mail-screens.test.tsx heading "Morning brief".
+
+## Phase 4 notes
+
+- Reader: subject, quiet "Summarise thread" button, then one sender row (36 px avatar, name, address, Reply / Mark unread / Archive / Delete / Details). The latest message card no longer repeats the sender; earlier messages keep theirs.
+- Settings hub is a list of six rows with a real one-line status each, under one workspace line with the counts. Mailbox hour chart, audit heatmap and team avatars are gone from the hub.
+- Charts only with data: Mailboxes hour chart needs 3 busy hours, the audit heatmap 3 active days; otherwise a sentence. Client card sparklines removed. Clients stat cards folded into the header line.
+- `src/components/empty-state.tsx`: EmptyState (icon, title, one line, one action; `bare` inside cards) and ErrorState (alert icon, exact message, Try again). Used by Mail, Drafts, Templates, Clients, Mailboxes, SettingsState, client detail, template editor, morning brief. Inline errors use ErrorText (alert icon).
+- With no mailbox connected, "New email" is quiet and "Connect a mailbox" is the primary.
+- Text characters as icons replaced with lucide (X, Plus, Check, Circle, CircleAlert). New template lost its 01 / 02 numbers. Audit filters and rows regained their classes. Email appearance hex fields and HTML boxes use mono.
+- Dead module rules pruned with prune.mjs.
+- Browser check at the Phase 4 commit: 333 captures (1440 and 390, both themes, all four states, overlays), 0 failures.
 
 ## How to check
 

@@ -1,8 +1,8 @@
 "use client";
 
+import { ErrorState } from "@/components/empty-state";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays } from "lucide-react";
 import { signalApi } from "@/lib/signal-api";
 import { durationLabel } from "@/lib/signal-mail";
 import { Spark } from "@/components/signal";
@@ -11,12 +11,12 @@ import { formatDate, formatShortDate, formatWeekday, plural } from "@/lib/format
 
 export function MorningBrief() {
   const { data, isPending, isError, refetch } = useQuery({ queryKey: ["mail-brief"], queryFn: ({ signal }) => signalApi.brief(signal), refetchInterval: 60_000 });
-  if (isPending) return <section className={s.quiet} role="status">Loading your brief...</section>;
-  if (isError || !data) return <section className={s.quiet} role="alert">Your brief could not load. <button onClick={() => void refetch()}>Try again</button></section>;
+  if (isPending) return <section className={s.brief} role="status"><p className={s.muted}>Loading your brief...</p></section>;
+  if (isError || !data) return <section className={s.brief}><ErrorState bare title="Your brief could not load" onRetry={() => void refetch()} /></section>;
   return <section className={s.brief} aria-label="Morning brief">
     <header className={s.hero}>
       <h1>Morning brief</h1>
-      <p className={s.sectionLabel}><time dateTime={new Date().toISOString()}>{formatWeekday(new Date())} {formatDate(new Date())}</time></p>
+      <p className={s.briefDate}><time dateTime={new Date().toISOString()}>{formatWeekday(new Date())} {formatDate(new Date())}</time></p>
       <dl className={s.briefCounts}>{[
         [data.unreadCount, "unread"], [data.waitingOnMe.length, "waiting on you"],
         [data.awaitingCount, "awaiting reply"], [data.upcomingFlights.length, "upcoming flights"],
@@ -37,10 +37,9 @@ export function MorningBrief() {
       </article>
       <article className={`${s.card} ${s.flights}`}>
         <h2 className={s.sectionLabel}>Next go-lives</h2>
-        {data.upcomingFlights.length ? <ul className={s.flightTiles}>{data.upcomingFlights.map((flight) => <li key={flight.id}>
+        {data.upcomingFlights.length ? <ul className={s.flightRows}>{data.upcomingFlights.map((flight) => <li key={flight.id}>
           <Link href={`/clients/detail?id=${encodeURIComponent(flight.clientId)}`}>
-            <span className={s.flightMark} aria-hidden="true"><CalendarDays size={18} /></span>
-            <b>{flight.siteName}</b><small>{flight.client} / <time dateTime={flight.startDate}>{formatShortDate(flight.startDate)}</time></small>
+            <b>{flight.siteName}</b><span>{flight.client}, from <time dateTime={flight.startDate}>{formatShortDate(flight.startDate)}</time></span>
           </Link>
         </li>)}</ul> : <p className={s.muted}>No upcoming flights</p>}
       </article>

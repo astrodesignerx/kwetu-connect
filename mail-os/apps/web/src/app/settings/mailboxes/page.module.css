@@ -1,5 +1,4 @@
 .page { min-width: 0; }
-.empty { display: grid; justify-items: center; gap: 16px; }
 .list { display: grid; gap: 20px; }
 .health { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 32px; }
 .identity h2 { margin: 12px 0 8px; font-size: 20px; line-height: 28px; font-weight: 600; overflow-wrap: anywhere; }

@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/empty-state";
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -7,7 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { clientsApi, displayDate, replyDuration } from "@/lib/signal-clients";
 import { ClientAvatar, StatusChip } from "@/components/signal";
-import { Button, ViewState } from "@/components/ui";
+import { Button, ViewState, buttonClass } from "@/components/ui";
 import { ClientForm } from "@/components/clients/client-form";
 import { ClientProjects } from "@/components/clients/client-projects";
 import s from "./page.module.css";
@@ -35,7 +36,7 @@ function ClientWorkspace({ id }: { id: string }) {
     router.push("/clients");
   } });
   if (company.isPending) return <ViewState loading label="Loading client" />;
-  if (company.isError) return <div role="alert"><p>{company.error.message}</p><Link href="/clients">Back to clients</Link></div>;
+  if (company.isError) return <ErrorState title="This client could not load" message={company.error.message} action={<Link href="/clients" className={buttonClass("default")}>Back to clients</Link>} />;
   const data = company.data;
   const stats = insights.data;
   return <div className={s.page}>

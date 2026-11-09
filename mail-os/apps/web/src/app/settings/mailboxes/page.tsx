@@ -1,5 +1,8 @@
 "use client";
 
+import { plural } from "@/lib/format";
+import { Mail } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import Link from "next/link";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -31,7 +34,7 @@ export default function MailboxesPage() {
   return <div className={s.page}>
     <SettingsHeader title="Mailboxes" context="Settings / Personal" description="The email accounts your workspace reads and sends from" action={mailboxes.data?.length ? <Link className={buttonClass()} href="/settings/mailboxes/connect">Connect mailbox</Link> : undefined} />
     {!removing && <Feedback error={disconnect.error} />}
-    {mailboxes.isPending ? <SettingsState loading /> : mailboxes.isError ? <SettingsState error={mailboxes.error} retry={() => void mailboxes.refetch()} /> : mailboxes.data.length === 0 ? <div className={s.empty}><SettingsState empty="No mailbox connected" /><Link className={buttonClass()} href="/settings/mailboxes/connect">Connect mailbox</Link></div> : <div className={s.list}>{mailboxes.data.map((mailbox) => <MailboxHealth key={mailbox.id} mailbox={mailbox} onDisconnect={() => { disconnect.reset(); setRemoving(mailbox); }} />)}</div>}
+    {mailboxes.isPending ? <SettingsState loading /> : mailboxes.isError ? <SettingsState error={mailboxes.error} retry={() => void mailboxes.refetch()} /> : mailboxes.data.length === 0 ? <EmptyState icon={Mail} title="No mailbox connected" text="Connect the email account you use for webmail" action={<Link className={buttonClass()} href="/settings/mailboxes/connect">Connect mailbox</Link>} /> : <div className={s.list}>{mailboxes.data.map((mailbox) => <MailboxHealth key={mailbox.id} mailbox={mailbox} onDisconnect={() => { disconnect.reset(); setRemoving(mailbox); }} />)}</div>}
     <ShellDialog open={!!removing} onClose={() => { if (!disconnect.isPending) setRemoving(null); }} labelId="disconnect-title">
       <h2 id="disconnect-title">Disconnect this mailbox?</h2>
       <p className={s.dialogText}>{removing?.email} and its synced mail will leave this workspace. Messages stay on your mail server. You can reconnect later.</p>
@@ -59,9 +62,17 @@ function MailboxHealth({ mailbox, onDisconnect }: { mailbox: MailboxDto; onDisco
       <Feedback error={stats.data?.syncError} />
     </div>
     <div className={s.chart}><h3>Messages fetched in the last 24 hours</h3>
-      {stats.isPending ? <SettingsState loading /> : stats.isError ? <SettingsState error={stats.error} retry={() => void stats.refetch()} /> : <><HourBars values={utcHourValues(stats.data.hourly)} highlightPeak={false} height={150} label="Fetched messages in the last 24 hours, grouped by UTC hour of day" /><p className={s.note}>Last 24 hours, grouped by UTC hour of day</p></>}
+      {stats.isPending ? <SettingsState loading /> : stats.isError ? <SettingsState error={stats.error} retry={() => void stats.refetch()} /> : <HourChart values={utcHourValues(stats.data.hourly)} />}
       <div className={s.actions}><Button variant="default" disabled={sync.isPending || test.isPending} onClick={() => sync.mutate()}>{sync.isPending ? "Queuing..." : "Sync now"}</Button><Button variant="ghost" disabled={test.isPending || sync.isPending} onClick={() => test.mutate()}>{test.isPending ? "Testing..." : "Test connection"}</Button><Button variant="danger" onClick={onDisconnect}>Disconnect mailbox</Button></div>
       <Feedback error={test.error ?? sync.error} message={message} />
     </div>
   </div></Panel>;
+}
+
+/** The hour chart earns its space only when messages arrived in at least three hours. */
+function HourChart({ values }: { values: number[] }) {
+  const busy = values.filter((value) => value > 0).length;
+  const total = values.reduce((sum, value) => sum + value, 0);
+  if (busy < 3) return <p className={s.note}>{total === 0 ? "Nothing fetched in the last 24 hours" : `${plural(total, "message")} fetched in ${plural(busy, "hour")} of the last 24`}</p>;
+  return <><HourBars values={values} highlightPeak={false} height={150} label="Fetched messages in the last 24 hours, grouped by UTC hour of day" /><p className={s.note}>Grouped by UTC hour of day</p></>;
 }

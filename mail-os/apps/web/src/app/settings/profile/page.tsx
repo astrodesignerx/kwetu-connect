@@ -1,5 +1,6 @@
 "use client";
 
+import { Check, Circle } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
@@ -49,7 +50,7 @@ export default function ProfilePage() {
         <Panel><form className={s.form} onSubmit={(event) => void save(event, "password")}><h2>Password</h2><div className={s.fields}>
           <Field label="Current password" htmlFor="currentPassword"><Input id="currentPassword" type="password" autoComplete="current-password" required value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} /></Field>
           <Field label="New password" htmlFor="newPassword"><Input id="newPassword" type="password" autoComplete="new-password" required minLength={8} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} aria-describedby="password-rules" /><Meter value={strength.score} label="New password strength" /></Field>
-        </div><ul id="password-rules" className={s.rules}>{strength.rules.map((rule) => <li key={rule.key} data-met={rule.met}><span aria-hidden="true">{rule.met ? "✓" : "○"}</span> {rule.label}<span className={s.srOnly}>: {rule.met ? "met" : "not met"}</span></li>)}</ul><p className={s.note}>At least 8 characters are required. The other rules are guidance. Changing your password signs you out everywhere else.</p>
+        </div><ul id="password-rules" className={s.rules}>{strength.rules.map((rule) => <li key={rule.key} data-met={rule.met}>{rule.met ? <Check size={14} aria-hidden /> : <Circle size={14} aria-hidden />}{rule.label}<span className={s.srOnly}>: {rule.met ? "met" : "not met"}</span></li>)}</ul><p className={s.note}>At least 8 characters are required. The other rules are guidance. Changing your password signs you out everywhere else.</p>
           {result?.form === "password" && <Feedback error={result.error} message={result.message} />}<Button type="submit" variant="default" disabled={!!busy}>{busy === "password" ? "Changing password..." : "Change password"}</Button>
         </form></Panel>
       </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorText } from "@/components/ui";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { signalApi, type ProjectFlight } from "@/lib/signal-api";
@@ -39,7 +40,7 @@ export function FlightForm({ projects, initial, onDone }: {
       <label>Start date<input required type="date" value={startDate} onChange={e => setStartDate(e.target.value)} /></label>
       <label>End date<input required type="date" value={endDate} onChange={e => setEndDate(e.target.value)} /></label>
     </div>
-    {(error || save.isError) && <p className={s.error} role="alert">{error ?? save.error?.message}</p>}
+    {(error || save.isError) && <ErrorText>{error ?? save.error?.message}</ErrorText>}
     <div className={s.actions}><Button type="button" variant="ghost" disabled={save.isPending} onClick={onDone}>Cancel</Button><Button disabled={save.isPending}>{save.isPending ? "Saving..." : "Save flight"}</Button></div>
   </form>;
 }

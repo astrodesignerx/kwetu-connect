@@ -7,9 +7,7 @@
 .identity p { margin-top: 4px; color: var(--muted); font-size: 13px; line-height: 20px; }
 .identity small { color: var(--muted); font-size: 13px; font-weight: 400; }
 .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-.metaText { color: var(--muted); font-size: 13px; line-height: 20px; }
 .note { color: var(--muted); font-size: 13px; line-height: 20px; }
-.personAction { justify-self: start; }
 .matrix { min-width: 0; }
 .matrix table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .matrix th, .matrix td { padding: 12px 4px; border-bottom: 1px solid var(--line); text-align: left; font-size: 13px; line-height: 20px; overflow-wrap: anywhere; }

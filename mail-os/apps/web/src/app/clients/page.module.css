@@ -1,10 +1,1 @@
 .page { --page-header-gap: 0px; display: flex; flex-direction: column; gap: 24px; min-width: 0; color: var(--fg); }
-.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.stats > div { min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
-.stats dd { margin: 0 0 8px; font-size: 28px; line-height: 36px; font-weight: 600; }
-.stats dt { max-width: 160px; color: var(--muted); font-size: 13px; line-height: 20px; }
-.panel { display: grid; justify-items: start; gap: 12px; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
-@media (max-width: 520px) {
-  .stats { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-  .stats > div { display: flex; align-items: baseline; gap: 12px; padding: 16px 20px; }
-}

@@ -1,5 +1,6 @@
 "use client";
 
+import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -84,11 +85,12 @@ export function ThreadLinker({ threadId }: { threadId: string }) {
               {data.company.name}
             </a>
             <button
-              className="tool-link"
+              className="tool-icon"
               onClick={() => unlinkCompany.mutate()}
               title="Unlink from this client"
+              aria-label="Unlink from this client"
             >
-              ✕
+              <X size={14} aria-hidden />
             </button>
           </div>
           {data.projects.length > 0 && (
@@ -102,14 +104,16 @@ export function ThreadLinker({ threadId }: { threadId: string }) {
                   <div key={p.id} className="flex items-center justify-between text-xs">
                     <span>{p.name}</span>
                     <button
-                      className="tool-link"
+                      className="tool-icon"
+                      aria-label={linked ? `Unlink ${p.name}` : `Link ${p.name}`}
+                      title={linked ? "Unlink project" : "Link project"}
                       onClick={() =>
                         linked
                           ? unlinkProject.mutate(p.id)
                           : linkProject.mutate(p.id)
                       }
                     >
-                      {linked ? "✕" : "+"}
+                      {linked ? <X size={14} aria-hidden /> : <Plus size={14} aria-hidden />}
                     </button>
                   </div>
                 );

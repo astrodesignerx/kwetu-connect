@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorText } from "@/components/ui";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -32,7 +33,7 @@ export function ClientForm({ initial, onDone }: { initial?: CompanyDto; onDone: 
       <label>Email domain<input value={domain} onChange={e => setDomain(e.target.value)} placeholder="company.co.ke" /></label>
     </div>
     <label>Internal notes<textarea rows={2} value={notes} onChange={e => setNotes(e.target.value)} /></label>
-    {save.isError && <p className={s.error} role="alert">{save.error.message}</p>}
+    {save.isError && <ErrorText>{save.error.message}</ErrorText>}
     <div className={s.actions}><Button type="button" variant="ghost" onClick={onDone} disabled={save.isPending}>Cancel</Button><Button disabled={!name.trim() || save.isPending}>{save.isPending ? "Saving..." : initial ? "Save changes" : "Create client"}</Button></div>
   </form>;
 }

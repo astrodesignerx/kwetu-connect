@@ -2,10 +2,8 @@
 .section h2 { font-size: 20px; line-height: 28px; font-weight: 600; }
 .note { margin-top: 4px; color: var(--muted); font-size: 13px; line-height: 20px; }
 .form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(96px, 148px) auto; align-items: end; gap: 12px; }
-.select { width: 100%; min-width: 0; }
 .tickets { display: grid; gap: 12px; }
 .ticket { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
-.ticketInfo { min-width: 0; }
 .ticket small { color: var(--muted); font-size: 12px; line-height: 16px; }
 .ticket h3 { margin: 4px 0; font-size: 16px; line-height: 24px; font-weight: 600; overflow-wrap: anywhere; }
 .ticket p { color: var(--muted); font-size: 13px; line-height: 20px; }

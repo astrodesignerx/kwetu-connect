@@ -1,0 +1,7 @@
+.empty { display: grid; justify-items: center; min-width: 0; padding: 48px 24px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); text-align: center; overflow-wrap: anywhere; animation: empty-in var(--t2) var(--ease) both; }
+.bare { padding: 32px 16px; border: 0; background: transparent; }
+.icon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 16px; border: 1px solid var(--line); border-radius: var(--radius-control); color: var(--muted); }
+.title { font-size: 16px; line-height: 24px; font-weight: 600; }
+.text { max-width: 360px; margin-top: 4px; color: var(--muted); font-size: 13px; line-height: 20px; }
+.action { margin-top: 20px; }
+@keyframes empty-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }

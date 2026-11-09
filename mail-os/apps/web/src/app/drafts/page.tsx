@@ -1,5 +1,9 @@
 "use client";
 
+import { ErrorText } from "@/components/ui";
+import { ErrorState } from "@/components/empty-state";
+import { FileText } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -37,8 +41,8 @@ export default function DraftsPage() {
   return (
     <div className={s.page}>
       <PageHeader title="Drafts" description={loading ? "Loading drafts..." : failed ? "Drafts unavailable" : `${drafts.length} saved, ${drafts.filter((draft) => draftReadiness(draft).ready).length} ready to send`} />
-      {remove.isError && <p role="alert">Could not discard this draft. Try again.</p>}
-      {failed && <p role="alert" className={s.quiet}>Drafts could not load. <button onClick={() => { void overview.refetch(); void saved.refetch(); }}>Try again</button></p>}
+      {remove.isError && <ErrorText>Could not discard this draft. Try again.</ErrorText>}
+      {failed && <ErrorState title="Drafts could not load" onRetry={() => { void overview.refetch(); void saved.refetch(); }} />}
       {loading ? <p className={s.quiet} role="status">Opening your saved messages...</p> : drafts.length ? <ul className={s.sheets}>{drafts.map((draft, index) => {
         const readiness = draftReadiness(draft);
         return <li className={s.sheet} key={draft.id} style={{ animationDelay: Math.min(index, 6) * 50 + 'ms' }}>
@@ -51,7 +55,7 @@ export default function DraftsPage() {
           </button>
           <button className={s.discard} disabled={remove.isPending} onClick={() => remove.mutate(draft.id)}>Discard</button>
         </li>;
-      })}</ul> : !failed && <p className={s.quiet}>No drafts</p>}
+      })}</ul> : !failed && <EmptyState icon={FileText} title="No drafts" text="Messages you start and do not send are kept here" />}
       {editing && (
         <ComposeModal ctx={editing} onClose={() => setEditing(null)} />
       )}

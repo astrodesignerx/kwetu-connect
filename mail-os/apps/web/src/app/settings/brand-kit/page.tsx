@@ -49,15 +49,15 @@ export default function BrandKitPage() {
         <Panel><h2>Colours</h2><div className={s.colours}>{([
           ["primaryColor", "Header bar"], ["accentColor", "Links"], ["textColor", "Text"], ["backgroundColor", "Background"],
         ] as const).map(([key, label]) => <Field key={key} label={label} htmlFor={"brand-" + key}><div className={s.colour}>
-          <input type="color" aria-label={label + " colour picker"} value={/^#[0-9a-f]{6}$/i.test(effective[key] ?? "") ? effective[key]! : "#FBB040"} onChange={(event) => update(key, event.target.value.toUpperCase())} />
-          <Input id={"brand-" + key} value={effective[key] ?? ""} placeholder="#FBB040" onChange={(event) => update(key, event.target.value)} />
+          <input type="color" className={s.swatch} aria-label={label + " colour picker"} value={/^#[0-9a-f]{6}$/i.test(effective[key] ?? "") ? effective[key]! : "#FBB040"} onChange={(event) => update(key, event.target.value.toUpperCase())} />
+          <Input id={"brand-" + key} className={s.hex} value={effective[key] ?? ""} placeholder="#FBB040" onChange={(event) => update(key, event.target.value)} />
         </div></Field>)}</div></Panel>
         <Panel><h2>Top of the email</h2><p className={s.note}>Leave empty for a plain email, or add a header bar</p><EditorBox label="Top of the email" html={effective.headerHtml ?? ""} onChange={(html) => update("headerHtml", html)} tools={<HeaderButton background={effective.primaryColor || "#FBB040"} logoUrl={effective.logoUrl} name={effective.name} />} /></Panel>
         <Panel><h2>Your sign-off</h2><p className={s.note}>Added after your message, below a thin line</p><EditorBox label="Your sign-off" html={effective.signatureHtml ?? ""} onChange={(html) => update("signatureHtml", html)} /></Panel>
         <Panel><h2>Small print</h2><EditorBox label="Small print" html={effective.footerHtml ?? ""} onChange={(html) => update("footerHtml", html)} /></Panel>
         <details className={s.code}><summary>Edit the HTML</summary><Panel>{([
           ["headerHtml", "Top of the email"], ["signatureHtml", "Your sign-off"], ["footerHtml", "Small print"],
-        ] as const).map(([key, label]) => <Field key={key} label={label} htmlFor={"code-" + key}><textarea id={"code-" + key} className="glass-input" rows={5} value={effective[key] ?? ""} onChange={(event) => update(key, event.target.value)} /></Field>)}</Panel></details>
+        ] as const).map(([key, label]) => <Field key={key} label={label} htmlFor={"code-" + key}><textarea id={"code-" + key} className={`glass-input ${s.codeInput}`} rows={5} value={effective[key] ?? ""} onChange={(event) => update(key, event.target.value)} /></Field>)}</Panel></details>
       </fieldset><Feedback error={save.error} message={save.isSuccess && !edit ? "Email appearance saved" : null} />
       <div className={s.actions}>{edit && <Button variant="ghost" disabled={save.isPending} onClick={() => { setEdit(null); save.reset(); }}>Undo my changes</Button>}<Button disabled={save.isPending || !edit} onClick={() => save.mutate(effective)}>{save.isPending ? "Saving..." : edit ? "Save changes" : "Saved"}</Button></div>
       </div>

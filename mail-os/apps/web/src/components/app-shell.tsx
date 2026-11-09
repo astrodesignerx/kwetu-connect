@@ -84,7 +84,7 @@ export function ShellContent({ children, variant = "content" }: AppShellProps) {
     <div className="signal-frame" data-v2>
       <div className="signal-desktop-sidebar"><Sidebar compact onCompose={compose} onNavigate={() => setDrawer(true)} /></div>
       <div className="signal-workspace">
-        <Topbar mail={mailMode} primaryCompose={mailMode || pathname.startsWith("/drafts")} onCompose={compose} onCommand={openPalette} onMenu={() => setDrawer(true)} />
+        <Topbar mail={mailMode} primaryCompose={(mailMode || pathname.startsWith("/drafts")) && overview?.mailboxes.length !== 0} onCompose={compose} onCommand={openPalette} onMenu={() => setDrawer(true)} />
         <main id="main-content" className="signal-canvas">
           {variant === "app" ? children : <div className="v2-scroll"><div className="v2-content">{children}</div></div>}
         </main>

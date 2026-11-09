@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorText } from "@/components/ui";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -32,9 +33,9 @@ export default function NewTemplatePage() {
   });
   return <form className={s.page} onSubmit={e => { e.preventDefault(); if (name.trim() && !create.isPending) create.mutate(); }}>
     <PageHeader context="Templates" contextHref="/settings/templates" title="New template" />
-    <section className={s.step}><div className={s.stepLabel}><span>01</span><h2>Name</h2></div><label className={s.name}>What will your team call it?<input autoFocus required value={name} onChange={e => setName(e.target.value)} placeholder="Weekly campaign update" /></label><label className={s.description}>What it&apos;s for (optional)<input value={description} onChange={e => setDescription(e.target.value)} placeholder="Friday updates for live campaigns" /></label></section>
-    <fieldset className={s.step}><legend className={s.stepLabel}><span>02</span>Starting point</legend><div className={s.options}>{[{ id: "blank", title: "Blank page", description: "Write it from scratch" }, { id: "update", title: "Personalised update", description: "Begin with client, project and sender fields" }].map(option => <label className={s.option} key={option.id}><input type="radio" name="start" value={option.id} checked={start === option.id} onChange={() => setStart(option.id)} /><strong>{option.title}</strong><small>{option.description}</small></label>)}</div></fieldset>
-    {create.isError && <p role="alert" className={s.error}>{create.error.message}</p>}
+    <section className={s.step}><h2 className={s.stepLabel}>Name</h2><label className={s.name}>What will your team call it?<input autoFocus required value={name} onChange={e => setName(e.target.value)} placeholder="Weekly campaign update" /></label><label className={s.description}>What it&apos;s for (optional)<input value={description} onChange={e => setDescription(e.target.value)} placeholder="Friday updates for live campaigns" /></label></section>
+    <fieldset className={s.step}><legend className={s.stepLabel}>Starting point</legend><div className={s.options}>{[{ id: "blank", title: "Blank page", description: "Write it from scratch" }, { id: "update", title: "Personalised update", description: "Begin with client, project and sender fields" }].map(option => <label className={s.option} key={option.id}><input type="radio" name="start" value={option.id} checked={start === option.id} onChange={() => setStart(option.id)} /><strong>{option.title}</strong><small>{option.description}</small></label>)}</div></fieldset>
+    {create.isError && <ErrorText>{create.error.message}</ErrorText>}
     <footer className={s.actions}><Button type="button" variant="ghost" onClick={() => router.push("/settings/templates")} disabled={create.isPending}>Cancel</Button><Button disabled={!name.trim() || create.isPending}>{create.isPending ? "Creating..." : "Create and start writing"}</Button></footer>
   </form>;
 }

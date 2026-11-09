@@ -1,5 +1,6 @@
 "use client";
 
+import { Check, CircleAlert } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -65,7 +66,7 @@ export default function ConnectMailboxPage() {
       </div>
       <Feedback error={error} message={stage === "verified" ? "Connected. Opening your inbox." : stage === "verify-error" ? "The mailbox is connected. The additional test needs attention." : null} />
       {connectionId ? <div className={s.actions}>{stage === "verify-error" && <Button type="button" disabled={busy} onClick={() => void verify(connectionId)}>Retry saved connection test</Button>}<Link href="/settings/mailboxes">View mailbox health</Link></div> : <Button type="submit" disabled={busy}>{busy ? "Connecting..." : "Connect"}</Button>}
-      {stage !== "idle" && <ol className={s.checklist} aria-live="polite">{connectChecklist(stage).map((step, index) => <li key={step.label} data-state={step.state}><span aria-hidden="true">{step.state === "complete" ? "✓" : step.state === "error" ? "!" : index + 1}</span><div><b>{step.label}</b><small>{step.detail}</small></div></li>)}</ol>}
+      {stage !== "idle" && <ol className={s.checklist} aria-live="polite">{connectChecklist(stage).map((step, index) => <li key={step.label} data-state={step.state}><span className={s.checkMark} aria-hidden="true">{step.state === "complete" ? <Check size={14} /> : step.state === "error" ? <CircleAlert size={14} /> : index + 1}</span><div><b>{step.label}</b><small>{step.detail}</small></div></li>)}</ol>}
       <details className={s.advanced}><summary>My provider needs specific servers</summary><div className={s.fields}><Field label="Receiving server (IMAP)" htmlFor="imapHost" hint="Port 993, TLS"><Input id="imapHost" disabled={locked} value={imapHost} onChange={(event) => setImapHost(event.target.value)} placeholder="mail.example.com" /></Field><Field label="Sending server (SMTP)" htmlFor="smtpHost" hint="Port 465, TLS. Use the hostname on its certificate."><Input id="smtpHost" disabled={locked} value={smtpHost} onChange={(event) => setSmtpHost(event.target.value)} placeholder="Your provider's SMTP hostname" /></Field></div></details>
       <p className={s.note}>No test email is sent. Your existing mail syncs in the background.</p>
     </form></Panel>

@@ -1,6 +1,7 @@
 "use client";
+import { EmptyState } from "@/components/empty-state";
 import { useEffect, useState } from 'react';
-import { Check, Paperclip } from 'lucide-react';
+import { Check, Inbox, Paperclip, Search } from 'lucide-react';
 import { groupThreads, durationLabel } from '@/lib/signal-mail';
 import type { MailThreadSummary as SignalThreadSummary } from '@/lib/signal-mail';
 import { ClientAvatar } from '@/components/signal';
@@ -18,7 +19,7 @@ export function ThreadList({ items, loading, selectedId, onSelect, selection, on
     return () => clearInterval(timer);
   }, []);
   if (loading) return <div className={s.quiet} role="status">Loading conversations...</div>;
-  if (!items.length) return <div className={s.quiet}>{query ? 'No conversations match this search.' : 'Nothing here.'}</div>;
+  if (!items.length) return query ? <EmptyState bare icon={Search} title="No matches" text="No conversations match this search" /> : <EmptyState bare icon={Inbox} title="No conversations" text="Nothing in this folder yet" />;
   const groups = query ? [{ label: 'Conversations', items }] : groupThreads(items);
   return <div className={s.listBody}>{groups.map((group) => <section key={group.label} aria-label={group.label}>
     <h2 className={s.groupLabel}>{group.label}</h2>
