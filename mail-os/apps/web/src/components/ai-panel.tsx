@@ -40,7 +40,7 @@ export function ThreadSummary({ threadId, onNextStep }: { threadId: string; onNe
       </div>
       {generate.isError && (
         <p role="alert">
-          {generate.error instanceof Error ? generate.error.message : "Could not summarize."}
+          {generate.error instanceof Error ? generate.error.message : "Could not summarise"}
         </p>
       )}
       {summary && <><p>{summary.replace(/^\s*[-*\d.)]+\s*/, "").split(/\n|(?<=[.!?])\s/)[0]}</p>

@@ -12,6 +12,7 @@ import { ThreadAssignee, ThreadNotes } from "@/components/collaboration";
 import { ThreadLinker } from "@/components/thread-linker";
 import { MailDisclosure } from "./disclosure";
 import s from "@/app/mail/page.module.css";
+import { formatDate, formatDateRange } from "@/lib/format";
 
 export function ThreadStateControl({ threadId, replyState }: { threadId: string; replyState: ThreadState["replyState"] }) {
   const cache = useQueryClient();
@@ -40,17 +41,17 @@ export function ConversationContext({ threadId, replyState, stateSince, onQuickR
   const quickReply = useMutation({ mutationFn: api.getTemplate, onSuccess: (template) => onQuickReply?.(template) });
   const today = new Date().toLocaleDateString("en-CA");
   const stateLabel = replyState === "Done" ? "Conversation done" : replyState === "Awaiting" ? "Awaiting a reply" : "Needs your reply";
-  const stages: StageTrackerProps["stages"][number][] = stateSince ? [{ id: "state", label: stateLabel, state: replyState === "Done" ? "done" : "now", date: new Date(stateSince).toLocaleDateString("en-GB"), dateTime: stateSince }] : [];
-  for (const query of flights) for (const flight of query.data ?? []) stages.push({ id: flight.id, label: flight.siteName, state: flight.endDate < today ? "done" : flight.startDate <= today ? "now" : "next", date: `${flight.startDate} to ${flight.endDate}`, dateTime: flight.startDate });
+  const stages: StageTrackerProps["stages"][number][] = stateSince ? [{ id: "state", label: stateLabel, state: replyState === "Done" ? "done" : "now", date: formatDate(stateSince), dateTime: stateSince }] : [];
+  for (const query of flights) for (const flight of query.data ?? []) stages.push({ id: flight.id, label: flight.siteName, state: flight.endDate < today ? "done" : flight.startDate <= today ? "now" : "next", date: formatDateRange(flight.startDate, flight.endDate), dateTime: flight.startDate });
   return <aside className={`${s.context} scroll-cue`} aria-label="Conversation context">
     <section className={s.contextCard}><h2><Users size={14} aria-hidden />Client</h2>
-      {company ? <div className={s.clientCard}><ClientAvatar name={company.name} /><div><b>{company.name}</b><p>{company.domain}</p></div><Link href={`/clients/detail?id=${encodeURIComponent(company.id)}`}>Open workspace<ArrowUpRight size={14} aria-hidden /></Link></div> : <p className={s.muted}>{associations.isPending ? "Loading client..." : associations.isError ? "Client links could not load." : "No client linked."}</p>}
+      {company ? <div className={s.clientCard}><ClientAvatar name={company.name} /><div><b>{company.name}</b><p>{company.domain}</p></div><Link href={`/clients/detail?id=${encodeURIComponent(company.id)}`}>Open workspace<ArrowUpRight size={14} aria-hidden /></Link></div> : <p className={s.muted}>{associations.isPending ? "Loading client..." : associations.isError ? "Client links could not load" : "No client linked"}</p>}
       {associations.isError && <button onClick={() => void associations.refetch()}>Try again</button>}
       <button type="button" className={s.contextAction} onClick={() => setEditingLinks((value) => !value)} aria-expanded={editingLinks}>{editingLinks ? "Close links" : company ? "Edit client and project links" : "Link a client"}</button>
       <MailDisclosure open={editingLinks}><ThreadLinker threadId={threadId} /></MailDisclosure>
     </section>
     <section className={s.contextCard}><h2><CalendarDays size={14} aria-hidden />Conversation and flights</h2>
-      {stages.length > 0 ? <StageTracker label="Conversation and flight stages" stages={stages} /> : <p className={s.muted}>No flights linked.</p>}
+      {stages.length > 0 ? <StageTracker label="Conversation and flight stages" stages={stages} /> : <p className={s.muted}>No flights linked</p>}
       {flights.some((query) => query.isPending) && <p role="status" className={s.muted}>Loading flights...</p>}
       {flights.some((query) => query.isError) && <p role="alert" className={s.muted}>Flights could not load. <button onClick={() => flights.forEach((query) => void query.refetch())}>Try again</button></p>}
     </section>

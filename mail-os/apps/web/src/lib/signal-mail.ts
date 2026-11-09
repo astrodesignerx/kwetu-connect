@@ -4,6 +4,7 @@ import { api, handleUnauthorized } from "./api";
 import { useAuthStore } from "./auth-store";
 import { htmlToText } from "./mail-frame";
 import type { SignalThreadDetail, SignalThreadSummary } from "./signal-api";
+import { formatDuration } from "@/lib/format";
 
 export interface MailInsight { id: string; mailboxConnectionId: string; clientId: string | null; clientName: string | null }
 export type MailThreadSummary = SignalThreadSummary & MailInsight;
@@ -48,12 +49,7 @@ export function groupThreads<T extends SignalThreadSummary>(items: T[], now = ne
 }
 
 export function durationLabel(seconds: number | null) {
-  if (seconds === null) return "No replies yet";
-  const minutes = Math.max(1, Math.round(seconds / 60));
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(minutes / 60);
-  if (hours >= 24) return `${Math.floor(hours / 24)}d ${hours % 24}h`;
-  return `${hours}h ${minutes % 60}m`;
+  return seconds === null ? "No replies yet" : formatDuration(seconds);
 }
 
 export function draftReadiness(draft: Pick<MailDraftDto, "toAddrs" | "ccAddrs" | "bccAddrs" | "subject" | "bodyText" | "bodyHtml" | "hasAttachments">) {

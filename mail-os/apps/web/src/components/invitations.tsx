@@ -31,12 +31,12 @@ export function InvitationsPanel() {
       setIssued({ id: response.invitation.id, email: response.invitation.email, token: response.token, link });
       setEmail(""); setError(null); setCopied(""); await refresh();
     },
-    onError: (failure) => setError(failure instanceof Error ? failure.message : "Could not create the invitation."),
+    onError: (failure) => setError(failure instanceof Error ? failure.message : "Could not create the invitation"),
   });
   const revoke = useMutation({
     mutationFn: (id: string) => api.adminRevokeInvitation(id),
     onSuccess: async (_, id) => { if (issued?.id === id) setIssued(null); await refresh(); },
-    onError: (failure) => setError(failure instanceof Error ? failure.message : "Could not revoke the invitation."),
+    onError: (failure) => setError(failure instanceof Error ? failure.message : "Could not revoke the invitation"),
   });
   async function copy(kind: string, value: string) {
     try { await navigator.clipboard.writeText(value); setCopied(kind); setError(null); }
@@ -57,7 +57,7 @@ export function InvitationsPanel() {
     </div>}</Panel>
     {invitations.isPending ? <SettingsState loading /> : invitations.isError ? <SettingsState error={invitations.error} retry={() => void invitations.refetch()} /> : !invitations.data.length ? <SettingsState empty="No invitations yet" /> : <div className={s.tickets}>{invitations.data.map((invitation) => {
       const pending = invitation.status === "pending" && new Date(invitation.expiresAt).getTime() > now;
-      return <article className={s.ticket} key={invitation.id}><div><small>Invitation / {invitation.role}</small><h3>{invitation.email}</h3><p title={dateTime(invitation.expiresAt)}>{invitationExpiry(invitation.expiresAt, invitation.status, now)}</p></div><div className={s.actions}><Chip strong={pending}>{pending ? "Pending" : invitation.status === "pending" ? "Expired" : invitation.status}</Chip>{pending && issued?.id === invitation.id && issued.link && <Button variant="default" onClick={() => void copy("link", issued.link!)}>{copied === "link" ? "Copied" : "Copy link"}</Button>}{pending && <Button variant="danger" disabled={revoke.isPending} onClick={() => { setError(null); revoke.mutate(invitation.id); }}>Revoke</Button>}</div></article>;
+      return <article className={s.ticket} key={invitation.id}><div><small>{invitation.role} invitation</small><h3>{invitation.email}</h3><p title={dateTime(invitation.expiresAt)}>{invitationExpiry(invitation.expiresAt, invitation.status, now)}</p></div><div className={s.actions}><Chip strong={pending}>{pending ? "Pending" : invitation.status === "pending" ? "Expired" : invitation.status}</Chip>{pending && issued?.id === invitation.id && issued.link && <Button variant="default" onClick={() => void copy("link", issued.link!)}>{copied === "link" ? "Copied" : "Copy link"}</Button>}{pending && <Button variant="danger" disabled={revoke.isPending} onClick={() => { setError(null); revoke.mutate(invitation.id); }}>Revoke</Button>}</div></article>;
     })}</div>}
   </section>;
 }

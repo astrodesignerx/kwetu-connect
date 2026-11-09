@@ -9,6 +9,7 @@ import { cn } from "@/lib/cn";
 import { ThreadLinker } from "@/components/thread-linker";
 import { MailDisclosure } from "@/components/mail/disclosure";
 import { StickyNote } from "lucide-react";
+import { formatDateTime } from "@/lib/format";
 
 export function ThreadAssignee({ threadId }: { threadId: string }) {
   const queryClient = useQueryClient();
@@ -47,7 +48,7 @@ export function ThreadAssignee({ threadId }: { threadId: string }) {
           <span className="min-w-0 break-words">{assignment.userDisplayName || assignment.userEmail}</span>
           <button className="tool-link" onClick={() => assign.mutate('00000000-0000-0000-0000-000000000000')} aria-label="Unassign">Unassign</button>
         </div>
-      ) : <MutedText>Not assigned.</MutedText>}
+      ) : <MutedText>Not assigned</MutedText>}
       {assign.isError && <p role="alert" className="text-xs">Could not change the assignment. Try again.</p>}
     </GlassPanel>
   );
@@ -61,7 +62,7 @@ function AssigneePicker({
   onPick: (id: string) => void;
 }) {
   if (members.length === 0) {
-    return <MutedText>No teammates found.</MutedText>;
+    return <MutedText>No teammates found</MutedText>;
   }
   return (
     <ul className="space-y-1">
@@ -187,9 +188,9 @@ export function ThreadNotes({ threadId, contextTools = true }: { threadId: strin
                   <span className="min-w-0 flex-1 whitespace-pre-wrap text-muted">
                     {n.body}
                   </span>
-                  <span className="shrink-0 text-xs tabular-nums text-muted">
-                    {new Date(n.createdAt).toLocaleDateString()}
-                  </span>
+                  <time className="shrink-0 text-muted" dateTime={n.createdAt}>
+                    {formatDateTime(n.createdAt)}
+                  </time>
                   <button
                     type="button"
                     onClick={() => remove.mutate(n.id)}

@@ -6,6 +6,7 @@ import type { MailThreadSummary as SignalThreadSummary } from '@/lib/signal-mail
 import { ClientAvatar } from '@/components/signal';
 import { Button } from '@/components/ui';
 import s from '@/app/mail/page.module.css';
+import { formatWhen } from '@/lib/format';
 
 export function ThreadList({ items, loading, selectedId, onSelect, selection, onToggleSelect, total, hasMore, loadingMore, onLoadMore, query }: {
   items: SignalThreadSummary[]; loading: boolean; selectedId: string | null; onSelect: (id: string) => void;
@@ -59,9 +60,5 @@ function firstParticipant(participants: string | null): string {
 }
 
 function formatRelative(iso: string): string {
-  const d = new Date(iso);
-  const diffH = (Date.now() - d.getTime()) / 36e5;
-  if (diffH < 24) return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  if (diffH < 24 * 7) return d.toLocaleDateString([], { weekday: "short" });
-  return d.toLocaleDateString([], { month: "short", day: "numeric" });
+  return formatWhen(iso);
 }

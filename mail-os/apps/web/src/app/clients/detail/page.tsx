@@ -12,6 +12,7 @@ import { ClientForm } from "@/components/clients/client-form";
 import { ClientProjects } from "@/components/clients/client-projects";
 import s from "./page.module.css";
 import { PageHeader } from "@/components/page-header";
+import { formatDateRange, plural } from "@/lib/format";
 
 export default function ClientDetailPage() {
   return <Suspense fallback={<ViewState loading label="Loading client" />}><ClientLookup /></Suspense>;
@@ -43,21 +44,21 @@ function ClientWorkspace({ id }: { id: string }) {
       action={<Button variant="default" onClick={() => setEditing(!editing)}>{editing ? "Close editor" : "Edit client"}</Button>} />
     {editing && <ClientForm initial={data.company} onDone={() => setEditing(false)} />}
     {insights.isPending ? <p className={s.muted} role="status">Loading client insights...</p> : insights.isError ? <div role="alert" className={s.error}>Could not load insights. <Button variant="ghost" onClick={() => void insights.refetch()}>Try again</Button></div> : stats && <dl className={s.kpis}>
-      <div><dt>Boards booked</dt><dd>{stats.boardsBooked}</dd><small>{displayDate(stats.startDate)} to {displayDate(stats.endDate)}</small></div>
-      <div><dt>Median first reply</dt><dd>{replyDuration(stats.firstReply.medianSeconds)}</dd><small>{stats.firstReply.count} replies / last {stats.firstReply.days} days</small></div>
+      <div><dt>Boards booked</dt><dd>{stats.boardsBooked}</dd><small><time dateTime={stats.startDate}>{formatDateRange(stats.startDate, stats.endDate)}</time></small></div>
+      <div><dt>Median first reply</dt><dd>{replyDuration(stats.firstReply.medianSeconds)}</dd><small>{plural(stats.firstReply.count, "reply", "replies")} in the last {stats.firstReply.days} days</small></div>
       <div><dt>Last contact</dt><dd className={s.date}>{displayDate(stats.lastContactAt)}</dd></div>
     </dl>}
     {data.company.notes && <p className={s.notes}>{data.company.notes}</p>}
     <ClientProjects companyId={id} projects={data.projects} />
     <section className={s.panel}>
-      <div className={s.sectionHead}><h2>People</h2><span className={s.muted}>{data.contacts.length} contacts</span></div>
-      {!data.contacts.length ? <p className={s.muted}>Add the client&apos;s email domain to discover people from message addresses.</p> : <ul className={s.rows}>{data.contacts.map(contact => <li key={contact.id}>
-        <ClientAvatar name={contact.name || contact.email} size="small" /><div className={s.grow}><strong>{contact.name || contact.email}</strong><small>{contact.email}</small></div><small className={s.muted}>{contact.messageCount} messages</small>
+      <div className={s.sectionHead}><h2>People</h2><span className={s.muted}>{plural(data.contacts.length, "contact")}</span></div>
+      {!data.contacts.length ? <p className={s.muted}>Add the client&apos;s email domain to discover people from message addresses</p> : <ul className={s.rows}>{data.contacts.map(contact => <li key={contact.id}>
+        <ClientAvatar name={contact.name || contact.email} size="small" /><div className={s.grow}><strong>{contact.name || contact.email}</strong><small>{contact.email}</small></div><small className={s.muted}>{plural(contact.messageCount, "message")}</small>
       </li>)}</ul>}
     </section>
     <section className={s.panel}>
       <div className={s.sectionHead}><h2>Communication history</h2><Link href="/mail" className={s.back}>Link conversations in Mail</Link></div>
-      {!data.threads.length ? <p className={s.muted}>Open a conversation in Mail and use Tag to client to link it here.</p> : <ol className={s.timeline}>{data.threads.map(thread => {
+      {!data.threads.length ? <p className={s.muted}>Open a conversation in Mail and use Tag to client to link it here</p> : <ol className={s.timeline}>{data.threads.map(thread => {
         const state = stats?.recentThreads.find(t => t.id === thread.id);
         return <li key={thread.id}><time dateTime={thread.lastDate ?? undefined}>{displayDate(thread.lastDate)}</time><span className={s.dot} aria-hidden="true" /><Link href={`/mail?id=${encodeURIComponent(thread.id)}`}>
           <strong>{thread.subject || "(no subject)"}</strong><small>{thread.snippet || thread.participants}</small>

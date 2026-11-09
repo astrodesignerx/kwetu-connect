@@ -2,6 +2,7 @@ import { ApiError } from "@kompanion/api-client";
 import { handleUnauthorized } from "./api";
 import { useAuthStore } from "./auth-store";
 import type { ProjectFlightInput, ReplyState } from "./signal-api";
+import { formatDate, formatDuration } from "@/lib/format";
 
 export interface ClientActivity {
   id: string; name: string; domain: string | null; projectCount: number; threadCount: number; boardsBooked: number;
@@ -46,13 +47,9 @@ export function nairobiToday(): string {
 }
 
 export function displayDate(value: string | null): string {
-  if (!value) return "No contact yet";
-  return new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Nairobi", day: "numeric", month: "short", year: "numeric" }).format(new Date(value));
+  return formatDate(value, "No contact yet");
 }
 
 export function replyDuration(seconds: number | null): string {
-  if (seconds === null) return "No replies yet";
-  if (seconds < 60) return `${Math.round(seconds)}s`;
-  if (seconds < 3600) return `${Math.round(seconds / 60)}m`;
-  return `${(seconds / 3600).toFixed(1)}h`;
+  return seconds === null ? "No replies yet" : formatDuration(seconds);
 }

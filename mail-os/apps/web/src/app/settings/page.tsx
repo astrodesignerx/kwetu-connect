@@ -28,7 +28,7 @@ export default function SettingsHubPage() {
   if (workspace.isError) return <SettingsState error={workspace.error} retry={() => void workspace.refetch()} />;
   const data = workspace.data;
   return <div className={s.page}>
-    <SettingsHeader title="Settings" context="" description="Your workspace, in good order." />
+    <SettingsHeader title="Settings" context="" />
     <section className={s.banner}>
       <span className={s.mark} aria-hidden="true">k</span><div className={s.workspace}><small>Workspace</small><h2>{data.workspaceName}</h2></div>
       <div className={s.numbers}><Stat value={data.memberCount} label="people" /><Stat value={data.mailboxCount} label="mailboxes" /><Stat value={data.templateCount} label="templates" /><Stat value={data.sendsLast30Days} label="sends / last 30 days" /></div>

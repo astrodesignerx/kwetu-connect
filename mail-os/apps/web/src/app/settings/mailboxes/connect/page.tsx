@@ -39,7 +39,7 @@ export default function ConnectMailboxPage() {
       router.replace("/mail");
     } catch (failure) {
       setStage("verify-error");
-      setError(failure instanceof Error ? failure.message : "Saved connection could not be verified.");
+      setError(failure instanceof Error ? failure.message : "Saved connection could not be verified");
       await refresh();
     }
   }
@@ -52,16 +52,16 @@ export default function ConnectMailboxPage() {
       await verify(mailbox.id);
     } catch (failure) {
       setPassword(""); setStage("connect-error");
-      setError(failure instanceof Error ? failure.message : "Could not connect this mailbox.");
+      setError(failure instanceof Error ? failure.message : "Could not connect this mailbox");
     }
   }
 
   return <div className={s.page}>
-    <SettingsHeader title="Connect your email" context="Settings / Mailboxes" description="Sign in with the email and password you use for webmail." action={<Link href="/settings/mailboxes" className={s.cancel}>{connectionId ? "Back to mailboxes" : "Cancel"}</Link>} />
+    <SettingsHeader title="Connect your email" context="Settings / Mailboxes" description="Sign in with the email and password you use for webmail" action={<Link href="/settings/mailboxes" className={s.cancel}>{connectionId ? "Back to mailboxes" : "Cancel"}</Link>} />
     <Panel><form onSubmit={(event) => void connect(event)} className={s.form}>
       <div className={s.fields}>
         <Field label="Email address" htmlFor="mb-email"><Input id="mb-email" type="email" autoFocus autoComplete="username" required disabled={locked} value={email} onChange={(event) => setEmail(event.target.value)} /></Field>
-        <Field label="Password" htmlFor="mb-password" hint="Stored encrypted by your workspace."><Input id="mb-password" type="password" autoComplete="new-password" required disabled={locked} value={password} onChange={(event) => setPassword(event.target.value)} /></Field>
+        <Field label="Password" htmlFor="mb-password" hint="Stored encrypted by your workspace"><Input id="mb-password" type="password" autoComplete="new-password" required disabled={locked} value={password} onChange={(event) => setPassword(event.target.value)} /></Field>
       </div>
       <Feedback error={error} message={stage === "verified" ? "Connected. Opening your inbox." : stage === "verify-error" ? "The mailbox is connected. The additional test needs attention." : null} />
       {connectionId ? <div className={s.actions}>{stage === "verify-error" && <Button type="button" disabled={busy} onClick={() => void verify(connectionId)}>Retry saved connection test</Button>}<Link href="/settings/mailboxes">View mailbox health</Link></div> : <Button type="submit" disabled={busy}>{busy ? "Connecting..." : "Connect"}</Button>}

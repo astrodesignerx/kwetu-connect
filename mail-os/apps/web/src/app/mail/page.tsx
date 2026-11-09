@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDate, formatDateTime, formatShortDate, formatWhen } from '@/lib/format';
 import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
@@ -398,7 +399,7 @@ function Reader({ thread, selected, mailboxId, syncError, onRetrySync, retrying,
       <div className={s.readerTop}>
         <button type="button" className={s.backButton} onClick={onBack} aria-label="Back to inbox"><ArrowLeft size={16} aria-hidden /></button>
         <ConversationChips threadId={thread.id} />
-        <time>{thread.lastDate ? new Date(thread.lastDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''}</time>
+        <time dateTime={thread.lastDate ?? undefined}>{formatShortDate(thread.lastDate)}</time>
       </div>
       <header className={s.sender}>
         <span className={s.senderAvatar} aria-hidden>{initialsFor(who)}</span>
@@ -474,15 +475,9 @@ function Participants({
           />
         </button>
 
-        <span className="shrink-0 text-xs tabular-nums text-muted">
-          {thread.lastDate
-            ? new Date(thread.lastDate).toLocaleDateString(undefined, {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })
-            : ""}
-        </span>
+        <time className="shrink-0 text-muted" dateTime={thread.lastDate ?? undefined}>
+          {formatDate(thread.lastDate)}
+        </time>
       </div>
 
       <MailDisclosure open={open}>
@@ -493,7 +488,7 @@ function Participants({
             <AddressRow label="Cc" value={latest?.ccAddrs} />
             <AddressRow
               label="Date"
-              value={latest?.date ? new Date(latest.date).toLocaleString() : null}
+              value={latest?.date ? formatDateTime(latest.date) : null}
             />
           </dl>
           <ContactDetails
@@ -531,7 +526,7 @@ function MessageCard({ message, index, defaultOpen }: { message: ThreadDetailDto
       <ClientAvatar name={who} size="small" />
       <span><span className="block truncate text-sm font-semibold">{who}</span><span className={s.snippet}>{open ? 'to ' + (message.toAddrs || '(no recipients)') : message.snippet || '(no preview)'}</span></span>
       {message.hasAttachments && <Paperclip size={14} aria-label="Has attachments" />}
-      <time>{message.date ? new Date(message.date).toLocaleDateString('en-GB') : ''}</time>
+      <time dateTime={message.date ?? undefined}>{formatWhen(message.date)}</time>
       <ChevronRight size={14} aria-hidden style={{ transform: open ? 'rotate(90deg)' : undefined, transition: 'transform var(--t2) var(--ease)' }} />
     </button>
     <MailDisclosure open={open}><div className={s.messageBody}>

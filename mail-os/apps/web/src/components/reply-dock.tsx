@@ -144,11 +144,11 @@ export function ReplyDock({
     onError: (e) => {
       const resolution = sendId.noteError(e, contentSnapshot());
       if (resolution.action === "send" && resolution.key !== sendId.key) {
-        setError("The request changed, so retrying with a fresh request.");
+        setError("The request changed, so retrying with a fresh request");
         send.mutate(resolution.key);
         return;
       }
-      setError(e instanceof Error ? e.message : "Could not send the reply.");
+      setError(e instanceof Error ? e.message : "Could not send the reply");
     },
   });
 
@@ -156,21 +156,21 @@ export function ReplyDock({
     setError(null);
     setConfirmNewSend(false);
     if (assist.isPending) {
-      setError("Wait for writing assist to finish before sending.");
+      setError("Wait for writing assist to finish before sending");
       return;
     }
     if (isBlankHtml(body)) {
-      setError("The reply is empty.");
+      setError("The reply is empty");
       return;
     }
     if (!ctx.prefillTo) {
-      setError("This thread has no reply address.");
+      setError("This thread has no reply address");
       return;
     }
     if (!sendId.canSend) {
       setError(
         sendId.outcome === "accepted"
-          ? "This reply was already sent."
+          ? "This reply was already sent"
           : "This reply may already have gone out. Check Sent before starting a new send."
       );
       return;
@@ -291,8 +291,8 @@ export function ReplyDock({
         <div className="flex flex-wrap items-center gap-2 px-1 pt-2 text-xs text-muted">
           <span>
             {confirmNewSend
-              ? "Confirm this is a new send after checking Sent."
-              : "Check the Sent folder first, then start a new send if it is missing."}
+              ? "Confirm this is a new send after checking Sent"
+              : "Check the Sent folder first, then start a new send if it is missing"}
           </span>
           <button
             type="button"

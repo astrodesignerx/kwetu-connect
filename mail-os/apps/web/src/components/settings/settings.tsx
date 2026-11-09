@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/page-header";
 import { Button, ViewState } from "@/components/ui";
 import s from "./settings.module.css";
+import { formatDateTime } from "@/lib/format";
 
 export function SettingsHeader({ title, context = "Settings", description, action }: {
   title: string; context?: string; description?: string; action?: React.ReactNode;
@@ -17,8 +18,8 @@ export function SettingsState({ loading, error, empty = "Nothing here yet", retr
   loading?: boolean; error?: unknown; empty?: string; retry?: () => void;
 }) {
   return <div className={s.state}>
-    <ViewState loading={loading} label={error ? "This could not load" : loading ? "Getting your workspace ready." : empty} />
-    {!!error && <p role="alert">{error instanceof Error ? error.message : "Please try again."}</p>}
+    <ViewState loading={loading} label={error ? "This could not load" : loading ? "Getting your workspace ready" : empty} />
+    {!!error && <p role="alert">{error instanceof Error ? error.message : "Please try again"}</p>}
     {!!error && retry && <Button variant="default" onClick={retry}>Try again</Button>}
   </div>;
 }
@@ -38,5 +39,5 @@ export function Stat({ value, label }: { value: React.ReactNode; label: string }
   return <div className={s.stat}><b>{value}</b><small>{label}</small></div>;
 }
 export function dateTime(value?: string | null) {
-  return value ? new Date(value).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }) : "Not yet";
+  return formatDateTime(value, "Not yet");
 }

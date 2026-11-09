@@ -28,7 +28,7 @@ export function FlightForm({ projects, initial, onDone }: {
   });
   return <form className={s.form} onSubmit={event => {
     event.preventDefault();
-    const problem = validateFlight({ siteName, startDate, endDate }) ?? (!projectId ? "Choose a project." : null);
+    const problem = validateFlight({ siteName, startDate, endDate }) ?? (!projectId ? "Choose a project" : null);
     setError(problem);
     if (!problem && !save.isPending) save.mutate();
   }}>

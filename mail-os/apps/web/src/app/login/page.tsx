@@ -43,8 +43,8 @@ export default function LoginPage() {
 
   return (
     <AuthCard
-      title="Welcome back."
-      subtitle="Sign in to Kwetu OS"
+      title="Sign in"
+      subtitle="Use your Kwetu OS account"
       footer={
         <>
           <Link

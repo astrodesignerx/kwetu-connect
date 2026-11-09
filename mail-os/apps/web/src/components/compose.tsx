@@ -1,5 +1,6 @@
 "use client";
 
+import { formatTime } from "@/lib/format";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -225,7 +226,7 @@ export function ComposeModal({
         setError(
           e.code === "draft_conflict"
             ? "This draft changed elsewhere. Reload it before saving again."
-            : "This draft was already sent or discarded."
+            : "This draft was already sent or discarded"
         );
         return;
       }
@@ -306,7 +307,7 @@ export function ComposeModal({
       ]);
     } catch (e) {
       settledRef.current = false;
-      setError(e instanceof Error ? e.message : "Could not finish saving.");
+      setError(e instanceof Error ? e.message : "Could not finish saving");
       return;
     }
     const id = latest.current.draftId;
@@ -315,7 +316,7 @@ export function ComposeModal({
         await api.deleteDraft(id);
       } catch (e) {
         settledRef.current = false;
-        setError(e instanceof Error ? e.message : "Could not discard the draft.");
+        setError(e instanceof Error ? e.message : "Could not discard the draft");
         return;
       }
       void queryClient.invalidateQueries({ queryKey: ["drafts"] });
@@ -361,7 +362,7 @@ export function ComposeModal({
         // The failed identity is spent (content mismatch on a safely failed
         // operation): one immediate attempt with the fresh identity.
         autoRetriedRef.current = true;
-        setError("The request changed, so retrying with a fresh request.");
+        setError("The request changed, so retrying with a fresh request");
         send.mutate(buildSendRequest(resolution.key));
         return;
       }
@@ -398,18 +399,18 @@ export function ComposeModal({
     setError(null);
     setConfirmNewSend(false);
     if (!to.trim()) {
-      setError("Add at least one recipient.");
+      setError("Add at least one recipient");
       toInput.current?.focus();
       return;
     }
     if (isBlankHtml(body)) {
-      setError("The message is empty.");
+      setError("The message is empty");
       return;
     }
     if (!sendId.canSend) {
       setError(
         sendId.outcome === "accepted"
-          ? "This draft was already sent."
+          ? "This draft was already sent"
           : "This send may already have gone out. Check Sent before starting a new send."
       );
       return;
@@ -424,7 +425,7 @@ export function ComposeModal({
       ]);
     } catch (e) {
       settledRef.current = false;
-      setError(e instanceof Error ? e.message : "Could not finish saving.");
+      setError(e instanceof Error ? e.message : "Could not finish saving");
       return;
     }
     send.mutate(buildSendRequest(sendId.keyForSend(contentSnapshot())));
@@ -467,14 +468,14 @@ export function ComposeModal({
     mutationFn: () =>
       ctx.replyToThreadId
         ? api.suggestReply({ threadId: ctx.replyToThreadId, tone })
-        : Promise.reject(new Error("Reply context required.")),
+        : Promise.reject(new Error("Reply context required")),
     onSuccess: (r) => {
       // The AI returns prose, not markup; wrapping it keeps the editor from showing
       // one run-on paragraph.
       setBody(looksLikeHtml(r.reply) ? r.reply : textToHtml(r.reply));
       setAiError(null);
     },
-    onError: (e) => setAiError(e instanceof Error ? e.message : "Could not draft a reply."),
+    onError: (e) => setAiError(e instanceof Error ? e.message : "Could not draft a reply"),
   });
 
   const rewrite = useMutation({
@@ -483,7 +484,7 @@ export function ComposeModal({
       setBody(looksLikeHtml(r.body) ? r.body : textToHtml(r.body));
       setAiError(null);
     },
-    onError: (e) => setAiError(e instanceof Error ? e.message : "Could not rewrite."),
+    onError: (e) => setAiError(e instanceof Error ? e.message : "Could not rewrite"),
   });
 
   const aiBusy = suggest.isPending || rewrite.isPending;
@@ -794,7 +795,7 @@ export function ComposeModal({
                 srcDoc={frameDocument(
                   preview.data?.bodyHtml ??
                     (isBlankHtml(outgoingHtml)
-                      ? "<p style='color:#999'>Start typing to see the rendered email here.</p>"
+                      ? "<p style='color:#999'>Start typing to see the rendered email here</p>"
                       : outgoingHtml),
                   true
                 )}
@@ -818,8 +819,8 @@ export function ComposeModal({
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
               <span>
                 {confirmNewSend
-                  ? "Confirm this is a new send after checking Sent."
-                  : "Check the Sent folder first, then start a new send if it is missing."}
+                  ? "Confirm this is a new send after checking Sent"
+                  : "Check the Sent folder first, then start a new send if it is missing"}
               </span>
               <button
                 type="button"
@@ -1022,7 +1023,7 @@ function TemplatePicker({
           </div>
         ) : !data?.length ? (
           <div className="p-6">
-            <MutedText>No templates yet. Create one in Settings → Templates.</MutedText>
+            <MutedText>No templates yet. Create one in Settings, under Templates.</MutedText>
           </div>
         ) : (
           <div className="grid min-h-0 flex-1 grid-cols-1 sm:grid-cols-[16rem_minmax(0,1fr)]">
@@ -1279,7 +1280,7 @@ function TemplateFill({
                 ))}
 
                 {template.variables.length === 0 && template.lists.length === 0 && (
-                  <MutedText>This template has nothing to fill in.</MutedText>
+                  <MutedText>This template has nothing to fill in</MutedText>
                 )}
               </>
             )}
@@ -1298,7 +1299,7 @@ function TemplateFill({
               <span className="min-w-0 flex-1 truncate text-xs text-muted">
                 {missing.length > 0
                   ? `${missing.length} still to fill in. The preview shows examples meanwhile.`
-                  : "Ready to insert."}
+                  : "Ready to insert"}
               </span>
               <Button
                 onClick={() => insert.mutate()}
@@ -1379,5 +1380,5 @@ function looksLikeHtml(value: string): boolean {
 }
 
 function timeOf(d: Date): string {
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return formatTime(d);
 }

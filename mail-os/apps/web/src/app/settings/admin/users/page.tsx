@@ -27,12 +27,12 @@ export default function AdminUsersPage() {
   });
   if (!ready) return <SettingsState loading />;
   return <div className={s.page}>
-    <SettingsHeader title="Team and invitations" context="Settings / Admin" description="The people in your workspace and what they can do." />
+    <SettingsHeader title="Team and invitations" context="Settings / Admin" description="The people in your workspace and what they can do" />
     <Feedback error={updateRole.error} message={updateRole.isSuccess ? "Role updated. That person must sign in again." : null} />
     {users.isPending ? <SettingsState loading /> : users.isError ? <SettingsState error={users.error} retry={() => void users.refetch()} /> : users.data.length === 0 ? <SettingsState empty="No people to show" /> : <div className={s.people}>{users.data.map((person) => <article className={s.person} key={person.id}>
       <div className={s.identity}><Avatar name={person.displayName} /><div><b>{person.displayName}{person.id === me?.id && <small> (you)</small>}</b><p>{person.email}</p></div></div>
       <div className={s.meta}><Chip>{person.role}</Chip><span>{person.mailboxCount} {person.mailboxCount === 1 ? "mailbox" : "mailboxes"}</span></div>
-      <small className={s.note}>Last sign-in {dateTime(person.lastLoginAt)}</small>
+      <small className={s.note}>Last sign-in <time dateTime={person.lastLoginAt ?? undefined}>{dateTime(person.lastLoginAt)}</time></small>
       {person.id !== me?.id && <Button variant="ghost" disabled={updateRole.isPending} onClick={() => updateRole.mutate({ id: person.id, role: person.role === "Admin" ? "Member" : "Admin" })}>{person.role === "Admin" ? "Change to member" : "Make admin"}</Button>}
     </article>)}</div>}
     <Panel><h2>What each role can do</h2><div className={s.matrix}><table><thead><tr><th scope="col">Permission</th><th scope="col">Admin</th><th scope="col">Member</th></tr></thead><tbody>{permissions.map(([permission, admin, member]) => <tr key={permission}><th scope="row">{permission}</th><td>{admin}</td><td>{member}</td></tr>)}</tbody></table></div><p className={s.note}>Permissions reflect the current API. Only the author or an admin can delete an internal note. Removing accounts is not available.</p></Panel>

@@ -28,6 +28,6 @@ describe("client directory", () => {
     fireEvent.keyDown(screen.getByRole("tab", { name: "Grid" }), { key: "ArrowRight" });
     expect(document.getElementById("client-results")?.dataset.view).toBe("list");
     fireEvent.change(screen.getByRole("textbox"), { target: { value: "not present" } });
-    expect(screen.getByText("No clients match that search.")).toBeTruthy();
+    expect(screen.getByText("No clients match that search")).toBeTruthy();
   });
 });

@@ -35,7 +35,7 @@ export default function TemplateEditorPage() {
 
 function EditorLookup() {
   const id = useSearchParams().get("id") ?? "";
-  return id ? <TemplateEditor key={id} id={id} /> : <p>Choose a template from the library.</p>;
+  return id ? <TemplateEditor key={id} id={id} /> : <p>Choose a template from the library</p>;
 }
 
 function TemplateEditor({ id }: { id: string }) {
@@ -75,7 +75,7 @@ function TemplateEditor({ id }: { id: string }) {
   }
 
   if (isLoading) return <ViewState loading label="Loading template" />;
-  if (!effective) return <p role="alert">Could not load this template.</p>;
+  if (!effective) return <p role="alert">Could not load this template</p>;
   const dirty = edit !== null;
 
   return (
@@ -269,7 +269,7 @@ function SubjectField({
         onBlur={remember}
         placeholder="Update on your campaign"
       />
-      <Hint>What your client sees in their inbox list.</Hint>
+      <Hint>What your client sees in their inbox list</Hint>
     </div>
   );
 }
@@ -340,10 +340,10 @@ function Preview({
   return (
     <aside className={s.preview}>
       <div className={s.previewHead}><span>Recipient preview</span><Segmented label="Preview device" value={device} onChange={setDevice} options={[{ value: "desktop", label: "Desktop" }, { value: "phone", label: "Phone" }]} /></div>
-      <DevicePreview key={device} device={device} html={data?.bodyHtml ?? "<p style='font-family:sans-serif;padding:16px'>Start writing to see the email.</p>"} />
+      <DevicePreview key={device} device={device} html={data?.bodyHtml ?? "<p style='font-family:sans-serif;padding:16px'>Start writing to see the email</p>"} />
       <div className={s.previewSubject} role={isError ? "alert" : undefined}>
         {isError
-          ? "Could not build the preview just now."
+          ? "Could not build the preview just now"
           : `Subject: ${data?.subject || "(none)"}`}
       </div>
       {variables.length > 0 && <fieldset className={s.samples}><legend>Sample values for the preview</legend>{variables.map(token => <label key={token}>{labelFor(token)}<input value={values[token] ?? ""} placeholder={exampleFor(token) || labelFor(token)} onChange={event => setValues(current => ({ ...current, [token]: event.target.value }))} /></label>)}</fieldset>}

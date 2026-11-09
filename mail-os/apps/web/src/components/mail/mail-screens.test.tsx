@@ -31,7 +31,7 @@ describe("Signal mail screens", () => {
     };
     brief.mockResolvedValue(response);
     mount(<MorningBrief />);
-    expect(await screen.findByRole("heading", { name: "Your morning brief" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Morning brief" })).toBeTruthy();
     expect(screen.queryByText(/Habari/)).toBeNull();
     expect(screen.getByRole("link", { name: /Confirm installation/ }).getAttribute("href")).toBe("/mail?id=thread-1");
     expect(screen.getByText("Waiting 2h 0m")).toBeTruthy();

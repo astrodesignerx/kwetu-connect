@@ -136,7 +136,7 @@ export function AttachmentList({
           <span className="text-xs text-muted">
             {names.length > 0
               ? `${names.join(", ")}: not downloaded yet.`
-              : "This message has an attachment that hasn't been downloaded yet."}
+              : "This message has an attachment that hasn't been downloaded yet"}
           </span>
           <span className="text-xs text-muted">
             An admin can fetch it with{" "}

@@ -11,6 +11,7 @@ import { draftReadiness } from "@/lib/signal-mail";
 import { htmlToText } from "@/lib/mail-frame";
 import { ComposeModal, loadDraftToContext, type ComposeContext } from "@/components/compose";
 import { combineDraftLists } from "@/lib/drafts";
+import { formatDateTime } from "@/lib/format";
 
 export default function DraftsPage() {
   const { ready } = useRequireAuth();
@@ -35,7 +36,7 @@ export default function DraftsPage() {
   if (!ready) return null;
   return (
     <div className={s.page}>
-      <PageHeader title="Drafts" description={loading ? "Loading drafts..." : failed ? "Drafts unavailable" : `${drafts.length} saved / ${drafts.filter((draft) => draftReadiness(draft).ready).length} ready`} />
+      <PageHeader title="Drafts" description={loading ? "Loading drafts..." : failed ? "Drafts unavailable" : `${drafts.length} saved, ${drafts.filter((draft) => draftReadiness(draft).ready).length} ready to send`} />
       {remove.isError && <p role="alert">Could not discard this draft. Try again.</p>}
       {failed && <p role="alert" className={s.quiet}>Drafts could not load. <button onClick={() => { void overview.refetch(); void saved.refetch(); }}>Try again</button></p>}
       {loading ? <p className={s.quiet} role="status">Opening your saved messages...</p> : drafts.length ? <ul className={s.sheets}>{drafts.map((draft, index) => {
@@ -46,11 +47,11 @@ export default function DraftsPage() {
             <h2>{draft.subject || '(no subject)'}</h2>
             <p>{draft.bodyText || htmlToText(draft.bodyHtml ?? '') || 'No message yet.'}</p>
             <span className={s.recipient}>From {mailboxById.get(draft.mailboxConnectionId)?.email}</span>
-            <span className={s.footer}><time dateTime={draft.updatedAt}>{new Date(draft.updatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</time><StatusChip label={readiness.label} strong={!readiness.ready} /></span>
+            <span className={s.footer}><time dateTime={draft.updatedAt}>{formatDateTime(draft.updatedAt)}</time><StatusChip label={readiness.label} strong={!readiness.ready} /></span>
           </button>
           <button className={s.discard} disabled={remove.isPending} onClick={() => remove.mutate(draft.id)}>Discard</button>
         </li>;
-      })}</ul> : !failed && <p className={s.quiet}>No drafts. Your next message starts here.</p>}
+      })}</ul> : !failed && <p className={s.quiet}>No drafts</p>}
       {editing && (
         <ComposeModal ctx={editing} onClose={() => setEditing(null)} />
       )}

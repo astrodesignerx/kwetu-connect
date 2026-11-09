@@ -1,6 +1,7 @@
 import type { AttachmentDto, MailDraftDto, ThreadDetailDto } from "@kompanion/types";
 import { bodyFragment, escapeHtml, textToHtml } from "./mail-frame";
 import { snapshotSendContent } from "./send-identity";
+import { formatDateTime } from "@/lib/format";
 
 export interface ComposeContext {
   mode: "new" | "reply";
@@ -73,7 +74,7 @@ export function replyContextFromThread(
   const quotedHtml = [...thread.messages]
     .reverse()
     .reduce((inner, m) => {
-      const when = m.date ? new Date(m.date).toLocaleString() : "";
+      const when = m.date ? formatDateTime(m.date) : "";
       const who = m.fromName || m.fromAddr || "Unknown";
       const content = m.bodyHtml
         ? bodyFragment(m.bodyHtml)

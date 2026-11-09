@@ -8,6 +8,7 @@ import { Meter } from "@/components/signal";
 import { Button, Input } from "@/components/ui";
 import { Avatar, Feedback, Field, Panel, SettingsHeader } from "@/components/settings/settings";
 import s from "./page.module.css";
+import { formatDate } from "@/lib/format";
 
 export default function ProfilePage() {
   const { user, setUser, setAuth } = useAuthStore();
@@ -31,19 +32,19 @@ export default function ProfilePage() {
       else setUser(response.user);
       if (form === "details") { setUsername(response.user.username); setDisplayName(response.user.displayName); }
       else { setCurrentPassword(""); setNewPassword(""); }
-      setResult({ form, message: response.token ? "Password changed. Other signed-in sessions have been signed out." : "Details saved." });
-    } catch (error) { setResult({ form, error: error instanceof Error ? error.message : "Update failed." }); }
+      setResult({ form, message: response.token ? "Password changed. Other signed-in sessions have been signed out." : "Details saved" });
+    } catch (error) { setResult({ form, error: error instanceof Error ? error.message : "Update failed" }); }
     finally { setBusy(null); }
   }
 
   return <div className={s.page}>
-    <SettingsHeader title="Profile" context="Settings / Personal" description="How you appear to your team and how you sign in." />
+    <SettingsHeader title="Profile" context="Settings / Personal" description="How you appear to your team and how you sign in" />
     <div className={s.layout}>
-      <aside className={s.pass}><small>Kwetu OS / Staff</small><Avatar name={user?.displayName ?? ""} /><div><h2>{user?.displayName}</h2><p>{user?.role}</p></div><dl><dt>Username</dt><dd>@{user?.username}</dd><dt>Email</dt><dd>{user?.email}</dd><dt>Member since</dt><dd>{user?.createdAt ? new Date(user.createdAt).toLocaleDateString("en-GB", { month: "long", year: "numeric" }) : "Not available"}</dd></dl></aside>
+      <aside className={s.pass}><small>Kwetu OS / Staff</small><Avatar name={user?.displayName ?? ""} /><div><h2>{user?.displayName}</h2><p>{user?.role}</p></div><dl><dt>Username</dt><dd>@{user?.username}</dd><dt>Email</dt><dd>{user?.email}</dd><dt>Member since</dt><dd><time dateTime={user?.createdAt ?? undefined}>{formatDate(user?.createdAt, "Not available")}</time></dd></dl></aside>
       <div className={s.forms}>
         <Panel><form className={s.form} onSubmit={(event) => void save(event, "details")}><h2>Details</h2><div className={s.fields}>
           <Field label="Display name" htmlFor="displayName"><Input id="displayName" value={displayName} onChange={(event) => setDisplayName(event.target.value)} required /></Field>
-          <Field label="Username" htmlFor="username" hint="Use this or your email to sign in."><Input id="username" autoComplete="username" spellCheck={false} value={username} onChange={(event) => setUsername(event.target.value)} required /></Field>
+          <Field label="Username" htmlFor="username" hint="Use this or your email to sign in"><Input id="username" autoComplete="username" spellCheck={false} value={username} onChange={(event) => setUsername(event.target.value)} required /></Field>
         </div>{result?.form === "details" && <Feedback error={result.error} message={result.message} />}<Button type="submit" disabled={!!busy}>Save details</Button></form></Panel>
         <Panel><form className={s.form} onSubmit={(event) => void save(event, "password")}><h2>Password</h2><div className={s.fields}>
           <Field label="Current password" htmlFor="currentPassword"><Input id="currentPassword" type="password" autoComplete="current-password" required value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} /></Field>

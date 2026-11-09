@@ -138,6 +138,6 @@ describe("drafts across mailboxes", () => {
     expect(await screen.findByText("Ready to send")).toBeTruthy();
     expect(await screen.findByText("Missing recipient and subject")).toBeTruthy();
     expect(screen.getByText("Missing recipient")).toBeTruthy();
-    expect(screen.getByText("3 saved / 1 ready")).toBeTruthy();
+    expect(screen.getByText("3 saved, 1 ready to send")).toBeTruthy();
   });
 });

@@ -123,7 +123,7 @@ export function ThreadLinker({ threadId }: { threadId: string }) {
           onPick={(id) => linkCompany.mutate(id)}
         />
       ) : (
-        <MutedText>Not tagged to a client yet.</MutedText>
+        <MutedText>Not tagged to a client yet</MutedText>
       )}
       {data.contacts.length > 0 && (
         <div className="mt-3 border-t border-line pt-2">
