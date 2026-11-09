@@ -13,7 +13,17 @@ const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", 
 const SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const WEEK = [1, 2, 3, 4, 5, 6, 0];
 type Section = "price" | "discounts" | "capacity" | "lengths" | "often" | "lead" | "blocks" | "hours";
-const TITLES: Record<Section, string> = { price: "Price", discounts: "Discounts", capacity: "Sold per hour", lengths: "Lengths", often: "Plays an hour", lead: "Booking lead", blocks: "Time blocks", hours: "Screen hours" };
+const TITLES: Record<Section, string> = { price: "Price", discounts: "Discounts", capacity: "For sale each hour", lengths: "Lengths", often: "Plays an hour", lead: "Booking lead", blocks: "Time blocks", hours: "Screen hours" };
+const HINTS: Record<Section, string> = {
+  price: "What each second of screen time costs, and the smallest order the booking page accepts.",
+  discounts: "A percentage taken off the whole price once an order reaches a number of plays.",
+  capacity: "How many seconds of each hour are for sale, and the most plays one advertiser can take in an hour.",
+  lengths: "The advert lengths customers can choose on the booking page, in seconds.",
+  often: "The plays an hour choices customers can choose on the booking page.",
+  lead: "How many working days a booking needs before its first play, not counting the public holidays listed.",
+  blocks: "The named parts of the day customers pick hours from.",
+  hours: "When the screen is on each day, and the time blocks that split the day.",
+};
 const ICONS = { price: Coins, discounts: Percent, capacity: Hourglass, lengths: FilmStrip, often: Play, lead: Timer, blocks: Clock, hours: Clock };
 const n = (value: number) => value.toLocaleString("en-GB");
 const hh = (hour: number) => String(hour).padStart(2, "0");
@@ -32,7 +42,16 @@ function hoursSummary(hours: BookingSettings["screenHours"]) {
   return hourGroups(hours).map((g) => (g.from === g.to ? SHORT[g.from] : SHORT[g.from] + " to " + SHORT[g.to]) + (g.open >= g.close ? " closed" : " " + hh(g.open) + " to " + hh(g.close))).join(", ");
 }
 
-export default function SettingsEditor({ initial }: { initial: BookingSettings }) {
+/** "Fri to Sun" or "Mon, Wed": days (Monday first) as short names, runs of three or more joined with "to". */
+function dayList(days: number[]) {
+  const runs: number[][] = [];
+  for (const day of WEEK.filter((d) => days.includes(d))) { const last = runs[runs.length - 1]; if (last && WEEK.indexOf(day) === WEEK.indexOf(last[last.length - 1]) + 1) last.push(day); else runs.push([day]); }
+  return runs.map((run) => run.length > 2 ? SHORT[run[0]] + " to " + SHORT[run[run.length - 1]] : run.map((d) => SHORT[d]).join(", ")).join(", ");
+}
+/** A number field with its unit inside the box on the right. */
+const Unit = ({ unit, children }: { unit: string; children: React.ReactNode }) => <span className="settings-input">{children}<em aria-hidden="true">{unit}</em></span>;
+
+export default function SettingsEditor({ initial, activeBookings }: { initial: BookingSettings; activeBookings: number }) {
   const [settings, setSettings] = useState(initial);
   const [lengths, setLengths] = useState(initial.lengths.join(", "));
   const [holidays, setHolidays] = useState(initial.publicHolidays.join("\n"));
@@ -47,33 +66,37 @@ export default function SettingsEditor({ initial }: { initial: BookingSettings }
   const steps = [...candidate.discountSteps].sort((a, b) => a.minPlays - b.minPlays);
   const lens = [...candidate.lengths].filter(Number.isFinite).sort((a, b) => a - b);
   const plays = candidate.howOften.map((o) => o.plays).sort((a, b) => a - b);
-  const tiles: { id: Section; value: string; note: string; wide?: boolean }[] = [
-    { id: "price", value: `KES ${n(candidate.kesPerSecond)} / s`, note: `Smallest order ${n(candidate.minOrderKes)}` },
-    { id: "discounts", value: steps.length ? steps.map((s) => s.percent).join(" / ") + "%" : "None", note: steps.length ? `From ${n(steps[0].minPlays)} plays` : "No discount steps" },
-    { id: "capacity", value: `${n(Math.round(candidate.secondsForSalePerHour / 60))} min`, note: `Max ${candidate.maxPlaysPerAdvertiserPerHour} plays each` },
-    { id: "lengths", value: lens.length ? `${lens[0]} to ${lens[lens.length - 1]}s` : "None", note: `${lens.length} choices` },
-    { id: "often", value: plays.length ? `${plays[0]} to ${plays[plays.length - 1]}` : "None", note: `${plays.length} choices` },
-    { id: "lead", value: `${candidate.leadWorkingDays} ${candidate.leadWorkingDays === 1 ? "day" : "days"}`, note: `${candidate.publicHolidays.length} holidays set` },
-    { id: "blocks", value: `${Object.keys(candidate.timeBlocks).length} blocks`, note: Object.values(candidate.timeBlocks).map((block) => block.label).join(", ") },
-    { id: "hours", value: hoursSummary(candidate.screenHours), note: `${Object.keys(candidate.timeBlocks).length} time blocks, ${Object.values(candidate.timeBlocks).map((b) => b.label).join(", ")}`, wide: true },
+  // A rule is only stated when the hours really follow it: the late block open on some days but not all.
+  const late = candidate.timeBlocks.late;
+  const lateDays = late ? WEEK.filter((day) => candidate.screenHours[day].close > late.startHour && candidate.screenHours[day].open < late.endHour) : [];
+  const hoursRule = late && lateDays.length > 0 && lateDays.length < 7 ? `${late.label} block runs ${dayList(lateDays)} only` : "";
+  const tiles: { id: Section; value: React.ReactNode; sig: string; note: string; aside?: string; wide?: boolean }[] = [
+    { id: "price", value: <>KES {n(candidate.kesPerSecond)} <small>a second</small></>, sig: String(candidate.kesPerSecond), note: `Smallest order KES ${n(candidate.minOrderKes)}` },
+    { id: "discounts", value: steps.length ? steps.map((s) => s.percent).join(" / ") + "%" : "None", sig: steps.map((s) => s.percent).join(), aside: "by plays booked", note: steps.length ? `From ${n(steps[0].minPlays)} plays` : "No discount steps" },
+    { id: "capacity", value: `${n(Math.round(candidate.secondsForSalePerHour / 60))} min`, sig: String(candidate.secondsForSalePerHour), note: `${n(candidate.secondsForSalePerHour)} s, up to ${candidate.maxPlaysPerAdvertiserPerHour} plays per advertiser` },
+    { id: "lengths", value: lens.length ? `${lens[0]} to ${lens[lens.length - 1]}s` : "None", sig: lens.join(), note: "" },
+    { id: "often", value: plays.length ? `${plays[0]} to ${plays[plays.length - 1]}` : "None", sig: plays.join(), note: "" },
+    { id: "lead", value: `${candidate.leadWorkingDays} ${candidate.leadWorkingDays === 1 ? "day" : "days"}`, sig: String(candidate.leadWorkingDays), note: "Before the first play" },
+    { id: "blocks", value: `${Object.keys(candidate.timeBlocks).length} blocks`, sig: "blocks", note: "" },
+    { id: "hours", value: hoursSummary(candidate.screenHours), sig: hoursSummary(candidate.screenHours), note: "", aside: hoursRule, wide: true },
   ];
 
-  const field = (key: keyof Pick<BookingSettings, "kesPerSecond" | "minOrderKes" | "secondsForSalePerHour" | "maxPlaysPerAdvertiserPerHour" | "leadWorkingDays">, label: string) =>
-    <label key={key}>{label}<input type="number" min={1} step={1} required value={settings[key]} onChange={(e) => update((s) => { s[key] = Number(e.target.value); })} /></label>;
+  const field = (key: keyof Pick<BookingSettings, "kesPerSecond" | "minOrderKes" | "secondsForSalePerHour" | "maxPlaysPerAdvertiserPerHour" | "leadWorkingDays">, label: string, unit: string) =>
+    <label key={key}>{label}<Unit unit={unit}><input type="number" min={1} step={1} required value={settings[key]} onChange={(e) => update((s) => { s[key] = Number(e.target.value); })} /></Unit></label>;
 
   const editors: Record<Section, React.ReactNode> = {
     blocks: <>{(Object.keys(settings.timeBlocks) as (keyof BookingSettings["timeBlocks"])[]).map((id) => <div key={id} className="settings-row is-block"><input aria-label={`${id} label`} value={settings.timeBlocks[id].label} maxLength={80} onChange={(e) => update((s) => { s.timeBlocks[id].label = e.target.value; })} /><input aria-label={`${id} start hour`} type="number" min={0} max={23} step={1} value={settings.timeBlocks[id].startHour} onChange={(e) => update((s) => { s.timeBlocks[id].startHour = Number(e.target.value); })} /><input aria-label={`${id} end hour`} type="number" min={1} max={24} step={1} value={settings.timeBlocks[id].endHour} onChange={(e) => update((s) => { s.timeBlocks[id].endHour = Number(e.target.value); })} /></div>)}</>,
-    price: <>{field("kesPerSecond", "KES per second")}{field("minOrderKes", "Smallest order (KES)")}</>,
-    capacity: <>{field("secondsForSalePerHour", "Seconds for sale per hour")}{field("maxPlaysPerAdvertiserPerHour", "Maximum plays per advertiser per hour")}</>,
-    lengths: <label>Available lengths in seconds, separated by commas<input value={lengths} onChange={(e) => setLengths(e.target.value)} required /><span className="settings-hint">Use multiples of 5 seconds.</span></label>,
-    lead: <>{field("leadWorkingDays", "Lead working days")}<label>Public holidays, one per line (YYYY-MM-DD)<textarea rows={4} value={holidays} onChange={(e) => setHolidays(e.target.value)} /></label></>,
+    price: <>{field("kesPerSecond", "KES per second", "KES")}{field("minOrderKes", "Smallest order", "KES")}</>,
+    capacity: <>{field("secondsForSalePerHour", "Seconds for sale per hour", "s")}{field("maxPlaysPerAdvertiserPerHour", "Maximum plays per advertiser per hour", "plays an hour")}</>,
+    lengths: <label>Available lengths in seconds, separated by commas<Unit unit="s"><input value={lengths} onChange={(e) => setLengths(e.target.value)} required /></Unit><span className="settings-hint">Use multiples of 5 seconds.</span></label>,
+    lead: <>{field("leadWorkingDays", "Lead working days", "days")}<label>Public holidays, one per line (YYYY-MM-DD), {candidate.publicHolidays.length} set<textarea rows={4} value={holidays} onChange={(e) => setHolidays(e.target.value)} /></label></>,
     discounts: <>{settings.discountSteps.map((step, index) => <div key={index} className="settings-row">
-      <label>From plays<input type="number" min={1} step={1} value={step.minPlays} onChange={(e) => update((s) => { s.discountSteps[index].minPlays = Number(e.target.value); })} /></label>
-      <label>Percent off<input type="number" min={1} max={99} step={1} value={step.percent} onChange={(e) => update((s) => { s.discountSteps[index].percent = Number(e.target.value); })} /></label>
+      <label>From plays<Unit unit="plays"><input type="number" min={1} step={1} value={step.minPlays} onChange={(e) => update((s) => { s.discountSteps[index].minPlays = Number(e.target.value); })} /></Unit></label>
+      <label>Percent off<Unit unit="%"><input type="number" min={1} max={99} step={1} value={step.percent} onChange={(e) => update((s) => { s.discountSteps[index].percent = Number(e.target.value); })} /></Unit></label>
       <button type="button" className="settings-remove" aria-label={`Remove step ${index + 1}`} onClick={() => update((s) => { s.discountSteps.splice(index, 1); })}><X size={14} aria-hidden="true" /></button>
     </div>)}<button type="button" className="settings-add" onClick={() => update((s) => { s.discountSteps.push({ minPlays: 1, percent: 1 }); })}>+ Add step</button><span className="settings-hint">Highest plays and percent first.</span></>,
     often: <>{settings.howOften.map((option, index) => <div key={index} className="settings-row">
-      <label>Plays an hour<input type="number" min={1} step={1} value={option.plays} onChange={(e) => update((s) => { s.howOften[index].plays = Number(e.target.value); })} /></label>
+      <label>Plays an hour<Unit unit="plays"><input type="number" min={1} step={1} value={option.plays} onChange={(e) => update((s) => { s.howOften[index].plays = Number(e.target.value); })} /></Unit></label>
       <label>Label<input value={option.label} maxLength={80} onChange={(e) => update((s) => { s.howOften[index].label = e.target.value; })} /></label>
       <button type="button" className="settings-remove" aria-label={`Remove choice ${index + 1}`} onClick={() => update((s) => { s.howOften.splice(index, 1); })}><X size={14} aria-hidden="true" /></button>
     </div>)}<button type="button" className="settings-add" onClick={() => update((s) => { s.howOften.push({ plays: 1, label: "" }); })}>+ Add choice</button></>,
@@ -90,25 +113,34 @@ export default function SettingsEditor({ initial }: { initial: BookingSettings }
   return <form action={action} className="staff-form settings-c">
     <input type="hidden" name="settings" value={JSON.stringify(candidate)} />
     <div className="settings-tiles">{tiles.map((tile) => { const Icon = ICONS[tile.id]; return <button key={tile.id} type="button" className={`settings-tile${tile.wide ? " is-wide" : ""}`} data-section={tile.id} aria-pressed={open === tile.id} aria-controls="settings-panel" onClick={() => setOpen(open === tile.id ? null : tile.id)}>
-      <span className="settings-tile-label"><span className="v2-setting-icon"><Icon size={17} aria-hidden="true" /></span>{TITLES[tile.id]}</span><strong key={tile.value}>{tile.value}</strong><span className="settings-tile-note">{open === tile.id ? "Editing" : tile.note}</span>
+      <span className="settings-tile-label"><span className="v2-setting-icon"><Icon size={17} aria-hidden="true" /></span>{TITLES[tile.id]}{tile.aside && <small className="settings-tile-aside">{tile.aside}</small>}</span><strong key={tile.sig}>{tile.value}</strong>{tile.note && <span className="settings-tile-note">{tile.note}</span>}
       {(tile.id === "lengths" || tile.id === "often" || tile.id === "blocks") && <span className="v2-rule-chips" aria-hidden="true">{(tile.id === "lengths" ? lens.map((length) => length + "s") : tile.id === "often" ? plays.map(String) : Object.values(candidate.timeBlocks).map((block) => `${block.label} ${hh(block.startHour)} to ${hh(block.endHour)}`)).map((label) => <span key={label}>{label}</span>)}</span>}
-      {tile.id === "discounts" && <span className="v2-discount-stair" aria-hidden="true">{[{ minPlays: 0, percent: 0 }, ...steps].map((step) => <span key={step.minPlays + ":" + step.percent}><i style={{ height: `${18 + Math.min(99, step.percent) * 1.2}px` }}>{step.percent}%</i><small>{step.minPlays ? n(step.minPlays) : "Base"}</small></span>)}</span>}
+      {tile.id === "discounts" && <span className="v2-discount-stair" aria-hidden="true">{[{ minPlays: 0, percent: 0 }, ...steps].map((step) => <span key={step.minPlays + ":" + step.percent}><i style={{ height: `${18 + Math.min(99, step.percent) * 1.2}px` }}>{step.percent}%</i><small>{step.minPlays ? n(step.minPlays) : "Under " + n(steps[0].minPlays)}</small></span>)}</span>}
       {tile.id === "hours" && <span className="v2-screen-hours" aria-hidden="true"><span />{Array.from({ length: 24 }, (_, hour) => <small key={hour}>{hour % 3 === 0 ? hh(hour) : ""}</small>)}{hourGroups(candidate.screenHours).map((group) => <span className="v2-screen-hour-row" key={group.from}><span>{SHORT[group.from]}{group.from !== group.to ? " to " + SHORT[group.to] : ""}</span>{Array.from({ length: 24 }, (_, hour) => <i key={hour} data-open={hour >= group.open && hour < group.close} />)}</span>)}</span>}
     </button>; })}</div>
     <aside id="settings-panel" className="settings-panel" aria-label="Edit settings" data-open={open !== null}>
       <fieldset disabled={pending} className="settings-fields" key={open ?? "none"}>
-        {open ? <><div className="settings-panel-head"><h2>{TITLES[open]}</h2><button type="button" className="settings-remove" aria-label="Close panel" onClick={() => setOpen(null)}><X size={14} aria-hidden="true" /></button></div>{editors[open]}</>
+        {open ? <><div className="settings-panel-head"><h2>Editing <span>{TITLES[open]}</span></h2><span className="settings-state" data-draft={unsaved}>{unsaved ? "Draft" : "Saved"}</span><button type="button" className="settings-remove" aria-label="Close panel" onClick={() => setOpen(null)}><X size={14} aria-hidden="true" /></button></div><p className="settings-sub">{HINTS[open]}</p>{editors[open]}</>
           : <p className="settings-sub">Pick a tile to change it. New quotes use these settings; quotes already made keep their price.</p>}
       </fieldset>
-      <div className="settings-impact"><b>Impact on the rulebook examples</b>
+      <div className="settings-impact"><b>Sample orders</b>
         {error ? <p role="alert" className="settings-error">{error}</p> : RULEBOOK_EXAMPLES.map((example) => {
           const before = quote(example.request, initial); const after = quote(example.request, candidate);
           const changed = before.ok && after.ok && before.priceKes !== after.priceKes;
-          return <div key={example.name} className="settings-example"><span>{example.name}</span>
+          return <div key={example.name} className="settings-example"><span>{after.ok ? `${n(after.plays)} plays x ${example.request.lengthSeconds}s, ${after.discountPercent ? after.discountPercent + "% off" : "no discount"}` : example.name}</span>
             <span>{after.ok ? <>{changed && before.ok && <s>KES {n(before.priceKes)}</s>} <b data-changed={changed}>KES {n(after.priceKes)}</b>{after.belowMinimum ? " below smallest order" : ""}</> : after.errors.join(" ")}</span></div>;
         })}
       </div>
-      <button className="staff-button" disabled={Boolean(error) || !unsaved || pending}>{pending ? "Saving..." : unsaved ? "Save changes" : "No changes"}</button>
+      <div className="settings-applies"><b>Where this rule applies</b>
+        <div><span>Public booking page</span><span>/book live calculator</span></div>
+        <div><span>New quote button</span><span>New quotes only</span></div>
+        <div><span>Active bookings</span><span>{n(activeBookings)} keep {activeBookings === 1 ? "its" : "their"} booked price</span></div>
+      </div>
+      <div className="settings-footer">
+        <button className="staff-button" disabled={Boolean(error) || !unsaved || pending}>{pending ? "Saving..." : unsaved ? "Save changes" : "No changes to save"}</button>
+        <button type="button" className="settings-reset" disabled={!unsaved || pending} onClick={() => { setSettings(initial); setLengths(initial.lengths.join(", ")); setHolidays(initial.publicHolidays.join("\n")); }}>Reset</button>
+      </div>
+      <p className="settings-sub">Save lights up once something changes. Existing bookings keep their price.</p>
       <p role="status" className="settings-status">{state.message}</p>
     </aside>
   </form>;

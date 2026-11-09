@@ -3380,3 +3380,32 @@ label.advert-check:hover .advert-medal[data-state="you"] { transform: scale(1.08
   .v2-task:is([data-task]) { padding-block: 3px; }
   .v2-task-stack .v2-starting-soon { margin-top: 4px; padding-top: 8px; }
 }
+
+/* Phase 5 Settings: ember ring on the open tile, editor heading with state, unit suffixes, sample orders and footer. */
+.settings-tile { position: relative; }
+.settings-tile::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; opacity: 0; box-shadow: 0 0 0 2px var(--v2-e2), 0 0 22px -4px var(--v2-glow); transition: opacity var(--duration-base) var(--ease-standard); }
+.settings-tile[aria-pressed="true"]::after { opacity: 1; animation: settings-ring 2.4s var(--ease-standard) infinite; }
+@keyframes settings-ring { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+.settings-tile strong small { font-family: inherit; font-size: 12px; font-weight: 500; color: var(--muted-foreground); }
+.settings-tile-label { justify-content: flex-start; }
+.settings-tile-aside { margin-left: auto; font-size: 10px; font-weight: 500; color: var(--muted-foreground); text-align: right; }
+.settings-tile[aria-pressed="true"] .settings-tile-note { color: var(--muted-foreground); font-weight: 400; }
+.v2-rule-chips > span { border-radius: 999px; padding: 4px 10px; }
+.settings-panel-head { gap: 8px; }
+.settings-panel-head h2 { margin-right: auto; }
+.settings-panel-head h2 span { color: var(--v2-amber-text); }
+.settings-state { font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 999px; color: var(--muted-foreground); background: var(--muted); transition: background var(--duration-base) var(--ease-standard), color var(--duration-base) var(--ease-standard); }
+.settings-state[data-draft="true"] { color: var(--v2-amber-text); background: color-mix(in srgb, var(--v2-e2) 16%, transparent); }
+.settings-input { position: relative; display: block; margin-top: 4px; }
+.settings-input input { width: 100%; padding-right: 3.6rem; }
+.settings-input em { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 11px; color: var(--muted-foreground); pointer-events: none; white-space: nowrap; }
+.settings-applies { display: grid; gap: 6px; padding: 12px 16px; border-radius: 16px; border: 1px solid var(--border); font-size: 12px; }
+.settings-applies > div { display: flex; justify-content: space-between; gap: 8px; }
+.settings-applies > div > span:last-child { color: var(--muted-foreground); text-align: right; }
+.settings-footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.settings-reset { padding: 0 16px; border-radius: 12px; border: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--foreground); transition: border-color var(--duration-base) var(--ease-standard), opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard); }
+.settings-reset:hover:not(:disabled) { border-color: var(--primary); transform: translateY(-1px); }
+.settings-reset:disabled { opacity: .45; }
+.settings-footer .staff-button:disabled { cursor: default; }
+.settings-reset:focus-visible, .settings-tile:focus-visible, .settings-input input:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .settings-tile[aria-pressed="true"]::after { animation: none; } }

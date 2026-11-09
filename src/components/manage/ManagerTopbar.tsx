@@ -12,7 +12,7 @@ const PAGES: [path: string, title: string, note?: string][] = [
   ["/manage/bookings", "Bookings"],
   ["/manage/adverts", "Adverts"],
   ["/manage/schedule", "Schedule"],
-  ["/manage/settings", "Settings", "How the screen is sold. Existing quotes keep their price."],
+  ["/manage/settings", "Settings", "Prices and screen rules | Changes apply to new quotes only"],
 ];
 // "Mon 9 Nov 18:42" in Nairobi time.
 function nairobiStamp(iso: string) {
