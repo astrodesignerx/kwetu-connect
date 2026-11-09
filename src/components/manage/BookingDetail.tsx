@@ -1,6 +1,12 @@
 import { Fragment } from "react";
-import { todayInNairobi } from "@/lib/store/validation";
-import { BookingSummary, CapacityNotice } from "@/components/booking/BookingSummary";
+import Image from "next/image";
+import type { ReactNode } from "react";
+import { CapacityNotice } from "@/components/booking/BookingSummary";
+import Timetable from "@/components/booking/Timetable";
+import { occupancyByDayBlock } from "@/lib/booking/occupancy";
+import { nextAction, weeksOf } from "@/lib/booking/pipeline";
+import { dateRange } from "@/lib/format/dates";
+import BookingHeader from "./BookingHeader";
 import { ActionForm } from "@/components/manage/ActionForm";
 import StatusControls from "@/components/manage/StatusControls";
 import { paymentNote, uploadAdvert, decideAdvert } from "@/app/manage/actions";
@@ -8,10 +14,9 @@ import type { BookingDetail as Detail } from "@/lib/store/types";
 import type { BookingSettings } from "@/lib/booking/settings";
 import AdvertPreview from "./AdvertPreview";
 import BookingDetailTabs from "./BookingDetailTabs";
-import { STATUSES } from "@/lib/booking/status";
 import { number } from "@/components/booking/QuoteTotals";
 
-export default function BookingDetail({ detail, settings, demo, compact = false }: { detail: Detail; settings: BookingSettings; demo: boolean; compact?: boolean }) {
+export default function BookingDetail({ detail, settings, demo, today, moveBase, confirm, compact = false }: { detail: Detail; settings: BookingSettings; demo: boolean; today: string; moveBase: string; confirm?: ReactNode; compact?: boolean }) {
   const { booking: b, advertiser: a, adverts, history } = detail;
   const reference = b.reference;
   const closed = b.status === "Finished" || b.status === "Cancelled";
@@ -23,6 +28,32 @@ export default function BookingDetail({ detail, settings, demo, compact = false 
   </section></div>;
   const contact = <section className="staff-card detail-advertiser space-y-2"><h2>Advertiser</h2><p>{a.name}</p><p>{a.business}</p><p className="break-all"><a className="underline" href={`tel:+${a.phone}`}>+{a.phone}</a></p>{a.email && <p className="break-all"><a className="underline" href={`mailto:${a.email}`}>{a.email}</a></p>}<p>{a.paysBy === "invoice" ? "Pay by invoice" : "Pay now"}</p></section>;
   const historyPanel = <section className="staff-card detail-history"><h2>Status history</h2>{!history.length && <p>No status changes yet.</p>}<ol className="space-y-4">{history.map((entry) => <li key={entry.id} className="break-words border-b border-gray-200 pb-3"><p>{entry.fromStatus} to {entry.toStatus}</p><p className="mt-1 text-sm text-gray-600">{new Date(entry.createdAt).toLocaleString("en-GB", { timeZone: "Africa/Nairobi" })} / {entry.staffEmail}</p>{entry.note && <p className="mt-1">{entry.note}</p>}</li>)}</ol></section>;
-  const summary = <><div className="v2-detail-plan-tiles">{[["Length", b.request.lengthSeconds + "s"], ["Plays an hour", String(b.request.howOften)], ["Planned plays", number(b.plays)], ["Total, VAT included", "KES " + number(b.priceKes)]].map(([label, value]) => <div key={label}><small>{label}</small><b>{value}</b></div>)}</div><div className="v2-booking-detail"><section className="staff-card detail-answers"><h2>Answers and sums</h2><BookingSummary booking={b} settings={settings} /></section><div className="v2-summary-advert">{b.paymentNote && <section className="staff-card"><h2>Recorded payment note</h2><p>{b.paymentNote}</p></section>}<AdvertPreview detail={detail} demo={demo} /><CapacityNotice capacity={detail.capacity} /></div></div></>;
-  return <article className={"booking-detail v2-tabbed-booking" + (compact ? " is-compact" : "")}><header className="v2-detail-header"><div className="v2-detail-identity"><p className="eyebrow">{reference}</p>{!compact && <h1>{a.business}</h1>}<ol className="v2-detail-stages" aria-label="Booking stage">{STATUSES.filter((stage) => stage !== "Cancelled").map((stage, index) => <li key={stage} aria-current={stage === b.status ? "step" : undefined} data-complete={index < STATUSES.indexOf(b.status) && b.status !== "Cancelled"}><i aria-hidden="true">{index + 1}</i><span>{stage}</span></li>)}</ol>{b.status === "Cancelled" && <p className="text-red-700">Cancelled</p>}</div><details className="v2-detail-move"><summary>Change status</summary><div className="staff-card detail-status"><StatusControls key={b.updatedAt} detail={detail} settings={settings} today={todayInNairobi()} /></div></details></header><BookingDetailTabs key={reference} panels={[summary, advertPanel, payment, contact, historyPanel].map((panel, index) => <Fragment key={index}>{panel}</Fragment>)} /></article>;
+  const r = b.request;
+  const advert = adverts.find((ad) => ad.decision === "waiting") ?? adverts[adverts.length - 1];
+  const advertUrl = advert?.filePath ? `/manage/bookings/${reference}/advert/${advert.id}` : null;
+  const extension = advert?.fileName.split(".").pop()?.toUpperCase() ?? "";
+  const isImage = ["PNG", "JPG", "JPEG"].includes(extension);
+  const advertStatus = !advert ? "No advert uploaded yet" : advert.decision === "waiting" ? "Waiting for review" : advert.decision === "approved" ? "Approved" : "Refused";
+  const rate = b.plays && r.lengthSeconds ? +(b.fullPriceKes / (b.plays * r.lengthSeconds)).toFixed(2) : 0;
+  const saved = b.fullPriceKes - b.priceKes;
+  const summary = <><div className="v2-detail-plan-tiles">{[["Length", r.lengthSeconds + "s"], ["Plays an hour", String(r.howOften)], ["Plays", number(b.plays)], ["Weeks", String(weeksOf(r))]].map(([label, value]) => <div key={label}><small>{label}</small><b>{value}</b></div>)}</div>
+    <div className="v2-booking-detail v2-summary-grid">
+      <section className="staff-card v2-hours-card"><div className="v2-card-head"><h2>Booked hours</h2><span>{dateRange(r.startDate, r.endDate)}</span></div><div className="booking-summary"><Timetable settings={settings} occupancy={occupancyByDayBlock([], r.startDate, r.endDate, settings)} selection={r} /></div></section>
+      <div className="v2-summary-advert">
+        {b.paymentNote && <section className="staff-card v2-note-card"><h2>Payment note</h2><p>{b.paymentNote}</p></section>}
+        <section className="staff-card v2-advert-card"><h2>Advert</h2><div className="v2-advert-row">
+          <span className="v2-advert-thumb" data-empty={!advert}>{advertUrl && isImage ? <Image src={advertUrl} alt="" fill unoptimized sizes="96px" /> : <b>{advert ? advert.seconds + "s" : "None"}</b>}</span>
+          <div><strong>{advertStatus}</strong>{advert && <p>{advert.seconds} s {extension || "file"}. {advert.decision === "waiting" ? <>Open it in <a className="staff-link underline" href={"/manage/adverts?q=" + encodeURIComponent(reference)}>Adverts</a>.</> : advert.fileName}</p>}<span className="pipeline-pill" data-stage={b.status}>{b.status}</span></div>
+        </div></section>
+        <section className="staff-card v2-price-card"><h2>Price</h2><dl>
+          <div><dt>{number(b.plays)} plays x {r.lengthSeconds}s x KES {rate}</dt><dd>KES {number(b.fullPriceKes)}</dd></div>
+          <div><dt>{b.discountPercent ? `Discount, ${b.discountPercent}%` : "Discount, none"}</dt><dd>{saved > 0 ? "KES -" + number(saved) : "KES 0"}</dd></div>
+          <div className="is-total"><dt>Total, VAT included</dt><dd>KES {number(b.priceKes)}</dd></div>
+        </dl></section>
+        {!detail.capacity.ok && <CapacityNotice capacity={detail.capacity} />}
+      </div></div></>;
+  const header = <BookingHeader business={a.business} reference={reference} status={b.status} action={nextAction({ reference, status: b.status, paymentNote: b.paymentNote, request: r }, adverts, today)} moveBase={moveBase} compact={compact}>
+    <StatusControls key={b.updatedAt} detail={detail} settings={settings} today={today} />
+  </BookingHeader>;
+  return <article className={"booking-detail v2-tabbed-booking" + (compact ? " is-compact" : "")}><BookingDetailTabs key={reference} header={header} confirm={confirm} panels={[summary, advertPanel, payment, contact, historyPanel].map((panel, index) => <Fragment key={index}>{panel}</Fragment>)} /></article>;
 }

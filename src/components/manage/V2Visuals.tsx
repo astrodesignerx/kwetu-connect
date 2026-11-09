@@ -90,5 +90,8 @@ export function BlockRows({ blocks, today }: { blocks: BlockRow[]; today?: strin
 }
 
 export function StageShareBar({ stages }: { stages: { label: string; count: number }[] }) {
-  return <section className="v2-card v2-stage-shares"><h2>Bookings by stage</h2><div className="v2-share-labels">{stages.map(({ label, count }) => <strong key={label}>{count}<small>{label}</small></strong>)}</div><div className="v2-share-bars" aria-hidden="true">{stages.map(({ label, count }) => <i key={label} data-stage={label} style={{ flex: Math.max(.1, count) }} />)}</div></section>;
+  const total = stages.reduce((sum, { count }) => sum + count, 0);
+  const finished = stages.find(({ label }) => label === "Finished")?.count ?? 0;
+  const live = stages.find(({ label }) => label === "Live")?.count ?? 0;
+  return <section className="v2-card v2-stage-shares"><div className="v2-share-head"><h2>Bookings by stage</h2><p>{total - finished} active, {finished} finished</p></div><div className="v2-share-labels">{stages.map(({ label, count }) => <strong key={label}>{count}<small>{label === "Live" && total ? `Live, ${Math.round((live / total) * 100)}%` : label}</small></strong>)}</div><div className="v2-share-bars" aria-hidden="true">{stages.map(({ label, count }) => <i key={label} data-stage={label} style={{ flex: Math.max(.1, count) }} />)}</div></section>;
 }

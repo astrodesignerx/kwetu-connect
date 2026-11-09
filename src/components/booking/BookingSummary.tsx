@@ -3,6 +3,7 @@ import type { BookingSettings } from "@/lib/booking/settings";
 import type { CapacityResult } from "@/lib/booking/capacity";
 import { occupancyByDayBlock } from "@/lib/booking/occupancy";
 import Timetable from "./Timetable";
+import { dateRange } from "@/lib/format/dates";
 
 export function BookingSummary({ booking: b, settings }: { booking: Pick<PublicBooking, "request" | "plays" | "fullPriceKes" | "discountPercent" | "priceKes">; settings: BookingSettings }) {
   const r = b.request;
@@ -10,7 +11,7 @@ export function BookingSummary({ booking: b, settings }: { booking: Pick<PublicB
     ["Length", `${r.lengthSeconds} seconds`], ["How often", `${r.howOften} plays an hour`],
     ["Days", r.days.map((d) => ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][d]).join(", ")],
     ["Time blocks", r.blocks.map((id) => settings.timeBlocks[id].label).join(", ")],
-    ["Dates", `${r.startDate} to ${r.endDate}`], ["Plays", b.plays.toLocaleString("en-GB")],
+    ["Dates", dateRange(r.startDate, r.endDate)], ["Plays", b.plays.toLocaleString("en-GB")],
     ["Full price", `KES ${b.fullPriceKes.toLocaleString("en-GB")}`], ["Discount", `${b.discountPercent}%`], ["Price", `KES ${b.priceKes.toLocaleString("en-GB")}`],
   ];
   return <div className="booking-summary space-y-5">

@@ -9,7 +9,7 @@ import { addDays, isValidDate, weekdayOf } from "@/lib/booking/hours";
 import { useSidebar } from "./useSidebar";
 
 const PAGES: [path: string, title: string, note?: string][] = [
-  ["/manage/bookings", "Bookings", "Drag a card to a stage, then confirm the move"],
+  ["/manage/bookings", "Bookings"],
   ["/manage/adverts", "Advert review desk"],
   ["/manage/schedule", "Screen schedule", "Approved and Live bookings, with approved adverts only"],
   ["/manage/settings", "Settings", "How the screen is sold. Existing quotes keep their price."],
@@ -44,7 +44,7 @@ export default function ManagerTopbar({ today, now, notices }: { today: string; 
   const Heading = page && pathname === page[0] ? "h1" : "p";
   // One search for the page: Adverts searches its queue, everything else searches bookings. Active filters are kept.
   const onAdverts = pathname === "/manage/adverts";
-  const keep = onAdverts ? ["filter"] : pathname === "/manage/bookings" ? ["status", "from", "to"] : [];
+  const keep = onAdverts ? ["filter"] : pathname === "/manage/bookings" ? ["status", "from", "to", "view", "hide", "layout"] : [];
   const overview = pathname === "/manage";
   const week = params.get("week");
   const date = week && isValidDate(week) ? week : today;
