@@ -10,8 +10,8 @@ import { useSidebar } from "./useSidebar";
 
 const PAGES: [path: string, title: string, note?: string][] = [
   ["/manage/bookings", "Bookings"],
-  ["/manage/adverts", "Advert review desk"],
-  ["/manage/schedule", "Screen schedule", "Approved and Live bookings, with approved adverts only"],
+  ["/manage/adverts", "Adverts"],
+  ["/manage/schedule", "Schedule"],
   ["/manage/settings", "Settings", "How the screen is sold. Existing quotes keep their price."],
 ];
 // "Mon 9 Nov 18:42" in Nairobi time.
