@@ -30,7 +30,10 @@
 .error { color: var(--fg); font-size: 13px; line-height: 20px; }
 @media (max-width: 600px) {
   .panel { padding: 20px; }
-  .kpis { grid-template-columns: minmax(0, 1fr); }
+  .kpis { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .kpis > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; column-gap: 12px; padding: 16px 20px; }
+  .kpis dd, .kpis .date { grid-column: 2; grid-row: 1; margin: 0; font-size: 20px; line-height: 28px; text-align: right; }
+  .kpis small { grid-column: 1 / -1; margin-top: 4px; }
   .timeline li { grid-template-columns: 8px minmax(0, 1fr); gap: 8px; }
   .timeline time { grid-column: 2; }
   .timeline .dot { grid-column: 1; grid-row: auto; }

@@ -62,18 +62,32 @@
 .stages b { display: block; font-weight: 500; overflow-wrap: anywhere; }
 .stages time { display: block; margin-top: 4px; color: var(--muted); overflow-wrap: anywhere; }
 
-.flightScroll { max-width: 100%; padding: 4px 2px; overflow-x: auto; }
-.flight { position: relative; min-width: 620px; }
-.flightHeader, .flightRow { display: grid; grid-template-columns: 148px minmax(0, 1fr); }
-.flightHeader { height: 36px; }
-.flightHeader > div { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); color: var(--muted); font-family: var(--f-mono), monospace; font-size: 12px; line-height: 16px; }
-.flightRow { height: 48px; align-items: center; border-top: 1px solid var(--line); }
-.flightRow > span { overflow: hidden; padding-right: 12px; font-size: 13px; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
-.flightTrack { position: relative; height: 100%; background: linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / calc(100% / 6) 100%; }
-.flightBar { position: absolute; top: 12px; bottom: 12px; overflow: hidden; padding: 4px 8px; border-radius: var(--radius-tag); background: var(--fg); color: var(--surface); font-family: var(--f-mono), monospace; font-size: 12px; line-height: 16px; white-space: nowrap; transform-origin: left; animation: growX var(--t3) var(--ease) both; animation-delay: calc(var(--i, 0) * 48ms); }
-.todayLayer { position: absolute; inset: 0 0 0 148px; pointer-events: none; }
-.today { position: absolute; top: 16px; bottom: 0; width: 1px; background: var(--fg); }
-.today b { position: absolute; right: 4px; top: 0; padding: 0 4px; background: var(--surface); color: var(--fg); font-family: var(--f-mono), monospace; font-size: 12px; line-height: 16px; font-weight: 500; white-space: nowrap; }
+/* The flight plan: a six-week schedule sheet. Week hairlines, day ticks, solid bars and one Today line. */
+.flightScroll { max-width: 100%; overflow-x: auto; }
+.flight { position: relative; min-width: 640px; --site: 160px; }
+.flightHeader, .flightRow { display: grid; grid-template-columns: var(--site) minmax(0, 1fr); }
+.flightHeader { height: 56px; border-bottom: 1px solid var(--fg); }
+.flightCorner { align-self: end; padding-bottom: 16px; color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; }
+.flightWeeks { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); padding-bottom: 12px;
+  background-image: linear-gradient(90deg, var(--fg) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: calc(100% / 6) 12px, calc(100% / 42) 4px; background-position: 0 100%, 0 100%; background-repeat: repeat-x; }
+.flightWeeks span { align-self: end; padding: 0 0 4px 4px; color: var(--muted); font-family: var(--f-mono), monospace; font-size: 12px; line-height: 16px; white-space: nowrap; }
+.flightRow { height: 48px; align-items: center; border-bottom: 1px solid var(--line); }
+.flightSite { align-self: stretch; min-width: 0; overflow: hidden; padding: 12px 12px 0 0; font-size: 13px; line-height: 20px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.flightTrack { position: relative; height: 100%; background: linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / calc(100% / 6) 100%; border-right: 1px solid var(--line); }
+.flightBar { position: absolute; top: 12px; height: 24px; overflow: hidden; padding: 4px 8px; border-radius: var(--radius-tag); background: var(--fg); color: var(--surface); font-family: var(--f-mono), monospace; font-size: 12px; line-height: 16px; white-space: nowrap; text-overflow: ellipsis; animation: flightIn var(--t3) var(--ease) both; animation-delay: calc(var(--i, 0) * 48ms); }
+.flightBar[data-from-before=true] { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.flightBar[data-runs-on=true] { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.todayLayer { position: absolute; inset: 0 0 0 var(--site); pointer-events: none; }
+.today { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--fg); }
+.today b { position: absolute; left: 4px; top: 4px; padding: 0 4px; border-radius: var(--radius-tag); background: var(--fg); color: var(--surface); font-family: var(--f-mono), monospace; font-size: 12px; line-height: 16px; font-weight: 500; white-space: nowrap; }
+.today[data-flip=true] b { left: auto; right: 4px; }
+/* Phones: the six weeks fit the width, with every other week labelled. */
+@media (max-width: 600px) {
+  .flight { min-width: 0; --site: 96px; }
+  .flightWeeks span:nth-child(even) { visibility: hidden; overflow: hidden; }
+  .flightBar { padding: 4px; }
+}
 
 .avatar { display: inline-grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--raise); color: var(--fg); font-size: 12px; font-weight: 600; }
 .avatar[data-size="small"] { width: 24px; height: 24px; font-size: 12px; }
@@ -99,6 +113,7 @@ a.clientTile:active { transform: scale(.99); }
 .segmented button:disabled { opacity: .4; cursor: not-allowed; }
 
 @keyframes growY { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+@keyframes flightIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
 @keyframes growX { from { transform: scaleX(0); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
 @keyframes blink { 0%, 100% { opacity: .32; } 50% { opacity: 1; } }
 @keyframes marquee { to { transform: translateX(-50%); } }

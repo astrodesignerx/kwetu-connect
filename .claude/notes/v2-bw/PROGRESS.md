@@ -8,11 +8,11 @@ Branch: t3/0d3ac476 (worktree C:/Users/ether/.t3/worktrees/kwetu-connect/t3-0d3a
 | 1 Foundations | done | 8dced57 |
 | 2 Navigation and actions | done | 06e8ade, review fixes 1d6d126 |
 | 3 Words and formats | done | 4ecb04e |
-| 4 Screens | done | see git log |
-| 5 Schedule | not started | |
+| 4 Screens | done | e95b661 |
+| 5 Schedule | done | see git log |
 | 6 Motion | not started | |
 
-Next: Phase 5 (the flight plan on the client page), then Phase 6 (motion), then the full browser matrix and final report.
+Next: Phase 6 (motion: no loops on non-live things, entrance once, lift only on link cards), then the full browser matrix and the final report.
 
 Known gaps carried from Phase 1 (fixed in later phases): a few TSX class names (emptyMail, newCard, trend, flightTiles, flightMark, mark, add, connect, conversationTools) have no module rule yet; they are replaced by the empty state, page header and screen work in Phases 2 and 4. Module rules nothing references yet are pruned at the end of Phase 4 with prune.mjs.
 
@@ -48,6 +48,14 @@ Tools here: `audit.mjs` (source audit), `prune.mjs` (dead module rules), `tw-swe
 - Text characters as icons replaced with lucide (X, Plus, Check, Circle, CircleAlert). New template lost its 01 / 02 numbers. Audit filters and rows regained their classes. Email appearance hex fields and HTML boxes use mono.
 - Dead module rules pruned with prune.mjs.
 - Browser check at the Phase 4 commit: 333 captures (1440 and 390, both themes, all four states, overlays), 0 failures.
+
+## Phase 5 notes
+
+- The flight plan (`src/components/signal/campaign.tsx`, styles under "The flight plan" in signal.module.css) is a six-week sheet: a solid `--fg` baseline under the header, week hairlines with day ticks, a "Site" column, solid `--fg` bars with `--surface` mono text that ellipsis, flat bar ends when a flight starts before or runs past the window, and one Today line with its own label lane (the label flips left near the right edge).
+- At 600 px and below it fits the width with no sideways scroll: 96 px site column, every other week labelled.
+- Client KPIs become compact label and value rows on phones.
+- `flight-shot.mjs` screenshots the plan alone with a long site name and two clipped flights (needs the 3024 server).
+- Morning brief go-lives are plain rows (done in Phase 4). No new cards, no LED effects.
 
 ## How to check
 

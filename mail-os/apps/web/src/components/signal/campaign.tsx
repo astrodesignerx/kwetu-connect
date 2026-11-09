@@ -21,21 +21,26 @@ export type FlightPlanProps = { sites: readonly FlightSite[]; startDate: SignalD
 
 export function FlightPlan({ sites, startDate, today, label, todayLabel = "Today" }: FlightPlanProps) {
   const start = dayNumber(startDate);
+  const end = start + 42;
   const marker = todayPosition(today, startDate);
   return <div className={`${s.root} ${s.flightScroll} scroll-cue-x`} tabIndex={0} role="region" aria-label={label}>
     <div className={s.flight}>
-      <div className={s.flightHeader}><span /><div>{Array.from({ length: 6 }, (_, week) => <span key={week}>{shortDate(start + week * 7)}</span>)}</div></div>
+      <div className={s.flightHeader}>
+        <span className={s.flightCorner}>Site</span>
+        <div className={s.flightWeeks}>{Array.from({ length: 6 }, (_, week) => <span key={week}>{shortDate(start + week * 7)}</span>)}</div>
+      </div>
       {sites.map((site, index) => {
         const position = flightPosition(site.startDate, site.endDate, startDate);
         const text = site.label ?? `${shortDate(dayNumber(site.startDate))} to ${shortDate(dayNumber(site.endDate))}`;
         return <div className={s.flightRow} key={site.id}>
-          <span title={site.name}>{site.name}</span><div className={s.flightTrack}>
-            {position && <span className={s.flightBar} style={{ left: `${position.left}%`, width: `${position.width}%`, "--i": index } as SignalStyle} title={text}>{text}</span>}
+          <span className={s.flightSite} title={site.name}>{site.name}</span><div className={s.flightTrack}>
+            {position && <span className={s.flightBar} data-from-before={dayNumber(site.startDate) < start} data-runs-on={dayNumber(site.endDate) + 1 > end}
+              style={{ left: `${position.left}%`, width: `${position.width}%`, "--i": index } as SignalStyle} title={text}>{text}</span>}
             <span className={s.srOnly}>{text}</span>
           </div>
         </div>;
       })}
-      {marker !== null && <div className={s.todayLayer} aria-hidden="true"><span className={s.today} style={{ left: `${marker}%` }}><b>{todayLabel}</b></span></div>}
+      {marker !== null && <div className={s.todayLayer} aria-hidden="true"><span className={s.today} data-flip={marker > 80} style={{ left: `${marker}%` }}><b>{todayLabel}</b></span></div>}
     </div>
   </div>;
 }
