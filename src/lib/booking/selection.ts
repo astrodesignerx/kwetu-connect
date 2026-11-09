@@ -46,6 +46,15 @@ export function toggleSelection(selection: Selection, action: SelectionAction, i
   return fromCells([...cells].filter((key) => { const cell = parseCell(key); return cell !== null && isOpen(cell.day, cell.block); }));
 }
 
+export type QuickPick = "mornings" | "evenings" | "weekends" | "clear";
+/** A ready-made selection that replaces the current one, made only of boxes that are open. */
+export function quickPick(pick: QuickPick, isOpen: IsOpen): Required<Selection> {
+  const keys = pick === "clear" ? [] : pick === "mornings" ? DAY_ORDER.map((day) => cellKey(day, "morning"))
+    : pick === "evenings" ? DAY_ORDER.map((day) => cellKey(day, "evening"))
+    : [6, 0].flatMap((day) => BLOCK_ORDER.map((block) => cellKey(day, block)));
+  return fromCells(keys.filter((key) => { const cell = parseCell(key)!; return isOpen(cell.day, cell.block); }));
+}
+
 /** The picked boxes with closed ones removed, so summaries and saved bookings only list boxes that can play. */
 export function openSelection(selection: Selection, isOpen: IsOpen): Required<Selection> {
   return fromCells(requestCells(selection).filter((key) => { const cell = parseCell(key); return cell !== null && isOpen(cell.day, cell.block); }));

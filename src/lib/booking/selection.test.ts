@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { bookedHours } from "./hours";
-import { fromCells, scheduleLines, toggleSelection, type Selection } from "./selection";
+import { fromCells, quickPick, scheduleLines, toggleSelection, type Selection } from "./selection";
 import { DEFAULT_SETTINGS } from "./settings";
 
 const initial: Selection = { days: [6], blocks: ["morning", "midday"] };
@@ -62,4 +62,22 @@ describe("closed boxes", () => {
     const next = toggleSelection({ days: [], blocks: [], cells: ["3-late", "6-late"] }, { kind: "cell", day: 0, block: "late" }, lateClosedMonToThu);
     expect(next.cells).toEqual(["6-late", "0-late"]);
   });
+});
+
+describe("quick picks", () => {
+  const all = () => true;
+  it("picks every morning, every evening and the weekend", () => {
+    expect(quickPick("mornings", all).cells).toHaveLength(7);
+    expect(quickPick("mornings", all).blocks).toEqual(["morning"]);
+    expect(quickPick("evenings", all).blocks).toEqual(["evening"]);
+    const weekend = quickPick("weekends", all);
+    expect(weekend.days).toEqual([6, 0]);
+    expect(weekend.cells).toHaveLength(10);
+  });
+  it("clears the selection", () => expect(quickPick("clear", all).cells).toEqual([]));
+  it("keeps only open boxes", () => {
+    const next = quickPick("weekends", (day, block) => day === 6 && block === "late");
+    expect(next.cells).toEqual(["6-late"]);
+  });
+  it("gives nothing when no box is open", () => expect(quickPick("evenings", () => false).cells).toEqual([]));
 });

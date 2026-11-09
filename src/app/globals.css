@@ -3409,3 +3409,12 @@ label.advert-check:hover .advert-medal[data-state="you"] { transform: scale(1.08
 .settings-footer .staff-button:disabled { cursor: default; }
 .settings-reset:focus-visible, .settings-tile:focus-visible, .settings-input input:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .settings-tile[aria-pressed="true"]::after { animation: none; } }
+
+/* Phase 5 /book quick picks: round buttons above the timetable. */
+.book-quick-picks { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 12px; }
+.book-quick-picks span { font-size: 11px; color: var(--muted-foreground); margin-right: 4px; }
+.book-quick-picks button { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--foreground); font-size: 12px; font-weight: 600; transition: border-color var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard), opacity var(--duration-base) var(--ease-standard); }
+.book-quick-picks button:hover:not(:disabled) { border-color: var(--primary); transform: translateY(-1px); }
+.book-quick-picks button:active:not(:disabled) { transform: scale(.97); }
+.book-quick-picks button:disabled { opacity: .45; }
+.book-quick-picks button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
