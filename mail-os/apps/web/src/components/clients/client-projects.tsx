@@ -13,6 +13,7 @@ import { FlightPlan, StatusChip } from "@/components/signal";
 import { FlightForm } from "./flight-form";
 import s from "../../app/clients/detail/page.module.css";
 import f from "./forms.module.css";
+import { DateField } from "@/components/date-field";
 import { formatDateRange } from "@/lib/format";
 
 export function ClientProjects({ companyId, projects }: { companyId: string; projects: ProjectDto[] }) {
@@ -35,9 +36,9 @@ export function ClientProjects({ companyId, projects }: { companyId: string; pro
     <section className={s.panel}>
       <div className={s.sectionHead}><h2>Flight plan</h2><Button size="small" disabled={!projects.length} onClick={() => setFlightEdit("new")}>New flight</Button></div>
       {!projects.length ? <p className={s.muted}>Create a project to book its first flight</p> : <>
-        <label className={s.window}>Six weeks from <input aria-label="Flight plan start date" type="date" value={windowStart} onChange={e => { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) setWindowStart(e.target.value); }} /></label>
+        <label className={s.window}>Six weeks from <DateField compact aria-label="Flight plan start date" value={windowStart} onChange={e => { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) setWindowStart(e.target.value); }} /></label>
         {queries.some(q => q.isPending) ? <ViewState loading label="Loading flights" /> : queries.some(q => q.isError) ? <ErrorState bare title="Could not load all project flights" onRetry={() => queries.forEach(q => void q.refetch())} /> : flights.length ? <>
-          <FlightPlan label={`Flight plan from ${windowStart} to ${end}`} startDate={windowStart} today={today} sites={flights.filter(x => x.startDate <= end && x.endDate >= windowStart).map(x => ({ id: x.id, name: x.siteName, startDate: x.startDate, endDate: x.endDate }))} />
+          <FlightPlan label={`Flight plan, ${formatDateRange(windowStart, end)}`} startDate={windowStart} today={today} sites={flights.filter(x => x.startDate <= end && x.endDate >= windowStart).map(x => ({ id: x.id, name: x.siteName, startDate: x.startDate, endDate: x.endDate }))} />
           <ul className={s.rows}>{flights.map(flight => <li key={flight.id}>
             <div className={s.grow}><strong>{flight.siteName}</strong><small>{projects.find(p => p.id === flight.projectId)?.name} / <time dateTime={flight.startDate}>{formatDateRange(flight.startDate, flight.endDate)}</time></small></div>
             <Button size="small" variant="ghost" onClick={() => setFlightEdit(flight)} aria-label={`Edit flight at ${flight.siteName}`}>Edit</Button>

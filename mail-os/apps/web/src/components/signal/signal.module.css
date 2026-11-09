@@ -66,7 +66,7 @@
 .flightScroll { max-width: 100%; overflow-x: auto; }
 .flight { position: relative; min-width: 640px; --site: 160px; }
 .flightHeader, .flightRow { display: grid; grid-template-columns: var(--site) minmax(0, 1fr); }
-.flightHeader { height: 56px; border-bottom: 1px solid var(--fg); }
+.flightHeader { height: 64px; border-bottom: 1px solid var(--fg); }
 .flightCorner { align-self: end; padding-bottom: 16px; color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; }
 .flightWeeks { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); padding-bottom: 12px;
   background-image: linear-gradient(90deg, var(--fg) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);

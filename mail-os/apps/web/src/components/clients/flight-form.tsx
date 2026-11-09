@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { signalApi, type ProjectFlight } from "@/lib/signal-api";
 import { nairobiToday, validateFlight } from "@/lib/signal-clients";
 import { Button } from "@/components/ui";
+import { DateField } from "@/components/date-field";
 import s from "./forms.module.css";
 
 export function FlightForm({ projects, initial, onDone }: {
@@ -37,8 +38,8 @@ export function FlightForm({ projects, initial, onDone }: {
     <div className={s.fields}>
       <label>Project<select value={projectId} onChange={e => setProjectId(e.target.value)} disabled={!!initial} required>{projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
       <label>Site name<input autoFocus required maxLength={200} value={siteName} onChange={e => setSiteName(e.target.value)} /></label>
-      <label>Start date<input required type="date" value={startDate} onChange={e => setStartDate(e.target.value)} /></label>
-      <label>End date<input required type="date" value={endDate} onChange={e => setEndDate(e.target.value)} /></label>
+      <label>Start date<DateField required aria-label="Start date" value={startDate} onChange={e => setStartDate(e.target.value)} /></label>
+      <label>End date<DateField required aria-label="End date" value={endDate} onChange={e => setEndDate(e.target.value)} /></label>
     </div>
     {(error || save.isError) && <ErrorText>{error ?? save.error?.message}</ErrorText>}
     <div className={s.actions}><Button type="button" variant="ghost" disabled={save.isPending} onClick={onDone}>Cancel</Button><Button disabled={save.isPending}>{save.isPending ? "Saving..." : "Save flight"}</Button></div>

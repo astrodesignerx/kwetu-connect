@@ -152,6 +152,15 @@
   option { background: var(--surface); color: var(--fg); }
   input[type="date"] { color-scheme: inherit; font-family: var(--f-mono), monospace; }
   input[type="date"]::-webkit-calendar-picker-indicator { opacity: .64; cursor: pointer; }
+  /* Shows the app's date format, with the real date input invisibly on top of it. */
+  .date-field { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-width: 0; min-height: 40px; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--raise); color: var(--fg); font-size: 14px; line-height: 20px; font-variant-numeric: tabular-nums; cursor: pointer; transition: transform var(--t1) var(--ease); }
+  .date-field[data-compact] { display: inline-flex; width: auto; min-height: 32px; padding: 4px 8px; font-size: 13px; }
+  .date-field svg { flex-shrink: 0; color: var(--muted); }
+  .date-field:active { transform: scale(.98); }
+  .date-field:focus-within { outline: 2px solid var(--fg); outline-offset: 2px; }
+  .date-field > input { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; opacity: 0; cursor: pointer; }
+  .date-field > input::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; opacity: 0; }
+  @media (max-width: 859px) { .date-field { font-size: 16px; } }
   input[type="checkbox"], input[type="radio"] {
     appearance: none;
     display: inline-grid;
