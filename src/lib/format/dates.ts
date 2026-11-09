@@ -16,3 +16,12 @@ export function dateRange(fromIso: string, toIso: string, now: Date = new Date()
   const part = (iso: string) => withYear ? format(iso, { day: "numeric", month: "short", year: "numeric" }) : shortDate(iso);
   return part(fromIso) + " to " + part(toIso);
 }
+
+/** "Today", "Tomorrow", "In 7 days" or "Started 2 days ago", from a start date and today's date. */
+export function dueLabel(startIso: string, todayIso: string) {
+  const days = Math.round((at(startIso).getTime() - at(todayIso).getTime()) / 86400000);
+  if (days === 0) return "Today";
+  if (days === 1) return "Tomorrow";
+  if (days > 1) return `In ${days} days`;
+  return `Started ${-days} day${days === -1 ? "" : "s"} ago`;
+}

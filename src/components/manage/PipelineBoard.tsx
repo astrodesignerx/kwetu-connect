@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import { STATUSES } from "@/lib/booking/status";
 import type { BookingStatus } from "@/lib/booking/capacity";
-import { liveProgress, nextTask, type PipelineCard } from "@/lib/booking/pipeline";
+import { avatarColour, liveProgress, nextTask, type PipelineCard } from "@/lib/booking/pipeline";
 import { number } from "@/components/booking/QuoteTotals";
 import { dateRange, dayDate, shortDate } from "@/lib/format/dates";
 import { Plus, X } from "@phosphor-icons/react";
@@ -44,7 +44,7 @@ export default function PipelineBoard({ bookings, query, selected, status, today
     return <Link
       key={booking.reference} href={href(booking.reference)} scroll={false}
       className="pipeline-card" data-stage={booking.status} data-selected={selected === booking.reference}
-      style={{ animationDelay: `${Math.min(index, 2) * 120}ms`, "--avatar": ["#a3e635", "#2dd4bf", "#fb923c", "#60a5fa", "#fb7185"][booking.business.charCodeAt(0) % 5] } as CSSProperties}
+      style={{ animationDelay: `${Math.min(index, 2) * 120}ms`, "--avatar": avatarColour(booking.business) } as CSSProperties}
       draggable={!["Finished", "Cancelled"].includes(booking.status)}
       onDragStart={(event) => { event.dataTransfer.setData("text/plain", booking.reference); event.dataTransfer.effectAllowed = "move"; setDragged(booking.reference); }}
       onDragEnd={() => { setDragged(""); setOver(null); }}

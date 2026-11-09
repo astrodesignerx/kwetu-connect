@@ -57,7 +57,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
       {!bookings.length && <div className="ns-card empty-state">No bookings match these filters.</div>}
     </BookingFilters>
     {detail && <PipelineInspector key={detail.booking.reference} title={detail.advertiser.business} closeUrl={"/manage/bookings?" + values} reference={detail.booking.reference}>
-      <BookingDetail detail={detail} settings={settings} demo={store.mode === "memory"} today={today} moveBase={"/manage/bookings?" + moveQuery} compact
+      <BookingDetail detail={detail} settings={settings} demo={store.mode === "memory"} today={today} moveBase={"/manage/bookings?" + moveQuery} compact initialTab={read("tab")}
         confirm={target ? <PipelineMove key={detail.booking.reference + target} detail={detail} target={target} settings={settings} today={today} /> : undefined} />
     </PipelineInspector>}
   </section>;

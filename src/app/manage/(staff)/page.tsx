@@ -5,13 +5,16 @@ import { todayInNairobi } from "@/lib/store/validation";
 import { addDays, isValidDate, weekdayOf } from "@/lib/booking/hours";
 import { blockShares, currentPlaylist, hourShares, onAirStatus, weeklyTotals, weekSold, nairobiClock } from "@/lib/dashboard";
 import type { PlaylistItem, Schedule } from "@/lib/booking/playlist";
-import { ArrowRight, Play } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, Clock, Play, Warning } from "@phosphor-icons/react/dist/ssr";
 import OverviewBanner from "@/components/manage/OverviewBanner";
 import NowNext, { type NowNextRow } from "@/components/manage/NowNext";
-import { BlockRows, CapsuleBars, DarkIsland, FolderCard } from "@/components/manage/V2Visuals";
+import { AvatarStack, BlockRows, CapsuleBars, DarkIsland, FolderCard, PhotoFolderCard } from "@/components/manage/V2Visuals";
 import { RevenueChart } from "@/components/workspace/Charts";
 import { number } from "@/components/booking/QuoteTotals";
-import { shortDate } from "@/lib/format/dates";
+import { dayDate, dueLabel, shortDate } from "@/lib/format/dates";
+import { avatarColour } from "@/lib/booking/pipeline";
+
+type Task = { key: string; kind: "review" | "chase" | "confirm" | "nudge"; title: string; detail: string; action: string; href: string; start: string };
 
 export default async function WeekPage({ searchParams }: { searchParams: Promise<{ week?: string }> }) {
   await requireStaff();
@@ -23,12 +26,23 @@ export default async function WeekPage({ searchParams }: { searchParams: Promise
   const store = getStore();
   const [settings, occupancy, bookings] = await Promise.all([store.getSettings(), store.occupancy(monday, sunday), store.listBookings()]);
   const paidDetails = await Promise.all(bookings.filter((booking) => booking.status === "Paid").map((booking) => store.bookingDetail(booking.reference)));
-  const needsAdvert = new Set(paidDetails.filter((detail) => detail && !detail.adverts.some((advert) => advert.decision === "approved")).map((detail) => detail!.booking.reference));
-  const needs = bookings.filter((booking) => needsAdvert.has(booking.reference) || booking.status === "Quote").sort((first, second) => {
-    const priority = (booking: typeof first) => needsAdvert.has(booking.reference) ? 0 : booking.paymentNote ? 1 : 2;
-    return priority(first) - priority(second) || first.request.startDate.localeCompare(second.request.startDate);
-  });
+  const detailOf = new Map(paidDetails.flatMap((detail) => detail ? [[detail.booking.reference, detail] as const] : []));
+  const byStart = (first: { request: { startDate: string } }, second: { request: { startDate: string } }) => first.request.startDate.localeCompare(second.request.startDate);
+  // Paid bookings with no approved advert: a waiting advert needs review, otherwise (none, or only refused) the advert is missing.
+  const unapproved = bookings.filter((booking) => booking.status === "Paid" && detailOf.get(booking.reference) && !detailOf.get(booking.reference)!.adverts.some((advert) => advert.decision === "approved")).sort(byStart);
+  const waitingAdvert = (reference: string) => detailOf.get(reference)!.adverts.find((advert) => advert.decision === "waiting");
+  const quotes = bookings.filter((booking) => booking.status === "Quote").sort(byStart);
+  const unpaidQuotes = quotes.filter((booking) => !booking.paymentNote);
+  const contact = (reference: string) => "/manage/bookings?selected=" + reference + "&tab=Contact";
+  const tasks: Task[] = [
+    ...unapproved.filter((booking) => waitingAdvert(booking.reference)).map((booking): Task => { const advert = waitingAdvert(booking.reference)!; const extension = advert.fileName.includes(".") ? advert.fileName.split(".").pop()!.toUpperCase() : "file"; return { key: "review" + booking.reference, kind: "review", title: "Review the advert", detail: `${booking.business}, ${advert.seconds}s ${extension}`, action: "Review", href: "/manage/adverts?q=" + encodeURIComponent(booking.reference), start: booking.request.startDate }; }),
+    ...unapproved.filter((booking) => !waitingAdvert(booking.reference)).map((booking): Task => ({ key: "chase" + booking.reference, kind: "chase", title: "Chase the missing advert", detail: `${booking.business}, paid KES ${number(booking.priceKes)}`, action: "Remind", href: contact(booking.reference), start: booking.request.startDate })),
+    ...quotes.filter((booking) => booking.paymentNote).map((booking): Task => ({ key: "confirm" + booking.reference, kind: "confirm", title: "Confirm payment", detail: `${booking.business}, KES ${number(booking.priceKes)}`, action: "Confirm", href: "/manage/bookings?selected=" + booking.reference, start: booking.request.startDate })),
+    ...(unpaidQuotes.length ? [{ key: "nudge", kind: "nudge", title: `${unpaidQuotes.length} ${unpaidQuotes.length === 1 ? "quote" : "quotes"} awaiting payment`, detail: unpaidQuotes.length > 2 ? `${unpaidQuotes[0].business}, ${unpaidQuotes[1].business} and ${unpaidQuotes.length - 2} more` : unpaidQuotes.map((booking) => booking.business).join(" and "), action: "Nudge", href: unpaidQuotes.length === 1 ? contact(unpaidQuotes[0].reference) : "/manage/bookings?status=Quote", start: unpaidQuotes[0].request.startDate } satisfies Task] : []),
+  ];
+  const shown = tasks.slice(0, 4);
   const live = bookings.filter((booking) => booking.status === "Live");
+  const nextStart = bookings.filter((booking) => booking.status === "Approved" && booking.request.startDate > today).sort(byStart)[0];
   const collect = bookings.filter((booking) => booking.status === "Quote");
   const weeks = weeklyTotals(bookings, monday);
   const total = weeks[weeks.length - 1];
@@ -78,15 +92,15 @@ export default async function WeekPage({ searchParams }: { searchParams: Promise
   const eveningShare = (items: typeof rows[number]["hours"]) => { const open = items.filter((hour) => hour.hour >= 18 && !hour.closed); return open.length ? open.reduce((sum, hour) => sum + hour.share, 0) / open.length : 0; };
   const tonight = eveningShare(hours.map((hour) => ({ ...hour, closed: false })));
   return <section className="v2-overview">
-    <div className="v2-overview-top"><OverviewBanner sold={tonight} needs={needs.length} live={live.length} schedule={schedule} businesses={businesses} settings={settings} now={now.toISOString()} error={scheduleError} /><DarkIsland className="v2-today-card"><div className="v2-card-heading"><h2>Today by hour<small>{shortDate(today)}, planned</small></h2><span className="soft-pill">Now {String(clock.hour).padStart(2, "0")}:{String(Math.floor(clock.second / 60)).padStart(2, "0")}</span></div><CapsuleBars hours={hours} currentHour={clock.hour} /><NowNext rows={nowNext} empty={scheduleError ? "The playlist could not be loaded." : undefined} /><Link href="/manage/schedule" className="v2-inline-link">Open the planned playlist<ArrowRight size={13} aria-hidden="true" /></Link></DarkIsland></div>
+    <div className="v2-overview-top"><OverviewBanner sold={tonight} needs={tasks.length} live={live.length} schedule={schedule} businesses={businesses} settings={settings} now={now.toISOString()} error={scheduleError} /><DarkIsland className="v2-today-card"><div className="v2-card-heading"><h2>Today by hour<small>{shortDate(today)}, planned</small></h2><span className="soft-pill">Now {String(clock.hour).padStart(2, "0")}:{String(Math.floor(clock.second / 60)).padStart(2, "0")}</span></div><CapsuleBars hours={hours} currentHour={clock.hour} /><NowNext rows={nowNext} empty={scheduleError ? "The playlist could not be loaded." : undefined} /><Link href="/manage/schedule" className="v2-inline-link">Open the planned playlist<ArrowRight size={13} aria-hidden="true" /></Link></DarkIsland></div>
     <div className="v2-overview-folders">
-      <FolderCard label="Screen time sold" value={<>{Math.round(sold * 100)}<small>% this week</small></>} note="Of saleable screen time" colour="amber"><div className="v2-sold-meter" aria-hidden="true"><i style={{ transform: `scaleX(${Math.min(1, sold)})` }} /></div><Link href="/manage/schedule" className="v2-folder-link" aria-label="Open screen schedule" /></FolderCard>
-      <FolderCard label="Booked this week" value={<><small>KES</small>{number(total.kes)}</>} note={`${total.count} created bookings, cancelled excluded`}><div className="v2-folder-chart"><RevenueChart weeks={weeks} /></div></FolderCard>
-      <FolderCard label="To collect" value={<><small>KES</small>{number(toCollect)}</>} note={`${collect.length} unpaid quotes`} colour="violet"><div className="v2-quote-hatch" /><Link href="/manage/bookings?status=Quote" className="v2-folder-link" aria-label="Open unpaid quotes" /></FolderCard>
-      <FolderCard label="Live now" value={<>{live.length}<small>bookings</small></>} note="Scheduled, not measured playback" colour="green"><Link href="/manage/schedule" className="v2-folder-playlist">Open playlist<ArrowRight size={12} aria-hidden="true" /></Link></FolderCard>
+      <PhotoFolderCard share={sold} href="/manage/schedule" />
+      <FolderCard label="Booked this week" value={<><small>KES</small>{number(total.kes)}</>} note={`${total.count} created bookings, cancelled excluded`} pill={`${total.count} ${total.count === 1 ? "booking" : "bookings"}`}><div className="v2-folder-chart"><RevenueChart weeks={weeks} /></div></FolderCard>
+      <FolderCard label="To collect" value={<><small>KES</small>{number(toCollect)}</>} note={`${collect.length} unpaid quotes`} colour="violet" pill={`${collect.length} ${collect.length === 1 ? "quote" : "quotes"}`}><div className="v2-quote-hatch" /><Link href="/manage/bookings?status=Quote" className="v2-folder-link" aria-label="Open unpaid quotes" /></FolderCard>
+      <FolderCard label="Live now" value={<>{live.length}<small>bookings</small></>} note={nextStart ? "Next start " + dayDate(nextStart.request.startDate) : "Scheduled, not measured playback"} colour="green"><AvatarStack people={live.slice(0, 4).map((booking) => ({ name: booking.business, colour: avatarColour(booking.business) }))} extra={live.length - 4} /><Link href="/manage/schedule" className="v2-folder-playlist">Open playlist<ArrowRight size={12} aria-hidden="true" /></Link></FolderCard>
     </div>
     <div className="v2-overview-bottom"><section className="v2-card v2-sold-card"><div className="v2-card-heading"><h2>Sold by hour</h2><small>Week of {shortDate(monday)}, planned</small></div><BlockRows blocks={blockShares(rows, settings)} today={today} /></section>
-      <div className="v2-task-stack" id="needs-you"><DarkIsland><div className="v2-card-heading"><h2>Needs you <span className="v2-count">{needs.length}</span></h2><Link href="/manage/bookings">See all<ArrowRight size={12} aria-hidden="true" /></Link></div><div className="v2-needs-list">{needs.map((booking) => { const advert = needsAdvert.has(booking.reference); return <Link key={booking.reference} className="v2-task" data-task={advert ? "advert" : booking.paymentNote ? "payment" : "quote"} href={"/manage/bookings?selected=" + booking.reference}><span className="v2-task-icon" aria-hidden="true">{advert ? <Play size={15} weight="fill" /> : "KES"}</span><span><b>{advert ? "Check the advert" : booking.paymentNote ? "Confirm payment" : "Awaiting payment"}</b><small>{booking.business}</small><small>Starts {shortDate(booking.request.startDate)} / KES {number(booking.priceKes)}</small></span><span className="v2-task-action">{advert ? "Review" : booking.paymentNote ? "Check" : "Open"}</span></Link>; })}{!needs.length && <p className="empty-state">All caught up. No bookings need action.</p>}</div><details className="v2-starting-soon"><summary>Starting soon ({soon.length})</summary>{soon.map((booking) => <Link key={booking.reference} href={"/manage/bookings?selected=" + booking.reference}><span>{booking.business}</span><small>{shortDate(booking.request.startDate)} / {booking.status}</small></Link>)}{!soon.length && <p>No bookings start in the next 14 days.</p>}</details></DarkIsland></div>
+      <div className="v2-task-stack" id="needs-you"><DarkIsland><div className="v2-card-heading"><h2>Needs you <span className="v2-count">{tasks.length}</span></h2><Link href="/manage/bookings">See all{tasks.length > 4 && <span className="v2-see-count">{tasks.length}</span>}<ArrowRight size={12} aria-hidden="true" /></Link></div><div className="v2-needs-list">{shown.map((task) => <Link key={task.key} className="v2-task" data-task={task.kind} href={task.href}><span className="v2-task-icon" aria-hidden="true">{task.kind === "review" ? <Play size={15} weight="fill" /> : task.kind === "chase" ? <Warning size={15} weight="fill" /> : task.kind === "nudge" ? <Clock size={15} weight="fill" /> : "KES"}</span><span><b>{task.title}</b><small>{task.detail}</small></span><span className="v2-task-end"><span className="v2-task-action">{task.action}</span><small>{dueLabel(task.start, today)}</small></span></Link>)}{!tasks.length && <p className="empty-state">All caught up. No bookings need action.</p>}</div><details className="v2-starting-soon"><summary>Starting soon ({soon.length})</summary>{soon.map((booking) => <Link key={booking.reference} href={"/manage/bookings?selected=" + booking.reference}><span>{booking.business}</span><small>{shortDate(booking.request.startDate)} / {booking.status}</small></Link>)}{!soon.length && <p>No bookings start in the next 14 days.</p>}</details></DarkIsland></div>
     </div>
   </section>;
 }

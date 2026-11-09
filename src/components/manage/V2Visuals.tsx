@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { formatHour } from "@/lib/booking/hours";
 import { ChartBar, Clock, Coins, Play } from "@phosphor-icons/react";
@@ -8,12 +10,36 @@ export function DarkIsland({ children, className = "" }: { children: ReactNode; 
   return <section className={"v2-card v2-dark " + className}>{children}</section>;
 }
 
-export function FolderCard({ label, value, note, colour = "teal", children }: { label: string; value: ReactNode; note: string; colour?: string; children?: ReactNode }) {
+export function FolderCard({ label, value, note, colour = "teal", pill, children }: { label: string; value: ReactNode; note: string; colour?: string; pill?: string; children?: ReactNode }) {
   const Icon = colour === "amber" ? ChartBar : colour === "violet" ? Clock : colour === "green" ? Play : Coins;
   return <section className="v2-folder" data-colour={colour}>
-    <div className="v2-folder-label"><i aria-hidden="true"><Icon size={14} /></i>{label}</div>
+    <div className="v2-folder-label"><i aria-hidden="true"><Icon size={14} /></i>{label}{pill && <em className="v2-folder-pill">{pill}</em>}</div>
     <div className="v2-folder-value">{value}</div><p>{note}</p>{children}
   </section>;
+}
+
+/** Screen time sold: the billboard photo above an ember area, with a ten segment pixel meter lit to the real share. */
+export function PhotoFolderCard({ share, href }: { share: number; href: string }) {
+  const lit = Math.round(Math.min(1, Math.max(0, share)) * 10);
+  return <section className="v2-folder v2-folder-photo" data-colour="amber">
+    <div className="v2-folder-photo-band" aria-hidden="true">
+      <Image className="v2-photo-night" src="/images/evening-billboard.webp" alt="" fill sizes="(max-width: 1100px) 50vw, 25vw" />
+      <Image className="v2-photo-day" src="/images/daytime-billboard.webp" alt="" fill sizes="(max-width: 1100px) 50vw, 25vw" />
+    </div>
+    <div className="v2-folder-photo-body">
+      <div className="v2-folder-label"><i aria-hidden="true"><ChartBar size={14} /></i>Screen time sold</div>
+      <div className="v2-folder-photo-row">
+        <div className="v2-folder-value">{Math.round(share * 100)}<small>% this week</small></div>
+        <span className="v2-pixel-meter" aria-hidden="true">{Array.from({ length: 10 }, (_, index) => <i key={index} data-lit={index < lit} style={{ transitionDelay: `${index * 25}ms` }} />)}</span>
+      </div>
+    </div>
+    <Link href={href} className="v2-folder-link" aria-label={`Screen time sold, ${Math.round(share * 100)}% of saleable screen time this week. Open screen schedule`} />
+  </section>;
+}
+
+/** Round initials for the first few live bookings, then "+N" for the rest. */
+export function AvatarStack({ people, extra }: { people: { name: string; colour: string }[]; extra: number }) {
+  return <span className="v2-avatars" aria-hidden="true">{people.map((person) => <i key={person.name} style={{ "--avatar": person.colour } as CSSProperties}>{person.name.slice(0, 2).toUpperCase()}</i>)}{extra > 0 && <b>+{extra}</b>}</span>;
 }
 
 export type HourShare = { hour: number; share: number };

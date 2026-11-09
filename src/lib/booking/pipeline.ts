@@ -73,6 +73,9 @@ export function nextTask(booking: PipelineCard, today: string): { label: string;
   return { label: booking.status === "Finished" ? "Completed" : "Cancelled", tone: "quiet" };
 }
 
+/** The round avatar colour for a business, the same on booking cards and the Overview. */
+export const avatarColour = (business: string) => ["#a3e635", "#2dd4bf", "#fb923c", "#60a5fa", "#fb7185"][business.charCodeAt(0) % 5];
+
 const dayNumber = (date: string) => Math.round(Date.parse(date + "T00:00:00Z") / 86400000);
 export const daysBetween = (from: string, to: string) => dayNumber(to) - dayNumber(from);
 

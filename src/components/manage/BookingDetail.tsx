@@ -16,7 +16,7 @@ import AdvertPreview from "./AdvertPreview";
 import BookingDetailTabs from "./BookingDetailTabs";
 import { number } from "@/components/booking/QuoteTotals";
 
-export default function BookingDetail({ detail, settings, demo, today, moveBase, confirm, compact = false }: { detail: Detail; settings: BookingSettings; demo: boolean; today: string; moveBase: string; confirm?: ReactNode; compact?: boolean }) {
+export default function BookingDetail({ detail, settings, demo, today, moveBase, confirm, compact = false, initialTab }: { detail: Detail; settings: BookingSettings; demo: boolean; today: string; moveBase: string; confirm?: ReactNode; compact?: boolean; initialTab?: string }) {
   const { booking: b, advertiser: a, adverts, history } = detail;
   const reference = b.reference;
   const closed = b.status === "Finished" || b.status === "Cancelled";
@@ -55,5 +55,5 @@ export default function BookingDetail({ detail, settings, demo, today, moveBase,
   const header = <BookingHeader business={a.business} reference={reference} status={b.status} action={nextAction({ reference, status: b.status, paymentNote: b.paymentNote, request: r }, adverts, today)} moveBase={moveBase} compact={compact}>
     <StatusControls key={b.updatedAt} detail={detail} settings={settings} today={today} moveBase={moveBase} />
   </BookingHeader>;
-  return <article className={"booking-detail v2-tabbed-booking" + (compact ? " is-compact" : "")}><BookingDetailTabs key={reference} header={header} confirm={confirm} panels={[summary, advertPanel, payment, contact, historyPanel].map((panel, index) => <Fragment key={index}>{panel}</Fragment>)} /></article>;
+  return <article className={"booking-detail v2-tabbed-booking" + (compact ? " is-compact" : "")}><BookingDetailTabs key={reference} initialTab={initialTab} header={header} confirm={confirm} panels={[summary, advertPanel, payment, contact, historyPanel].map((panel, index) => <Fragment key={index}>{panel}</Fragment>)} /></article>;
 }
