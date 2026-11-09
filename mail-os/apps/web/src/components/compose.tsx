@@ -555,7 +555,7 @@ export function ComposeModal({
       data-closing={closing || undefined}
       role="dialog"
       aria-modal="true"
-      aria-label={isReply ? "Reply" : "New message"}
+      aria-label={isReply ? "Reply" : "New email"}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) dismiss({ save: true });
       }}
@@ -593,7 +593,7 @@ export function ComposeModal({
         </button>
 
         <div className={cn("compose-sheet", s.sheet)}>
-        <header className={s.heading}><b>{isReply ? "Reply" : "New message"}</b><span>{saving ? "Saving..." : savedAt ? `Draft saved ${timeOf(savedAt)}` : "Draft autosaves as you write"}</span></header>
+        <header className={s.heading}><b>{isReply ? "Reply" : "New email"}</b><span>{saving ? "Saving..." : savedAt ? `Draft saved ${timeOf(savedAt)}` : "Draft autosaves as you write"}</span></header>
         <div className={s.writingLayout}><div className={s.main}>
         <div
           className={cn(

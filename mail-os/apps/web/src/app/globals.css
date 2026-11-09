@@ -110,6 +110,7 @@
     -webkit-font-smoothing: antialiased;
     font-variant-numeric: tabular-nums;
   }
+  small { font-size: 12px; line-height: 16px; }
   button { cursor: pointer; }
   button:disabled { cursor: default; }
   :focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }

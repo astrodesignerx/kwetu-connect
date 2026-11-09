@@ -74,7 +74,7 @@ export function ShellContent({ children, variant = "content" }: AppShellProps) {
     ...DESTINATIONS.map((route) => ({ id: route.href, label: route.label, group: "Routes", run: () => router.push(route.href) })),
     ...FOLDERS.map((folder) => ({ id: folder.key, label: folder.label, group: "Mail folders", run: () => router.push(mailHref({ folder: folder.key })) })),
     ...(overview?.mailboxes ?? []).map((mailbox) => ({ id: mailbox.id, label: mailbox.email, group: "Mailboxes", run: () => router.push(`/mail?m=${mailbox.id}`) })),
-    { id: "compose", label: "New message", group: "Actions", keywords: "compose write", run: compose },
+    { id: "compose", label: "New email", group: "Actions", keywords: "compose write", run: compose },
     { id: "theme", label: "Switch Night / Day", group: "Actions", keywords: "theme dark light", run: toggleTheme },
     { id: "help", label: "Keyboard shortcuts", group: "Actions", run: () => setHelp(true) },
     { id: "connect", label: "Connect a mailbox", group: "Actions", run: () => router.push("/settings/mailboxes/connect") },

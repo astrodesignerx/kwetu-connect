@@ -46,7 +46,7 @@ export default function SettingsHubPage() {
         {data.mailboxHealth.needsAttention > 0 && <span className={s.attention}>{data.mailboxHealth.needsAttention === 1 ? "1 workspace connection needs attention" : `${data.mailboxHealth.needsAttention} workspace connections need attention`}</span>}
       </Tile>
       <Tile href="/settings/brand-kit" title="Email appearance" half>
-        {kit.data ? <div className={s.brand}><div className={s.preview}><iframe tabIndex={-1} title="Saved email appearance" sandbox="" srcDoc={renderBrandPreview(kit.data)} /></div><span className={s.swatches}>{[kit.data.primaryColor, kit.data.accentColor, kit.data.textColor, kit.data.backgroundColor].map((colour, index) => <i key={index} style={{ background: colour || "var(--raise)" }} title={colour || "Default"} />)}</span></div> : <span className={s.note}>{kit.isError ? "Appearance unavailable" : "Loading appearance"}</span>}
+        {kit.data ? <div className={s.brand}><div className={s.preview}><iframe tabIndex={-1} title="Saved email appearance" sandbox="" srcDoc={renderBrandPreview(kit.data)} /></div><span className={s.swatches}>{[kit.data.primaryColor, kit.data.accentColor, kit.data.textColor, kit.data.backgroundColor].map((colour, index) => <i key={index} data-user-colour style={{ background: colour || "var(--raise)" }} title={colour || "Default"} />)}</span></div> : <span className={s.note}>{kit.isError ? "Appearance unavailable" : "Loading appearance"}</span>}
       </Tile>
       <Tile href="/settings/templates" title="Templates" half>
         <strong className={s.count}>{data.templateCount}<small>saved templates</small></strong>
