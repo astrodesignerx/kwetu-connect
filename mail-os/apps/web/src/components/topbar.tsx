@@ -1,16 +1,14 @@
 "use client";
 
-import { Bell, Menu, Plus, Search } from "lucide-react";
+import { Menu, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui";
 import { ThemeToggle } from "@/components/shell/theme";
-import { useToast } from "@/components/shell/toast";
 import { useMailHubStatus } from "@/lib/signalr";
 
 export function Topbar({ onCommand = () => {}, onMenu = () => {}, onCompose, mail = false, primaryCompose = false }: {
   onCommand?: () => void; onMenu?: () => void; onCompose?: () => void; mail?: boolean; primaryCompose?: boolean;
 } = {}) {
   const status = useMailHubStatus();
-  const toast = useToast();
   const healthy = status === "connected";
   const label = healthy ? "Live mail updates connected" : status === "failed"
     ? "Live updates offline. Refresh to fetch the latest mail." : status === "idle"
@@ -26,8 +24,6 @@ export function Topbar({ onCommand = () => {}, onMenu = () => {}, onCompose, mai
         <span className="signal-sync" data-state={healthy ? "healthy" : status === "failed" ? "error" : "waiting"}
           role="img" aria-label={label} title={label} />
         <ThemeToggle />
-        <Button variant="ghost" size="icon" aria-label="Notifications" title="Notifications"
-          onClick={() => toast("Notifications are not available yet. New mail appears in Mail.")}><Bell size={18} /></Button>
       </div>
       <Button variant={primaryCompose ? "primary" : "default"} className="mail-new-email" onClick={onCompose}><Plus size={16} aria-hidden /><span>New email</span></Button>
     </header>

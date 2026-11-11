@@ -7,6 +7,7 @@
 .filter[aria-pressed="true"] { color: var(--surface); font-weight: 500; }
 .filter[aria-pressed="true"]::before { opacity: 1; }
 .filter:active { transform: scale(.97); }
+.viewsToggle { margin-left: auto; }
 .timeline { display: grid; gap: 24px; }
 .day h2 { margin-bottom: 12px; color: var(--muted); font-family: var(--f-mono), monospace; font-size: 12px; line-height: 16px; font-weight: 400; }
 .day ol { display: grid; padding: 0; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); list-style: none; }

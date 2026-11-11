@@ -75,6 +75,14 @@ export function invitationExpiry(expiresAt: string, status: string, now = Date.n
   return days === 1 ? "Expires in 1 day" : `Expires in ${days} days`;
 }
 
+/**
+ * Admin screens that were only opened, not changed. They are recorded for the
+ * record but bury real changes, so the log hides them unless asked. Reading
+ * someone's mail (admin.thread.view, admin.mailbox.threads.view) is never hidden.
+ */
+const PAGE_VIEWS = new Set(["admin.workspace.overview", "admin.audit.daily.view", "admin.users.view", "admin.mailboxes.view"]);
+export const isPageView = (action: string) => PAGE_VIEWS.has(action);
+
 export function auditKind(action: string) {
   if (action.includes("invitation")) return { label: "Invite" };
   if (action.includes("role")) return { label: "Role" };
