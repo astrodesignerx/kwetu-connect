@@ -117,6 +117,20 @@
 .toggle::after { content: ""; position: absolute; left: 2px; top: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--fg); transition: transform var(--t1) var(--ease); }
 .stateAction[aria-pressed=true] .toggle::after { transform: translateX(12px); }
 .quickReplies { display: grid; gap: 8px; }
+.quickReplies button { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 36px; padding: 6px 8px 6px 12px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); color: var(--fg); text-align: left; font-size: 13px; line-height: 20px; font-weight: 500; transition: background-color var(--t1) var(--ease), border-color var(--t1) var(--ease), transform var(--t1) var(--ease); }
+.quickReplies button span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.quickReplies button svg { flex-shrink: 0; color: var(--muted); transition: transform var(--t1) var(--ease); }
+.quickReplies button:hover:not(:disabled) { border-color: var(--fg); background: var(--raise); }
+.quickReplies button:hover:not(:disabled) svg { transform: translateX(2px); }
+.quickReplies button:active:not(:disabled) { transform: scale(.98); }
+.quickReplies button:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.quickReplies button:disabled { opacity: .48; cursor: default; }
+.retryLink { color: var(--fg); text-decoration: underline; text-underline-offset: 2px; transition: opacity var(--t1) var(--ease); }
+.retryLink:hover { opacity: .64; }
+@media (prefers-reduced-motion: reduce) {
+  .quickReplies button, .quickReplies button svg { transition: none; }
+  .quickReplies button:active:not(:disabled), .quickReplies button:hover:not(:disabled) svg { transform: none; }
+}
 
 /* Plain states */
 .noMailbox { display: grid; flex: 1; place-items: center; min-width: 0; padding: 32px 16px; }

@@ -62,7 +62,7 @@ export function ConversationContext({ threadId, replyState, stateSince, onQuickR
       <ThreadNotes threadId={threadId} contextTools={false} />
     </section>
     <section className={s.contextCard}><h2><Layers size={14} aria-hidden />Quick replies<small>From templates</small></h2>
-      {templates.isPending ? <p className={s.muted} role="status">Loading templates...</p> : templates.isError ? <p className={s.muted} role="alert">Templates could not load. <button onClick={() => void templates.refetch()}>Try again</button></p> : templates.data?.length ? <div className={s.quickReplies}>{templates.data.map((template) => <button key={template.id} disabled={!onQuickReply || quickReply.isPending} onClick={() => quickReply.mutate(template.id)}>{template.name}<ChevronRight size={14} aria-hidden /></button>)}</div> : <p className={s.muted}>No templates yet. <Link href="/settings/templates">Manage templates</Link></p>}
+      {templates.isPending ? <p className={s.muted} role="status">Loading templates...</p> : templates.isError ? <p className={s.muted} role="alert">Templates could not load. <button type="button" className={s.retryLink} onClick={() => void templates.refetch()}>Try again</button></p> : templates.data?.length ? <div className={s.quickReplies}>{templates.data.map((template) => <button type="button" key={template.id} title={template.name} disabled={!onQuickReply || quickReply.isPending} onClick={() => quickReply.mutate(template.id)}><span>{template.name}</span><ChevronRight size={14} aria-hidden /></button>)}</div> : <p className={s.muted}>No templates yet. <Link href="/settings/templates">Manage templates</Link></p>}
       {quickReply.isError && <ErrorText>This template could not open. Try again.</ErrorText>}
     </section>
   </aside>;
