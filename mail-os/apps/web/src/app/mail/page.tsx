@@ -13,6 +13,8 @@ import { useAuthStore } from "@/lib/auth-store";
 import { Button, ErrorText, buttonClass } from "@/components/ui";
 import { initialsFor } from "@/lib/avatar";
 import { frameDocument } from "@/lib/mail-frame";
+import { bulkArchiveMessage, runEach } from "@/lib/bulk";
+import { useToast } from "@/components/shell/toast";
 import s from './page.module.css';
 import { signalMail } from '@/lib/signal-mail';
 import type { MailThreadDetail as SignalThreadDetail } from '@/lib/signal-mail';
@@ -84,6 +86,7 @@ function MailView() {
     queryFn: api.mailOverview,
     enabled: !!token,
   });
+  const toast = useToast();
   const mailboxes = overview?.mailboxes ?? [];
   const currentMailboxId = searchParams.get("m") ?? mailboxes[0]?.id ?? null;
   const currentMailbox = mailboxes.find((m) => m.id === currentMailboxId);
@@ -251,12 +254,11 @@ function MailView() {
     });
 
   const bulkArchive = useMutation({
-    mutationFn: async (ids: string[]) => {
-      for (const id of ids) await api.moveThread(id, "Archive");
-    },
-    onSuccess: () => {
-      setSelection(new Set());
-      setParam("id", null);
+    mutationFn: (ids: string[]) => runEach(ids, (id) => api.moveThread(id, "Archive")),
+    onSuccess: ({ done, failed }) => {
+      setSelection(new Set(failed));
+      if (threadId && done.includes(threadId)) setParam("id", null);
+      if (failed.length) toast(bulkArchiveMessage(done.length, done.length + failed.length));
       void queryClient.invalidateQueries({ queryKey: ["threads"] });
       void queryClient.invalidateQueries({ queryKey: ["thread-counts"] });
       void queryClient.invalidateQueries({ queryKey: ["overview"] });
