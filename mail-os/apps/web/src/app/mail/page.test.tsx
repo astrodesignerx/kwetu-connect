@@ -53,10 +53,12 @@ describe("V2 mail behaviour", () => {
     mount(); await openFirst();
     expect(screen.getByRole("region", { name: "Messages" })).toBeTruthy();
     const frame = screen.getByTitle("Message 1");
-    expect(frame.getAttribute("sandbox")).toBe("");
+    // Same origin lets the reader measure the message; scripts stay blocked.
+    expect(frame.getAttribute("sandbox")).toBe("allow-same-origin");
+    expect(screen.queryByRole("button", { name: /Expand message/ })).toBeNull();
     expect(frame.getAttribute("srcdoc")).toContain("img-src data:");
     fireEvent.click(screen.getByRole("button", { name: "Show images" }));
-    expect(frame.getAttribute("sandbox")).toBe("");
+    expect(frame.getAttribute("sandbox")).toBe("allow-same-origin");
     expect(frame.getAttribute("srcdoc")).not.toContain("img-src data:");
   });
 
