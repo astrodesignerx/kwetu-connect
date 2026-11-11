@@ -13,7 +13,7 @@
 .checkMark { display: grid; place-items: center; flex-shrink: 0; width: 28px; height: 28px; border: 1px solid var(--line); border-radius: var(--radius-tag); color: var(--muted); font-family: var(--f-mono), monospace; font-size: 12px; }
 .checklist b { display: block; font-size: 13px; line-height: 20px; font-weight: 500; }
 .checklist small { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; line-height: 20px; }
-.checklist [data-state="complete"] .checkMark { border-color: var(--fg); background: var(--fg); color: var(--surface); }
-.checklist [data-state="error"] .checkMark { border: 2px solid var(--fg); color: var(--fg); }
+.checklist [data-state="complete"] .checkMark { border-color: var(--ok); background: var(--ok); color: var(--surface); }
+.checklist [data-state="error"] .checkMark { border: 2px solid var(--bad); color: var(--bad); }
 .checklist [data-state="running"] .checkMark { border-color: var(--fg); color: var(--fg); }
 .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 13px; line-height: 20px; }

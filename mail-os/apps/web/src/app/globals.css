@@ -2,19 +2,31 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Kwetu OS is strictly black and white. Every interface colour below is a pure
-   neutral. Meaning is carried by weight, shape and words, never by hue. */
+/* Kwetu OS uses warm neutrals and four colours with one job each: gold acts,
+   ember tells time, green is finished or healthy, red has failed. Nothing else
+   is coloured. Gold as a fill always carries --gold-ink text; gold as text or as
+   an outline on a neutral surface uses --gold-text, which is dark enough to read. */
 :root {
   color-scheme: light;
-  --bg: #ededed;
+  --bg: #f3f2ef;
   --surface: #ffffff;
-  --raise: #f5f5f5;
-  --line: #e3e3e3;
-  --fg: #111111;
-  --muted: #636363;
-  --shadow-menu: 0 1px 2px rgb(0 0 0 / .06), 0 8px 24px rgb(0 0 0 / .08);
-  --shadow-dialog: 0 2px 4px rgb(0 0 0 / .06), 0 24px 64px rgb(0 0 0 / .16);
-  --overlay: rgb(0 0 0 / .48);
+  --raise: #f1efeb;
+  --line: #e4e0d8;
+  --fg: #17130f;
+  --muted: #5f5850;
+  --gold: #edb347;
+  --gold-ink: #1d1006;
+  --gold-text: #8a5e12;
+  --gold-soft: rgb(237 179 71 / .2);
+  --ember: #b8430b;
+  --ember-soft: rgb(255 106 31 / .13);
+  --ok: #087a50;
+  --ok-soft: rgb(8 122 80 / .12);
+  --bad: #b3261e;
+  --bad-soft: rgb(179 38 30 / .1);
+  --shadow-menu: 0 1px 2px rgb(29 16 6 / .06), 0 8px 24px rgb(29 16 6 / .08);
+  --shadow-dialog: 0 2px 4px rgb(29 16 6 / .06), 0 24px 64px rgb(29 16 6 / .16);
+  --overlay: rgb(29 16 6 / .48);
   --ease: cubic-bezier(0.2, 0, 0, 1);
   --t1: 120ms;
   --t2: 200ms;
@@ -23,12 +35,20 @@
 
 .dark {
   color-scheme: dark;
-  --bg: #0d0d0d;
-  --surface: #181818;
-  --raise: #202020;
-  --line: #303030;
-  --fg: #f2f2f2;
-  --muted: #a3a3a3;
+  --bg: #13100d;
+  --surface: #1b1612;
+  --raise: #241e18;
+  --line: #2f2822;
+  --fg: #f8f2ea;
+  --muted: #b9ad9f;
+  --gold-text: #f4c578;
+  --gold-soft: rgb(237 179 71 / .16);
+  --ember: #ff9152;
+  --ember-soft: rgb(255 106 31 / .17);
+  --ok: #34d399;
+  --ok-soft: rgb(52 211 153 / .13);
+  --bad: #fca5a5;
+  --bad-soft: rgb(252 165 165 / .12);
   --shadow-menu: none;
   --shadow-dialog: none;
   --overlay: rgb(0 0 0 / .64);
@@ -44,6 +64,16 @@
   --color-line: var(--line);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
+  --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
+  --color-gold-text: var(--gold-text);
+  --color-gold-soft: var(--gold-soft);
+  --color-ember: var(--ember);
+  --color-ember-soft: var(--ember-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
   /* A sheet of paper for rendered email, which assumes white in both themes. */
   --color-paper: #ffffff;
   --color-transparent: transparent;
@@ -113,7 +143,7 @@
   small { font-size: 12px; line-height: 16px; }
   button { cursor: pointer; }
   button:disabled { cursor: default; }
-  :focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+  :focus-visible { outline: 2px solid var(--gold-text); outline-offset: 2px; }
   svg.lucide { stroke-width: 1.75; flex-shrink: 0; }
 
   /* One voice for machine facts: every date, time, keycap and code sample. */
@@ -136,7 +166,7 @@
   }
 
   /* Native controls follow the theme and the system corners. */
-  :is(input, textarea, select) { accent-color: var(--fg); }
+  :is(input, textarea, select) { accent-color: var(--gold); }
   :is(input, textarea)::placeholder { color: var(--muted); opacity: 1; }
   :is(input, textarea, select):disabled { opacity: .56; cursor: default; }
   select {
@@ -157,7 +187,7 @@
   .date-field[data-compact] { display: inline-flex; width: auto; min-height: 32px; padding: 4px 8px; font-size: 13px; }
   .date-field svg { flex-shrink: 0; color: var(--muted); }
   .date-field:active { transform: scale(.98); }
-  .date-field:focus-within { outline: 2px solid var(--fg); outline-offset: 2px; }
+  .date-field:focus-within { outline: 2px solid var(--gold-text); outline-offset: 2px; }
   .date-field > input { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; opacity: 0; cursor: pointer; }
   .date-field > input::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; opacity: 0; }
   @media (max-width: 859px) { .date-field { font-size: 16px; } }
@@ -235,14 +265,12 @@
   .signal-button:hover::before { opacity: .08; }
   .signal-button:active { transform: scale(.98); }
   .signal-button:disabled { pointer-events: none; opacity: .48; }
-  .btn-primary { border-color: var(--fg); background: var(--fg); color: var(--surface); font-weight: 600; }
+  .btn-primary { border-color: var(--gold); background: var(--gold); color: var(--gold-ink); font-weight: 600; }
   .btn-default { border-color: var(--line); }
   .btn-ghost { background: transparent; color: var(--muted); }
-  /* Destructive: outlined, then inverting to a solid fill. The blend flips text and
-     ground together, so the change can fade on opacity alone in either theme. */
-  .btn-danger { border-color: var(--fg); color: var(--fg); }
-  .btn-danger::before { inset: 0; z-index: 1; background: #ffffff; mix-blend-mode: difference; }
-  .btn-danger:hover::before { opacity: 1; }
+  /* Destructive: outlined in red. Hover is the shared veil, which is red here
+     because it takes the text colour. */
+  .btn-danger { border-color: var(--bad); color: var(--bad); }
   .signal-button-small { min-height: 32px; padding: 0 12px; }
   .signal-button-icon { width: 40px; height: 40px; padding: 0; flex-shrink: 0; }
 
@@ -264,7 +292,7 @@
   .signal-logo { display: grid; flex-shrink: 0; place-items: center; }
   .kca-mark {
     display: block;
-    background: currentColor;
+    background: linear-gradient(160deg, #edb347, #9a650c);
     -webkit-mask: url("/brand/kca-icon.svg") center / contain no-repeat;
     mask: url("/brand/kca-icon.svg") center / contain no-repeat;
   }
@@ -283,7 +311,7 @@
     font-size: 14px;
     line-height: 20px;
   }
-  .glass-input[aria-invalid="true"], .glass-input:user-invalid { border: 2px solid var(--fg); padding: 7px 11px; }
+  .glass-input[aria-invalid="true"], .glass-input:user-invalid { border: 2px solid var(--bad); padding: 7px 11px; }
   .glass-input-dense { min-height: 32px; padding: 4px 8px; }
 
   /* Shared states */
@@ -304,7 +332,7 @@
   .view-state-skeleton { display: grid; gap: 8px; width: min(240px, 100%); }
   .view-state-skeleton i { height: 8px; border-radius: var(--radius-tag); background: var(--raise); }
   .view-state-skeleton i:last-child { width: 64%; }
-  .error-line { display: flex; align-items: flex-start; gap: 8px; color: var(--fg); font-size: 13px; line-height: 20px; overflow-wrap: anywhere; }
+  .error-line { display: flex; align-items: flex-start; gap: 8px; color: var(--bad); font-size: 13px; line-height: 20px; overflow-wrap: anywhere; }
   .error-line svg { margin-top: 2px; }
 
   /* Frame */
@@ -318,7 +346,7 @@
   .v2-content { width: 100%; max-width: 1040px; margin: 0 auto; padding: 20px 0 32px; }
   .v2-content > * { min-width: 0; }
 
-  /* Rail: flat icon-over-label items. The active item is a solid fill of the text colour. */
+  /* Rail: flat icon-over-label items. The active item sits on a gold tint. */
   .mail-rail { height: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px 8px 16px; overflow-y: auto; }
   .mail-rail-brand { display: grid; place-items: center; width: 44px; min-height: 32px; flex-shrink: 0; }
   .mail-rail nav { display: grid; justify-items: center; gap: 4px; }
@@ -326,12 +354,11 @@
   .mail-rail nav a::before, .mail-rail nav button::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--fg); opacity: 0; transition: opacity var(--t1) var(--ease); }
   .mail-rail nav a:hover::before, .mail-rail nav button:hover::before { opacity: .06; }
   .mail-rail nav a:active, .mail-rail nav button:active { transform: scale(.96); }
-  .mail-rail nav a[aria-current=page] { color: var(--surface); }
-  .mail-rail nav a[aria-current=page]::before { opacity: 1; }
+  .mail-rail nav a[aria-current=page] { color: var(--fg); }
+  .mail-rail nav a[aria-current=page]::before { background: var(--gold-soft); opacity: 1; }
   .mail-rail nav span { max-width: 100%; overflow: hidden; font-size: 12px; line-height: 16px; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; }
   .mail-rail nav a[aria-current=page] span { font-weight: 600; }
-  .mail-rail small { position: absolute; right: 8px; top: 4px; display: grid; place-items: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: var(--radius-tag); background: var(--fg); color: var(--surface); font-family: var(--f-mono), monospace; font-size: 12px; line-height: 16px; }
-  .mail-rail nav a[aria-current=page] small { background: var(--surface); color: var(--fg); }
+  .mail-rail small { position: absolute; right: 8px; top: 4px; display: grid; place-items: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: var(--radius-tag); background: var(--gold); color: var(--gold-ink); font-family: var(--f-mono), monospace; font-size: 12px; line-height: 16px; }
   .mail-rail .mail-rail-bottom { margin-top: auto; padding-top: 12px; }
   .mail-rail nav .mail-rail-avatar { width: 36px; min-height: 36px; height: 36px; margin-top: 8px; padding: 0; border-radius: 50%; background: var(--raise); color: var(--fg); font-size: 12px; font-weight: 600; }
   .mail-rail nav .mail-rail-avatar::before { content: none; }
@@ -363,13 +390,16 @@
   .signal-topbar-tools { display: flex; align-items: center; gap: 4px; }
   .signal-menu { display: none; }
 
-  /* Status dots: filled is healthy, a ring is waiting, a struck ring has failed. */
+  /* Status dots: filled green is healthy, a neutral ring is waiting, a struck red dot
+     has failed. Shape carries the state too, so colour is never the only signal. */
   .signal-sync { position: relative; display: inline-block; flex-shrink: 0; width: 8px; height: 8px; margin-inline: 8px; border: 1px solid var(--fg); border-radius: 50%; }
-  .signal-sync[data-state=healthy] { background: var(--fg); }
-  .signal-sync[data-state=error]::after { content: ""; position: absolute; left: 50%; top: -2px; width: 1px; height: 12px; background: var(--fg); transform: rotate(-45deg); }
+  .signal-sync[data-state=healthy] { border-color: var(--ok); background: var(--ok); }
+  .signal-sync[data-state=error] { border-color: var(--bad); background: var(--bad); }
+  .signal-sync[data-state=error]::after { content: ""; position: absolute; left: 50%; top: -2px; width: 1px; height: 12px; background: var(--bad); transform: rotate(-45deg); }
   .status-dot { position: relative; display: inline-block; flex-shrink: 0; width: 8px; height: 8px; border: 1px solid var(--fg); border-radius: 50%; }
-  .status-dot[data-state=healthy] { background: var(--fg); }
-  .status-dot[data-state=failed]::after { content: ""; position: absolute; left: 50%; top: -2px; width: 1px; height: 12px; background: var(--fg); transform: rotate(-45deg); }
+  .status-dot[data-state=healthy] { border-color: var(--ok); background: var(--ok); }
+  .status-dot[data-state=failed] { border-color: var(--bad); background: var(--bad); }
+  .status-dot[data-state=failed]::after { content: ""; position: absolute; left: 50%; top: -2px; width: 1px; height: 12px; background: var(--bad); transform: rotate(-45deg); }
 
   .mail-new-email { flex-shrink: 0; }
 
@@ -381,15 +411,14 @@
   .signal-nav-link { position: relative; display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: var(--radius-control); color: var(--muted); font-size: 14px; line-height: 20px; font-weight: 500; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
   .signal-nav-link:hover { opacity: .64; }
   .signal-nav-link:active { transform: scale(.98); }
-  .signal-nav-link.is-active { background: var(--fg); color: var(--surface); }
-  .signal-count { margin-left: auto; min-width: 20px; padding: 0 4px; border-radius: var(--radius-tag); background: var(--fg); color: var(--surface); text-align: center; font-family: var(--f-mono), monospace; font-size: 12px; line-height: 20px; font-weight: 500; }
-  .signal-nav-link.is-active .signal-count { background: var(--surface); color: var(--fg); }
+  .signal-nav-link.is-active { background: var(--gold-soft); color: var(--fg); }
+  .signal-count { margin-left: auto; min-width: 20px; padding: 0 4px; border-radius: var(--radius-tag); background: var(--gold); color: var(--gold-ink); text-align: center; font-family: var(--f-mono), monospace; font-size: 12px; line-height: 20px; font-weight: 500; }
   .signal-sidebar-context { flex: 1; min-height: 0; overflow-y: auto; }
   .signal-mail-context summary { display: flex; align-items: center; gap: 8px; padding: 0 12px 8px; color: var(--muted); font-size: 12px; line-height: 16px; cursor: pointer; }
   .signal-mail-context summary::-webkit-details-marker { display: none; }
   .signal-folder { display: flex; justify-content: space-between; align-items: center; padding: 4px 12px 4px 32px; border-radius: var(--radius-control); color: var(--muted); font-size: 13px; line-height: 24px; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
   .signal-folder:hover { opacity: .64; }
-  .signal-folder[aria-current=page] { background: var(--fg); color: var(--surface); }
+  .signal-folder[aria-current=page] { background: var(--gold-soft); color: var(--fg); }
   .signal-folder small { font-family: var(--f-mono), monospace; font-size: 12px; }
   .signal-mailbox-label { display: grid; gap: 8px; margin-top: 20px; padding-inline: 12px; color: var(--muted); font-size: 12px; line-height: 16px; }
   .signal-mailbox-label select { width: 100%; min-width: 0; min-height: 40px; padding-left: 12px; border: 1px solid var(--line); border-radius: var(--radius-control); font-size: 13px; }
@@ -466,7 +495,7 @@
   .signal-auth-footer { margin-top: 24px; color: var(--muted); font-size: 13px; line-height: 20px; }
   .auth-link { color: var(--fg); font-weight: 500; text-decoration: underline; text-underline-offset: 4px; transition: opacity var(--t1) var(--ease); }
   .auth-link:hover { opacity: .64; }
-  .signal-auth-error { display: flex; align-items: flex-start; gap: 8px; color: var(--fg); font-size: 13px; line-height: 20px; overflow-wrap: anywhere; }
+  .signal-auth-error { display: flex; align-items: flex-start; gap: 8px; color: var(--bad); font-size: 13px; line-height: 20px; overflow-wrap: anywhere; }
   .signal-auth-error svg { margin-top: 2px; }
   .signal-loading { animation: signal-spin 1s linear infinite; }
   @keyframes signal-spin { to { transform: rotate(360deg); } }
@@ -520,7 +549,7 @@
   .editor-surface blockquote { margin-block: 8px; padding-left: 12px; border-left: 2px solid var(--fg); color: var(--muted); }
   .editor-surface img { max-width: 100%; border-radius: var(--radius-control); }
   .editor-box { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); }
-  .editor-box:focus-within { border-color: var(--fg); }
+  .editor-box:focus-within { border-color: var(--gold-text); }
   .editor-source { width: 100%; height: 100%; min-height: 192px; padding-block: 12px; resize: none; background: transparent; font-family: var(--f-mono), monospace; font-size: 12px; line-height: 20px; outline: 0; }
   .quote-toggle { display: inline-flex; align-items: center; gap: 4px; min-height: 28px; padding: 0 8px; border: 1px solid var(--line); border-radius: var(--radius-tag); color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
   .quote-toggle:hover { opacity: .64; }
@@ -554,8 +583,8 @@
   .reader-action::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--fg); opacity: 0; transition: opacity var(--t1) var(--ease); }
   .reader-action:hover::before { opacity: .08; }
   .reader-action:active { transform: scale(.96); }
-  .reader-action-primary { background: var(--fg); color: var(--surface); font-weight: 600; }
-  .reader-action-primary::before { background: var(--surface); }
+  .reader-action-primary { background: var(--gold); color: var(--gold-ink); font-weight: 600; }
+  .reader-action-primary::before { background: var(--gold-ink); }
   .reader-action-small { min-height: 28px; padding: 0 8px; font-size: 12px; line-height: 16px; }
   .detail-panel { animation: compose-slip var(--t2) var(--ease) both; }
   .reply-dock { flex-shrink: 0; padding: 12px 20px; border-top: 1px solid var(--line); }

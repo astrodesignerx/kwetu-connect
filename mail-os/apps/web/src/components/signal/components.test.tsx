@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { useState } from "react";
 import { Heatmap, HourBars, Meter, Spark } from "./charts";
 import { LedBar, StateBoard } from "./boards";
+import { StatusChip } from "./clients";
 import { Segmented } from "./segmented";
 
 afterEach(cleanup);
@@ -63,5 +64,21 @@ describe("Chart and LED accessibility", () => {
     expect(screen.getByRole("img", { name: "Approval due, Install tomorrow" })).toBeTruthy();
     expect(screen.getByRole("status").textContent).toBe("Loading");
     expect(screen.getByRole("status").getAttribute("aria-live")).toBe("polite");
+  });
+});
+
+describe("StatusChip", () => {
+  it("marks a waiting chip as strong and as a time state", () => {
+    render(<StatusChip label="Waiting on us" waiting />);
+    const chip = screen.getByText("Waiting on us");
+    expect(chip.getAttribute("data-waiting")).toBe("true");
+    expect(chip.getAttribute("data-strong")).toBe("true");
+  });
+
+  it("leaves a plain strong chip neutral", () => {
+    render(<StatusChip label="Needs a subject" strong />);
+    const chip = screen.getByText("Needs a subject");
+    expect(chip.getAttribute("data-strong")).toBe("true");
+    expect(chip.getAttribute("data-waiting")).toBe("false");
   });
 });

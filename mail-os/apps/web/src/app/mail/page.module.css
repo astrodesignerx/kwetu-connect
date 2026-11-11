@@ -16,7 +16,8 @@
 .row { position: relative; display: block; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); isolation: isolate; }
 .row::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--fg); opacity: 0; pointer-events: none; transition: opacity var(--t1) var(--ease); }
 .row:hover::before { opacity: .04; }
-.row::after { content: ""; position: absolute; inset: -1px; border: 1px solid var(--fg); border-radius: inherit; opacity: 0; pointer-events: none; transition: opacity var(--t1) var(--ease); }
+.row::after { content: ""; position: absolute; inset: -1px; border: 1px solid var(--gold-text); border-radius: inherit; opacity: 0; pointer-events: none; transition: opacity var(--t1) var(--ease); }
+.row[data-active=true]::before { background: var(--gold-soft); opacity: 1; }
 .row[data-active=true]::after { opacity: 1; }
 .avatarButton { position: absolute; left: 12px; top: 12px; z-index: 1; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--raise); color: var(--fg); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
 .avatarButton:hover { opacity: .72; }
@@ -24,15 +25,15 @@
 .rowButton { display: block; width: 100%; min-width: 0; border-radius: var(--radius-tag); text-align: left; }
 .rowTop { display: flex; align-items: center; gap: 8px; min-height: 32px; padding-left: 40px; font-size: 13px; line-height: 20px; }
 .rowTop time { flex-shrink: 0; color: var(--muted); white-space: nowrap; }
-.unread { flex: 0 0 8px; height: 8px; border-radius: 50%; background: var(--fg); }
+.unread { flex: 0 0 8px; height: 8px; border-radius: 50%; background: var(--gold); }
 .subject, .snippet { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .subject { margin-top: 8px; font-size: 14px; line-height: 20px; font-weight: 500; }
 .row[data-unread=true] .subject { font-weight: 600; }
 .snippet { margin-top: 4px; color: var(--muted); font-size: 13px; line-height: 20px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.row mark { background: var(--fg); color: var(--surface); }
+.row mark { background: var(--gold-soft); color: var(--fg); }
 .rowMeta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 8px; margin-top: 8px; color: var(--muted); font-size: 12px; line-height: 16px; }
 .rowMeta > span { overflow-wrap: anywhere; }
-.waitingLabel { margin-left: auto; color: var(--fg); font-weight: 600; }
+.waitingLabel { margin-left: auto; color: var(--ember); font-weight: 600; }
 
 /* Brief */
 .brief { order: 2; min-width: 0; padding: 24px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
@@ -48,7 +49,7 @@
 .waiting li + li { border-top: 1px solid var(--line); }
 .waiting a { display: block; padding: 8px 0; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; transition: opacity var(--t1) var(--ease); }
 .waiting a:hover { opacity: .64; }
-.waiting small { display: block; margin-top: 4px; color: var(--fg); font-size: 12px; line-height: 16px; font-weight: 600; }
+.waiting small { display: block; margin-top: 4px; color: var(--ember); font-size: 12px; line-height: 16px; font-weight: 600; }
 .metric { display: block; margin-bottom: 4px; font-size: 28px; line-height: 36px; font-weight: 600; }
 .muted { color: var(--muted); font-size: 13px; line-height: 20px; }
 .flights { grid-column: 1 / -1; }
@@ -122,10 +123,10 @@
 div.mailboxHeader { margin-top: 12px; }
 .mailboxPicker .mailboxHeader { margin: 0; transition: border-color var(--t1) var(--ease), background-color var(--t1) var(--ease); }
 .mailboxPicker .mailboxHeader:hover, .mailboxPicker .mailboxHeader[aria-expanded=true] { border-color: var(--fg); background: var(--raise); }
-.mailboxPicker .mailboxHeader:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
-.mailboxDot { flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--fg); }
+.mailboxPicker .mailboxHeader:focus-visible { outline: 2px solid var(--gold-text); outline-offset: 2px; }
+.mailboxDot { flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
 .mailboxDot[data-state=Pending], .mailboxDot[data-state=Backfilling] { background: transparent; box-shadow: inset 0 0 0 1.5px var(--fg); }
-.mailboxDot[data-state=Error] { border-radius: 2px; background: var(--muted); }
+.mailboxDot[data-state=Error] { border-radius: 2px; background: var(--bad); }
 .mailboxText { display: grid; flex: 1; min-width: 0; }
 .mailboxText b, .mailboxText small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mailboxText b { font-size: 13px; line-height: 20px; font-weight: 600; }
@@ -142,7 +143,7 @@ div.mailboxHeader { margin-top: 12px; }
 .quickReplies button:hover:not(:disabled) { border-color: var(--fg); background: var(--raise); }
 .quickReplies button:hover:not(:disabled) svg { transform: translateX(2px); }
 .quickReplies button:active:not(:disabled) { transform: scale(.98); }
-.quickReplies button:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.quickReplies button:focus-visible { outline: 2px solid var(--gold-text); outline-offset: 2px; }
 .quickReplies button:disabled { opacity: .48; cursor: default; }
 .retryLink { color: var(--fg); text-decoration: underline; text-underline-offset: 2px; transition: opacity var(--t1) var(--ease); }
 .retryLink:hover { opacity: .64; }
@@ -155,7 +156,7 @@ div.mailboxHeader { margin-top: 12px; }
 .noMailbox { display: grid; flex: 1; place-items: center; min-width: 0; padding: 32px 16px; }
 .noMailbox > * { width: min(440px, 100%); }
 .actionError { padding: 0 4px 8px; }
-.syncError { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; padding: 8px 12px; border: 2px solid var(--fg); border-radius: var(--radius-control); }
+.syncError { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; padding: 8px 12px; border: 2px solid var(--bad); border-radius: var(--radius-control); }
 .errorActions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .quiet { min-width: 0; padding: 32px 24px; color: var(--muted); font-size: 13px; line-height: 20px; }
 .quiet button { text-decoration: underline; }

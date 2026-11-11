@@ -29,7 +29,7 @@ export function ClientDirectory({ clients }: { clients: ClientActivity[] }) {
             </ClientTile> : <Link href={href} className={s.row}>
               <ClientAvatar name={client.name} />
               <div className={s.identity}><strong>{client.name}</strong><small>{client.domain || plural(client.projectCount, "project")}</small></div>
-              <span className={s.count}>{plural(client.threadCount, "conversation")}</span><StatusChip label={status} strong={client.status === "WaitingOnUs"} />
+              <span className={s.count}>{plural(client.threadCount, "conversation")}</span><StatusChip label={status} waiting={client.status === "WaitingOnUs"} />
             </Link>}
           </div>;
         })}

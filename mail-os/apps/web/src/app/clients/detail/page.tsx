@@ -41,7 +41,7 @@ function ClientWorkspace({ id }: { id: string }) {
   const stats = insights.data;
   return <div className={s.page}>
     <PageHeader context="Clients" contextHref="/clients" title={data.company.name}
-      meta={<><span>{data.company.domain || "No domain added"}</span>{stats && <StatusChip label={stats.waitingCount > 0 ? "Waiting on us" : "All replied"} strong={stats.waitingCount > 0} />}</>}
+      meta={<><span>{data.company.domain || "No domain added"}</span>{stats && <StatusChip label={stats.waitingCount > 0 ? "Waiting on us" : "All replied"} waiting={stats.waitingCount > 0} />}</>}
       action={<Button variant="default" onClick={() => setEditing(!editing)}>{editing ? "Close editor" : "Edit client"}</Button>} />
     {editing && <ClientForm initial={data.company} onDone={() => setEditing(false)} />}
     {insights.isPending ? <p className={s.muted} role="status">Loading client insights...</p> : insights.isError ? <div role="alert" className={s.error}>Could not load insights. <Button variant="ghost" onClick={() => void insights.refetch()}>Try again</Button></div> : stats && <dl className={s.kpis}>
@@ -63,7 +63,7 @@ function ClientWorkspace({ id }: { id: string }) {
         const state = stats?.recentThreads.find(t => t.id === thread.id);
         return <li key={thread.id}><time dateTime={thread.lastDate ?? undefined}>{displayDate(thread.lastDate)}</time><span className={s.dot} aria-hidden="true" /><Link href={`/mail?id=${encodeURIComponent(thread.id)}`}>
           <strong>{thread.subject || "(no subject)"}</strong><small>{thread.snippet || thread.participants}</small>
-          {state && <StatusChip label={state.replyState === "ToReply" ? "Waiting on us" : state.replyState === "Awaiting" ? "Awaiting reply" : "Done"} strong={state.replyState === "ToReply"} />}
+          {state && <StatusChip label={state.replyState === "ToReply" ? "Waiting on us" : state.replyState === "Awaiting" ? "Awaiting reply" : "Done"} waiting={state.replyState === "ToReply"} />}
         </Link></li>;
       })}</ol>}
     </section>
