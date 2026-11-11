@@ -29,16 +29,16 @@ export const BODY_STYLE =
   "margin:0;padding:16px;color:#171717;background:#ffffff}" +
   "a{color:#B8791F}blockquote{border-left:3px solid #FBB040;padding-left:12px;color:#171717cc;margin-left:0}" +
   "img{max-width:100%;height:auto}" +
-  // The frame is its own document, so the app's rules don't reach it — including
-  // the one that hides scrollbars. A message taller than the frame is reached with
-  // the wheel, or by the reader's own "Expand message" control.
+  // The frame is its own document, so the app's rules don't reach it, including
+  // the one that hides scrollbars. The reader sizes the frame to the full message,
+  // so only very wide messages scroll, and sideways.
   "*{scrollbar-width:none;-ms-overflow-style:none}" +
   "::-webkit-scrollbar{display:none}</style>";
 
 // Blocks every remote subresource. Marketing mail embeds 1x1 tracking pixels that
 // report back the moment a message is opened; without this the act of reading an
 // email silently tells the sender who read it and when. The reader opts in per
-// message. `sandbox=""` already denies scripts — this is about network calls.
+// message. The sandbox already denies scripts; this is about network calls.
 export const BLOCK_REMOTE =
   `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; ` +
   `img-src data:; style-src 'unsafe-inline'; font-src data:">`;

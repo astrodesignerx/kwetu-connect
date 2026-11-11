@@ -3,7 +3,7 @@
 import { ErrorState } from "@/components/empty-state";
 import { EmptyState } from "@/components/empty-state";
 import { formatDateTime, formatShortDate, formatWhen, plural } from '@/lib/format';
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -516,8 +516,33 @@ function MessageCard({ message, index, defaultOpen, showSender }: { message: Thr
 
 function MessageBody({ html, index }: { html: string; index: number }) {
   const [showRemote, setShowRemote] = useState(false);
-  const [tall, setTall] = useState(false);
+  const frameRef = useRef<HTMLIFrameElement>(null);
   const hasRemote = /(?:src|background)\s*=\s*["']?https?:/i.test(html);
+  const srcDoc = useMemo(() => frameDocument(html, !showRemote), [html, showRemote]);
+
+  // The frame grows to the message's full height, so the reader column scrolls as
+  // one page. Images and "Show images" change the height after load, hence the observer.
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    let observer: ResizeObserver | null = null;
+    const fit = () => {
+      const root = frame.contentDocument?.documentElement;
+      if (root) frame.style.height = `${Math.max(80, root.scrollHeight)}px`;
+    };
+    const onLoad = () => {
+      observer?.disconnect();
+      fit();
+      const root = frame.contentDocument?.documentElement;
+      if (root && typeof ResizeObserver !== "undefined") {
+        observer = new ResizeObserver(fit);
+        observer.observe(root);
+      }
+    };
+    frame.addEventListener("load", onLoad);
+    if (frame.contentDocument?.readyState === "complete") onLoad();
+    return () => { frame.removeEventListener("load", onLoad); observer?.disconnect(); };
+  }, [srcDoc]);
 
   return (
     <div>
@@ -535,25 +560,15 @@ function MessageBody({ html, index }: { html: string; index: number }) {
           </button>
         </div>
       )}
+      {/* allow-same-origin without allow-scripts: the message still cannot run any
+          code, but the reader can measure its height. Never add allow-scripts here. */}
       <iframe
+        ref={frameRef}
         title={`Message ${index + 1}`}
-        srcDoc={frameDocument(html, !showRemote)}
-        className={cn(
-          "w-full rounded-control border border-line bg-paper ",
-          tall ? "h-[70vh]" : "h-80"
-        )}
-        sandbox=""
+        srcDoc={srcDoc}
+        className="block h-20 w-full rounded-control border border-line bg-paper"
+        sandbox="allow-same-origin"
       />
-      {/* The frame cannot measure its own content: sandbox="" denies scripts, and
-          relaxing that for srcdoc would hand the message same-origin access to the
-          app. So the reader offers the height instead of guessing it. */}
-      <button
-        type="button"
-        onClick={() => setTall((v) => !v)}
-        className="mt-1 rounded-tag px-2 py-0.5 text-xs font-medium text-muted transition-[transform,opacity] duration-120 ease-standard hover:opacity-64"
-      >
-        {tall ? "Shrink message" : "Expand message"}
-      </button>
     </div>
   );
 }
