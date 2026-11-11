@@ -20,6 +20,7 @@ import type { MailThreadDetail as SignalThreadDetail } from '@/lib/signal-mail';
 import { ClientAvatar, Segmented } from '@/components/signal';
 import { ThreadList } from '@/components/mail/thread-list';
 import { MorningBrief } from '@/components/mail/morning-brief';
+import { MailboxHeader } from '@/components/mail/mailbox-header';
 import { ConversationContext, ConversationChips } from '@/components/mail/conversation-context';
 import { ComposeModal, replyContextFromThread, type ComposeContext } from "@/components/compose";
 import { ThreadSummary } from "@/components/ai-panel";
@@ -335,6 +336,7 @@ function MailView() {
                 <Segmented options={[{ value: 'inbox', label: 'All' }, { value: 'unread', label: 'Unread' }, { value: 'assigned', label: 'Assigned' }]}
                   value={folder === 'unread' || folder === 'assigned' ? folder : 'inbox'} onChange={(value) => setParams({ folder: value, id: null })} label="Filter messages" />
               </div>}
+            <MailboxHeader mailboxes={mailboxes} currentId={currentMailboxId} onPick={(id) => setParams({ m: id, id: null })} />
             <ListToolbar total={threadTotal} loading={threadsLoading} items={threadItems} selection={visibleSelection}
               onSelectAll={(all) => setSelection(all ? new Set(threadItems.map((item) => item.id)) : new Set())}
               onBulkArchive={() => bulkArchive.mutate([...visibleSelection])} bulkBusy={bulkArchive.isPending} />

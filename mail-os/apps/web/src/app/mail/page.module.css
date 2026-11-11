@@ -116,6 +116,25 @@
 .toggle { position: relative; flex-shrink: 0; width: 28px; height: 16px; border-radius: 999px; background: var(--line); }
 .toggle::after { content: ""; position: absolute; left: 2px; top: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--fg); transition: transform var(--t1) var(--ease); }
 .stateAction[aria-pressed=true] .toggle::after { transform: translateX(12px); }
+/* Mailbox header: which mailbox the list shows, and its sync health */
+.mailboxPicker { position: relative; margin-top: 12px; }
+.mailboxHeader { display: flex; align-items: center; gap: 10px; width: 100%; min-width: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); color: var(--fg); text-align: left; }
+div.mailboxHeader { margin-top: 12px; }
+.mailboxPicker .mailboxHeader { margin: 0; transition: border-color var(--t1) var(--ease), background-color var(--t1) var(--ease); }
+.mailboxPicker .mailboxHeader:hover, .mailboxPicker .mailboxHeader[aria-expanded=true] { border-color: var(--fg); background: var(--raise); }
+.mailboxPicker .mailboxHeader:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.mailboxDot { flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--fg); }
+.mailboxDot[data-state=Pending], .mailboxDot[data-state=Backfilling] { background: transparent; box-shadow: inset 0 0 0 1.5px var(--fg); }
+.mailboxDot[data-state=Error] { border-radius: 2px; background: var(--muted); }
+.mailboxText { display: grid; flex: 1; min-width: 0; }
+.mailboxText b, .mailboxText small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mailboxText b { font-size: 13px; line-height: 20px; font-weight: 600; }
+.mailboxText small { color: var(--muted); font-size: 12px; line-height: 16px; }
+.mailboxChevron { flex-shrink: 0; color: var(--muted); transition: transform var(--t2) var(--ease); }
+.mailboxHeader[aria-expanded=true] .mailboxChevron { transform: rotate(180deg); }
+.mailboxMenu { left: 0; right: 0; top: calc(100% + 4px); display: grid; padding: 4px; }
+.mailboxMenu button { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--radius-tag); text-align: left; transition: background-color var(--t1) var(--ease); }
+.mailboxMenu button:hover, .mailboxMenu button:focus-visible { background: var(--raise); outline: none; }
 .quickReplies { display: grid; gap: 8px; }
 .quickReplies button { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 36px; padding: 6px 8px 6px 12px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); color: var(--fg); text-align: left; font-size: 13px; line-height: 20px; font-weight: 500; transition: background-color var(--t1) var(--ease), border-color var(--t1) var(--ease), transform var(--t1) var(--ease); }
 .quickReplies button span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
