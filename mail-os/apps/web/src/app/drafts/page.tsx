@@ -15,7 +15,7 @@ import { draftReadiness } from "@/lib/signal-mail";
 import { htmlToText } from "@/lib/mail-frame";
 import { ComposeModal, loadDraftToContext, type ComposeContext } from "@/components/compose";
 import { combineDraftLists } from "@/lib/drafts";
-import { formatDateTime } from "@/lib/format";
+import { formatDateTime, formatWhen } from "@/lib/format";
 
 export default function DraftsPage() {
   const { ready } = useRequireAuth();
@@ -51,7 +51,7 @@ export default function DraftsPage() {
             <h2>{draft.subject || '(no subject)'}</h2>
             <p>{draft.bodyText || htmlToText(draft.bodyHtml ?? '') || 'No message yet.'}</p>
             <span className={s.recipient}>From {mailboxById.get(draft.mailboxConnectionId)?.email}</span>
-            <span className={s.footer}><time dateTime={draft.updatedAt}>{formatDateTime(draft.updatedAt)}</time><StatusChip label={readiness.label} strong={!readiness.ready} /></span>
+            <span className={s.footer}><time dateTime={draft.updatedAt} title={formatDateTime(draft.updatedAt)}>{formatWhen(draft.updatedAt)}</time><StatusChip label={readiness.label} strong={!readiness.ready} /></span>
           </button>
           <button className={s.discard} disabled={remove.isPending} onClick={() => remove.mutate(draft.id)}>Discard</button>
         </li>;

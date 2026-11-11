@@ -2,7 +2,7 @@
 
 import { ErrorState } from "@/components/empty-state";
 import { EmptyState } from "@/components/empty-state";
-import { formatDateTime, formatShortDate, formatWhen, plural } from '@/lib/format';
+import { formatDateTime, formatWhen, plural } from '@/lib/format';
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
@@ -409,7 +409,7 @@ function Reader({ thread, selected, mailboxId, syncError, onRetrySync, retrying,
       <div className={s.readerTop}>
         <button type="button" className={s.backButton} onClick={onBack} aria-label="Back to inbox"><ArrowLeft size={16} aria-hidden /></button>
         <ConversationChips threadId={thread.id} />
-        <time dateTime={thread.lastDate ?? undefined}>{formatShortDate(thread.lastDate)}</time>
+        <time dateTime={thread.lastDate ?? undefined} title={formatDateTime(thread.lastDate)}>{formatWhen(thread.lastDate)}</time>
       </div>
       <h1>{thread.subject || '(no subject)'}</h1>
       {syncError && <div className={s.syncError}><ErrorText>This mailbox stopped syncing: {syncError}</ErrorText><Button variant="default" size="small" onClick={onRetrySync} disabled={retrying}>Retry</Button></div>}
@@ -516,7 +516,7 @@ function MessageCard({ message, index, defaultOpen, showSender }: { message: Thr
       {showSender && <ClientAvatar name={who} size="small" />}
       <span className={s.messageWho}>{showSender && <span className={s.messageName}>{who}</span>}<span className={s.messageSnippet}>{open || !showSender ? to : message.snippet || '(no preview)'}</span></span>
       {message.hasAttachments && <Paperclip size={14} aria-label="Has attachments" />}
-      <time dateTime={message.date ?? undefined}>{formatWhen(message.date)}</time>
+      <time dateTime={message.date ?? undefined} title={formatDateTime(message.date)}>{formatWhen(message.date)}</time>
       <ChevronRight size={14} aria-hidden className={s.chevron} data-open={open} />
     </button>
     <MailDisclosure open={open}><div className={s.messageBody}>

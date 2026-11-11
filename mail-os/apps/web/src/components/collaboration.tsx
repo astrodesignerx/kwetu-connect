@@ -10,7 +10,7 @@ import { cn } from "@/lib/cn";
 import { ThreadLinker } from "@/components/thread-linker";
 import { MailDisclosure } from "@/components/mail/disclosure";
 import { StickyNote, X } from "lucide-react";
-import { formatDateTime } from "@/lib/format";
+import { formatDateTime, formatWhen } from "@/lib/format";
 
 export function ThreadAssignee({ threadId }: { threadId: string }) {
   const queryClient = useQueryClient();
@@ -189,8 +189,8 @@ export function ThreadNotes({ threadId, contextTools = true }: { threadId: strin
                   <span className="min-w-0 flex-1 whitespace-pre-wrap text-muted">
                     {n.body}
                   </span>
-                  <time className="shrink-0 text-muted" dateTime={n.createdAt}>
-                    {formatDateTime(n.createdAt)}
+                  <time className="shrink-0 text-muted" dateTime={n.createdAt} title={formatDateTime(n.createdAt)}>
+                    {formatWhen(n.createdAt)}
                   </time>
                   <button
                     type="button"
