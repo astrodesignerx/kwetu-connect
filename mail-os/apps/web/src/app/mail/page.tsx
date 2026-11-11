@@ -11,7 +11,6 @@ import type { ThreadDetailDto, ThreadSummaryDto } from "@kompanion/types";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
 import { Button, ErrorText, buttonClass } from "@/components/ui";
-import { cn } from "@/lib/cn";
 import { initialsFor } from "@/lib/avatar";
 import { frameDocument } from "@/lib/mail-frame";
 import s from './page.module.css';
@@ -150,6 +149,19 @@ function MailView() {
   });
 
   const threadMailbox = mailboxes.find((mailbox) => mailbox.id === thread?.mailboxConnectionId) ?? currentMailbox;
+
+  // A link that names only the conversation (the morning brief, a notification)
+  // may point into another mailbox. Follow it, so the list and the header match
+  // the conversation that is open.
+  const openThreadMailboxId = thread && thread.id === threadId ? thread.mailboxConnectionId : null;
+  const followMailbox = openThreadMailboxId && openThreadMailboxId !== currentMailboxId
+    && mailboxes.some((mailbox) => mailbox.id === openThreadMailboxId) ? openThreadMailboxId : null;
+  useEffect(() => {
+    if (!followMailbox) return;
+    const next = new URLSearchParams(searchParams);
+    next.set("m", followMailbox);
+    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+  }, [followMailbox, searchParams, router, pathname]);
 
   const setRead = useMutation({
     mutationFn: ({ id, read }: { id: string; read: boolean }) => api.setThreadRead(id, read),
