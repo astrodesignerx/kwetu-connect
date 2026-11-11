@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-// This handler runs on the Node.js runtime and is always dynamic — it sends an
+// This handler runs on the Node.js runtime and is always dynamic: it sends an
 // email per request and must never be cached or statically evaluated.
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,7 +23,7 @@ type ContactPayload = {
   botcheck?: string;
 };
 
-// Minimal email sanity check — the browser also validates, this guards the API.
+// Minimal email sanity check: the browser also validates, this guards the API.
 const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
 // Escape user text before dropping it into the HTML email body.
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
   }
 
   // Honeypot: real users never see this field. If it's filled, silently accept
-  // so the bot thinks it succeeded — but send nothing.
+  // so the bot thinks it succeeded, but send nothing.
   if (body.botcheck) {
     return NextResponse.json({ success: true });
   }
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    // Misconfiguration, not a user error — log it and return a graceful message.
+    // Misconfiguration, not a user error: log it and return a graceful message.
     console.error("RESEND_API_KEY is not set; cannot send contact email.");
     return NextResponse.json(
       {

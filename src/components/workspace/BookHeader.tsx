@@ -4,6 +4,7 @@ import { ArrowUpRight, CalendarBlank, Receipt, UserCircle, WhatsappLogo } from "
 import type { BookingSettings } from "@/lib/booking/settings";
 import { WHATSAPP_NUMBER } from "@/lib/contact";
 import ThemeSwitch from "./ThemeSwitch";
+import BookMoreMenu from "./BookMoreMenu";
 import OnAir from "./OnAir";
 import { MyBookings } from "@/components/booking/SavedBookings";
 const STEPS = [{ label: "Choose", Icon: CalendarBlank }, { label: "Your details", Icon: UserCircle }, { label: "Pay and send advert", Icon: Receipt }];
@@ -21,7 +22,8 @@ export default function BookHeader({ settings, step = 1 }: { settings: BookingSe
       <MyBookings />
       <OnAir settings={settings} now={new Date().toISOString()} variant="chip" />
       <a className="header-icon is-whatsapp" href={"https://wa.me/" + WHATSAPP_NUMBER} target="_blank" rel="noopener noreferrer" aria-label="Ask on WhatsApp" title="Ask on WhatsApp"><WhatsappLogo size={17} weight="fill" aria-hidden="true" /></a>
-      <ThemeSwitch variant="icons" />
+      <ThemeSwitch variant="toggle" />
+      <BookMoreMenu />
       <Link href="/" className="back-site-button">Back to site<ArrowUpRight size={14} aria-hidden="true" /></Link>
     </div>
   </header>;

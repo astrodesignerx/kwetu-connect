@@ -15,14 +15,14 @@ const WEEK = [1, 2, 3, 4, 5, 6, 0];
 type Section = "price" | "discounts" | "capacity" | "lengths" | "often" | "lead" | "blocks" | "hours";
 const TITLES: Record<Section, string> = { price: "Price", discounts: "Discounts", capacity: "For sale each hour", lengths: "Lengths", often: "Plays an hour", lead: "Booking lead", blocks: "Time blocks", hours: "Screen hours" };
 const HINTS: Record<Section, string> = {
-  price: "What each second of screen time costs, and the smallest order the booking page accepts.",
-  discounts: "A percentage taken off the whole price once an order reaches a number of plays.",
-  capacity: "How many seconds of each hour are for sale, and the most plays one advertiser can take in an hour.",
-  lengths: "The advert lengths customers can choose on the booking page, in seconds.",
-  often: "The plays an hour choices customers can choose on the booking page.",
-  lead: "How many working days a booking needs before its first play, not counting the public holidays listed.",
-  blocks: "The named parts of the day customers pick hours from.",
-  hours: "When the screen is on each day, and the time blocks that split the day.",
+  price: "Price per second and minimum order.",
+  discounts: "Applies to the whole order when its play threshold is reached.",
+  capacity: "Saleable seconds and maximum plays per advertiser, per hour.",
+  lengths: "Available advert lengths.",
+  often: "Available plays per hour.",
+  lead: "Working days before the first play, excluding listed public holidays.",
+  blocks: "Hour groups offered when booking.",
+  hours: "Screen opening hours and time blocks.",
 };
 const ICONS = { price: Coins, discounts: Percent, capacity: Hourglass, lengths: FilmStrip, often: Play, lead: Timer, blocks: Clock, hours: Clock };
 const n = (value: number) => value.toLocaleString("en-GB");
@@ -115,13 +115,13 @@ export default function SettingsEditor({ initial, activeBookings }: { initial: B
     <div className="settings-tiles">{tiles.map((tile) => { const Icon = ICONS[tile.id]; return <button key={tile.id} type="button" className={`settings-tile${tile.wide ? " is-wide" : ""}`} data-section={tile.id} aria-pressed={open === tile.id} aria-controls="settings-panel" onClick={() => setOpen(open === tile.id ? null : tile.id)}>
       <span className="settings-tile-label"><span className="v2-setting-icon"><Icon size={17} aria-hidden="true" /></span>{TITLES[tile.id]}{tile.aside && <small className="settings-tile-aside">{tile.aside}</small>}</span><strong key={tile.sig}>{tile.value}</strong>{tile.note && <span className="settings-tile-note">{tile.note}</span>}
       {(tile.id === "lengths" || tile.id === "often" || tile.id === "blocks") && <span className="v2-rule-chips" aria-hidden="true">{(tile.id === "lengths" ? lens.map((length) => length + "s") : tile.id === "often" ? plays.map(String) : Object.values(candidate.timeBlocks).map((block) => `${block.label} ${hh(block.startHour)} to ${hh(block.endHour)}`)).map((label) => <span key={label}>{label}</span>)}</span>}
-      {tile.id === "discounts" && <span className="v2-discount-stair" aria-hidden="true">{[{ minPlays: 0, percent: 0 }, ...steps].map((step) => <span key={step.minPlays + ":" + step.percent}><i style={{ height: `${18 + Math.min(99, step.percent) * 1.2}px` }}>{step.percent}%</i><small>{step.minPlays ? n(step.minPlays) : "Under " + n(steps[0].minPlays)}</small></span>)}</span>}
+      {tile.id === "discounts" && <span className="v2-discount-stair" aria-hidden="true">{[{ minPlays: 0, percent: 0 }, ...steps].map((step) => <span key={step.minPlays + ":" + step.percent}><i style={{ "--p": Math.min(99, step.percent) } as React.CSSProperties}>{step.percent}%</i><small>{step.minPlays ? n(step.minPlays) : "Under " + n(steps[0].minPlays)}</small></span>)}</span>}
       {tile.id === "hours" && <span className="v2-screen-hours" aria-hidden="true"><span />{Array.from({ length: 24 }, (_, hour) => <small key={hour}>{hour % 3 === 0 ? hh(hour) : ""}</small>)}{hourGroups(candidate.screenHours).map((group) => <span className="v2-screen-hour-row" key={group.from}><span>{SHORT[group.from]}{group.from !== group.to ? " to " + SHORT[group.to] : ""}</span>{Array.from({ length: 24 }, (_, hour) => <i key={hour} data-open={hour >= group.open && hour < group.close} />)}</span>)}</span>}
     </button>; })}</div>
     <aside id="settings-panel" className="settings-panel" aria-label="Edit settings" data-open={open !== null}>
       <fieldset disabled={pending} className="settings-fields" key={open ?? "none"}>
         {open ? <><div className="settings-panel-head"><h2>Editing <span>{TITLES[open]}</span></h2><span className="settings-state" data-draft={unsaved}>{unsaved ? "Draft" : "Saved"}</span><button type="button" className="settings-remove" aria-label="Close panel" onClick={() => setOpen(null)}><X size={14} aria-hidden="true" /></button></div><p className="settings-sub">{HINTS[open]}</p>{editors[open]}</>
-          : <p className="settings-sub">Pick a tile to change it. New quotes use these settings; quotes already made keep their price.</p>}
+          : <p className="settings-sub">New quotes use these settings. Existing bookings keep their price.</p>}
       </fieldset>
       <div className="settings-impact"><b>Sample orders</b>
         {error ? <p role="alert" className="settings-error">{error}</p> : RULEBOOK_EXAMPLES.map((example) => {
@@ -140,7 +140,7 @@ export default function SettingsEditor({ initial, activeBookings }: { initial: B
         <button className="staff-button" disabled={Boolean(error) || !unsaved || pending}>{pending ? "Saving..." : unsaved ? "Save changes" : "No changes to save"}</button>
         <button type="button" className="settings-reset" disabled={!unsaved || pending} onClick={() => { setSettings(initial); setLengths(initial.lengths.join(", ")); setHolidays(initial.publicHolidays.join("\n")); }}>Reset</button>
       </div>
-      <p className="settings-sub">Save lights up once something changes. Existing bookings keep their price.</p>
+
       <p role="status" className="settings-status">{state.message}</p>
     </aside>
   </form>;

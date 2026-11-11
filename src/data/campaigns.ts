@@ -29,7 +29,7 @@ export const campaigns: Campaign[] = [
     video: "/videos/recent/kca-placeholder-01.mp4",
     videoHd: "/videos/theater/kca-placeholder-01.mp4",
     description:
-      "House placeholder creative running between client bookings — bold type and motion to keep the screen live.",
+      "House placeholder creative running between client bookings: bold type and motion to keep the screen live.",
   },
   {
     slug: "kca-placeholder-02",
@@ -55,7 +55,7 @@ export const campaigns: Campaign[] = [
     video: "/videos/recent/kca-placeholder-05.mp4",
     videoHd: "/videos/theater/kca-placeholder-05.mp4",
     description:
-      "House placeholder with kinetic type and gold-black brand system — keeps dwell time high between paid campaigns.",
+      "House placeholder with kinetic type and gold-black brand system, keeping dwell time high between paid campaigns.",
   },
   {
     slug: "elements-staffing",
@@ -68,7 +68,7 @@ export const campaigns: Campaign[] = [
     video: "/videos/recent/elements-staffing.mp4",
     videoHd: "/videos/theater/elements-staffing.mp4",
     description:
-      "Healthcare staffing campaign for Elements Staffing & Nursingly — running on the Kisumu Ndogo Road LED.",
+      "Healthcare staffing campaign for Elements Staffing & Nursingly, running on the Kisumu Ndogo Road LED.",
   },
   {
     slug: "eagle-creek",
@@ -81,7 +81,7 @@ export const campaigns: Campaign[] = [
     video: "/videos/recent/eagle-creek.mp4",
     videoHd: "/videos/theater/eagle-creek.mp4",
     description:
-      "Hospitality campaign for Eagle Creek Kenya Limited — full-screen motion creative on the Eldoret LED.",
+      "Hospitality campaign for Eagle Creek Kenya Limited, full-screen motion creative on the Eldoret LED.",
   },
   {
     slug: "lacata-dairies",
@@ -94,6 +94,6 @@ export const campaigns: Campaign[] = [
     video: "/videos/recent/lacata-dairies.mp4",
     videoHd: "/videos/theater/lacata-dairies.mp4",
     description:
-      "FMCG campaign for Lacata Dairies — dairy brand motion spot in the recent on-screen loop.",
+      "FMCG campaign for Lacata Dairies, dairy brand motion spot in the recent on-screen loop.",
   },
 ];

@@ -36,6 +36,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  turbopack: { root: __dirname },
   experimental: { serverActions: { bodySizeLimit: "55mb" } },
   async headers() {
     return [

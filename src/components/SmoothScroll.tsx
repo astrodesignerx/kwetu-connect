@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Lenis from "lenis";
-// Lenis' own stylesheet — sets `html.lenis body { height: auto }` (so the scroll
+// Lenis' own stylesheet: sets `html.lenis body { height: auto }` (so the scroll
 // limit is computed correctly) and disables pointer events on iframes (so the
 // embedded map doesn't hijack the wheel). Without it, scrolling gets stuck.
 import "lenis/dist/lenis.css";
@@ -31,7 +31,7 @@ export default function SmoothScroll() {
     let rafId = 0;
     const raf = (time: number) => {
       // Schedule the NEXT frame first. If lenis.raf() ever throws on a transient
-      // DOM state, the loop keeps running and self-heals — instead of dying
+      // DOM state, the loop keeps running and self-heals, instead of dying
       // permanently and freezing the page until a manual refresh.
       rafId = requestAnimationFrame(raf);
       lenis.raf(time);

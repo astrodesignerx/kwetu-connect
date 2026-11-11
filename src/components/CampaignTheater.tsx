@@ -72,7 +72,7 @@ export default function CampaignTheater() {
             {reduceMotion ? (
               <Image
                 src={campaign.cover}
-                alt={`${campaign.title} — ${campaign.client}`}
+                alt={`${campaign.title} - ${campaign.client}`}
                 fill
                 sizes="(min-width: 1024px) 80vw, 100vw"
                 className="object-cover"
@@ -89,7 +89,7 @@ export default function CampaignTheater() {
                 loop
                 playsInline
                 preload="metadata"
-                aria-label={`${campaign.title} — ${campaign.client}`}
+                aria-label={`${campaign.title} - ${campaign.client}`}
                 className="h-full w-full object-cover"
               />
             )}
@@ -135,7 +135,7 @@ export default function CampaignTheater() {
         </div>
       </div>
 
-      {/* Filmstrip selector — posters only so only the feature decodes */}
+      {/* Filmstrip selector: posters only so only the feature decodes */}
       <div
         role="listbox"
         aria-label="Choose a campaign to preview"
@@ -169,7 +169,7 @@ export default function CampaignTheater() {
               <span className="relative block aspect-video overflow-hidden">
                 <Image
                   src={c.cover}
-                  alt={`${c.title} — ${c.client}`}
+                  alt={`${c.title} - ${c.client}`}
                   fill
                   sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                   className={`object-cover transition-transform duration-500 ${
@@ -243,7 +243,7 @@ export default function CampaignTheater() {
             <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-white/10 shrink-0">
               <div className="min-w-0">
                 <p className="text-[0.6875rem] font-semibold text-brand-500 uppercase tracking-wider">
-                  {campaign.category} · {campaign.term}
+                  {campaign.category} - {campaign.term}
                 </p>
                 <h3 className="text-base sm:text-lg font-bold text-white truncate">{campaign.title}</h3>
                 <p className="text-xs text-gray-400 truncate">{campaign.client}</p>

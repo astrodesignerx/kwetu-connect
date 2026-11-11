@@ -133,7 +133,7 @@ export default function CampaignCard({ campaign }: { campaign: Campaign }) {
               <div>
                 <h3 className="text-base font-bold text-white">{campaign.title}</h3>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  {campaign.client} · {campaign.term}
+                  {campaign.client} - {campaign.term}
                 </p>
               </div>
               <button

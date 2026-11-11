@@ -30,8 +30,8 @@ describe("advert desk queue", () => {
     expect(queuePill(entry("Paid", advert("waiting", "2026-11-09T08:00:00Z")), "2026-11-09").text).toBe("Waiting today");
     expect(queuePill(entry("Paid", advert("waiting", "2026-11-08T08:00:00Z")), "2026-11-09").text).toBe("Waiting 1 day");
     expect(queuePill(entry("Approved", advert("approved", "2026-11-01T08:00:00Z")), "2026-11-09").text).toBe("Approved");
-    expect(queuePill(entry("Paid", null), "2026-11-09")).toEqual({ tone: "rose", text: "Missing, starts 14 Nov" });
-    expect(queuePill(entry("Quote", null), "2026-11-09")).toEqual({ tone: "quiet", text: "Missing, unpaid" });
+    expect(queuePill(entry("Paid", null), "2026-11-09")).toEqual({ tone: "rose", text: "Starts 14 Nov" });
+    expect(queuePill(entry("Quote", null), "2026-11-09")).toEqual({ tone: "quiet", text: "Unpaid" });
     expect(queueSub(entry("Quote", null))).toBe("No file yet, quote");
     expect(queueSub(entry("Paid", null))).toBe("No file yet, paid");
   });

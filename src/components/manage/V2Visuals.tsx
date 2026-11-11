@@ -107,7 +107,7 @@ export function BlockRows({ blocks, today }: { blocks: BlockRow[]; today?: strin
         <span className="v2-block-label"><i data-block={block.id} aria-hidden="true" /><span><b>{block.label}</b><small>{pad(block.startHour)} to {pad(block.endHour)}</small></span></span>
         {block.cells.map((cell) => {
           const key = `${block.id}${cell.date}`;
-          return <button type="button" key={cell.date} className="v2-block-cell" data-level={cell.share === null ? 0 : tileLevel(cell.share)} data-closed={cell.share === null} aria-pressed={chosen === key} aria-label={describe(block, cell)} onClick={() => setChosen(key)}>{cell.share === null ? "" : `${Math.round(cell.share * 100)}%`}</button>;
+          return <button type="button" key={cell.date} className="v2-block-cell" data-level={cell.share === null ? 0 : tileLevel(cell.share)} data-closed={cell.share === null} data-today-col={today === cell.date || undefined} aria-pressed={chosen === key} aria-label={describe(block, cell)} onClick={() => setChosen(key)}>{cell.share === null ? "" : `${Math.round(cell.share * 100)}%`}</button>;
         })}
       </div>)}
     </div>

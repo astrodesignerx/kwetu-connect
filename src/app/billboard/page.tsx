@@ -6,9 +6,9 @@ import AnimatedSection from "@/components/AnimatedSection";
 import AnimatedItem from "@/components/AnimatedItem";
 
 export const metadata: Metadata = {
-  title: "Our Billboard — Kisumu Ndogo Road, Eldoret",
+  title: "Our Billboard | Kisumu Ndogo Road, Eldoret",
   description:
-    "Full-HD LED billboard on Kisumu Ndogo Road near Langas Junction, Eldoret — 35,000–55,000+ daily impressions across CBD, airport, and Langas traffic.",
+    "Full-HD LED billboard on Kisumu Ndogo Road near Langas Junction, Eldoret: 35,000–55,000+ daily impressions across CBD, airport, and Langas traffic.",
   alternates: { canonical: "/billboard" },
 };
 
@@ -159,7 +159,7 @@ export default function BillboardPage() {
                 <div className="relative rounded-2xl overflow-hidden min-h-[240px] md:h-80 group">
                   <Image
                     src={item.image}
-                    alt={`Billboard campaign mockup — ${item.title}`}
+                    alt={`Billboard campaign mockup: ${item.title}`}
                     fill
                     sizes="(min-width: 768px) 50vw, 100vw"
                     className="object-cover object-top transition-transform duration-700 group-hover:scale-110"

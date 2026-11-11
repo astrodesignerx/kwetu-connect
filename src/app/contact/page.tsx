@@ -130,7 +130,7 @@ export default function ContactPage() {
                   </div>
 
                   <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
-                    {/* Honeypot — hidden from real users, catches spam bots. */}
+                    {/* Honeypot: hidden from real users, catches spam bots. */}
                     <input
                       type="text"
                       name="botcheck"

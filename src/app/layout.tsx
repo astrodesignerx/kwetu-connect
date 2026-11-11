@@ -141,10 +141,10 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <PublicChrome hideBooking><SmoothScroll /><PixelWaveButtons /></PublicChrome>
+        <PublicChrome><SmoothScroll /><PixelWaveButtons /></PublicChrome>
         <PublicChrome><Navbar /></PublicChrome>
         <main id="main-content" className="flex-1 -mt-[88px]">{children}</main>
-        <PublicChrome footer><Footer /><FloatingButtons /></PublicChrome>
+        <PublicChrome><Footer /><FloatingButtons /></PublicChrome>
       </body>
     </html>
   );

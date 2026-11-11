@@ -87,14 +87,14 @@ function MarqueeCard({
         loop
         playsInline
         preload="metadata"
-        aria-label={`${campaign.title} — ${campaign.client}`}
+        aria-label={`${campaign.title} - ${campaign.client}`}
         className="h-full w-full object-cover"
       />
-      {/* Eyebrow tag — always visible */}
+      {/* Eyebrow tag: always visible */}
       <span className="pointer-events-none absolute left-3 top-3 inline-block px-2 py-0.5 rounded text-[0.6875rem] font-semibold text-brand-500 uppercase tracking-wider bg-black/50 backdrop-blur-sm">
         {campaign.category}
       </span>
-      {/* Name — appears on card hover/focus (when marquee is paused) */}
+      {/* Name: appears on card hover/focus (when marquee is paused) */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-3 sm:p-4 opacity-0 translate-y-1 group-hover/card:opacity-100 group-hover/card:translate-y-0 group-focus-within:opacity-100 group-focus-within:translate-y-0 transition-all duration-200">
         <p className="text-sm font-bold text-white leading-none truncate">{campaign.title}</p>
         <p className="text-xs text-gray-300 truncate">{campaign.client}</p>

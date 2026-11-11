@@ -5,7 +5,7 @@ import AnimatedSection from "@/components/AnimatedSection";
 import AnimatedItem from "@/components/AnimatedItem";
 
 export const metadata: Metadata = {
-  title: "About Us — LED Advertising in Eldoret",
+  title: "About Us | LED Advertising in Eldoret",
   description:
     "Kwetu Connect Advertising connects businesses and communities through high-impact LED billboard advertising in Eldoret and the North Rift region.",
   alternates: { canonical: "/about" },
@@ -181,7 +181,7 @@ export default function AboutPage() {
                 <div className="relative rounded-2xl overflow-hidden min-h-[180px] sm:min-h-[220px] md:h-80 group">
                   <Image
                     src={audience.image}
-                    alt={`${audience.label} — ${audience.sublabel}`}
+                    alt={`${audience.label} - ${audience.sublabel}`}
                     fill
                     sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
                     className="object-cover md:grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110"

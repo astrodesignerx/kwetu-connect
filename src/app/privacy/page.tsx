@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const sections = [
   {
     heading: "1. Who we are",
-    body: "Kwetu Connect Advertising (“Kwetu Connect”, “we”, “us”) operates LED billboard advertising services in Eldoret, Kenya. Our registered contact is P.O. Box 8698-30100, Eldoret, Kenya — info@kwetuconnectads.co.ke.",
+    body: "Kwetu Connect Advertising (“Kwetu Connect”, “we”, “us”) operates LED billboard advertising services in Eldoret, Kenya. Our registered contact is P.O. Box 8698-30100, Eldoret, Kenya: info@kwetuconnectads.co.ke.",
   },
   {
     heading: "2. What we collect",

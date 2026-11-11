@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import CampaignTheater from "@/components/CampaignTheater";
 
 export const metadata: Metadata = {
-  title: "Recently on Screen — Campaigns on Our Eldoret LED Billboard",
+  title: "Recently on Screen | Campaigns on Our Eldoret LED Billboard",
   description:
-    "Campaigns running now and recently on Kwetu Connect's LED billboard on Kisumu Ndogo Road, Eldoret — with real motion creative from the screen.",
+    "Campaigns running now and recently on Kwetu Connect's LED billboard on Kisumu Ndogo Road, Eldoret, with real motion creative from the screen.",
   alternates: { canonical: "/campaigns" },
 };
 

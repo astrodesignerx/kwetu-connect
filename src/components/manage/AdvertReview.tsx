@@ -33,9 +33,9 @@ export default function AdvertReview({ advert, reference, business, bookedSecond
   const rows = checkRows({ fileName: advert.fileName, seconds: advert.seconds, bookedSeconds, shape, length });
   return <>
     <section className="v2-card advert-card advert-preview-card" aria-label="Preview">
-      <AdvertCardHead business={business} reference={reference} downloadUrl={url} fileName={advert.fileName}
-        facts={[advert.fileName, advert.seconds + " s", kindLabel(kind), "uploaded " + uploaded].join(" | ")} />
       <AdvertStage url={failed ? null : url} video={video} fileName={advert.fileName} onMeasured={setMeasured} onFailed={() => setFailed(true)}
+        header={<AdvertCardHead business={business} reference={reference} downloadUrl={url} fileName={advert.fileName}
+          facts={[advert.fileName, advert.seconds + " s", kindLabel(kind), "uploaded " + uploaded].join(" | ")} />}
         unavailable={<div className="advert-unavailable"><strong>{demo ? "Demo advert" : "Preview unavailable"}</strong><span>{advert.fileName}</span><small>{demo ? "Demo mode stores file names only. No media is available." : "The file could not be shown here. Nothing is measured for it."}</small></div>} />
     </section>
     <section className="v2-card advert-card advert-checks-card" aria-label="Checks">
@@ -50,9 +50,8 @@ export default function AdvertReview({ advert, reference, business, bookedSecond
         <div className="advert-segment" role="group" aria-label="Choose decision" data-choice={refusing ? "refuse" : "approve"}><i aria-hidden="true" /><button type="button" aria-pressed={!refusing} onClick={() => setRefusing(false)}><Check size={13} aria-hidden="true" />Approve</button><button type="button" aria-pressed={refusing} onClick={() => setRefusing(true)}><X size={13} aria-hidden="true" />Refuse</button></div>
         {refusing && <label className="advert-reason">Reason for refusing<textarea name="reason" required maxLength={500} defaultValue={advert.reason} rows={3} /></label>}
         {!refusing && blocked && <p role="alert" className="advert-alert">Fix the shape or length mismatch before approving this advert.</p>}
-        <button type="submit" className="advert-submit" data-refuse={refusing || undefined} disabled={!refusing && blocked}>{pending ? "Saving..." : refusing ? "Save refusal" : "Approve advert"}</button>
+        <button type="submit" className="advert-submit" data-refuse={refusing || undefined} disabled={!refusing && blocked}>{pending ? "Saving..." : "Save decision"}</button>
       </fieldset><p role="status" className="advert-status">{state.message}</p></form>
-      <p className="advert-help">Your decision is saved on the booking. No email is sent from here. Approving a file does not move the booking.</p>
       {paidWithApproved && <Link className="advert-open advert-open-booking" href={"/manage/bookings?selected=" + reference}>Open booking to approve it</Link>}
     </section>
   </>;

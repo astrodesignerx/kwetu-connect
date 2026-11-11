@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { addDays, earliestStartDate } from "@/lib/booking/hours";
 import { readAnswers, buildQuery, normaliseDays, normaliseBlocks, type Answers } from "@/lib/booking/answers";
 import { occupancyByDayBlock, type Occupancy } from "@/lib/booking/occupancy";
-import { fromCells, openSelection, quickPick, scheduleLines, toggleSelection, type QuickPick } from "@/lib/booking/selection";
+import { fromCells, openSelection, scheduleLines, toggleSelection } from "@/lib/booking/selection";
 import { suggestPlan } from "@/lib/booking/plan";
 import { quote } from "@/lib/booking/quote";
 import type { BookingSettings } from "@/lib/booking/settings";
@@ -80,11 +80,6 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
 
   function change(partial: Partial<Answers>) {
     setAnswers((current) => ({ ...current, ...partial })); setBudgetMessage(""); setPickMessage("");
-  }
-  function pickQuick(pick: QuickPick) {
-    const next = quickPick(pick, (day, block) => occupancy[day][block].open);
-    if (pick !== "clear" && next.cells.length === 0) { setPickMessage("None of those hours are free for these dates."); return; }
-    change(next);
   }
   function applyBudget(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -176,14 +171,12 @@ export default function BookingQuote({ initialAnswers, initialOccupancy, today, 
         </div>
         <AdvertUpload lengthSeconds={answers.lengthSeconds} advert={advert} onChange={setAdvert} />
         <div className="booking-grid-panel timetable-panel">
-          <div className="timetable-heading"><div><h1>Pick your hours</h1></div><TimetableLegend /></div>
-          <div className="book-quick-picks" role="group" aria-label="Quick picks"><span>Quick picks</span>{([["mornings", "Every morning"], ["evenings", "Evenings"], ["weekends", "Weekends"], ["clear", "Clear"]] as const).map(([pick, label]) => <button key={pick} type="button" disabled={!availabilityKnown} onClick={() => pickQuick(pick)}>{label}</button>)}</div>
+          <div className="timetable-heading"><div><h1>Pick your hours</h1>{result.ok && <p className="v2-grid-summary"><b>{picked.cells.length}</b> boxes <span><b>{number(result.hoursBooked)}</b> screen hours</span><span><b>{number(result.plays)}</b> planned plays</span></p>}</div><TimetableLegend /></div>
           <Timetable settings={settings} occupancy={occupancy} pending={!availabilityKnown} selection={answers} onSelect={(action) => change(toggleSelection(answers, action, (day, block) => occupancy[day][block].open))} />
           <div className="availability-message" role="status">
             {!rangeValid ? "Choose dates in order, up to 366 days apart." : !availabilityCurrent ? "Updating busy hours..." : availability.error || pickMessage}
             {availabilityCurrent && availability.error && <button type="button" className="quiet-button" onClick={() => setRetry((n) => n + 1)}>Try again</button>}
           </div>
-          {result.ok && <p className="v2-grid-summary"><b>{picked.cells.length}</b> boxes <span><b>{number(result.hoursBooked)}</b> screen hours</span><span><b>{number(result.plays)}</b> planned plays</span></p>}
         </div>
         <aside className="quote-desktop" aria-label="Your quote">{card}</aside>
       </div>

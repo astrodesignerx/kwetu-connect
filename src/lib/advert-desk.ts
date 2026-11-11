@@ -43,9 +43,9 @@ export function queuePill(entry: DeskEntry, today: string): { tone: PillTone; te
   const { advert, detail } = entry;
   if (!advert) {
     const status = detail.booking.status;
-    if (status === "Quote") return { tone: "quiet", text: "Missing, unpaid" };
-    if (status === "Live") return { tone: "rose", text: "Missing, live now" };
-    return { tone: "rose", text: "Missing, starts " + shortDate(detail.booking.request.startDate) };
+    if (status === "Quote") return { tone: "quiet", text: "Unpaid" };
+    if (status === "Live") return { tone: "rose", text: "Live now" };
+    return { tone: "rose", text: "Starts " + shortDate(detail.booking.request.startDate) };
   }
   if (advert.decision === "approved") return { tone: "green", text: "Approved" };
   if (advert.decision === "refused") return { tone: "rose", text: "Refused" };
