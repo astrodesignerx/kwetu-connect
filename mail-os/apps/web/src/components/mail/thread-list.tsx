@@ -1,8 +1,9 @@
 "use client";
+import { WaitingPill } from './waiting-pill';
 import { EmptyState } from "@/components/empty-state";
 import { useEffect, useState } from 'react';
 import { Check, Inbox, Paperclip, Search } from 'lucide-react';
-import { groupThreads, durationLabel } from '@/lib/signal-mail';
+import { groupThreads } from '@/lib/signal-mail';
 import type { MailThreadSummary as SignalThreadSummary } from '@/lib/signal-mail';
 import { ClientAvatar } from '@/components/signal';
 import { Button } from '@/components/ui';
@@ -46,7 +47,7 @@ function ThreadRow({ thread: t, active, picked, onSelect, onToggle, query, now }
       <span className={s.subject}><Highlight text={t.subject || '(no subject)'} query={query} /> {t.hasAttachments && <Paperclip size={14} className="inline" aria-label="Has attachments" />}</span>
       <span className={s.snippet}><Highlight text={t.snippet ?? ''} query={query} /></span>
       <span className={s.rowMeta}><span>{t.clientName || (t.hasAttachments ? 'Files attached' : `${t.messageCount} message${t.messageCount === 1 ? '' : 's'}`)}</span>
-        {t.replyState === 'ToReply' && <span className={s.waitingLabel}>Waiting {durationLabel(Math.max(0, (now - new Date(t.stateSince).getTime()) / 1000))}</span>}
+        {t.replyState === 'ToReply' && <WaitingPill seconds={(now - new Date(t.stateSince).getTime()) / 1000} />}
       </span>
     </button>
   </li>;

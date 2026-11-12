@@ -6,6 +6,7 @@ import type { MailBrief } from "@/lib/signal-api";
 import type { MailThreadSummary } from "@/lib/signal-mail";
 import { MorningBrief } from "./morning-brief";
 import { ThreadStateControl } from "./conversation-context";
+import { WaitingPill } from './waiting-pill';
 import { ThreadList } from "./thread-list";
 
 const { brief, setThreadState } = vi.hoisted(() => ({ brief: vi.fn(), setThreadState: vi.fn() }));
@@ -34,12 +35,17 @@ describe("Signal mail screens", () => {
     expect(await screen.findByRole("heading", { name: "Morning brief" })).toBeTruthy();
     expect(screen.queryByText(/Habari/)).toBeNull();
     expect(screen.getByRole("link", { name: /Confirm installation/ }).getAttribute("href")).toBe("/mail?id=thread-1");
-    expect(screen.getByText("Waiting 2h 0m")).toBeTruthy();
+    expect(screen.getByLabelText("Waiting 2 hours 0 minutes")).toBeTruthy();
     expect(["unread", "waiting on you", "awaiting reply"].map((label) => screen.getByText(label).parentElement?.textContent))
       .toEqual(["7unread", "1waiting on you", "4awaiting reply"]);
     expect(screen.getByRole("link", { name: /Westlands/ }).getAttribute("href")).toBe("/clients/detail?id=client-1");
     expect(screen.getByText("1h 0m")).toBeTruthy();
     expect(screen.getByRole("img", { name: /days with replies only/ })).toBeTruthy();
+  });
+
+  it("labels a waiting pill in full units", () => {
+    mount(<WaitingPill seconds={(5 * 24 + 11) * 3600} />);
+    expect(screen.getByLabelText("Waiting 5 days 11 hours").textContent).toBe("5d 11h");
   });
 
   it("shows a recoverable brief error without fabricated metrics", async () => {
