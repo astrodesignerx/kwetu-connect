@@ -1,9 +1,10 @@
 "use client";
 
+import { useThreadState } from './use-thread-state';
 import { ErrorText } from "@/components/ui";
 import Link from "next/link";
 import { useState } from "react";
-import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import type { EmailTemplateDto } from "@kompanion/types";
 import { ArrowUpRight, CalendarDays, Check, ChevronRight, Layers, Users } from "lucide-react";
 import { api } from "@/lib/api";
@@ -16,14 +17,9 @@ import s from "@/app/mail/page.module.css";
 import { formatDate, formatDateRange } from "@/lib/format";
 
 export function ThreadStateControl({ threadId, replyState }: { threadId: string; replyState: ThreadState["replyState"] }) {
-  const cache = useQueryClient();
-  const change = useMutation({
-    mutationFn: () => signalApi.setThreadState(threadId, replyState === "Done" ? "ToReply" : "Done"),
-    onSuccess: () => {
-      for (const key of ["thread", "threads", "mail-brief", "overview", "thread-counts"]) void cache.invalidateQueries({ queryKey: [key] });
-    },
-  });
-  return <div><button className={s.stateAction} aria-label={replyState === "Done" ? "Reopen" : "Mark done"} aria-pressed={replyState === "Done"} disabled={change.isPending} onClick={() => change.mutate()}><span className={s.toggle} aria-hidden /><span>{change.isPending ? "Saving..." : replyState === "Done" ? "Reopen" : "Mark done"}</span><small>{replyState === "Done" ? "Done" : replyState === "Awaiting" ? "Awaiting reply" : "Needs reply"}</small></button>
+  const change = useThreadState(threadId, replyState);
+  const done = replyState === "Done";
+  return <div><button type="button" className={`reader-action ${s.doneAction}`} data-done={done} aria-label={done ? "Reopen" : "Mark done"} title={done ? "Reopen" : "Mark done"} disabled={change.isPending} onClick={() => change.mutate()}><Check size={16} aria-hidden />{done ? "Done" : "Mark done"}</button>
     {change.isError && <ErrorText>Could not change the conversation state. Try again.</ErrorText>}
   </div>;
 }
@@ -57,7 +53,6 @@ export function ConversationContext({ threadId, replyState, stateSince, onQuickR
       {flights.some((query) => query.isError) && <p role="alert" className={s.muted}>Flights could not load. <button onClick={() => flights.forEach((query) => void query.refetch())}>Try again</button></p>}
     </section>
     <section className={s.contextCard}><h2><Check size={14} aria-hidden />This conversation</h2>
-      <ThreadStateControl threadId={threadId} replyState={replyState} />
       <ThreadAssignee threadId={threadId} />
       <ThreadNotes threadId={threadId} contextTools={false} />
     </section>

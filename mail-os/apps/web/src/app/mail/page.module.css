@@ -64,9 +64,9 @@
 /* Conversation */
 .conversation { order: 2; display: grid; grid-template-columns: minmax(0, 1fr) 296px; gap: 16px; min-width: 0; min-height: 0; }
 .reader { min-width: 0; padding: 0 24px 20px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius-card); }
-.readerTop { display: flex; align-items: center; gap: 8px; min-height: 32px; margin: 12px -8px 0; color: var(--muted); }
+.readerTop { position: sticky; top: 0; z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); padding: 8px 0; flex-wrap: wrap; display: flex; align-items: center; gap: 8px; min-height: 32px; margin: 12px -8px 0; color: var(--muted); }
 .readerTop time { margin-left: auto; white-space: nowrap; }
-.backButton { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-control); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+.backButton { display: none; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-control); transition: transform var(--t1) var(--ease), opacity var(--t1) var(--ease); }
 .backButton:hover { opacity: .64; }
 .backButton:active { transform: scale(.94); }
 .chips { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
@@ -82,7 +82,7 @@
 .chevron { transition: transform var(--t2) var(--ease); }
 .chevron[data-open=true] { transform: rotate(90deg); }
 .details { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
-.reader > h1 { margin: 16px 0 12px; font-size: 20px; line-height: 28px; font-weight: 600; overflow-wrap: anywhere; }
+.subjectLine h1 { margin: 16px 0 12px; font-size: 20px; line-height: 28px; font-weight: 600; overflow-wrap: anywhere; }
 .message { overflow: hidden; margin-bottom: 8px; }
 .messageHead { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 0; text-align: left; }
 .messageHead[aria-expanded=false] { padding: 4px 8px; border-radius: var(--radius-control); background: var(--raise); }
@@ -113,12 +113,6 @@
 .clientCard a:hover { opacity: .64; }
 .contextAction { margin-top: 8px; color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; transition: opacity var(--t1) var(--ease); }
 .contextAction:hover { opacity: .64; }
-.stateAction { display: flex; align-items: center; gap: 8px; width: 100%; border-radius: var(--radius-tag); color: var(--fg); text-align: left; font-size: 13px; line-height: 20px; }
-.stateAction small { margin-left: auto; padding: 0 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--fg); font-size: 12px; line-height: 20px; font-weight: 600; white-space: nowrap; }
-.stateAction[aria-pressed=true] small { color: var(--muted); font-weight: 500; }
-.toggle { position: relative; flex-shrink: 0; width: 28px; height: 16px; border-radius: 999px; background: var(--line); }
-.toggle::after { content: ""; position: absolute; left: 2px; top: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--fg); transition: transform var(--t1) var(--ease); }
-.stateAction[aria-pressed=true] .toggle::after { transform: translateX(12px); }
 /* Mailbox header: which mailbox the list shows, and its sync health */
 .mailboxPicker { position: relative; margin-top: 12px; }
 .mailboxHeader { display: flex; align-items: center; gap: 10px; width: 100%; min-width: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); color: var(--fg); text-align: left; }
@@ -215,4 +209,24 @@ div.mailboxHeader { margin-top: 12px; }
 @media (prefers-reduced-motion: reduce) {
   .row::before, .row::after, .avatarButton { transition: none; }
   .avatarButton:active { transform: none; }
+}
+
+.readerActions { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-left: auto; min-width: 0; }
+.readerActions > div { min-width: 0; }
+.readerMore { position: relative; }
+.readerMenu { right: 0; top: calc(100% + 4px); white-space: nowrap; padding: 4px; }
+.subjectLine { display: flex; flex-wrap: wrap; align-items: center; gap: 0 8px; margin-bottom: 12px; }
+.subjectLine h1 { min-width: 0; margin-bottom: 0; }
+.stateChip { margin-top: 12px; }
+.stateChip[data-done=true] span, .doneAction[data-done=true] { color: var(--ok); }
+.stateChip[data-done=true] i { background: var(--ok); }
+@media (max-width: 1120px) {
+  .responsiveAction span { display: none; }
+  .responsiveAction { width: 32px; padding: 0; justify-content: center; }
+}
+@media (max-width: 760px) {
+  .backButton { display: grid; }
+  .readerTop { margin-inline: 0; }
+  .readerActions { gap: 2px; }
+  .readerActions :global(.reader-action) { padding-inline: 6px; }
 }

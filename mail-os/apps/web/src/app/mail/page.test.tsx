@@ -18,7 +18,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/lib/signal-mail", async (original) => ({ ...await original<typeof import("@/lib/signal-mail")>(), signalMail: { listThreads: mocks.list, getThread: mocks.detail } }));
 vi.mock("@/lib/api", () => ({ api: { mailOverview: mocks.overview, setThreadRead: mocks.read, moveThread: mocks.move, triggerMailboxSync: vi.fn(), aiStatus: vi.fn().mockResolvedValue({ configured: false }) } }));
 vi.mock("@/components/mail/morning-brief", () => ({ MorningBrief: () => <section aria-label="Morning brief">Your morning brief</section> }));
-vi.mock("@/components/mail/conversation-context", () => ({ ConversationChips: () => null, ConversationContext: () => <aside aria-label="Conversation context" /> }));
+vi.mock("@/components/mail/conversation-context", () => ({ ThreadStateControl: () => <button>Mark done</button>, ConversationChips: () => null, ConversationContext: () => <aside aria-label="Conversation context" /> }));
 vi.mock("@/components/contact-card", () => ({ ContactDetails: () => null }));
 vi.mock("@/components/attachments", () => ({ AttachmentList: () => null }));
 vi.mock("@/components/ai-panel", () => ({ ThreadSummary: () => null, TONES: [] }));
@@ -66,7 +66,8 @@ describe("V2 mail behaviour", () => {
     mocks.detail.mockResolvedValueOnce({ ...detail("thread-0"), hasUnread: true });
     mount(); await openFirst();
     await waitFor(() => expect(mocks.read).toHaveBeenCalledWith("thread-0", true));
-    fireEvent.click(screen.getByRole("button", { name: "Mark unread" }));
+    fireEvent.click(screen.getByRole("button", { name: "More" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Mark unread" }));
     await waitFor(() => expect(mocks.read).toHaveBeenCalledWith("thread-0", false));
     expect(new URLSearchParams(mocks.search).has("id")).toBe(false);
   });

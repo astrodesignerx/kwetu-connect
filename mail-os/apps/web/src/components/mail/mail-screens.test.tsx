@@ -81,6 +81,7 @@ describe("Signal mail screens", () => {
   it("reopens a done thread and keeps failures visible", async () => {
     setThreadState.mockRejectedValue(new Error("offline"));
     mount(<ThreadStateControl threadId="t" replyState="Done" />);
+    expect(screen.getByRole("button", { name: "Reopen" }).textContent).toBe("Done");
     fireEvent.click(screen.getByRole("button", { name: "Reopen" }));
     await waitFor(() => expect(setThreadState).toHaveBeenCalledWith("t", "ToReply"));
     expect(await screen.findByRole("alert")).toBeTruthy();
