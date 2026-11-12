@@ -43,7 +43,7 @@ export default function MailFixture() {
         if (scenario === "loading") await new Promise((resolve) => setTimeout(resolve, 20_000));
         const folder = url.searchParams.get("folder");
         const query = url.searchParams.get("q")?.toLowerCase() ?? "";
-        const items = scenario === "empty" ? [] : threads.filter((item) => (folder === "archive" ? item.moved === "Archive" : !item.moved) && (folder !== "unread" || item.hasUnread) && (folder !== "assigned" || ["fixture-1", "fixture-3"].includes(item.id)) && `${item.subject} ${item.participants} ${item.snippet}`.toLowerCase().includes(query));
+        const items = scenario === "empty" ? [] : threads.filter((item) => (folder === "archive" ? item.moved === "Archive" : !item.moved) && (folder !== "unread" || item.hasUnread) && (folder !== "waiting" || item.replyState === "ToReply") && (folder !== "assigned" || ["fixture-1", "fixture-3"].includes(item.id)) && `${item.subject} ${item.participants} ${item.snippet}`.toLowerCase().includes(query));
         return json({ items, total: items.length });
       }
       if (thread && path.endsWith("/read")) { thread.hasUnread = !body.read; return new Response(null, { status: 204 }); }

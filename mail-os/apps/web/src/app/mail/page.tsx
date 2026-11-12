@@ -51,7 +51,8 @@ const PAGE_SIZE = 50;
  */
 const FOLDER_LABELS: Record<string, string> = {
   inbox: "Inbox",
-  unread: "Unread",
+  unread: "Inbox",
+  waiting: "Inbox",
   assigned: "Assigned",
   sent: "Sent",
   archive: "Archive",
@@ -347,8 +348,8 @@ function MailView() {
           <section className={`${s.list} scroll-cue`} aria-label={activeQuery ? 'Search results' : 'Messages'}>
             {activeQuery ? <><h1 className={s.searchHeading}>{activeQuery}</h1><div className={s.searchTools}><button aria-pressed="true">Conversations {threadTotal}</button><button onClick={() => setParams({ q: null, id: null })}>Clear search</button></div></> :
               <div className={s.listHead}><h1 className={s.heading}>{FOLDER_LABELS[folder] ?? 'Mail'}</h1>
-                <Segmented options={[{ value: 'inbox', label: 'All' }, { value: 'unread', label: 'Unread' }, { value: 'assigned', label: 'Assigned' }]}
-                  value={folder === 'unread' || folder === 'assigned' ? folder : 'inbox'} onChange={(value) => setParams({ folder: value, id: null })} label="Filter messages" />
+                <Segmented options={[{ value: 'inbox', label: 'All' }, { value: 'unread', label: 'Unread' }, { value: 'waiting', label: 'Waiting' }]}
+                  value={folder === 'unread' || folder === 'waiting' ? folder : 'inbox'} onChange={(value) => setParams({ folder: value, id: null })} label="Filter messages" />
               </div>}
             <MailboxHeader mailboxes={mailboxes} currentId={currentMailboxId} onPick={(id) => setParams({ m: id, id: null })} />
             <ListToolbar total={threadTotal} loading={threadsLoading} items={threadItems} selection={visibleSelection}

@@ -14,6 +14,26 @@ public sealed class MailInsightsTests : IAsyncLifetime
     public ValueTask DisposeAsync() => _factory.DisposeAsync();
 
     [Fact]
+    public async Task Waiting_filter_returns_only_to_reply_threads_in_the_requested_mailbox()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var admin = await ApiFixture.RegisterAdminAsync(_factory);
+        var (connection, thread, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var (_, otherThread, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        await using (var db = _factory.NewDbContext())
+        {
+            foreach (var id in new[] { thread, otherThread })
+                (await db.MailThreads.SingleAsync(t => t.Id == id, ct)).ReplyState = ReplyState.ToReply;
+            foreach (var state in new[] { ReplyState.Done, ReplyState.Awaiting })
+                db.MailThreads.Add(new MailThread { MailboxConnectionId = connection, RootKey = Guid.NewGuid().ToString(), ReplyState = state });
+            await db.SaveChangesAsync(ct);
+        }
+        var response = await admin.Client.GetFromJsonAsync<System.Text.Json.JsonElement>($"/api/mail/threads?connectionId={connection}&folder=waiting", ct);
+        Assert.Equal(1, response.GetProperty("total").GetInt32());
+        Assert.Equal(thread, Assert.Single(response.GetProperty("items").EnumerateArray()).GetProperty("id").GetGuid());
+    }
+
+    [Fact]
     public async Task Members_can_resolve_shared_thread_mailbox_and_client_but_not_foreign_threads()
     {
         var ct = TestContext.Current.CancellationToken;

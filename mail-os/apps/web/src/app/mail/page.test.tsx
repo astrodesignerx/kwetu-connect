@@ -84,6 +84,14 @@ describe("V2 mail behaviour", () => {
     expect(mocks.move).toHaveBeenCalledWith("thread-1", "Archive");
   });
 
+  it("filters waiting conversations and keeps the Inbox heading", async () => {
+    mount(); await openFirst();
+    fireEvent.click(screen.getByRole("tab", { name: "Waiting" }));
+    await waitFor(() => expect(mocks.list).toHaveBeenLastCalledWith(expect.objectContaining({ folder: "waiting" })));
+    expect(new URLSearchParams(mocks.search).has("id")).toBe(false);
+    expect(screen.getByRole("heading", { name: "Inbox" })).toBeTruthy();
+  });
+
   it("preserves URL search and fetches the next page", async () => {
     mocks.search = "q=First";
     mocks.list.mockImplementation(async ({ page }: { page: number }) => ({ items: [rows[page]], total: 2 }));
