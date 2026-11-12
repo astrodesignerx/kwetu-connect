@@ -93,6 +93,13 @@ describe("V2 mail behaviour", () => {
     expect(screen.getByRole("heading", { name: "Inbox" })).toBeTruthy();
   });
 
+  it("shows the sending address in the collapsed and open reply dock", async () => {
+    mount(); await openFirst();
+    expect(screen.getByText("from studio@example.test")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Reply" }));
+    expect(screen.getByText("From").parentElement?.textContent).toBe("Fromstudio@example.test");
+  });
+
   it("preserves URL search and fetches the next page", async () => {
     mocks.search = "q=First";
     mocks.list.mockImplementation(async ({ page }: { page: number }) => ({ items: [rows[page]], total: 2 }));

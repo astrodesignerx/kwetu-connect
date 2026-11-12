@@ -398,7 +398,7 @@ function ListToolbar({ total, loading, items, selection, onSelectAll, onBulkArch
   </div>;
 }
 
-function Reader({ thread, selected, mailboxId, syncError, onRetrySync, retrying, onMarkUnread, onArchive, onDelete, moving, replyOpen, onReplyOpenChange, onExpandReply, onBack, draftHtml, onDraftChange }: {
+function Reader({ thread, selected, mailboxId, mailboxEmail, syncError, onRetrySync, retrying, onMarkUnread, onArchive, onDelete, moving, replyOpen, onReplyOpenChange, onExpandReply, onBack, draftHtml, onDraftChange }: {
   thread: SignalThreadDetail | undefined; selected: ThreadSummaryDto | undefined; mailboxId: string | null; mailboxEmail?: string; syncError: string | null;
   onRetrySync: () => void; retrying: boolean; onMarkUnread: () => void; onArchive: () => void; onDelete: () => void; moving: boolean;
   replyOpen: boolean; onReplyOpenChange: (open: boolean) => void; onExpandReply: (ctx: ComposeContext) => void; onCompose: () => void; onBack: () => void;
@@ -424,7 +424,7 @@ function Reader({ thread, selected, mailboxId, syncError, onRetrySync, retrying,
       <ThreadSummary threadId={thread.id} onNextStep={() => onReplyOpenChange(true)} />
       <Participants thread={thread} latest={latest} mailboxId={mailboxId} />
       {thread.messages.map((message, index) => <MessageCard key={message.id} message={message} index={index} defaultOpen={index === thread.messages.length - 1} showSender={index !== thread.messages.length - 1} clientId={thread.clientId} />)}
-      {mailboxId && <ReplyDock thread={thread} connectionId={mailboxId} open={replyOpen} onOpenChange={onReplyOpenChange} draftHtml={draftHtml} onDraftChange={onDraftChange} className={s.dock} onExpand={(ctx) => { onReplyOpenChange(false); onExpandReply(ctx); }} />}
+      {mailboxId && <ReplyDock thread={thread} connectionId={mailboxId} fromAddress={mailboxEmail} open={replyOpen} onOpenChange={onReplyOpenChange} draftHtml={draftHtml} onDraftChange={onDraftChange} className={s.dock} onExpand={(ctx) => { onReplyOpenChange(false); onExpandReply(ctx); }} />}
     </article>
     <ConversationContext threadId={thread.id} replyState={thread.replyState} stateSince={thread.stateSince} needsNudge={thread.needsNudge}
       onQuickReply={mailboxId ? (template) => onExpandReply({ ...replyContextFromThread(mailboxId, thread), prefillBody: template.bodyHtml ?? '', skipBrandWrap: template.skipBrandWrap }) : undefined} />

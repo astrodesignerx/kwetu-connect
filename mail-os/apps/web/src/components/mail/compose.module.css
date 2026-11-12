@@ -45,3 +45,6 @@
   .assist { gap: 16px; padding: 16px; border-left: 0; border-top: 1px solid var(--line); }
   .heading { padding: 16px; }
 }
+
+.replyFrom { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-size: 12px; line-height: 16px; }
+:global(.reply-dock-collapsed) .replyFrom { margin-left: auto; max-width: 45%; }
