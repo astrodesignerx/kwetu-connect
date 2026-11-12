@@ -5,13 +5,17 @@ import { useAuthStore } from "@/lib/auth-store";
 import type { MailBrief } from "@/lib/signal-api";
 import type { MailThreadSummary } from "@/lib/signal-mail";
 import { MorningBrief } from "./morning-brief";
-import { ThreadStateControl } from "./conversation-context";
+import { ConversationContext, ThreadStateControl } from "./conversation-context";
 import { WaitingPill } from './waiting-pill';
 import { ThreadList } from "./thread-list";
 
-const { brief, setThreadState } = vi.hoisted(() => ({ brief: vi.fn(), setThreadState: vi.fn() }));
-vi.mock("@/lib/signal-api", () => ({ signalApi: { brief, setThreadState } }));
+const { brief, setThreadState, flights, associations } = vi.hoisted(() => ({ brief: vi.fn(), setThreadState: vi.fn(), flights: vi.fn(), associations: vi.fn() }));
+vi.mock("@/lib/signal-api", () => ({ signalApi: { brief, setThreadState, flights } }));
 vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
+
+vi.mock("@/lib/api", () => ({ api: { getThreadAssociations: associations, listTemplates: vi.fn().mockResolvedValue([]), getTemplate: vi.fn() } }));
+vi.mock("@/components/collaboration", () => ({ ThreadAssignee: () => <div>Assignee</div>, ThreadNotes: () => <div>Team notes</div> }));
+vi.mock("@/components/thread-linker", () => ({ ThreadLinker: () => null }));
 
 function mount(element: React.ReactNode) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
@@ -76,6 +80,27 @@ describe("Signal mail screens", () => {
     fireEvent.click(screen.getByRole("button", { name: "Mark done" }));
     await waitFor(() => expect(setThreadState).toHaveBeenCalledWith("t", "Done"));
     await waitFor(() => expect(invalidation).toHaveBeenCalledWith({ queryKey: ["mail-brief"] }));
+  });
+
+  it("shows the On screen empty state without conversation stages", async () => {
+    associations.mockResolvedValue({ company: null, projects: [] });
+    mount(<ConversationContext threadId="t" replyState="ToReply" stateSince="2026-11-01" needsNudge={false} />);
+    expect(await screen.findByText("No flights linked")).toBeTruthy();
+    expect(screen.getAllByRole("heading").map((item) => item.textContent)).toEqual(["Client", "On screen", "Team", "Quick repliesFrom templates"]);
+    expect(screen.queryByRole("button", { name: "Mark done" })).toBeNull();
+  });
+
+  it("shows a running flight with dates and elapsed progress only", async () => {
+    associations.mockResolvedValue({ company: null, projects: [{ id: "p", name: "Campaign" }] });
+    const today = new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Nairobi" });
+    const day = 86_400_000;
+    const startDate = new Date(Date.parse(today) - 2 * day).toISOString().slice(0, 10);
+    const endDate = new Date(Date.parse(today) + 2 * day).toISOString().slice(0, 10);
+    flights.mockResolvedValue([{ id: "f", siteName: "Westlands", startDate, endDate }]);
+    mount(<ConversationContext threadId="t" replyState="ToReply" stateSince="2026-11-01" needsNudge={false} />);
+    expect(await screen.findByText("On screen now")).toBeTruthy();
+    expect(screen.getByRole("meter", { name: "Westlands: elapsed run" }).getAttribute("aria-valuenow")).toBe("0.4");
+    expect(screen.queryByText(/Plays|00:00/)).toBeNull();
   });
 
   it("reopens a done thread and keeps failures visible", async () => {

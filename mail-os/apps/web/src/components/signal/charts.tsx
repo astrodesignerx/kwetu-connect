@@ -72,12 +72,14 @@ export function HBars({ items, label }: HBarsProps) {
   );
 }
 
-export type MeterProps = { value: number; label: string };
+export type MeterProps = { value: number; label: string; variant?: "steps" | "progress" };
 
-export function Meter({ value, label }: MeterProps) {
-  const level = Math.min(4, Math.max(0, Math.trunc(finite(value))));
-  return <div className={`${s.root} ${s.meter}`} role="meter" aria-label={label} aria-valuemin={0} aria-valuemax={4} aria-valuenow={level}>
-    {Array.from({ length: 4 }, (_, index) => <span key={index} aria-hidden="true"><i style={{ transform: `scaleX(${index < level ? 1 : 0})` }} /></span>)}
+export function Meter({ value, label, variant = "steps" }: MeterProps) {
+  const progress = variant === "progress";
+  const max = progress ? 1 : 4;
+  const level = Math.min(max, Math.max(0, progress ? finite(value) : Math.trunc(finite(value))));
+  return <div className={`${s.root} ${s.meter}`} role="meter" aria-label={label} aria-valuemin={0} aria-valuemax={max} aria-valuenow={level} data-variant={variant}>
+    {Array.from({ length: progress ? 1 : 4 }, (_, index) => <span key={index} aria-hidden="true"><i style={{ transform: `scaleX(${progress ? level : index < level ? 1 : 0})` }} /></span>)}
   </div>;
 }
 
