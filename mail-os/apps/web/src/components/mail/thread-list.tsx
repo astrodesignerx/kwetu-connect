@@ -37,7 +37,7 @@ function Highlight({ text, query }: { text: string; query?: string }) {
 
 function ThreadRow({ thread: t, active, picked, onSelect, onToggle, query, now }: { thread: SignalThreadSummary; active: boolean; picked: boolean; onSelect: () => void; onToggle: () => void; index: number; query?: string; now: number }) {
   const who = firstParticipant(t.participants) || '(unknown sender)';
-  return <li className={s.row} data-active={active}>
+  return <li className={s.row} data-active={active} data-unread={t.hasUnread}>
     <button className={s.avatarButton} role="checkbox" aria-checked={picked} aria-label={picked ? 'Deselect thread' : 'Select thread'} onClick={onToggle}>
       {picked ? <Check size={16} aria-hidden /> : <ClientAvatar name={who} size="small" />}
     </button>
