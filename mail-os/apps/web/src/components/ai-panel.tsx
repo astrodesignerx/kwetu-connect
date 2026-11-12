@@ -24,32 +24,21 @@ export function ThreadSummary({ threadId, onNextStep }: { threadId: string; onNe
   return (
     <section className={s.summary} data-filled={!!summary} aria-label="AI summary">
       <div className={s.summaryActions}>
-        <button
-          type="button"
-          className="reader-action"
-          onClick={() => {
-            if (!generate.isPending) generate.mutate();
-          }}
-          disabled={generate.isPending}
-        >
-          <Sparkles size={16} aria-hidden />
-          {generate.isPending ? "Summarising..." : summary ? "Refresh summary" : "Summarise thread"}
-        </button>
-        {summary && (
-          <button type="button" className="reader-action" onClick={() => setOpen((value) => !value)} aria-expanded={open}>
-            {open ? "Less detail" : "Full summary"}
-          </button>
-        )}
+        {summary ? <>
+          <Sparkles size={14} aria-hidden className={s.summarySpark} />
+          <p className={s.summaryLine}>{summary.replace(/^\s*[-*\d.)]+\s*/, "").split(/\n|(?<=[.!?])\s/)[0]}</p>
+          <button type="button" className="reader-action" onClick={() => setOpen((value) => !value)} aria-expanded={open}>{open ? "Less" : "More"}</button>
+          <button type="button" className="reader-action" onClick={() => generate.mutate()} disabled={generate.isPending}>{generate.isPending ? "Summarising..." : "Refresh"}</button>
+        </> : <button type="button" className="reader-action" onClick={() => generate.mutate()} disabled={generate.isPending}><Sparkles size={14} aria-hidden />{generate.isPending ? "Summarising..." : "Summarise"}</button>}
       </div>
       {generate.isError && (
         <p role="alert">
           {generate.error instanceof Error ? generate.error.message : "Could not summarise"}
         </p>
       )}
-      {summary && <><p>{summary.replace(/^\s*[-*\d.)]+\s*/, "").split(/\n|(?<=[.!?])\s/)[0]}</p>
-        <MailDisclosure open={open}><pre>{summary}</pre></MailDisclosure>
+      {summary && <MailDisclosure open={open}><pre>{summary}</pre>
         {onNextStep && <button type="button" className="reader-action" onClick={onNextStep}><CornerUpLeft size={16} aria-hidden />Draft a reply</button>}
-      </>}
+      </MailDisclosure>}
     </section>
   );
 }
