@@ -9,7 +9,7 @@ import MailPage from "./page";
 
 const mocks = vi.hoisted(() => ({
   search: "", listeners: new Set<() => void>(),
-  state: vi.fn(), list: vi.fn(), detail: vi.fn(), overview: vi.fn(), read: vi.fn(), move: vi.fn(),
+  send: vi.fn(), state: vi.fn(), list: vi.fn(), detail: vi.fn(), overview: vi.fn(), read: vi.fn(), move: vi.fn(),
 }));
 vi.mock("next/navigation", () => ({
   usePathname: () => "/mail",
@@ -17,7 +17,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: (url: string) => { mocks.search = url.split("?")[1] ?? ""; mocks.listeners.forEach((listener) => listener()); } }),
 }));
 vi.mock("@/lib/signal-mail", async (original) => ({ ...await original<typeof import("@/lib/signal-mail")>(), signalMail: { listThreads: mocks.list, getThread: mocks.detail } }));
-vi.mock("@/lib/api", () => ({ api: { mailOverview: mocks.overview, setThreadRead: mocks.read, moveThread: mocks.move, triggerMailboxSync: vi.fn(), aiStatus: vi.fn().mockResolvedValue({ configured: false }) } }));
+vi.mock("@/lib/api", () => ({ api: { sendMail: mocks.send, mailOverview: mocks.overview, setThreadRead: mocks.read, moveThread: mocks.move, triggerMailboxSync: vi.fn(), aiStatus: vi.fn().mockResolvedValue({ configured: false }) } }));
 vi.mock("@/components/mail/morning-brief", () => ({ MorningBrief: () => <section aria-label="Morning brief">Your morning brief</section> }));
 vi.mock("@/components/mail/conversation-context", async (original) => ({ ...await original<typeof import("@/components/mail/conversation-context")>(), ConversationChips: () => null, ConversationContext: () => <aside aria-label="Conversation context" /> }));
 vi.mock("@/lib/signal-api", () => ({ signalApi: { setThreadState: mocks.state } }));
@@ -122,6 +122,35 @@ describe("V2 mail behaviour", () => {
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
     cleanup();
     await waitFor(() => expect(mocks.move).toHaveBeenCalledWith("thread-0", "Trash"));
+  });
+
+  it("shows Sending then Sent before collapsing the reply", async () => {
+    let resolveSend!: (value: unknown) => void;
+    mocks.send.mockImplementation(() => new Promise((resolve) => { resolveSend = resolve; }));
+    mount(); await openFirst();
+    fireEvent.click(screen.getByRole("button", { name: "Reply" }));
+    const editor = screen.getByRole("textbox", { name: "Reply body" });
+    editor.innerHTML = "<p>Reply text</p>"; fireEvent.input(editor);
+    fireEvent.click(screen.getByRole("button", { name: /^Send$/ }));
+    expect(await screen.findByRole("button", { name: /^Sending$/ })).toBeTruthy();
+    vi.useFakeTimers();
+    await act(async () => { resolveSend({}); await vi.advanceTimersByTimeAsync(1); });
+    expect(screen.getByRole("button", { name: /^Sent$/ })).toBeTruthy();
+    await act(async () => { await vi.advanceTimersByTimeAsync(1199); });
+    expect(screen.getByRole("button", { name: /^Sent$/ })).toBeTruthy();
+    await act(async () => { await vi.advanceTimersByTimeAsync(2); });
+    expect(screen.queryByRole("textbox", { name: "Reply body" })).toBeNull();
+  });
+
+  it("keeps the reply and restores Send after a failed send", async () => {
+    mocks.send.mockRejectedValue(new Error("Could not send the reply"));
+    mount(); await openFirst(); fireEvent.click(screen.getByRole("button", { name: "Reply" }));
+    const editor = screen.getByRole("textbox", { name: "Reply body" });
+    editor.innerHTML = "<p>Keep this reply</p>"; fireEvent.input(editor);
+    fireEvent.click(screen.getByRole("button", { name: /^Send$/ }));
+    expect(await screen.findByText("Could not send the reply")).toBeTruthy();
+    expect(screen.getByRole("textbox", { name: "Reply body" }).textContent).toBe("Keep this reply");
+    expect(screen.getByRole("button", { name: /^Send$/ })).toBeTruthy();
   });
 
   it("keeps the list beside the reader and blocks remote images in a sandbox", async () => {
