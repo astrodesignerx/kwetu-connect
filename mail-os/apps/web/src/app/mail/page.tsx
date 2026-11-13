@@ -19,6 +19,7 @@ import { signalMail } from '@/lib/signal-mail';
 import type { MailThreadDetail as SignalThreadDetail } from '@/lib/signal-mail';
 import { ClientAvatar, Segmented, StatusChip } from '@/components/signal';
 import { motionTime, reducedMotion } from "@/components/mail/motion";
+import { LoadingSkeleton } from "@/components/mail/loading-skeleton";
 import { ThreadList } from '@/components/mail/thread-list';
 import { MorningBrief } from '@/components/mail/morning-brief';
 import { MailboxHeader } from '@/components/mail/mailbox-header';
@@ -399,7 +400,7 @@ function Reader({ scanning, thread, selected, mailboxId, mailboxEmail, syncError
     setClosing(true);
     closeTimer.current = setTimeout(onBack, motionTime("--t3"));
   };
-  if (!thread) return <div className={`${s.quiet} ${s.readerState}`} role="status">{selected ? 'Opening conversation...' : 'Loading conversation...'}</div>;
+  if (!thread) return <LoadingSkeleton reader label={selected ? "Opening conversation..." : "Loading conversation..."} />;
   const latest = thread.messages[thread.messages.length - 1];
   return <div className={s.readerMotion} data-scanning={scanning} data-closing={closing} key={thread.id}><div className={`${s.conversation} scroll-cue`}>
     <article className={s.reader}>

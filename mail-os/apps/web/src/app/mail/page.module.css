@@ -280,3 +280,18 @@ div.mailboxHeader { margin-top: 12px; }
   .readerMotion, .readerMotion :is(.readerTop, .subjectLine, .senderRow, .summary, .message) { animation: none; }
   .readerTop::after { animation: none; transition: none; }
 }
+
+.listSkeleton, .readerSkeleton { min-width: 0; }
+.readerSkeleton { padding: 24px; }
+.skeletonRow { padding: 20px 12px; border-bottom: 1px solid var(--line); }
+.skeletonHeader { padding-bottom: 24px; }
+.skeletonMessage { border: 1px solid var(--line); border-radius: var(--radius-card); padding: 24px; margin-bottom: 16px; min-height: 156px; }
+:is(.skeletonRow, .skeletonHeader, .skeletonMessage) > span { display: block; height: 12px; margin-bottom: 12px; border-radius: var(--radius-tag); background: var(--raise); animation: skeleton-pulse 1.2s var(--ease) infinite alternate; }
+:is(.skeletonRow, .skeletonHeader, .skeletonMessage) > span:first-child { width: 42%; }
+:is(.skeletonRow, .skeletonHeader, .skeletonMessage) > span:last-child { width: 72%; margin-bottom: 0; }
+.skeletonHeader > span:first-child { height: 28px; width: 64%; }
+.skeletonMessage > span:last-child { height: 48px; }
+@keyframes skeleton-pulse { from { opacity: .45; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  :is(.skeletonRow, .skeletonHeader, .skeletonMessage) > span { animation: none; }
+}

@@ -1,4 +1,5 @@
 "use client";
+import { LoadingSkeleton } from "./loading-skeleton";
 import { WaitingPill } from './waiting-pill';
 import { EmptyState } from "@/components/empty-state";
 import { useEffect, useState, type CSSProperties } from 'react';
@@ -58,7 +59,7 @@ function ThreadRows({ items, loading, selectedId, onSelect, selection, onToggleS
     const timer = setTimeout(() => setRetained(items), motionTime("--t2") * 2);
     return () => clearTimeout(timer);
   }, [items, leaving, reduce]);
-  if (loading) return <div className={s.quiet} role="status">Loading conversations...</div>;
+  if (loading) return <LoadingSkeleton label="Loading conversations..." />;
   if (!retained.length) return query ? <EmptyState bare icon={Search} title="No matches" text="No conversations match this search" /> : <EmptyState bare icon={Inbox} title="No conversations" text="Nothing in this folder yet" />;
   const groups = query ? [{ label: 'Conversations', items: retained }] : groupThreads(retained);
   return <div className={s.listBody}>{groups.map((group) => <section key={group.label} aria-label={group.label}>

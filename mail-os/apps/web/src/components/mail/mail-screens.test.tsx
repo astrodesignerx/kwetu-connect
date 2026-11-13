@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthStore } from "@/lib/auth-store";
 import type { MailBrief } from "@/lib/signal-api";
@@ -7,6 +7,7 @@ import type { MailThreadSummary } from "@/lib/signal-mail";
 import { MorningBrief } from "./morning-brief";
 import { ConversationContext, ThreadStateControl } from "./conversation-context";
 import { WaitingPill } from './waiting-pill';
+import { LoadingSkeleton } from "./loading-skeleton";
 import { ThreadList } from "./thread-list";
 
 const { brief, setThreadState, flights, associations } = vi.hoisted(() => ({ brief: vi.fn(), setThreadState: vi.fn(), flights: vi.fn(), associations: vi.fn() }));
@@ -23,9 +24,54 @@ function mount(element: React.ReactNode) {
 }
 
 describe("Signal mail screens", () => {
+  afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); });
   beforeEach(() => {
     cleanup(); vi.clearAllMocks();
     useAuthStore.setState({ token: "test", user: { id: "u", username: "amina", displayName: "Amina Otieno", email: "a@test.local", role: "Member", createdAt: "" } });
+  });
+
+  it("delays skeletons by 150ms and cancels a fast load", () => {
+    vi.useFakeTimers();
+    const view = render(<LoadingSkeleton label="Loading conversations..." />);
+    act(() => vi.advanceTimersByTime(149)); expect(screen.queryByRole("status")).toBeNull();
+    act(() => vi.advanceTimersByTime(1)); expect(screen.getByRole("status").textContent).toBe("Loading conversations...");
+    expect(view.container.querySelectorAll('[aria-hidden] > div')).toHaveLength(6);
+    view.unmount();
+    const fast = render(<LoadingSkeleton reader label="Opening conversation..." />);
+    act(() => vi.advanceTimersByTime(100)); fast.unmount();
+    act(() => vi.advanceTimersByTime(100)); expect(screen.queryByRole("status")).toBeNull();
+    render(<LoadingSkeleton reader label="Loading conversation..." />);
+    act(() => vi.advanceTimersByTime(150)); expect(screen.getByRole("status").textContent).toBe("Loading conversation...");
+  });
+
+  it("retains exiting rows for the fade and gap, then restores an undone row", () => {
+    vi.useFakeTimers();
+    vi.stubGlobal("matchMedia", () => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
+    const row: MailThreadSummary = { id: "first", replyState: "Done", lastDate: "2026-11-12", hasUnread: false, subject: "First", participants: "Person", snippet: "Preview", messageCount: 1, firstDate: "2026-11-12", hasAttachments: false, stateSince: "2026-11-12", needsNudge: false, mailboxConnectionId: "m", clientId: null, clientName: null };
+    const props = { loading: false, selectedId: null, onSelect: vi.fn(), selection: new Set<string>(), onToggleSelect: vi.fn(), total: 1, hasMore: false, loadingMore: false, onLoadMore: vi.fn() };
+    const view = render(<ThreadList {...props} viewKey="all" items={[row]} />);
+    view.rerender(<ThreadList {...props} viewKey="all" items={[]} />);
+    expect(view.container.querySelector('li')?.getAttribute('aria-hidden')).toBe('true');
+    act(() => vi.advanceTimersByTime(399)); expect(view.container.querySelector('li')).toBeTruthy();
+    act(() => vi.advanceTimersByTime(1)); expect(view.container.querySelector('li')).toBeNull();
+    view.rerender(<ThreadList {...props} viewKey="all" items={[row]} />);
+    expect(screen.getByRole('button', { name: /First/ })).toBeTruthy();
+    expect(view.container.querySelector('li')?.getAttribute('data-arriving')).toBe('true');
+    view.rerender(<ThreadList {...props} viewKey="unread" items={[{ ...row, id: 'second', subject: 'Second' }]} />);
+    act(() => vi.advanceTimersByTime(119)); expect(screen.queryByText('Second')).toBeNull();
+    act(() => vi.advanceTimersByTime(1)); expect(screen.getByText('Second')).toBeTruthy();
+    expect(screen.queryByText('First')).toBeNull();
+  });
+
+  it("skips the filter delay and stagger under reduced motion", () => {
+    vi.useFakeTimers();
+    vi.stubGlobal("matchMedia", () => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
+    const row: MailThreadSummary = { id: "first", replyState: "Done", lastDate: "2026-11-12", hasUnread: false, subject: "First", participants: "Person", snippet: "Preview", messageCount: 1, firstDate: "2026-11-12", hasAttachments: false, stateSince: "2026-11-12", needsNudge: false, mailboxConnectionId: "m", clientId: null, clientName: null };
+    const props = { loading: false, selectedId: null, onSelect: vi.fn(), selection: new Set<string>(), onToggleSelect: vi.fn(), total: 1, hasMore: false, loadingMore: false, onLoadMore: vi.fn() };
+    const view = render(<ThreadList {...props} viewKey="all" items={[row]} />);
+    view.rerender(<ThreadList {...props} viewKey="unread" items={[{ ...row, id: "second", subject: "Second" }]} />);
+    expect(screen.queryByText("First")).toBeNull(); expect(screen.getByText("Second")).toBeTruthy();
+    expect(view.container.querySelector('li')?.style.getPropertyValue('--stagger')).toBe('0ms');
   });
 
   it("renders the real personal waiting list, organisation metrics and flights from a mocked brief", async () => {
