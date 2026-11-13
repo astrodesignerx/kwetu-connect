@@ -255,3 +255,28 @@ div.mailboxHeader { margin-top: 12px; }
   .listTransition { transition: none; }
   .rowSlot, .rowSlot .row { animation: none; }
 }
+
+.readerMotion { order: 2; min-width: 0; min-height: 0; display: grid; animation: reader-in var(--t2) var(--ease) both; }
+.readerMotion > .conversation { min-height: 0; }
+.readerMotion :is(.readerTop, .subjectLine, .senderRow, .summary) { animation: reader-content var(--t1) var(--ease) var(--t2) both; }
+.readerMotion .message { animation: reader-content var(--t2) var(--ease) calc(var(--t2) + 40ms + var(--message-delay, 0ms)) both; }
+.readerMotion[data-scanning=true] { animation: reader-content var(--t1) var(--ease) both; }
+.readerMotion[data-scanning=true] :is(.readerTop, .subjectLine, .senderRow, .summary, .message) { animation: none; }
+.readerTop::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: var(--shadow-menu); opacity: 0; transition: opacity var(--t1) var(--ease); }
+@supports (animation-timeline: scroll()) {
+  .readerTop::after { animation: toolbar-shadow linear both; animation-timeline: scroll(nearest block); animation-range: 0px 24px; }
+}
+@keyframes toolbar-shadow { from { opacity: 0; } to { opacity: 1; } }
+@keyframes reader-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes reader-content { from { opacity: 0; } to { opacity: 1; } }
+@keyframes reader-phone { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+@media (max-width: 859px) {
+  .readerMotion { animation: reader-phone var(--t3) var(--ease) both; }
+  .readerMotion :is(.readerTop, .subjectLine, .senderRow, .summary) { animation-delay: var(--t3); }
+  .readerMotion .message { animation-delay: calc(var(--t3) + 40ms + var(--message-delay, 0ms)); }
+  .readerMotion[data-closing=true] { animation: reader-phone var(--t3) var(--ease) reverse both; pointer-events: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .readerMotion, .readerMotion :is(.readerTop, .subjectLine, .senderRow, .summary, .message) { animation: none; }
+  .readerTop::after { animation: none; transition: none; }
+}
