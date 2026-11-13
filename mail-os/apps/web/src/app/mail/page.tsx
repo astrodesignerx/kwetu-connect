@@ -342,7 +342,7 @@ function MailView() {
               onSelectAll={(all) => setSelection(all ? new Set(threadItems.map((item) => item.id)) : new Set())}
               onBulkArchive={() => bulkArchive.mutate([...visibleSelection])} bulkBusy={bulkArchive.isPending} />
             {threadsError ? <ErrorState bare title="Messages could not load" onRetry={() => void refetchThreads()} /> :
-              <ThreadList items={threadItems} loading={threadsLoading} selectedId={threadId} onSelect={(id) => setParam('id', id)} selection={visibleSelection}
+              <ThreadList viewKey={`${currentMailboxId}:${folder}:${activeQuery ?? ""}`} items={threadItems} loading={threadsLoading} selectedId={threadId} onSelect={(id) => setParam('id', id)} selection={visibleSelection}
                 onToggleSelect={toggleSelect} total={threadTotal} hasMore={!!hasNextPage} loadingMore={isFetchingNextPage} onLoadMore={() => void fetchNextPage()} query={activeQuery} />}
           </section>
           {!threadId && !activeQuery && <MorningBrief />}
