@@ -13,8 +13,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import { Button, ErrorText, buttonClass } from "@/components/ui";
 import { initialsFor } from "@/lib/avatar";
 import { frameDocument } from "@/lib/mail-frame";
-import { bulkArchiveMessage, runEach } from "@/lib/bulk";
-import { useToast } from "@/components/shell/toast";
+import { usePendingMove } from "@/components/mail/use-pending-move";
 import s from './page.module.css';
 import { signalMail } from '@/lib/signal-mail';
 import type { MailThreadDetail as SignalThreadDetail } from '@/lib/signal-mail';
@@ -88,7 +87,7 @@ function MailView() {
     queryFn: api.mailOverview,
     enabled: !!token,
   });
-  const toast = useToast();
+  const queueMove = usePendingMove();
   const mailboxes = overview?.mailboxes ?? [];
   const currentMailboxId = searchParams.get("m") ?? mailboxes[0]?.id ?? null;
   const currentMailbox = mailboxes.find((m) => m.id === currentMailboxId);
@@ -179,17 +178,10 @@ function MailView() {
     },
   });
 
-  const move = useMutation({
-    mutationFn: ({ id, target }: { id: string; target: "Archive" | "Trash" }) =>
-      api.moveThread(id, target),
-    onSuccess: () => {
-      setParam("id", null);
-      void queryClient.invalidateQueries({ queryKey: ["threads"] });
-      void queryClient.invalidateQueries({ queryKey: ["thread-counts"] });
-      void queryClient.invalidateQueries({ queryKey: ["overview"] });
-      void queryClient.invalidateQueries({ queryKey: ["mail-brief"] });
-    },
-  });
+  const move = { isPending: false, mutate: ({ id, target }: { id: string; target: "Archive" | "Trash" }) => {
+    queueMove([id], target);
+    setParam("id", null);
+  } };
 
   const syncNow = useMutation({ mutationFn: (id: string) => api.triggerMailboxSync(id) });
 
@@ -255,18 +247,11 @@ function MailView() {
       return next;
     });
 
-  const bulkArchive = useMutation({
-    mutationFn: (ids: string[]) => runEach(ids, (id) => api.moveThread(id, "Archive")),
-    onSuccess: ({ done, failed }) => {
-      setSelection(new Set(failed));
-      if (threadId && done.includes(threadId)) setParam("id", null);
-      if (failed.length) toast(bulkArchiveMessage(done.length, done.length + failed.length));
-      void queryClient.invalidateQueries({ queryKey: ["threads"] });
-      void queryClient.invalidateQueries({ queryKey: ["thread-counts"] });
-      void queryClient.invalidateQueries({ queryKey: ["overview"] });
-      void queryClient.invalidateQueries({ queryKey: ["mail-brief"] });
-    },
-  });
+  const bulkArchive = { isPending: false, mutate: (ids: string[]) => {
+    queueMove(ids, "Archive", true);
+    setSelection(new Set());
+    if (threadId && ids.includes(threadId)) setParam("id", null);
+  } };
 
   // Keyboard navigation. A mail client is used all day; reaching for the mouse to
   // move down a list is the single biggest ergonomic cost. Search ("/") and the
@@ -332,7 +317,7 @@ function MailView() {
 
   return (
     <div className={s.root}>
-      {(move.isError || bulkArchive.isError || setRead.isError) && <div className={s.actionError}><ErrorText>The mail action could not finish. Try again using its control.</ErrorText></div>}
+      {setRead.isError && <div className={s.actionError}><ErrorText>The mail action could not finish. Try again using its control.</ErrorText></div>}
       <div className={`${s.workspace} scroll-cue`} data-conversation={!!threadId} data-search={!!activeQuery}>
         {threadId && (
           threadError ? <ErrorState className={s.readerState} title="Could not open this conversation" message="It may have moved. Try again or go back to the inbox." action={<div className={s.errorActions}><Button variant="default" onClick={() => void refetchThread()}>Try again</Button><Button variant="ghost" onClick={() => setParam('id', null)}>Back to inbox</Button></div>} /> :
