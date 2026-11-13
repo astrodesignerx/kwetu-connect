@@ -33,6 +33,7 @@ import { replyContextFromThread, type ComposeContext } from "@/components/compos
 export function ReplyDock({
   thread,
   connectionId,
+  fromAddress,
   open,
   onOpenChange,
   onExpand,
@@ -42,6 +43,7 @@ export function ReplyDock({
 }: {
   thread: ThreadDetailDto;
   connectionId: string;
+  fromAddress?: string;
   /** Owned by the mail view so the "r" shortcut can open this dock, not a modal. */
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -189,6 +191,7 @@ export function ReplyDock({
         >
           <CornerUpLeft aria-hidden size={16} className="shrink-0 opacity-60" />
           <span className="truncate">Reply to {correspondent}…</span>
+          {fromAddress && <span className={s.replyFrom} title={fromAddress}>from {fromAddress}</span>}
           <kbd className="ml-auto hidden shrink-0 rounded-tag border border-line px-1 font-mono text-xs sm:inline">
             r
           </kbd>
@@ -244,6 +247,8 @@ export function ReplyDock({
             <X size={14} />
           </button>
         </div>
+
+        {fromAddress && <div className="compose-row"><span className="compose-row-label">From</span><span className={s.replyFrom} title={fromAddress}>{fromAddress}</span></div>}
 
         <RichTextEditor
           html={body}

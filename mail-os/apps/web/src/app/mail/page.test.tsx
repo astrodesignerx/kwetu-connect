@@ -8,7 +8,7 @@ import MailPage from "./page";
 
 const mocks = vi.hoisted(() => ({
   search: "", listeners: new Set<() => void>(),
-  list: vi.fn(), detail: vi.fn(), overview: vi.fn(), read: vi.fn(), move: vi.fn(),
+  state: vi.fn(), list: vi.fn(), detail: vi.fn(), overview: vi.fn(), read: vi.fn(), move: vi.fn(),
 }));
 vi.mock("next/navigation", () => ({
   usePathname: () => "/mail",
@@ -18,7 +18,8 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/lib/signal-mail", async (original) => ({ ...await original<typeof import("@/lib/signal-mail")>(), signalMail: { listThreads: mocks.list, getThread: mocks.detail } }));
 vi.mock("@/lib/api", () => ({ api: { mailOverview: mocks.overview, setThreadRead: mocks.read, moveThread: mocks.move, triggerMailboxSync: vi.fn(), aiStatus: vi.fn().mockResolvedValue({ configured: false }) } }));
 vi.mock("@/components/mail/morning-brief", () => ({ MorningBrief: () => <section aria-label="Morning brief">Your morning brief</section> }));
-vi.mock("@/components/mail/conversation-context", () => ({ ConversationChips: () => null, ConversationContext: () => <aside aria-label="Conversation context" /> }));
+vi.mock("@/components/mail/conversation-context", async (original) => ({ ...await original<typeof import("@/components/mail/conversation-context")>(), ConversationChips: () => null, ConversationContext: () => <aside aria-label="Conversation context" /> }));
+vi.mock("@/lib/signal-api", () => ({ signalApi: { setThreadState: mocks.state } }));
 vi.mock("@/components/contact-card", () => ({ ContactDetails: () => null }));
 vi.mock("@/components/attachments", () => ({ AttachmentList: () => null }));
 vi.mock("@/components/ai-panel", () => ({ ThreadSummary: () => null, TONES: [] }));
@@ -66,7 +67,8 @@ describe("V2 mail behaviour", () => {
     mocks.detail.mockResolvedValueOnce({ ...detail("thread-0"), hasUnread: true });
     mount(); await openFirst();
     await waitFor(() => expect(mocks.read).toHaveBeenCalledWith("thread-0", true));
-    fireEvent.click(screen.getByRole("button", { name: "Mark unread" }));
+    fireEvent.click(screen.getByRole("button", { name: "More" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Mark unread" }));
     await waitFor(() => expect(mocks.read).toHaveBeenCalledWith("thread-0", false));
     expect(new URLSearchParams(mocks.search).has("id")).toBe(false);
   });
@@ -82,6 +84,37 @@ describe("V2 mail behaviour", () => {
     await waitFor(() => expect(mocks.move).toHaveBeenCalledTimes(2));
     expect(mocks.move).toHaveBeenCalledWith("thread-0", "Archive");
     expect(mocks.move).toHaveBeenCalledWith("thread-1", "Archive");
+  });
+
+  it("filters waiting conversations and keeps the Inbox heading", async () => {
+    mount(); await openFirst();
+    fireEvent.click(screen.getByRole("tab", { name: "Waiting" }));
+    await waitFor(() => expect(mocks.list).toHaveBeenLastCalledWith(expect.objectContaining({ folder: "waiting" })));
+    expect(new URLSearchParams(mocks.search).has("id")).toBe(false);
+    expect(screen.getByRole("heading", { name: "Inbox" })).toBeTruthy();
+  });
+
+  it("marks done from the toolbar, shows Done and reopens", async () => {
+    mocks.state.mockImplementation(async (_id: string, replyState: MailThreadDetail['replyState']) => {
+      mocks.detail.mockResolvedValue({ ...detail("thread-0"), replyState });
+      return { id: "thread-0", replyState };
+    });
+    mount(); await openFirst();
+    fireEvent.click(screen.getByRole("button", { name: "Mark done" }));
+    await waitFor(() => expect(mocks.state).toHaveBeenCalledWith("thread-0", "Done"));
+    const done = await screen.findByRole("button", { name: "Reopen" });
+    expect(done.textContent).toBe("Done");
+    expect(done.getAttribute("title")).toBe("Reopen");
+    fireEvent.click(done);
+    await waitFor(() => expect(mocks.state).toHaveBeenCalledWith("thread-0", "ToReply"));
+    expect(await screen.findByRole("button", { name: "Mark done" })).toBeTruthy();
+  });
+
+  it("shows the sending address in the collapsed and open reply dock", async () => {
+    mount(); await openFirst();
+    expect(screen.getByText("from studio@example.test")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Reply" }));
+    expect(screen.getByText("From").parentElement?.textContent).toBe("Fromstudio@example.test");
   });
 
   it("preserves URL search and fetches the next page", async () => {

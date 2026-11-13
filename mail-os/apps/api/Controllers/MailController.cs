@@ -99,6 +99,7 @@ public class MailController : ControllerBase
             q = folder.ToLowerInvariant() switch
             {
                 "unread" => q.Where(t => t.HasUnread),
+                "waiting" => q.Where(t => t.ReplyState == ReplyState.ToReply),
                 "inbox" => q.Where(t => t.Messages.Any(m => m.Folder.SpecialUse == FolderSpecialUse.Inbox)),
                 "sent" => q.Where(t => t.Messages.Any(m => m.Folder.SpecialUse == FolderSpecialUse.Sent)),
                 "archive" => q.Where(t => t.Messages.Any(m => m.Folder.SpecialUse == FolderSpecialUse.Archive)),

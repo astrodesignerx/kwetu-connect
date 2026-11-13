@@ -1,8 +1,9 @@
 "use client";
+import { WaitingPill } from './waiting-pill';
 import { EmptyState } from "@/components/empty-state";
 import { useEffect, useState } from 'react';
 import { Check, Inbox, Paperclip, Search } from 'lucide-react';
-import { groupThreads, durationLabel } from '@/lib/signal-mail';
+import { groupThreads } from '@/lib/signal-mail';
 import type { MailThreadSummary as SignalThreadSummary } from '@/lib/signal-mail';
 import { ClientAvatar } from '@/components/signal';
 import { Button } from '@/components/ui';
@@ -37,7 +38,7 @@ function Highlight({ text, query }: { text: string; query?: string }) {
 
 function ThreadRow({ thread: t, active, picked, onSelect, onToggle, query, now }: { thread: SignalThreadSummary; active: boolean; picked: boolean; onSelect: () => void; onToggle: () => void; index: number; query?: string; now: number }) {
   const who = firstParticipant(t.participants) || '(unknown sender)';
-  return <li className={s.row} data-active={active}>
+  return <li className={s.row} data-active={active} data-unread={t.hasUnread}>
     <button className={s.avatarButton} role="checkbox" aria-checked={picked} aria-label={picked ? 'Deselect thread' : 'Select thread'} onClick={onToggle}>
       {picked ? <Check size={16} aria-hidden /> : <ClientAvatar name={who} size="small" />}
     </button>
@@ -46,7 +47,7 @@ function ThreadRow({ thread: t, active, picked, onSelect, onToggle, query, now }
       <span className={s.subject}><Highlight text={t.subject || '(no subject)'} query={query} /> {t.hasAttachments && <Paperclip size={14} className="inline" aria-label="Has attachments" />}</span>
       <span className={s.snippet}><Highlight text={t.snippet ?? ''} query={query} /></span>
       <span className={s.rowMeta}><span>{t.clientName || (t.hasAttachments ? 'Files attached' : `${t.messageCount} message${t.messageCount === 1 ? '' : 's'}`)}</span>
-        {t.replyState === 'ToReply' && <span className={s.waitingLabel}>Waiting {durationLabel(Math.max(0, (now - new Date(t.stateSince).getTime()) / 1000))}</span>}
+        {t.replyState === 'ToReply' && <WaitingPill seconds={(now - new Date(t.stateSince).getTime()) / 1000} />}
       </span>
     </button>
   </li>;

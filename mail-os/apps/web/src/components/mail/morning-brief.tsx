@@ -1,5 +1,6 @@
 "use client";
 
+import { WaitingPill } from './waiting-pill';
 import { ErrorState } from "@/components/empty-state";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -26,7 +27,7 @@ export function MorningBrief() {
       <article className={s.card}>
         <h2 className={s.sectionLabel}>Waiting on you</h2>
         {data.waitingOnMe.length ? <ul className={s.waiting}>{data.waitingOnMe.map((thread) => <li key={thread.id}>
-          <Link href={`/mail?id=${encodeURIComponent(thread.id)}`}><span>{thread.subject || "(no subject)"}</span><small>Waiting {durationLabel(thread.waitingSeconds)}</small></Link>
+          <Link href={`/mail?id=${encodeURIComponent(thread.id)}`}><span>{thread.subject || "(no subject)"}</span><WaitingPill seconds={thread.waitingSeconds} /></Link>
         </li>)}</ul> : <p className={s.muted}>Nothing waiting on you</p>}
       </article>
       <article className={s.card}>

@@ -18,13 +18,14 @@ import { useToast } from "@/components/shell/toast";
 import s from './page.module.css';
 import { signalMail } from '@/lib/signal-mail';
 import type { MailThreadDetail as SignalThreadDetail } from '@/lib/signal-mail';
-import { ClientAvatar, Segmented } from '@/components/signal';
+import { ClientAvatar, Segmented, StatusChip } from '@/components/signal';
 import { ThreadList } from '@/components/mail/thread-list';
 import { MorningBrief } from '@/components/mail/morning-brief';
 import { MailboxHeader } from '@/components/mail/mailbox-header';
-import { ConversationContext, ConversationChips } from '@/components/mail/conversation-context';
+import { ConversationContext, ConversationChips, ThreadStateControl } from '@/components/mail/conversation-context';
 import { ComposeModal, replyContextFromThread, type ComposeContext } from "@/components/compose";
 import { ThreadSummary } from "@/components/ai-panel";
+import { Popover, useDismissable } from "@/components/popover";
 import { MailDisclosure } from "@/components/mail/disclosure";
 import { AttachmentList } from "@/components/attachments";
 import { ContactDetails } from "@/components/contact-card";
@@ -51,7 +52,8 @@ const PAGE_SIZE = 50;
  */
 const FOLDER_LABELS: Record<string, string> = {
   inbox: "Inbox",
-  unread: "Unread",
+  unread: "Inbox",
+  waiting: "Inbox",
   assigned: "Assigned",
   sent: "Sent",
   archive: "Archive",
@@ -347,8 +349,8 @@ function MailView() {
           <section className={`${s.list} scroll-cue`} aria-label={activeQuery ? 'Search results' : 'Messages'}>
             {activeQuery ? <><h1 className={s.searchHeading}>{activeQuery}</h1><div className={s.searchTools}><button aria-pressed="true">Conversations {threadTotal}</button><button onClick={() => setParams({ q: null, id: null })}>Clear search</button></div></> :
               <div className={s.listHead}><h1 className={s.heading}>{FOLDER_LABELS[folder] ?? 'Mail'}</h1>
-                <Segmented options={[{ value: 'inbox', label: 'All' }, { value: 'unread', label: 'Unread' }, { value: 'assigned', label: 'Assigned' }]}
-                  value={folder === 'unread' || folder === 'assigned' ? folder : 'inbox'} onChange={(value) => setParams({ folder: value, id: null })} label="Filter messages" />
+                <Segmented options={[{ value: 'inbox', label: 'All' }, { value: 'unread', label: 'Unread' }, { value: 'waiting', label: 'Waiting' }]}
+                  value={folder === 'unread' || folder === 'waiting' ? folder : 'inbox'} onChange={(value) => setParams({ folder: value, id: null })} label="Filter messages" />
               </div>}
             <MailboxHeader mailboxes={mailboxes} currentId={currentMailboxId} onPick={(id) => setParams({ m: id, id: null })} />
             <ListToolbar total={threadTotal} loading={threadsLoading} items={threadItems} selection={visibleSelection}
@@ -396,7 +398,7 @@ function ListToolbar({ total, loading, items, selection, onSelectAll, onBulkArch
   </div>;
 }
 
-function Reader({ thread, selected, mailboxId, syncError, onRetrySync, retrying, onMarkUnread, onArchive, onDelete, moving, replyOpen, onReplyOpenChange, onExpandReply, onBack, draftHtml, onDraftChange }: {
+function Reader({ thread, selected, mailboxId, mailboxEmail, syncError, onRetrySync, retrying, onMarkUnread, onArchive, onDelete, moving, replyOpen, onReplyOpenChange, onExpandReply, onBack, draftHtml, onDraftChange }: {
   thread: SignalThreadDetail | undefined; selected: ThreadSummaryDto | undefined; mailboxId: string | null; mailboxEmail?: string; syncError: string | null;
   onRetrySync: () => void; retrying: boolean; onMarkUnread: () => void; onArchive: () => void; onDelete: () => void; moving: boolean;
   replyOpen: boolean; onReplyOpenChange: (open: boolean) => void; onExpandReply: (ctx: ComposeContext) => void; onCompose: () => void; onBack: () => void;
@@ -407,24 +409,38 @@ function Reader({ thread, selected, mailboxId, syncError, onRetrySync, retrying,
   return <div className={`${s.conversation} scroll-cue`} key={thread.id}>
     <article className={s.reader}>
       <div className={s.readerTop}>
-        <button type="button" className={s.backButton} onClick={onBack} aria-label="Back to inbox"><ArrowLeft size={16} aria-hidden /></button>
+        <button type="button" className={s.backButton} onClick={onBack} aria-label="Back to inbox" title="Back to inbox"><ArrowLeft size={16} aria-hidden /></button>
         <ConversationChips threadId={thread.id} />
-        <time dateTime={thread.lastDate ?? undefined} title={formatDateTime(thread.lastDate)}>{formatWhen(thread.lastDate)}</time>
+        <div className={s.readerActions}>
+          <button type="button" className="reader-action reader-action-primary" aria-label="Reply" title="Reply" onClick={() => onReplyOpenChange(true)}><CornerUpLeft size={16} aria-hidden />Reply</button>
+          <ThreadStateControl threadId={thread.id} replyState={thread.replyState} />
+          <button type="button" className={`reader-action ${s.responsiveAction}`} onClick={onArchive} disabled={moving} aria-label="Archive" title="Archive"><Archive size={16} aria-hidden /><span>Archive</span></button>
+          <button type="button" className={`reader-action ${s.responsiveAction}`} onClick={onDelete} disabled={moving} aria-label="Delete" title="Delete"><Trash2 size={16} aria-hidden /><span>Delete</span></button>
+          <ReaderMore onMarkUnread={onMarkUnread} />
+        </div>
       </div>
-      <h1>{thread.subject || '(no subject)'}</h1>
+      <div className={s.subjectLine}><h1>{thread.subject || '(no subject)'}</h1><span data-done={thread.replyState === 'Done'} className={s.stateChip}><StatusChip label={thread.replyState === 'Done' ? 'Done' : thread.replyState === 'Awaiting' ? 'Awaiting reply' : 'Needs reply'} waiting={thread.replyState === 'ToReply'} /></span></div>
       {syncError && <div className={s.syncError}><ErrorText>This mailbox stopped syncing: {syncError}</ErrorText><Button variant="default" size="small" onClick={onRetrySync} disabled={retrying}>Retry</Button></div>}
       <ThreadSummary threadId={thread.id} onNextStep={() => onReplyOpenChange(true)} />
-      <Participants thread={thread} latest={latest} mailboxId={mailboxId} actions={<>
-        <button type="button" className="reader-action" onClick={() => onReplyOpenChange(true)}><CornerUpLeft size={16} aria-hidden />Reply</button>
-        <button type="button" className={`reader-action ${s.iconAction}`} onClick={onMarkUnread} aria-label="Mark unread" title="Mark unread"><MailOpen size={16} aria-hidden /></button>
-        <button type="button" className={`reader-action ${s.iconAction}`} onClick={onArchive} disabled={moving} aria-label="Archive" title="Archive"><Archive size={16} aria-hidden /></button>
-        <button type="button" className={`reader-action ${s.iconAction}`} onClick={onDelete} disabled={moving} aria-label="Delete" title="Delete"><Trash2 size={16} aria-hidden /></button>
-      </>} />
+      <Participants thread={thread} latest={latest} mailboxId={mailboxId} />
       {thread.messages.map((message, index) => <MessageCard key={message.id} message={message} index={index} defaultOpen={index === thread.messages.length - 1} showSender={index !== thread.messages.length - 1} clientId={thread.clientId} />)}
-      {mailboxId && <ReplyDock thread={thread} connectionId={mailboxId} open={replyOpen} onOpenChange={onReplyOpenChange} draftHtml={draftHtml} onDraftChange={onDraftChange} className={s.dock} onExpand={(ctx) => { onReplyOpenChange(false); onExpandReply(ctx); }} />}
+      {mailboxId && <ReplyDock thread={thread} connectionId={mailboxId} fromAddress={mailboxEmail} open={replyOpen} onOpenChange={onReplyOpenChange} draftHtml={draftHtml} onDraftChange={onDraftChange} className={s.dock} onExpand={(ctx) => { onReplyOpenChange(false); onExpandReply(ctx); }} />}
     </article>
     <ConversationContext threadId={thread.id} replyState={thread.replyState} stateSince={thread.stateSince} needsNudge={thread.needsNudge}
       onQuickReply={mailboxId ? (template) => onExpandReply({ ...replyContextFromThread(mailboxId, thread), prefillBody: template.bodyHtml ?? '', skipBrandWrap: template.skipBrandWrap }) : undefined} />
+  </div>;
+}
+
+function ReaderMore({ onMarkUnread }: { onMarkUnread: () => void }) {
+  const [open, setOpen] = useState(false);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const ref = useDismissable<HTMLDivElement>(open, () => { setOpen(false); trigger.current?.focus(); });
+  useEffect(() => { if (open) ref.current?.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus(); }, [open, ref]);
+  return <div className={s.readerMore} ref={ref}>
+    <button ref={trigger} type="button" className="reader-action" aria-label="More" title="More" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>More</button>
+    <Popover open={open} role="menu" className={s.readerMenu}>
+      <button type="button" role="menuitem" className="reader-action" aria-label="Mark unread" title="Mark unread" onClick={() => { setOpen(false); onMarkUnread(); }}><MailOpen size={16} aria-hidden />Mark unread</button>
+    </Popover>
   </div>;
 }
 
@@ -440,12 +456,10 @@ function Participants({
   thread,
   latest,
   mailboxId,
-  actions,
 }: {
   thread: ThreadDetailDto;
   latest: ThreadDetailDto["messages"][number] | undefined;
   mailboxId: string | null;
-  actions: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const who = latest?.fromName || latest?.fromAddr || "Unknown sender";
@@ -459,7 +473,6 @@ function Participants({
           <span>{latest?.fromAddr ?? "(no address)"}</span>
         </div>
         <div className={s.actions}>
-          {actions}
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
@@ -576,8 +589,7 @@ function MessageBody({ html, index }: { html: string; index: number }) {
           </button>
         </div>
       )}
-      {/* allow-same-origin without allow-scripts: the message still cannot run any
-          code, but the reader can measure its height. Never add allow-scripts here. */}
+      {/* Same-origin access lets the reader measure height. Scripts remain blocked. */}
       <iframe
         ref={frameRef}
         title={`Message ${index + 1}`}
