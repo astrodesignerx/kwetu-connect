@@ -3426,6 +3426,17 @@ label.advert-check:hover .advert-medal[data-state="you"] { transform: scale(1.08
   .mg-lower { grid-template-columns: minmax(0, .9fr) minmax(0, 1.6fr); }
   .mg-heat .v2-block-rows { grid-template-columns: 52px repeat(var(--days), minmax(0, 1fr)); gap: 4px; }
 }
+/* Two-column Overview fills the frame's height: spare height goes to the screen panel and the lower panels, never to an empty band at the bottom. */
+@media (min-width: 1000px) {
+  .manager-content:has(> .mg-overview) { flex: 1; display: flex; flex-direction: column; }
+  .mg-overview { flex: 1; grid-template-rows: minmax(0, 1fr); }
+  .mg-main-panel { flex: 1.15 1 auto; display: flex; flex-direction: column; }
+  .mg-main-panel .mg-stage { flex: 1; }
+  .mg-lower { flex: 1 1 auto; }
+  .mg-heat { display: flex; flex-direction: column; }
+  .mg-heat .v2-hour-grid { flex: 1; }
+  .mg-heat .v2-block-rows { flex: 1; grid-template-rows: auto; grid-auto-rows: minmax(26px, 1fr); }
+}
 @media (max-width: 999px) {
   .mg-overview { grid-template-columns: minmax(0, 1fr); }
   .mg-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
