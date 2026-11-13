@@ -321,7 +321,7 @@ function MailView() {
   return (
     <div className={s.root}>
       {setRead.isError && <div className={s.actionError}><ErrorText>The mail action could not finish. Try again using its control.</ErrorText></div>}
-      <div className={`${s.workspace} scroll-cue`} data-conversation={!!threadId} data-search={!!activeQuery}>
+      <div className={`${s.workspace} mail-workspace-cue`} data-conversation={!!threadId} data-search={!!activeQuery}>
         {threadId && (
           threadError ? <ErrorState className={s.readerState} title="Could not open this conversation" message="It may have moved. Try again or go back to the inbox." action={<div className={s.errorActions}><Button variant="default" onClick={() => void refetchThread()}>Try again</Button><Button variant="ghost" onClick={() => setParam('id', null)}>Back to inbox</Button></div>} /> :
           <Reader key={threadId} scanning={scanning} thread={thread} selected={selected} mailboxId={thread?.mailboxConnectionId ?? currentMailboxId} mailboxEmail={threadMailbox?.email}

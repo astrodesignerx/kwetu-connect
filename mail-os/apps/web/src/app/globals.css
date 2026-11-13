@@ -686,3 +686,18 @@
 @media (prefers-reduced-motion: reduce) {
   .reply-sent-tick, .reply-send-surface[data-closing=true] { transform-origin: bottom; animation: none; }
 }
+
+/* The workspace itself scrolls only in the phone layout. */
+@media (max-width: 859px) {
+  @supports (animation-timeline: scroll()) {
+    .mail-workspace-cue {
+      mask-image: linear-gradient(to bottom, transparent, var(--fg) var(--cue-start), var(--fg) calc(100% - var(--cue-end)), transparent);
+      animation: cue-start linear both, cue-end linear both;
+      animation-timeline: scroll(self block), scroll(self block);
+      animation-range: 0px 36px, calc(100% - 36px) 100%;
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mail-workspace-cue { mask-image: none; animation: none; }
+}

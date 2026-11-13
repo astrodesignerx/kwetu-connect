@@ -176,7 +176,7 @@ div.mailboxHeader { margin-top: 12px; }
   .bento { grid-template-columns: minmax(0, 1fr); }
   .flights { grid-column: auto; }
 }
-@media (max-width: 760px) {
+@media (max-width: 859px) {
   .workspace { grid-template-columns: minmax(0, 1fr); overflow-y: auto; }
   .workspace[data-conversation=true] > .list { display: none; }
   .list { overflow: visible; }
@@ -226,7 +226,7 @@ div.mailboxHeader { margin-top: 12px; }
   .responsiveAction span { display: none; }
   .responsiveAction { width: 32px; padding: 0; justify-content: center; }
 }
-@media (max-width: 760px) {
+@media (max-width: 859px) {
   .backButton { display: grid; }
   .readerTop { margin-inline: 0; }
   .readerActions { gap: 2px; }
