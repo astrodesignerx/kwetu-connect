@@ -11,7 +11,7 @@
 .selectionBox { display: grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--muted); border-radius: var(--radius-tag); background: var(--surface); color: var(--fg); }
 .listBody { margin-top: 12px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
 .listBody ul { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
-.groupLabel { position: sticky; top: 0; z-index: 2; background: var(--surface); border-bottom: 1px solid var(--line); border-radius: var(--radius-card) var(--radius-card) 0 0; padding: 12px 4px 8px; color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; }
+.groupLabel { position: sticky; top: 0; z-index: 2; background: var(--surface); border-bottom: 1px solid var(--line); border-radius: var(--radius-card) var(--radius-card) 0 0; padding: 12px 12px 8px; color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; }
 
 .row { position: relative; display: block; padding: 12px; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; isolation: isolate; }
 .listBody section:first-child .row:first-child { border-start-start-radius: var(--radius-card); border-start-end-radius: var(--radius-card); }
