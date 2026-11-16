@@ -45,6 +45,9 @@ public record InvitationDto(
 
 public record CreateInvitationRequest(string Email, string? Role);
 
+public record MailboxAccessMemberDto(Guid UserId, string DisplayName, string Email, string Role, string Reason);
+public record ReplaceMailboxAccessRequest(List<Guid> UserIds);
+
 /// <summary>
 /// Returned once, at creation. The raw token is never stored or retrievable again â€”
 /// only its hash is persisted â€” so the admin must copy the link now.
