@@ -50,5 +50,7 @@ describe("InvitationsPanel", () => {
     fireEvent.change(screen.getByLabelText("Email address"), { target: { value: "person@test.local" } });
     fireEvent.click(screen.getByRole("button", { name: "Create invitation" }));
     await waitFor(() => expect(mocks.create).toHaveBeenCalledWith({ email: "person@test.local", role: "Admin", mailboxIds: [], sendFromMailboxId: undefined }));
+    expect(await screen.findByText("No email was sent. Copy the link below and pass it on.")).toBeTruthy();
+    expect(screen.queryByText("The email could not be sent. Copy the link below.")).toBeNull();
   });
 });

@@ -19,7 +19,7 @@ export function InvitationsPanel() {
   const [mailboxIds, setMailboxIds] = useState<string[]>([]);
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [issued, setIssued] = useState<{ id: string; email: string; token: string; link: string | null; emailSent: boolean } | null>(null);
+  const [issued, setIssued] = useState<{ id: string; email: string; token: string; link: string | null; emailSent: boolean; emailRequested: boolean } | null>(null);
   const [copied, setCopied] = useState("");
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 60_000); return () => clearInterval(timer); }, []);
@@ -38,7 +38,7 @@ export function InvitationsPanel() {
     mutationFn: () => api.adminCreateInvitation({ email: email.trim(), role, mailboxIds: role === "Admin" ? [] : mailboxIds, sendFromMailboxId: sendFromMailboxId || undefined }),
     onSuccess: async (response) => {
       const link = /^https?:$/.test(window.location.protocol) ? window.location.origin + "/register?invite=" + encodeURIComponent(response.token) : null;
-      setIssued({ id: response.invitation.id, email: response.invitation.email, token: response.token, link, emailSent: response.emailSent });
+      setIssued({ id: response.invitation.id, email: response.invitation.email, token: response.token, link, emailSent: response.emailSent, emailRequested: !!sendFromMailboxId });
       setEmail(""); setMailboxIds([]); setError(null); setCopied(""); await refresh();
     },
     onError: (failure) => setError(failure instanceof Error ? failure.message : "Could not create the invitation"),
@@ -73,7 +73,7 @@ export function InvitationsPanel() {
       </Field></div>
       <Button type="submit" disabled={create.isPending || !email.trim()}>{create.isPending ? "Creating" : sendFromMailboxId ? "Send invitation" : "Create invitation"}</Button>
     </form><Feedback error={error} />
-    {issued && <div className={s.issued}><p className={s.emailStatus} data-sent={issued.emailSent} role="status">{issued.emailSent ? <MailCheck size={16} aria-hidden="true" /> : <MailWarning size={16} aria-hidden="true" />}{issued.emailSent ? `Invitation emailed to ${issued.email}` : "The email could not be sent. Copy the link below."}</p><h3>Invitation for {issued.email}</h3><p className={s.note}>Copy now. The server stores only a hash, so this code cannot be recovered later.</p>
+    {issued && <div className={s.issued}>{issued.emailRequested ? <p className={s.emailStatus} data-sent={issued.emailSent} role="status">{issued.emailSent ? <MailCheck size={16} aria-hidden="true" /> : <MailWarning size={16} aria-hidden="true" />}{issued.emailSent ? `Invitation emailed to ${issued.email}` : "The email could not be sent. Copy the link below."}</p> : <p className={s.note} role="status">No email was sent. Copy the link below and pass it on.</p>}<h3>Invitation for {issued.email}</h3><p className={s.note}>Copy now. The server stores only a hash, so this code cannot be recovered later.</p>
       {issued.link && <div className={s.copyRow}><code>{issued.link}</code><Button variant="default" onClick={() => void copy("link", issued.link!)}>{copied === "link" ? "Copied" : "Copy link"}</Button></div>}
       <div className={s.copyRow}><code>{issued.token}</code><Button variant="default" onClick={() => void copy("code", issued.token)}>{copied === "code" ? "Copied" : "Copy code"}</Button></div>
       <Button variant="ghost" onClick={() => setIssued(null)}>Done</Button>

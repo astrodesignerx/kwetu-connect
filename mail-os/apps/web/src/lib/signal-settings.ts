@@ -80,7 +80,7 @@ export function invitationExpiry(expiresAt: string, status: string, now = Date.n
  * record but bury real changes, so the log hides them unless asked. Reading
  * someone's mail (admin.thread.view, admin.mailbox.threads.view) is never hidden.
  */
-const PAGE_VIEWS = new Set(["admin.workspace.overview", "admin.audit.daily.view", "admin.users.view", "admin.mailboxes.view"]);
+const PAGE_VIEWS = new Set(["admin.workspace.overview", "admin.audit.daily.view", "admin.users.view", "admin.mailboxes.view", "admin.mailbox.access.view"]);
 export const isPageView = (action: string) => PAGE_VIEWS.has(action);
 
 export function auditKind(action: string) {
