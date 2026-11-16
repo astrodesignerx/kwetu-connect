@@ -92,6 +92,7 @@ public class MailComposer
     public async Task<MailDraftDto> UpsertDraftAsync(Guid userId, DraftUpsertRequest req, CancellationToken ct)
     {
         var connection = await ConnectionInOrgAsync(req.MailboxConnectionId, userId, ct);
+        await ValidateReplyTargetsAsync(userId, req.ReplyToThreadId, req.ReplyToMessageId, ct);
         var draftId = req.Id != Guid.Empty ? req.Id : Guid.NewGuid();
 
         // The lock lives inside the transaction below, so it is held across the
@@ -175,7 +176,7 @@ public class MailComposer
                 : null;
             await _db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
-            return (await ToDtosAsync(new List<MailDraft> { draft }, ct)).Single();
+            return (await ToDtosAsync(userId, new List<MailDraft> { draft }, ct)).Single();
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -221,14 +222,14 @@ public class MailComposer
             .Where(d => d.MailboxConnectionId == connection.Id)
             .OrderByDescending(d => d.UpdatedAt)
             .ToListAsync(ct);
-        return await ToDtosAsync(drafts, ct);
+        return await ToDtosAsync(userId, drafts, ct);
     }
 
     public async Task<MailDraftDto?> GetDraftAsync(Guid userId, Guid draftId, CancellationToken ct)
     {
         var draft = await LoadDraftInOrgAsync(userId, draftId, ct);
         if (draft is null) return null;
-        return (await ToDtosAsync(new List<MailDraft> { draft }, ct)).Single();
+        return (await ToDtosAsync(userId, new List<MailDraft> { draft }, ct)).Single();
     }
 
     public async Task<bool> DeleteDraftAsync(Guid userId, Guid draftId, CancellationToken ct)
@@ -266,19 +267,18 @@ public class MailComposer
     }
 
     /// <summary>
-    /// A draft belongs to the shared mailbox, not to whoever happened to type it, so
-    /// any member of the org can pick one up and finish it.
+    /// A draft belongs to its mailbox. Only people who can see that mailbox can
+    /// pick it up and finish it.
     /// </summary>
     private async Task<MailDraft?> LoadDraftInOrgAsync(Guid userId, Guid draftId, CancellationToken ct)
     {
-        var orgId = await CallerOrgIdOrNullAsync(userId, ct);
-        if (orgId is null) return null;
+        var visible = await new MailboxAccessService(_db).VisibleForUserAsync(userId, ct);
 
         return await _db.MailDrafts
             .Include(d => d.MailboxConnection)
             .ThenInclude(c => c!.User)
             .FirstOrDefaultAsync(
-                d => d.Id == draftId && d.MailboxConnection.User!.OrganizationId == orgId, ct);
+                d => d.Id == draftId && visible.Any(c => c.Id == d.MailboxConnectionId), ct);
     }
 
     public async Task<SendResponse> SendAsync(Guid userId, SendRequest req, CancellationToken ct)
@@ -361,9 +361,9 @@ public class MailComposer
             // A thread id from another org must be indistinguishable from a missing
             // one: the reply defaults (subject, last sender, Message-ID chain) are
             // foreign mail that the org-scoped endpoints never expose.
-            var orgId = await CallerOrgIdAsync(userId, ct);
+            var visible = await new MailboxAccessService(_db).VisibleForUserAsync(userId, ct);
             var replyThread = await _db.MailThreads
-                .Where(t => t.Id == replyThreadId && t.MailboxConnection.User!.OrganizationId == orgId)
+                .Where(t => t.Id == replyThreadId && visible.Any(c => c.Id == t.MailboxConnectionId))
                 .Select(t => new { t.Subject, Email = t.MailboxConnection.Email, t.MailboxConnectionId })
                 .FirstOrDefaultAsync(ct);
             if (replyThread is null)
@@ -415,6 +415,7 @@ public class MailComposer
             if (draft is not null)
             {
                 if (draft.MailboxConnectionId != connection.Id) throw new KeyNotFoundException("Draft not found.");
+                await ValidateReplyTargetsAsync(userId, draft.ReplyToThreadId, draft.ReplyToMessageId, ct);
                 // The reply context already resolved from ReplyToThreadId wins; a draft's
                 // stored chain is the fallback for a draft resumed from the drafts list.
                 replyToMessageId ??= draft.ReplyToMessageId;
@@ -1059,48 +1060,31 @@ public class MailComposer
     }
 
     /// <summary>
-    /// Resolves a mailbox the caller shares an organization with — not one they have to
-    /// own. The shared inbox is the product: requiring ownership here meant only one
-    /// person could reply from a team mailbox or even list its drafts, while everyone
-    /// saw the Reply and Drafts affordances regardless.
-    ///
-    /// Sending still authenticates as the mailbox, using the owner's stored credentials
-    /// from the vault, so mail goes out from the address it appears to come from.
+    /// Resolves a visible mailbox and uses its stored credentials for sending.
     /// </summary>
     private async Task<MailboxConnection> ConnectionInOrgAsync(Guid connectionId, Guid userId, CancellationToken ct)
     {
-        var orgId = await CallerOrgIdAsync(userId, ct);
+        var visible = await new MailboxAccessService(_db).VisibleForUserAsync(userId, ct);
 
         var connection = await _db.MailboxConnections
             .Include(c => c.User)
-            .FirstOrDefaultAsync(c => c.Id == connectionId && c.User!.OrganizationId == orgId, ct);
+            .FirstOrDefaultAsync(c => c.Id == connectionId && visible.Any(v => v.Id == c.Id), ct);
 
         if (connection is null) throw new KeyNotFoundException("Mailbox connection not found.");
         if (!connection.IsActive) throw new InvalidOperationException("Mailbox is not active.");
         return connection;
     }
 
-    /// <summary>
-    /// The caller's organization. Every lookup in this service is scoped by it, so a
-    /// thread, draft or attachment id from another org resolves to "not found" rather
-    /// than to a cross-org read.
-    /// </summary>
-    private async Task<int> CallerOrgIdAsync(Guid userId, CancellationToken ct)
+    private async Task ValidateReplyTargetsAsync(Guid userId, Guid? threadId, long? messageId, CancellationToken ct)
     {
-        var orgId = await CallerOrgIdOrNullAsync(userId, ct);
-        if (orgId is null) throw new KeyNotFoundException("Mailbox connection not found.");
-        return orgId.Value;
+        var visible = await new MailboxAccessService(_db).VisibleForUserAsync(userId, ct);
+        if (threadId is { } thread && !await _db.MailThreads.AnyAsync(t => t.Id == thread
+            && visible.Any(c => c.Id == t.MailboxConnectionId), ct))
+            throw new KeyNotFoundException("Reply thread not found.");
+        if (messageId is { } message && !await _db.MailMessages.AnyAsync(m => m.Id == message
+            && visible.Any(c => c.Id == m.MailboxConnectionId), ct))
+            throw new KeyNotFoundException("Reply message not found.");
     }
-
-    /// <summary>
-    /// Same lookup, but for read paths whose contract is "null means not found" rather
-    /// than "throw": a caller that no longer resolves yields null instead of a 500.
-    /// </summary>
-    private async Task<int?> CallerOrgIdOrNullAsync(Guid userId, CancellationToken ct) =>
-        await _db.Users
-            .Where(u => u.Id == userId)
-            .Select(u => (int?)u.OrganizationId)
-            .FirstOrDefaultAsync(ct);
 
     private static string? NullIfBlank(string? v) => string.IsNullOrWhiteSpace(v) ? null : v;
 
@@ -1171,8 +1155,9 @@ public class MailComposer
     /// so a resumed reply carries real headers) and the attachments bound to each
     /// draft. Batched per call; draft lists are small.
     /// </summary>
-    private async Task<List<MailDraftDto>> ToDtosAsync(List<MailDraft> drafts, CancellationToken ct)
+    private async Task<List<MailDraftDto>> ToDtosAsync(Guid userId, List<MailDraft> drafts, CancellationToken ct)
     {
+        var visible = await new MailboxAccessService(_db).VisibleForUserAsync(userId, ct);
         var draftIds = drafts.Select(d => d.Id).ToList();
         var bound = await _db.MailAttachments
             .Where(a => a.DraftId != null && draftIds.Contains(a.DraftId.Value))
@@ -1190,7 +1175,7 @@ public class MailComposer
         var messageIdByDbId = messageIds.Count == 0
             ? new Dictionary<long, string?>()
             : await _db.MailMessages
-                .Where(m => messageIds.Contains(m.Id))
+                .Where(m => messageIds.Contains(m.Id) && visible.Any(c => c.Id == m.MailboxConnectionId))
                 .ToDictionaryAsync(m => m.Id, m => m.MessageId, ct);
 
         var threadIds = drafts
@@ -1201,7 +1186,7 @@ public class MailComposer
         if (threadIds.Count > 0)
         {
             var threadMessages = await _db.MailMessages
-                .Where(m => m.ThreadId != null && threadIds.Contains(m.ThreadId.Value))
+                .Where(m => m.ThreadId != null && threadIds.Contains(m.ThreadId.Value) && visible.Any(c => c.Id == m.MailboxConnectionId))
                 .Select(m => new { ThreadId = m.ThreadId!.Value, m.MessageId, m.MessageDate, m.InternalDate })
                 .ToListAsync(ct);
             foreach (var group in threadMessages.GroupBy(m => m.ThreadId))

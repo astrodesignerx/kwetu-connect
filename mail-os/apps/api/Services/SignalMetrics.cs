@@ -1,3 +1,4 @@
+using Kompanion.Api.Services.Mail;
 using Kompanion.Api.Data;
 using Kompanion.Api.Models;
 using Microsoft.EntityFrameworkCore;
@@ -28,8 +29,9 @@ public class SignalMetrics(AppDbContext db)
 
     public async Task<MailBriefDto> BriefAsync(int orgId, Guid userId, DateTimeOffset now, CancellationToken ct)
     {
+        var visible = await new MailboxAccessService(db).VisibleForUserAsync(userId, ct);
         var threads = db.MailThreads.AsNoTracking().Where(t => t.MailboxConnection.IsActive
-            && t.MailboxConnection.User!.OrganizationId == orgId);
+            && visible.Any(c => c.Id == t.MailboxConnectionId));
         var waiting = await threads.Where(t => t.ReplyState == ReplyState.ToReply
             && (db.ThreadAssignments.Any(a => a.ThreadId == t.Id && a.UserId == userId)
                 || (!db.ThreadAssignments.Any(a => a.ThreadId == t.Id) && t.MailboxConnection.UserId == userId)))
@@ -37,7 +39,7 @@ public class SignalMetrics(AppDbContext db)
             .Select(t => new { t.Id, t.Subject, t.StateSince, t.NeedsNudge }).ToListAsync(ct);
         var unread = await db.MailMessages.CountAsync(m => m.Folder.SpecialUse == FolderSpecialUse.Inbox
             && !m.Flags.Contains("Seen") && m.Folder.MailboxConnection.IsActive
-            && m.Folder.MailboxConnection.User!.OrganizationId == orgId, ct);
+            && visible.Any(c => c.Id == m.MailboxConnectionId), ct);
         var today = BusinessDate(now);
         var end = today.AddDays(7);
         var flights = await db.ProjectFlights.AsNoTracking()
@@ -48,7 +50,7 @@ public class SignalMetrics(AppDbContext db)
         var dates = WorkingDates(now, 7);
         var start = new DateTimeOffset(dates[0].ToDateTime(TimeOnly.MinValue), TimeSpan.FromHours(3)).ToUniversalTime();
         var rows = await db.ThreadResponseTimes.AsNoTracking()
-            .Where(r => r.MailboxConnection.User!.OrganizationId == orgId && r.SentAt >= start && r.SentAt <= now)
+            .Where(r => visible.Any(c => c.Id == r.MailboxConnectionId) && r.SentAt >= start && r.SentAt <= now)
             .Select(r => new { r.SentAt, r.Seconds }).ToListAsync(ct);
         var included = rows.Where(r => dates.Contains(BusinessDate(r.SentAt))).ToList();
         var daily = dates.Select(date =>
@@ -63,11 +65,12 @@ public class SignalMetrics(AppDbContext db)
             new FirstReplyDto(7, included.Count, Median(included.Select(r => r.Seconds)), daily));
     }
 
-    public async Task<ResponseTimesDto> ResponseTimesAsync(int orgId, string by, int days, DateTimeOffset now, CancellationToken ct)
+    public async Task<ResponseTimesDto> ResponseTimesAsync(int orgId, Guid userId, string by, int days, DateTimeOffset now, CancellationToken ct)
     {
+        var visible = await new MailboxAccessService(db).VisibleForUserAsync(userId, ct);
         var since = now.AddDays(-days);
         var rows = await db.ThreadResponseTimes.AsNoTracking()
-            .Where(r => r.MailboxConnection.User!.OrganizationId == orgId && r.SentAt >= since && r.SentAt <= now)
+            .Where(r => visible.Any(c => c.Id == r.MailboxConnectionId) && r.SentAt >= since && r.SentAt <= now)
             .Select(r => new { r.UserId, UserName = r.User.DisplayName, r.CompanyId,
                 ClientName = r.Company == null ? "Unlinked" : r.Company.Name, r.Seconds }).ToListAsync(ct);
         var groups = rows.GroupBy(r => by == "client" ? r.CompanyId : (Guid?)r.UserId)

@@ -18,6 +18,8 @@ namespace Kompanion.Api.Controllers;
 public class MailController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private IQueryable<MailboxConnection> VisibleMailboxes(int orgId) =>
+        new MailboxAccessService(_db).Visible(UserId(), orgId, User.IsInRole("Admin"));
     private readonly MailActionService _actions;
     private readonly MailComposer _composer;
     private readonly AttachmentStore _attachments;
@@ -37,10 +39,10 @@ public class MailController : ControllerBase
         var userId = UserId();
         var orgId = OrgId();
 
-        // Phase 7: shared inbox. Every member of the org sees every connected mailbox.
-        var mailboxes = await _db.MailboxConnections
+        // The same visibility rule governs the overview and individual mail reads.
+        var mailboxes = await VisibleMailboxes(orgId)
             .Include(c => c.User)
-            .Where(c => c.User!.OrganizationId == orgId && c.IsActive)
+            .Where(c => c.IsActive)
             .ToListAsync(ct);
 
         var ids = mailboxes.Select(m => m.Id).ToList();
@@ -159,7 +161,7 @@ public class MailController : ControllerBase
         var orgId = OrgId();
         var thread = await _db.MailThreads
             .Include(t => t.MailboxConnection)
-            .FirstOrDefaultAsync(t => t.Id == id && t.MailboxConnection!.User!.OrganizationId == orgId, ct);
+            .FirstOrDefaultAsync(t => t.Id == id && VisibleMailboxes(orgId).Any(c => c.Id == t.MailboxConnectionId), ct);
         if (thread is null) return NotFound(errorResponse("Thread not found."));
 
         var messages = await _db.MailMessages
@@ -189,7 +191,7 @@ public class MailController : ControllerBase
         var orgId = OrgId();
         var thread = await _db.MailThreads
             .Include(t => t.MailboxConnection)
-            .FirstOrDefaultAsync(t => t.Id == id && t.MailboxConnection!.User!.OrganizationId == orgId, ct);
+            .FirstOrDefaultAsync(t => t.Id == id && VisibleMailboxes(orgId).Any(c => c.Id == t.MailboxConnectionId), ct);
         if (thread is null) return NotFound(errorResponse("Thread not found."));
         try
         {
@@ -206,7 +208,7 @@ public class MailController : ControllerBase
         var orgId = OrgId();
         var thread = await _db.MailThreads
             .Include(t => t.MailboxConnection)
-            .FirstOrDefaultAsync(t => t.Id == id && t.MailboxConnection!.User!.OrganizationId == orgId, ct);
+            .FirstOrDefaultAsync(t => t.Id == id && VisibleMailboxes(orgId).Any(c => c.Id == t.MailboxConnectionId), ct);
         if (thread is null) return NotFound(errorResponse("Thread not found."));
         try
         {
@@ -221,8 +223,7 @@ public class MailController : ControllerBase
     [HttpPost("mailboxes/{id:guid}/sync")]
     public async Task<IActionResult> TriggerSync(Guid id)
     {
-        // Org-scoped, not owner-scoped: on a shared inbox anyone watching a mailbox
-        // should be able to ask it to catch up. A sync only pulls; it cannot lose mail.
+        // Anyone who can see this mailbox can ask it to catch up.
         if (!await MailboxInOrgAsync(id, OrgId())) return NotFound(errorResponse("Mailbox not found."));
         MailSyncJobs.TriggerIncremental(id);
         return Accepted();
@@ -231,10 +232,8 @@ public class MailController : ControllerBase
     // ---------- Attachments ----------
 
     /// <summary>
-    /// Streams one attachment's bytes. Org-scoped through the owning message, the
-    /// caller's own staged upload, or a draft in the caller's org (shared drafts),
-    /// so an attachment id from another organization is indistinguishable from a
-    /// missing one.
+    /// Streams bytes from a visible mailbox or an unbound upload owned by the caller.
+    /// Bound uploads always require mailbox access, including for their uploader.
     /// </summary>
     [HttpGet("attachments/{id:guid}")]
     public async Task<IActionResult> DownloadAttachment(Guid id, CancellationToken ct)
@@ -249,14 +248,10 @@ public class MailController : ControllerBase
                 a.FileName,
                 a.ContentType,
                 a.BlobKey,
-                // Readable if it hangs off a message in the caller's org (shared inbox),
-                // if it is the caller's own staged upload, or if it is bound to a
-                // draft in the caller's org (shared draft).
-                InOrg = a.Message != null && _db.MailboxConnections.Any(c =>
-                    c.Id == a.Message.MailboxConnectionId && c.User!.OrganizationId == orgId),
-                IsOwn = a.OwnerUserId == userId,
-                DraftInOrg = a.Draft != null && _db.MailboxConnections.Any(c =>
-                    c.Id == a.Draft.MailboxConnectionId && c.User!.OrganizationId == orgId)
+                // Check mailbox access before considering an unbound upload.
+                InOrg = a.Message != null && VisibleMailboxes(orgId).Any(c => c.Id == a.Message.MailboxConnectionId),
+                IsOwn = a.OwnerUserId == userId && a.MessageId == null && a.DraftId == null,
+                DraftInOrg = a.Draft != null && VisibleMailboxes(orgId).Any(c => c.Id == a.Draft.MailboxConnectionId)
             })
             .FirstOrDefaultAsync(ct);
 
@@ -297,7 +292,7 @@ public class MailController : ControllerBase
             draft = await _db.MailDrafts
                 .Include(d => d.MailboxConnection)
                 .FirstOrDefaultAsync(d => d.Id == draftId
-                    && d.MailboxConnection!.User!.OrganizationId == orgId, ct);
+                    && VisibleMailboxes(orgId).Any(c => c.Id == d.MailboxConnectionId), ct);
             if (draft is null) return NotFound(errorResponse("Draft not found."));
         }
 
@@ -334,9 +329,8 @@ public class MailController : ControllerBase
         var userId = UserId();
         var attachment = await _db.MailAttachments
             .FirstOrDefaultAsync(a => a.Id == id && a.MessageId == null
-                && (a.OwnerUserId == userId
-                    || (a.Draft != null && _db.MailboxConnections.Any(c =>
-                        c.Id == a.Draft.MailboxConnectionId && c.User!.OrganizationId == orgId))), ct);
+                && (a.OwnerUserId == userId && a.DraftId == null
+                    || (a.Draft != null && VisibleMailboxes(orgId).Any(c => c.Id == a.Draft.MailboxConnectionId))), ct);
         if (attachment is null) return NotFound(errorResponse("Attachment not found."));
 
         _db.MailAttachments.Remove(attachment);
@@ -409,13 +403,8 @@ public class MailController : ControllerBase
 
     private static object SendError(string message, string code) => new { error = message, code = code };
 
-    // Phase 7: shared inbox — any org member can read from any mailbox in the org.
-    // Write actions (sync, connect/disconnect, draft, send) still scope to the
-    // caller's user id, so only the mailbox owner controls the connection.
-    private async Task<bool> MailboxInOrgAsync(Guid connectionId, int orgId) =>
-        await _db.MailboxConnections
-            .Include(c => c.User)
-            .AnyAsync(c => c.Id == connectionId && c.User!.OrganizationId == orgId);
+    private Task<bool> MailboxInOrgAsync(Guid connectionId, int orgId) =>
+        VisibleMailboxes(orgId).AnyAsync(c => c.Id == connectionId);
 
     // Read from the signed token rather than re-querying the user on every request.
     private int OrgId() => this.CallerOrgId();

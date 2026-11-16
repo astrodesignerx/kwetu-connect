@@ -196,6 +196,7 @@ builder.Services.AddScoped<ImapConnectionFactory>();
 builder.Services.AddScoped<IMailSessionFactory, MailKitMailSessionFactory>();
 builder.Services.AddScoped<MailIngestor>();
 builder.Services.AddScoped<ThreadingService>();
+builder.Services.AddScoped<MailboxAccessService>();
 builder.Services.AddScoped<MailActionService>();
 builder.Services.AddSingleton<MailboxSyncGate>();
 builder.Services.AddSingleton<AttachmentStore>();

@@ -189,4 +189,20 @@ public sealed class WorkspaceOverviewTests : IAsyncLifetime
         var admin = await ApiFixture.RegisterAdminAsync(_factory);
         Assert.Equal(HttpStatusCode.BadRequest, (await admin.Client.GetAsync($"/api/admin/audit-log/daily?weeks={weeks}", Ct)).StatusCode);
     }
+    [Fact]
+    public async Task Overview_health_and_mailbox_count_follow_current_grants()
+    {
+        var admin = await ApiFixture.RegisterAdminAsync(_factory);
+        var member = await ApiFixture.InviteAndRegisterAsync(_factory, admin, "member@test.local");
+        var (shared, _, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var before = await member.Client.GetFromJsonAsync<JsonElement>("/api/workspace/overview", Ct);
+        Assert.Equal(0, before.GetProperty("mailboxCount").GetInt32());
+        Assert.Equal(2, before.GetProperty("memberCount").GetInt32());
+        await ApiFixture.GrantAsync(_factory, shared, member.UserId);
+        var after = await member.Client.GetFromJsonAsync<JsonElement>("/api/workspace/overview", Ct);
+        Assert.Equal(1, after.GetProperty("mailboxCount").GetInt32());
+        Assert.Equal(1, after.GetProperty("mailboxHealth").GetProperty("pending").GetInt32());
+    }
+
 }

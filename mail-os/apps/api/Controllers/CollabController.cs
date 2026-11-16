@@ -15,6 +15,8 @@ namespace Kompanion.Api.Controllers;
 public class CollabController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private IQueryable<MailboxConnection> VisibleMailboxes(int orgId) =>
+        new MailboxAccessService(_db).Visible(UserId(), orgId, User.IsInRole("Admin"));
     private readonly MailNotifier _notifier;
 
     public CollabController(AppDbContext db, MailNotifier notifier)
@@ -29,11 +31,15 @@ public class CollabController : ControllerBase
     private int OrgId() => this.CallerOrgId();
 
     [HttpGet("org/members")]
-    public async Task<IActionResult> ListMembers(CancellationToken ct)
+    public async Task<IActionResult> ListMembers([FromQuery] Guid? connectionId, CancellationToken ct)
     {
         var orgId = OrgId();
-        var members = await _db.Users
-            .Where(u => u.OrganizationId == orgId)
+        if (connectionId is { } id && !await VisibleMailboxes(orgId).AnyAsync(c => c.Id == id, ct))
+            return NotFound(errorResponse("Mailbox not found."));
+        var viewers = connectionId is { } mailboxId
+            ? new MailboxAccessService(_db).Viewers(mailboxId)
+            : _db.Users.Where(u => u.OrganizationId == orgId);
+        var members = await viewers
             .OrderBy(u => u.DisplayName)
             .Select(u => new OrgMemberDto(u.Id, u.Email, u.Username, u.DisplayName, u.Role.ToString()))
             .ToListAsync(ct);
@@ -46,13 +52,16 @@ public class CollabController : ControllerBase
     public async Task<IActionResult> GetAssignment(Guid threadId, CancellationToken ct)
     {
         var orgId = OrgId();
+        if (!await _db.MailThreads.AnyAsync(t => t.Id == threadId
+            && VisibleMailboxes(orgId).Any(c => c.Id == t.MailboxConnectionId), ct))
+            return NotFound(errorResponse("Thread not found."));
         var a = await _db.ThreadAssignments
             .Include(x => x.User)
             .Include(x => x.AssignedBy)
             .FirstOrDefaultAsync(x => x.ThreadId == threadId
                 && _db.MailThreads
                     .Include(t => t.MailboxConnection)
-                    .Any(t => t.Id == threadId && t.MailboxConnection!.User!.OrganizationId == orgId), ct);
+                    .Any(t => t.Id == threadId && VisibleMailboxes(orgId).Any(c => c.Id == t.MailboxConnectionId)), ct);
         if (a is null) return NoContent();
         return Ok(new ThreadAssignmentDto(
             a.ThreadId, a.UserId, a.User.Email, a.User.DisplayName,
@@ -67,7 +76,7 @@ public class CollabController : ControllerBase
         var thread = await _db.MailThreads
             .Include(t => t.MailboxConnection)
             .FirstOrDefaultAsync(t => t.Id == threadId
-                && t.MailboxConnection!.User!.OrganizationId == orgId, ct);
+                && VisibleMailboxes(orgId).Any(c => c.Id == t.MailboxConnectionId), ct);
         if (thread is null) return NotFound(errorResponse("Thread not found."));
 
         var existing = await _db.ThreadAssignments.FirstOrDefaultAsync(a => a.ThreadId == threadId, ct);
@@ -89,6 +98,10 @@ public class CollabController : ControllerBase
         // Confirm the assignee is a member of the same org.
         var assignee = await _db.Users.FirstOrDefaultAsync(u => u.Id == body.UserId && u.OrganizationId == orgId, ct);
         if (assignee is null) return BadRequest(errorResponse("Assignee is not a member of this organization."));
+
+        if (!await new MailboxAccessService(_db).CanSeeAsync(thread.MailboxConnectionId,
+            assignee.Id, orgId, assignee.Role == UserRole.Admin, ct))
+            return BadRequest(errorResponse("That person cannot see this mailbox."));
 
         // Upsert: one row per thread.
         if (existing is null)
@@ -127,7 +140,7 @@ public class CollabController : ControllerBase
         var thread = await _db.MailThreads
             .Include(t => t.MailboxConnection)
             .FirstOrDefaultAsync(t => t.Id == threadId
-                && t.MailboxConnection!.User!.OrganizationId == orgId, ct);
+                && VisibleMailboxes(orgId).Any(c => c.Id == t.MailboxConnectionId), ct);
         if (thread is null) return NotFound(errorResponse("Thread not found."));
 
         var notes = await _db.ThreadNotes
@@ -150,7 +163,7 @@ public class CollabController : ControllerBase
         var thread = await _db.MailThreads
             .Include(t => t.MailboxConnection)
             .FirstOrDefaultAsync(t => t.Id == threadId
-                && t.MailboxConnection!.User!.OrganizationId == orgId, ct);
+                && VisibleMailboxes(orgId).Any(c => c.Id == t.MailboxConnectionId), ct);
         if (thread is null) return NotFound(errorResponse("Thread not found."));
 
         var note = new ThreadNote
@@ -183,7 +196,7 @@ public class CollabController : ControllerBase
 
         // Scope before authorization so a note in another org is indistinguishable
         // from one that doesn't exist.
-        if (note.Thread.MailboxConnection?.User?.OrganizationId != orgId)
+        if (!await VisibleMailboxes(orgId).AnyAsync(c => c.Id == note.Thread.MailboxConnectionId, ct))
             return NotFound(errorResponse("Note not found."));
 
         if (note.AuthorUserId != UserId())

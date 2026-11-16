@@ -136,6 +136,13 @@ public static class ApiFixture
         return (connection.Id, thread.Id, message.Id);
     }
 
+    public static async Task GrantAsync(TestAppFactory factory, Guid connectionId, Guid userId)
+    {
+        await using var db = factory.NewDbContext();
+        db.MailboxAccess.Add(new MailboxAccess { MailboxConnectionId = connectionId, UserId = userId });
+        await db.SaveChangesAsync();
+    }
+
     private static Session Authenticated(TestAppFactory factory, AuthBody body)
     {
         var client = ClientWithToken(factory, body.Token);

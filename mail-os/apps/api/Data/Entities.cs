@@ -69,6 +69,8 @@ public class Invitation
     public required string TokenHash { get; set; }
     public UserRole Role { get; set; } = UserRole.Member;
 
+    public List<Guid> MailboxIds { get; set; } = new();
+
     public Guid CreatedByUserId { get; set; }
     public User CreatedBy { get; set; } = null!;
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
@@ -117,4 +119,14 @@ public class AuditLogEntry
     public Guid? TargetMailboxId { get; set; }
     public string? Details { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+}
+
+public class MailboxAccess
+{
+    public Guid MailboxConnectionId { get; set; }
+    public MailboxConnection MailboxConnection { get; set; } = null!;
+    public Guid UserId { get; set; }
+    public User User { get; set; } = null!;
+    public Guid? GrantedByUserId { get; set; }
+    public DateTimeOffset GrantedAt { get; set; } = DateTimeOffset.UtcNow;
 }

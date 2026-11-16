@@ -1,3 +1,4 @@
+using Kompanion.Api.Services.Mail;
 using System.Security.Claims;
 using Kompanion.Api.Auth;
 using Kompanion.Api.Data;
@@ -13,6 +14,9 @@ namespace Kompanion.Api.Controllers;
 [Route("api")]
 public sealed class WorkspaceOverviewController(AppDbContext db, AuditService audit) : ControllerBase
 {
+    private IQueryable<MailboxConnection> VisibleMailboxes(int orgId) =>
+        new MailboxAccessService(db).Visible(this.CallerId(), orgId, User.IsInRole("Admin"));
+
     [HttpGet("workspace/overview")]
     public async Task<IActionResult> Overview(CancellationToken ct)
     {
@@ -22,7 +26,7 @@ public sealed class WorkspaceOverviewController(AppDbContext db, AuditService au
         var workspace = await db.Organizations.Where(o => o.Id == orgId)
             .Select(o => new { o.Name }).SingleOrDefaultAsync(ct);
         if (workspace is null) return NotFound();
-        var boxes = db.MailboxConnections.Where(m => m.User.OrganizationId == orgId && m.IsActive);
+        var boxes = VisibleMailboxes(orgId).Where(m => m.IsActive);
         var health = await boxes.GroupBy(m => m.SyncState)
             .Select(g => new { State = g.Key, Count = g.Count() }).ToListAsync(ct);
         int Count(MailboxSyncState state) => health.Where(g => g.State == state).Sum(g => g.Count);
@@ -40,7 +44,7 @@ public sealed class WorkspaceOverviewController(AppDbContext db, AuditService au
             mailboxCount = health.Sum(g => g.Count),
             templateCount = await db.EmailTemplates.CountAsync(t => t.OrganizationId == orgId, ct),
             sendsLast30Days = await db.SendOperations.CountAsync(s => s.Caller.OrganizationId == orgId
-                && s.MailboxConnection.User.OrganizationId == orgId
+                && VisibleMailboxes(orgId).Any(c => c.Id == s.MailboxConnectionId)
                 && s.Status == SendOperationStatus.Accepted && s.UpdatedAt >= since && s.UpdatedAt <= now, ct),
             pendingInvitations = pending,
             mailboxHealth = new { healthy = Count(MailboxSyncState.Syncing), pending = Count(MailboxSyncState.Pending),
@@ -54,8 +58,9 @@ public sealed class WorkspaceOverviewController(AppDbContext db, AuditService au
         if (hours is < 1 or > 168) return BadRequest(new { error = "Hours must be between 1 and 168." });
         var orgId = this.CallerOrgId();
         var callerId = this.CallerId();
-        var box = await db.MailboxConnections.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id
-            && m.UserId == callerId && m.User.OrganizationId == orgId, ct);
+        if (!await new MailboxAccessService(db).CanManageAsync(id, callerId, orgId, User.IsInRole("Admin"), ct))
+            return NotFound(new { error = "Mailbox not found." });
+        var box = await db.MailboxConnections.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id, ct);
         if (box is null) return NotFound(new { error = "Mailbox not found." });
         var now = DateTimeOffset.UtcNow;
         var endHour = new DateTimeOffset(now.Year, now.Month, now.Day, now.Hour, 0, 0, TimeSpan.Zero);
