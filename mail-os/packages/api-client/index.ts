@@ -23,6 +23,7 @@ import type {
   EmailTemplateUpsertRequest,
   LoginRequest,
   MailboxDto,
+  MailboxAccessMemberDto,
   MailboxStatusDto,
   MailDraftDto,
   MailOverviewDto,
@@ -139,6 +140,9 @@ export function createApiClient(options: ApiClientOptions) {
         method: "PATCH",
         body: JSON.stringify({ role }),
       }),
+    adminMailboxAccess: (id: string) => request<MailboxAccessMemberDto[]>(`/api/admin/mailboxes/${id}/access`),
+    adminSetMailboxAccess: (id: string, userIds: string[]) =>
+      request<void>(`/api/admin/mailboxes/${id}/access`, { method: "PUT", body: JSON.stringify({ userIds }) }),
     adminListMailboxes: () => request<MailboxDto[]>("/api/admin/mailboxes"),
     adminListInvitations: () => request<InvitationDto[]>("/api/admin/invitations"),
     adminCreateInvitation: (input: CreateInvitationRequest) =>

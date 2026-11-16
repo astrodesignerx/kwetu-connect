@@ -1,5 +1,7 @@
 "use client";
 
+import { useAuthStore } from "@/lib/auth-store";
+import { MailboxSharing } from "./sharing";
 import { plural } from "@/lib/format";
 import { Mail } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
@@ -32,7 +34,7 @@ export default function MailboxesPage() {
   });
 
   return <div className={s.page}>
-    <SettingsHeader title="Mailboxes" context="Settings / Personal" description="The email accounts your workspace reads and sends from" action={mailboxes.data?.length ? <Link className={buttonClass()} href="/settings/mailboxes/connect">Connect mailbox</Link> : undefined} />
+    <SettingsHeader title="Mailboxes" context="Settings" description="The email accounts your workspace reads and sends from" action={mailboxes.data?.length ? <Link className={buttonClass()} href="/settings/mailboxes/connect">Connect mailbox</Link> : undefined} />
     {!removing && <Feedback error={disconnect.error} />}
     {mailboxes.isPending ? <SettingsState loading /> : mailboxes.isError ? <SettingsState error={mailboxes.error} retry={() => void mailboxes.refetch()} /> : mailboxes.data.length === 0 ? <EmptyState icon={Mail} title="No mailbox connected" text="Connect the email account you use for webmail" action={<Link className={buttonClass()} href="/settings/mailboxes/connect">Connect mailbox</Link>} /> : <div className={s.list}>{mailboxes.data.map((mailbox) => <MailboxHealth key={mailbox.id} mailbox={mailbox} onDisconnect={() => { disconnect.reset(); setRemoving(mailbox); }} />)}</div>}
     <ShellDialog open={!!removing} onClose={() => { if (!disconnect.isPending) setRemoving(null); }} labelId="disconnect-title">
@@ -46,7 +48,10 @@ export default function MailboxesPage() {
 
 function MailboxHealth({ mailbox, onDisconnect }: { mailbox: MailboxDto; onDisconnect: () => void }) {
   const queryClient = useQueryClient();
-  const stats = useQuery({ queryKey: ["sync-stats", mailbox.id], queryFn: ({ signal }) => settingsApi.syncStats(mailbox.id, signal), refetchInterval: 30_000 });
+  const user = useAuthStore((state) => state.user);
+  const overview = useQuery({ queryKey: ["overview"], queryFn: api.mailOverview });
+  const status = overview.data?.mailboxes.find((box) => box.id === mailbox.id);
+  const stats = useQuery({ queryKey: ["sync-stats", mailbox.id], queryFn: ({ signal }) => settingsApi.syncStats(mailbox.id, signal), refetchInterval: 30_000, enabled: mailbox.canManage });
   const [message, setMessage] = useState("");
   const refresh = async () => { await Promise.all([
     queryClient.invalidateQueries({ queryKey: ["mailboxes"] }),
@@ -56,17 +61,17 @@ function MailboxHealth({ mailbox, onDisconnect }: { mailbox: MailboxDto; onDisco
   const sync = useMutation({ mutationFn: () => api.triggerMailboxSync(mailbox.id), onMutate: () => setMessage(""), onSuccess: async () => { setMessage("Sync queued. The numbers update when messages have been fetched."); await refresh(); } });
   const test = useMutation({ mutationFn: () => api.reverifyMailbox(mailbox.id), onMutate: () => setMessage(""), onSuccess: async () => { setMessage("Saved credentials verified successfully over IMAP"); await refresh(); } });
   return <Panel><div className={s.health}>
-    <div className={s.identity}>{stats.data && <HealthLight state={stats.data.syncState} />}<h2>{mailbox.email}</h2><p>Receiving: {mailbox.imapHost}:{mailbox.imapPort}<br />Sending: {mailbox.smtpHost}:{mailbox.smtpPort}</p><p>Last verified <time dateTime={mailbox.lastVerifiedAt ?? undefined}>{dateTime(mailbox.lastVerifiedAt)}</time></p>
+    <div className={s.identity}>{(stats.data || status) && <HealthLight state={stats.data?.syncState ?? status!.syncState} />}<h2>{mailbox.email}</h2><p>Connected by {mailbox.connectedByName}</p><p>Receiving: {mailbox.imapHost}:{mailbox.imapPort}<br />Sending: {mailbox.smtpHost}:{mailbox.smtpPort}</p><p>Last verified <time dateTime={mailbox.lastVerifiedAt ?? undefined}>{dateTime(mailbox.lastVerifiedAt)}</time></p>
       {stats.data && <div className={s.numbers}><Stat value={stats.data.conversationCount} label={stats.data.conversationCount === 1 ? "conversation" : "conversations"} /><Stat value={stats.data.messagesSynced} label="fetched in the last 24 hours" />{stats.data.errorCount24Hours !== null && <Stat value={stats.data.errorCount24Hours} label={stats.data.errorCount24Hours === 1 ? "error in the last 24 hours" : "errors in the last 24 hours"} />}</div>}
-      <p>Last sync <time dateTime={stats.data?.lastSyncCompletedAt ?? undefined}>{dateTime(stats.data?.lastSyncCompletedAt)}</time></p>
-      <Feedback error={stats.data?.syncError} />
+      <p>Last sync <time dateTime={(stats.data?.lastSyncCompletedAt ?? status?.lastSyncCompletedAt) ?? undefined}>{dateTime((stats.data?.lastSyncCompletedAt ?? status?.lastSyncCompletedAt))}</time></p>
+      <Feedback error={stats.data?.syncError ?? status?.syncError} />
     </div>
-    <div className={s.chart}><h3>Messages fetched in the last 24 hours</h3>
+    <div className={s.chart}>{mailbox.canManage && <><h3>Messages fetched in the last 24 hours</h3>
       {stats.isPending ? <SettingsState loading /> : stats.isError ? <SettingsState error={stats.error} retry={() => void stats.refetch()} /> : <HourChart values={utcHourValues(stats.data.hourly)} />}
-      <div className={s.actions}><Button variant="default" disabled={sync.isPending || test.isPending} onClick={() => sync.mutate()}>{sync.isPending ? "Queuing..." : "Sync now"}</Button><Button variant="ghost" disabled={test.isPending || sync.isPending} onClick={() => test.mutate()}>{test.isPending ? "Testing..." : "Test connection"}</Button><Button variant="danger" onClick={onDisconnect}>Disconnect mailbox</Button></div>
+      </>}<div className={s.actions}><Button variant="default" disabled={sync.isPending || test.isPending} onClick={() => sync.mutate()}>{sync.isPending ? "Queuing..." : "Sync now"}</Button>{mailbox.canManage && <><Button variant="ghost" disabled={test.isPending || sync.isPending} onClick={() => test.mutate()}>{test.isPending ? "Testing..." : "Test connection"}</Button><Button variant="danger" onClick={onDisconnect}>Disconnect mailbox</Button></>}</div>
       <Feedback error={test.error ?? sync.error} message={message} />
     </div>
-  </div></Panel>;
+  </div>{user?.role === "Admin" && <MailboxSharing id={mailbox.id} email={mailbox.email} userId={user.id} />}</Panel>;
 }
 
 /** The hour chart earns its space only when messages arrived in at least three hours. */

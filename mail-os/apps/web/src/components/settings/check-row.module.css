@@ -1,0 +1,18 @@
+.grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px 12px; min-width: 0; }
+.row { position: relative; display: flex; align-items: center; min-width: 0; height: 44px; gap: 12px; padding: 0 12px; border-radius: var(--radius-control); cursor: pointer; font-size: 14px; line-height: 20px; transition: background-color var(--t1) var(--ease); }
+.row:hover { background: var(--raise); }
+.row:has(input:focus-visible) { outline: 2px solid var(--gold-text); outline-offset: 2px; }
+.row input { position: absolute; width: 18px; height: 18px; opacity: 0; outline: none; }
+.box { display: grid; place-items: center; width: 18px; height: 18px; flex-shrink: 0; border: 1px solid var(--line); border-radius: var(--radius-tag); transition: background-color var(--t1) var(--ease); }
+.box svg { opacity: 0; color: var(--gold-ink); }
+.row input:checked + .box { background: var(--gold); border-color: var(--gold); }
+.row input:checked + .box svg { opacity: 1; }
+.row[data-locked="true"] { cursor: default; }
+.row[data-locked="true"] .box { background: var(--line); border-color: var(--line); }
+.row[data-locked="true"] .box svg { color: var(--muted); }
+.text { display: grid; min-width: 0; }
+.text > span, .text small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.text small, .reason { color: var(--muted); font-size: 12px; line-height: 16px; }
+.reason { margin-left: auto; flex-shrink: 0; }
+@media (min-width: 760px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .box, .row { transition: none; } }
