@@ -739,6 +739,33 @@ namespace Kompanion.Api.Migrations
                     b.ToTable("Organizations");
                 });
 
+            modelBuilder.Entity("Kompanion.Api.Data.PasswordResetRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ResolvedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("\"ResolvedAt\" IS NULL");
+
+                    b.ToTable("PasswordResetRequests");
+                });
+
             modelBuilder.Entity("Kompanion.Api.Data.Project", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1246,6 +1273,17 @@ namespace Kompanion.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("MailboxConnection");
+                });
+
+            modelBuilder.Entity("Kompanion.Api.Data.PasswordResetRequest", b =>
+                {
+                    b.HasOne("Kompanion.Api.Data.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Kompanion.Api.Data.Project", b =>

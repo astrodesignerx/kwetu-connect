@@ -2,15 +2,9 @@ import { ApiError } from "@kompanion/api-client";
 import { handleUnauthorized } from "./api";
 import { useAuthStore } from "./auth-store";
 
-export interface WorkspaceOverview {
-  workspaceName: string;
-  memberCount: number;
-  mailboxCount: number;
-  templateCount: number;
-  sendsLast30Days: number;
-  pendingInvitations: number | null;
-  mailboxHealth: { healthy: number; pending: number; backfilling: number; needsAttention: number };
-}
+import type { WorkspaceOverview } from "@kompanion/types";
+export type { WorkspaceOverview } from "@kompanion/types";
+
 export interface SyncStats {
   mailboxId: string;
   syncState: string;

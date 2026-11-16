@@ -82,3 +82,6 @@ public record AuditLogDto(
     long Id, string ActorEmail, string Action,
     string? TargetEmail, Guid? TargetMailboxId,
     string? Details, DateTimeOffset CreatedAt);
+
+public record WorkspaceSetupDto(bool MailboxConnected, string? FirstMailboxEmail,
+    bool TeamInvited, bool EmailLookSaved, bool QuickReplySaved);
