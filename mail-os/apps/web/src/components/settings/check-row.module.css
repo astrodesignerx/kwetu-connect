@@ -8,8 +8,8 @@
 .row input:checked + .box { background: var(--gold); border-color: var(--gold); }
 .row input:checked + .box svg { opacity: 1; }
 .row[data-locked="true"] { cursor: default; }
-.row[data-locked="true"] .box { background: var(--line); border-color: var(--line); }
-.row[data-locked="true"] .box svg { color: var(--muted); }
+.row[data-locked="true"] input:checked + .box { background: var(--line); border-color: var(--line); }
+.row[data-locked="true"] input:checked + .box svg { color: var(--muted); }
 .text { display: grid; min-width: 0; }
 .text > span, .text small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .text small, .reason { color: var(--muted); font-size: 12px; line-height: 16px; }
