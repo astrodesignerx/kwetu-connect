@@ -7,6 +7,7 @@ import { MailHubProvider, useMailHubStatus, usePresence } from "./signalr";
 type Handler = (...args: never[]) => void;
 
 interface FakeConnection {
+  handlers: Map<string, Handler>;
   oncloseCb: Handler | null;
   started: boolean;
   stopped: boolean;
@@ -27,6 +28,7 @@ const { built, accessFactories, defaults } = vi.hoisted(() => ({
 
 function makeConnection(): FakeConnection {
   const conn: FakeConnection = {
+    handlers: new Map(),
     oncloseCb: null,
     started: false,
     stopped: false,
@@ -62,7 +64,7 @@ vi.mock("@microsoft/signalr", () => ({
         return {
           withAutomaticReconnect: () => ({
             build: () => ({
-              on: () => {},
+              on: (event: string, handler: Handler) => { conn.handlers.set(event, handler); },
               onreconnecting: () => {},
               onreconnected: () => {},
               onclose: (cb: Handler) => {
@@ -94,8 +96,7 @@ function Probe() {
   );
 }
 
-function renderHub() {
-  const qc = new QueryClient();
+function renderHub(qc = new QueryClient()) {
   return render(
     <QueryClientProvider client={qc}>
       <MailHubProvider>
@@ -194,4 +195,17 @@ describe("MailHubProvider lifecycle", () => {
     });
     expect(built).toHaveLength(builds);
   });
+  it("clears cached mail after a mailbox access event", async () => {
+    const client = new QueryClient();
+    client.setQueryData(["thread", "private"], { body: "Private mail" });
+    client.setQueryData(["overview"], { mailboxes: [{ id: "private" }] });
+    renderHub(client);
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    expect(built[0].handlers.has("mailboxAccessChanged")).toBe(true);
+    await act(async () => { built[0].handlers.get("mailboxAccessChanged")?.(); await vi.advanceTimersByTimeAsync(0); });
+    expect(client.getQueryData(["thread", "private"])).toBeUndefined();
+    expect(client.getQueryData(["overview"])).toBeUndefined();
+    client.clear();
+  });
+
 });

@@ -28,5 +28,5 @@ export function useAllDrafts() {
     },
     enabled: mailboxIds.length > 0,
   });
-  return { mailboxes, mailboxById, drafts: drafts ?? [] };
+  return { mailboxes, mailboxById, drafts: mailboxIds.length ? drafts ?? [] : [] };
 }

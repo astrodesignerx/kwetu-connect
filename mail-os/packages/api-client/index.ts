@@ -335,7 +335,7 @@ export function createApiClient(options: ApiClientOptions) {
         body: JSON.stringify(req),
       }),
 
-    listMembers: () => request<OrgMemberDto[]>("/api/org/members"),
+    listMembers: (connectionId?: string) => request<OrgMemberDto[]>("/api/org/members" + (connectionId ? `?connectionId=${encodeURIComponent(connectionId)}` : "")),
     getAssignment: (threadId: string) =>
       request<ThreadAssignmentDto | null>(`/api/threads/${threadId}/assignment`),
     assignThread: (threadId: string, userId: string) =>

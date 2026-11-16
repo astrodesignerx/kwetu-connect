@@ -269,4 +269,21 @@ describe("V2 mail behaviour", () => {
     expect(await screen.findByRole("alert")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy();
   });
+  it.each(["Member", "Admin"] as const)("uses the %s empty mailbox wording", async (role) => {
+    useAuthStore.setState({ user: { id: "user", email: "user@test.local", username: "user", displayName: "User", role, createdAt: "" } });
+    mocks.overview.mockResolvedValue({ mailboxes: [] }); mount();
+    expect(await screen.findByText(role === "Member" ? "No mailbox shared with you yet" : "No mailbox connected")).toBeTruthy();
+    expect(screen.getByText(role === "Member" ? "Ask an admin to share one, or connect your own" : "Connect your cPanel mailbox and your mail syncs into this workspace")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Connect a mailbox" })).toBeTruthy();
+  });
+
+  it("falls back and closes the reader when the current mailbox disappears", async () => {
+    mocks.search = "m=mailbox&id=thread-0";
+    const client = mount(); await screen.findByRole("heading", { name: "First conversation" });
+    await act(async () => { client.setQueryData(["overview"], { mailboxes: [{ id: "remaining", email: "remaining@test.local", syncError: null }] }); });
+    await waitFor(() => expect(new URLSearchParams(mocks.search).get("m")).toBe("remaining"));
+    expect(new URLSearchParams(mocks.search).get("id")).toBeNull();
+    expect(screen.queryByRole("heading", { name: "First conversation" })).toBeNull();
+  });
+
 });

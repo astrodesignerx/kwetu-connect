@@ -91,7 +91,15 @@ function MailView() {
   });
   const queueMove = usePendingMove();
   const mailboxes = overview?.mailboxes ?? [];
-  const currentMailboxId = searchParams.get("m") ?? mailboxes[0]?.id ?? null;
+  const requestedMailboxId = searchParams.get("m");
+  const currentMailboxId = mailboxes.some((box) => box.id === requestedMailboxId) ? requestedMailboxId : mailboxes[0]?.id ?? null;
+  useEffect(() => {
+    if (!overview || !requestedMailboxId || overview.mailboxes.some((box) => box.id === requestedMailboxId)) return;
+    const next = new URLSearchParams(searchParams);
+    if (overview.mailboxes[0]) next.set("m", overview.mailboxes[0].id); else next.delete("m");
+    next.delete("id");
+    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+  }, [overview, requestedMailboxId, searchParams, router, pathname]);
   const currentMailbox = mailboxes.find((m) => m.id === currentMailboxId);
 
   /**
@@ -364,11 +372,12 @@ function MailView() {
   );
 }
 
-function NoMailboxes() {
+export function NoMailboxes() {
+  const isAdmin = useAuthStore((state) => state.user?.role === "Admin");
   return (
     <div className={s.noMailbox}>
-      <EmptyState icon={Mail} title="No mailbox connected"
-        text="Connect your cPanel mailbox and your mail syncs into this workspace"
+      <EmptyState icon={Mail} title={isAdmin ? "No mailbox connected" : "No mailbox shared with you yet"}
+        text={isAdmin ? "Connect your cPanel mailbox and your mail syncs into this workspace" : "Ask an admin to share one, or connect your own"}
         action={<Link href="/settings/mailboxes/connect" className={buttonClass()}>Connect a mailbox</Link>} />
     </div>
   );
@@ -422,7 +431,7 @@ function Reader({ scanning, thread, selected, mailboxId, mailboxEmail, syncError
       {thread.messages.map((message, index) => <MessageCard key={message.id} message={message} index={index} defaultOpen={index === thread.messages.length - 1} showSender={index !== thread.messages.length - 1} clientId={thread.clientId} />)}
       {mailboxId && <ReplyDock thread={thread} connectionId={mailboxId} fromAddress={mailboxEmail} open={replyOpen} onOpenChange={onReplyOpenChange} draftHtml={draftHtml} onDraftChange={onDraftChange} className={s.dock} onExpand={(ctx) => { onReplyOpenChange(false); onExpandReply(ctx); }} />}
     </article>
-    <ConversationContext threadId={thread.id} replyState={thread.replyState} stateSince={thread.stateSince} needsNudge={thread.needsNudge}
+    <ConversationContext connectionId={mailboxId ?? undefined} threadId={thread.id} replyState={thread.replyState} stateSince={thread.stateSince} needsNudge={thread.needsNudge}
       onQuickReply={mailboxId ? (template) => onExpandReply({ ...replyContextFromThread(mailboxId, thread), prefillBody: template.bodyHtml ?? '', skipBrandWrap: template.skipBrandWrap }) : undefined} />
   </div></div>;
 }
