@@ -41,15 +41,18 @@ public record UpdateProfileResponse(UserDto User, string? Token);
 public record InvitationDto(
     Guid Id, string Email, string Role,
     DateTimeOffset CreatedAt, DateTimeOffset ExpiresAt,
-    DateTimeOffset? AcceptedAt, DateTimeOffset? RevokedAt, string Status);
+    DateTimeOffset? AcceptedAt, DateTimeOffset? RevokedAt, string Status, List<Guid> MailboxIds);
 
-public record CreateInvitationRequest(string Email, string? Role);
+public record CreateInvitationRequest(string Email, string? Role, List<Guid>? MailboxIds = null, Guid? SendFromMailboxId = null);
+
+public record MailboxAccessMemberDto(Guid UserId, string DisplayName, string Email, string Role, string Reason);
+public record ReplaceMailboxAccessRequest(List<Guid> UserIds);
 
 /// <summary>
 /// Returned once, at creation. The raw token is never stored or retrievable again —
 /// only its hash is persisted — so the admin must copy the link now.
 /// </summary>
-public record CreateInvitationResponse(InvitationDto Invitation, string Token);
+public record CreateInvitationResponse(InvitationDto Invitation, string Token, bool EmailSent, string? EmailError);
 
 public record ConnectMailboxRequest(
     string Email, string Password,
@@ -61,12 +64,12 @@ public record MailboxDto(
     string ImapHost, int ImapPort,
     string SmtpHost, int SmtpPort,
     bool IsActive, DateTimeOffset CreatedAt, DateTimeOffset? LastVerifiedAt,
-    string? OwnerEmail)
+    string? OwnerEmail, string ConnectedByName, bool CanManage)
 {
-    public static MailboxDto From(MailboxConnection m, bool includeOwner = false) =>
+    public static MailboxDto From(MailboxConnection m, bool includeOwner = false, bool canManage = false) =>
         new(m.Id, m.Email, m.ImapHost, m.ImapPort, m.SmtpHost, m.SmtpPort,
             m.IsActive, m.CreatedAt, m.LastVerifiedAt,
-            includeOwner ? m.User?.Email : null);
+            includeOwner ? m.User?.Email : null, m.User?.DisplayName ?? "", canManage);
 }
 
 public record AdminUserDto(

@@ -1,5 +1,10 @@
+using Kompanion.Api.Services;
+using Kompanion.Api.Services.Mail;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Kompanion.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
@@ -12,11 +17,11 @@ namespace Kompanion.Api.Tests;
 /// </summary>
 public class RegistrationTests : IAsyncLifetime
 {
-    private TestAppFactory _factory = null!;
+    private FakeMailTestFactory _factory = null!;
 
     public async ValueTask InitializeAsync()
     {
-        _factory = new TestAppFactory();
+        _factory = new FakeMailTestFactory(new Dictionary<string, string> { ["App:WebBaseUrl"] = "https://kwetu.test" });
         await _factory.InitializeAsync();
     }
 
@@ -189,4 +194,114 @@ public class RegistrationTests : IAsyncLifetime
 
     private record ModeBody(string Mode);
     private record InvitationBody(Guid Id, string Email, string Role, string Status);
+    [Theory]
+    [InlineData("Member")]
+    [InlineData("Admin")]
+    public async Task Invitation_grants_exactly_selected_existing_mailboxes(string role)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var admin = await ApiFixture.RegisterAdminAsync(_factory);
+        var (one, _, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var (two, _, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var (deleted, _, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var response = await admin.Client.PostAsJsonAsync("/api/admin/invitations", new
+        {
+            email = "invitee@test.local", role, mailboxIds = new[] { one, two, deleted, one }
+        }, ct);
+        response.EnsureSuccessStatusCode();
+        var created = await response.Content.ReadFromJsonAsync<JsonElement>(ct);
+        var token = created.GetProperty("token").GetString();
+        Assert.Equal(role == "Admin" ? 0 : 3, created.GetProperty("invitation").GetProperty("mailboxIds").GetArrayLength());
+        (await admin.Client.DeleteAsync($"/api/mailboxes/{deleted}", ct)).EnsureSuccessStatusCode();
+        var registered = await _factory.CreateClient().PostAsJsonAsync("/api/auth/register", new
+        {
+            email = "invitee@test.local", password = "another good password", displayName = "Invitee", inviteToken = token
+        }, ct);
+        registered.EnsureSuccessStatusCode();
+        var userId = (await registered.Content.ReadFromJsonAsync<JsonElement>(ct)).GetProperty("user").GetProperty("id").GetGuid();
+        await using var db = _factory.NewDbContext();
+        var grants = await db.MailboxAccess.Where(a => a.UserId == userId).Select(a => a.MailboxConnectionId).ToListAsync(ct);
+        Assert.Equal(role == "Admin" ? 0 : 2, grants.Count);
+        if (role == "Member") Assert.Equal(new[] { one, two }.Order(), grants.Order());
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Invitation_email_uses_transport_and_failure_preserves_the_invitation(bool fails)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var admin = await ApiFixture.RegisterAdminAsync(_factory);
+        var (box, _, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        string? plain = null, html = null;
+        _factory.Smtp.OnSend = message =>
+        {
+            plain = message.TextBody; html = message.HtmlBody;
+            Assert.Equal("invited@test.local", message.To.Mailboxes.Single().Address);
+            return fails ? new IOException("simulated transport failure") : null;
+        };
+        var result = await admin.Client.PostAsJsonAsync("/api/admin/invitations", new
+        {
+            email = "invited@test.local", role = "Member", mailboxIds = new[] { box }, sendFromMailboxId = box
+        }, ct);
+        Assert.Equal(HttpStatusCode.OK, result.StatusCode);
+        var body = await result.Content.ReadFromJsonAsync<JsonElement>(ct);
+        Assert.Equal(!fails, body.GetProperty("emailSent").GetBoolean());
+        Assert.Equal(fails ? JsonValueKind.String : JsonValueKind.Null, body.GetProperty("emailError").ValueKind);
+        var token = body.GetProperty("token").GetString()!;
+        var link = "https://kwetu.test/register?invite=" + token;
+        Assert.Contains(link, plain);
+        Assert.Contains(link, html);
+        Assert.DoesNotContain(token, plain!.Replace(link, ""));
+        Assert.DoesNotContain(token, html!.Replace(link, ""));
+        Assert.Contains("Test Admin invited you to Kwetu OS", plain);
+        Assert.Contains("7 days", plain);
+        Assert.Equal(fails ? 0 : 1, _factory.Filer.FileCount);
+        await using var db = _factory.NewDbContext();
+        var invitation = await db.Invitations.SingleAsync(i => i.Email == "invited@test.local", ct);
+        Assert.Equal(Kompanion.Api.Controllers.AuthController.HashToken(token), invitation.TokenHash);
+        Assert.Empty(await db.MailDrafts.ToListAsync(ct));
+        Assert.Empty(await db.SendOperations.ToListAsync(ct));
+        Assert.Contains(await db.AuditLogEntries.Where(a => a.Action == "admin.invitation.create").Select(a => a.Details).ToListAsync(ct),
+            detail => detail != null && detail.Contains(box.ToString()) && detail.Contains($"email sent {!fails}"));
+    }
+
+    [Theory]
+    [InlineData("https://configured.test", "https://fallback.test", true, "https://configured.test")]
+    [InlineData(null, "https://fallback.test", true, "https://fallback.test")]
+    [InlineData(null, null, false, null)]
+    [InlineData("invalid", "https://fallback.test", false, null)]
+    public async Task Invitation_mailer_resolves_the_configured_or_first_CORS_web_address(string? configured,
+        string? fallback, bool sent, string? expectedBase)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var admin = await ApiFixture.RegisterAdminAsync(_factory);
+        var (box, _, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        using var scope = _factory.Services.CreateScope();
+        await using var db = _factory.NewDbContext();
+        var connection = await db.MailboxConnections.Include(c => c.User).SingleAsync(c => c.Id == box, ct);
+        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["App:WebBaseUrl"] = configured, ["Cors:WebOrigins:0"] = fallback
+        }).Build();
+        var mailer = new InvitationMailer(_factory.Smtp, scope.ServiceProvider.GetRequiredService<SmtpSender>(), config);
+        string? text = null;
+        _factory.Smtp.OnSend = message => { text = message.TextBody; return null; };
+        var result = await mailer.SendAsync(new Invitation { OrganizationId = connection.User.OrganizationId,
+            CreatedByUserId = admin.UserId, Email = "invite@test.local", TokenHash = "unused" }, "one-token",
+            "Inviter", connection, [], ct);
+        Assert.Equal(sent, result.Sent);
+        if (sent)
+        {
+            Assert.Null(result.Error);
+            Assert.Contains(expectedBase + "/register?invite=one-token", text);
+        }
+        else
+        {
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
+            Assert.Equal(0, _factory.Smtp.SendCount);
+        }
+    }
+
 }

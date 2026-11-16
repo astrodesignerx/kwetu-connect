@@ -50,6 +50,7 @@ public sealed class SignalDataTests : IAsyncLifetime
     {
         var (admin, connection, thread, _) = await Seed();
         var member = await ApiFixture.InviteAndRegisterAsync(_factory, admin, "member@test.local");
+        await ApiFixture.GrantAsync(_factory, connection, member.UserId);
         var result = await member.Client.PostAsJsonAsync($"/api/mail/threads/{thread}/state", new { state = "Done" }, TestContext.Current.CancellationToken);
         result.EnsureSuccessStatusCode();
         var state = (await result.Content.ReadFromJsonAsync<ThreadStateDto>(TestContext.Current.CancellationToken))!;
@@ -420,7 +421,7 @@ public sealed class SignalDataTests : IAsyncLifetime
         Assert.Equal(180, brief.FirstReply.MedianSeconds);
         Assert.Equal(120, brief.FirstReply.Daily[^1].MedianSeconds);
         Assert.Equal(2, brief.FirstReply.Daily[^1].Count);
-        var stats = await new SignalMetrics(db).ResponseTimesAsync(orgId, "client", 7, now, TestContext.Current.CancellationToken);
+        var stats = await new SignalMetrics(db).ResponseTimesAsync(orgId, admin.UserId, "client", 7, now, TestContext.Current.CancellationToken);
         Assert.Equal(4, stats.Count);
         Assert.Equal("Unlinked", Assert.Single(stats.Groups).Name);
     }

@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
     public DbSet<Organization> Organizations => Set<Organization>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Invitation> Invitations => Set<Invitation>();
+    public DbSet<MailboxAccess> MailboxAccess => Set<MailboxAccess>();
     public DbSet<MailboxConnection> MailboxConnections => Set<MailboxConnection>();
     public DbSet<AuditLogEntry> AuditLogEntries => Set<AuditLogEntry>();
     public DbSet<MailboxFolder> MailboxFolders => Set<MailboxFolder>();
@@ -46,6 +47,7 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Invitation>(e =>
         {
+            e.Property(i => i.MailboxIds).HasColumnType("uuid[]").HasDefaultValueSql("ARRAY[]::uuid[]");
             e.HasIndex(i => i.TokenHash).IsUnique();
             e.HasIndex(i => new { i.OrganizationId, i.Email });
             e.Property(i => i.Email).HasMaxLength(256);
@@ -59,6 +61,15 @@ public class AppDbContext : DbContext
         {
             e.HasIndex(m => new { m.UserId, m.Email }).IsUnique();
             e.Property(m => m.CredentialType).HasConversion<string>().HasMaxLength(32);
+        });
+
+        modelBuilder.Entity<MailboxAccess>(e =>
+        {
+            e.HasKey(a => new { a.MailboxConnectionId, a.UserId });
+            e.HasOne(a => a.MailboxConnection).WithMany()
+                .HasForeignKey(a => a.MailboxConnectionId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(a => a.User).WithMany()
+                .HasForeignKey(a => a.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<AuditLogEntry>(e =>

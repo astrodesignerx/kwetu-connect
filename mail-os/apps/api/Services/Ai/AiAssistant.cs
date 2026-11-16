@@ -1,3 +1,4 @@
+using Kompanion.Api.Services.Mail;
 using System.Text;
 using Kompanion.Api.Data;
 using Microsoft.EntityFrameworkCore;
@@ -92,14 +93,11 @@ public class AiAssistant
 
     private async Task<MailThread?> LoadOwnedThreadAsync(Guid threadId, Guid userId, CancellationToken ct)
     {
-        var orgId = await _db.Users
-            .Where(u => u.Id == userId)
-            .Select(u => u.OrganizationId)
-            .FirstAsync(ct);
+        var visible = await new MailboxAccessService(_db).VisibleForUserAsync(userId, ct);
         return await _db.MailThreads
             .Include(t => t.MailboxConnection)
             .FirstOrDefaultAsync(
-                t => t.Id == threadId && t.MailboxConnection!.User!.OrganizationId == orgId,
+                t => t.Id == threadId && visible.Any(c => c.Id == t.MailboxConnectionId),
                 ct);
     }
 

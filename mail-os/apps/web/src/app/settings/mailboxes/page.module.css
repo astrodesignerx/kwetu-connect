@@ -8,3 +8,13 @@
 .chart h3 { margin-bottom: 20px; color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 @media (max-width: 850px) { .health { grid-template-columns: minmax(0, 1fr); gap: 20px; } }
+
+.sharing { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); min-width: 0; }
+.sharingToggle { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; text-align: left; border-radius: var(--radius-control); }
+.sharingToggle strong { font-size: 14px; font-weight: 600; }
+.sharingToggle span { margin-left: auto; color: var(--muted); font-size: 13px; }
+.sharingToggle svg { flex-shrink: 0; transition: transform var(--t1) var(--ease); }
+.sharingToggle svg[data-open="true"] { transform: rotate(90deg); }
+.sharingActions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+@media (max-width: 759px) { .sharingActions > button { flex: 1; } }
+@media (prefers-reduced-motion: reduce) { .sharingToggle svg { transition: none; } }

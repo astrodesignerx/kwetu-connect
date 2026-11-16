@@ -1,3 +1,4 @@
+using Kompanion.Api.Services.Mail;
 using Kompanion.Api.Auth;
 using Kompanion.Api.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -10,6 +11,9 @@ namespace Kompanion.Api.Controllers;
 [ApiController, Authorize, Route("api/mail/insights")]
 public class MailInsightsController(AppDbContext db) : ControllerBase
 {
+    private IQueryable<MailboxConnection> VisibleMailboxes(int orgId) =>
+        new MailboxAccessService(db).Visible(this.CallerId(), orgId, User.IsInRole("Admin"));
+
     public record MailInsight(Guid Id, Guid MailboxConnectionId, Guid? ClientId, string? ClientName);
 
     [HttpGet]
@@ -19,7 +23,7 @@ public class MailInsightsController(AppDbContext db) : ControllerBase
         if (ids.Length > 200) return BadRequest(new { error = "Request at most 200 conversations." });
         var orgId = this.CallerOrgId();
         var threads = await db.MailThreads.AsNoTracking()
-            .Where(thread => ids.Contains(thread.Id) && thread.MailboxConnection.User!.OrganizationId == orgId)
+            .Where(thread => ids.Contains(thread.Id) && VisibleMailboxes(orgId).Any(c => c.Id == thread.MailboxConnectionId))
             .Select(thread => new { thread.Id, thread.MailboxConnectionId })
             .ToListAsync(ct);
         var visible = threads.Select(thread => thread.Id).ToArray();

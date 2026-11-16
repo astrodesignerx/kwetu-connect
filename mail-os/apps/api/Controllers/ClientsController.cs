@@ -1,3 +1,4 @@
+using Kompanion.Api.Services.Mail;
 using System.Security.Claims;
 using Kompanion.Api.Auth;
 using Kompanion.Api.Data;
@@ -15,6 +16,8 @@ namespace Kompanion.Api.Controllers;
 public class ClientsController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private IQueryable<MailboxConnection> VisibleMailboxes(int orgId) =>
+        new MailboxAccessService(_db).Visible(UserId(), orgId, User.IsInRole("Admin"));
 
     public ClientsController(AppDbContext db) => _db = db;
 
@@ -38,12 +41,12 @@ public class ClientsController : ControllerBase
 
         // One roll-up query: per-company thread counts (through projects too).
         var threadsByCompany = await _db.ThreadCompanies
-            .Where(tc => ids.Contains(tc.CompanyId))
+            .Where(tc => ids.Contains(tc.CompanyId) && VisibleMailboxes(orgId).Any(c => c.Id == tc.Thread.MailboxConnectionId))
             .Select(tc => new { tc.CompanyId, tc.ThreadId, tc.Thread.HasUnread })
             .ToListAsync(ct);
         var threadsByProject = await _db.ThreadProjects
             .Where(tp => _db.Projects.Where(p => ids.Contains(p.CompanyId))
-                .Select(p => p.Id).Contains(tp.ProjectId))
+                .Select(p => p.Id).Contains(tp.ProjectId) && VisibleMailboxes(orgId).Any(c => c.Id == tp.Thread.MailboxConnectionId))
             .Select(tp => new { tp.Project.CompanyId, tp.ThreadId, tp.Thread.HasUnread })
             .ToListAsync(ct);
 
@@ -93,12 +96,8 @@ public class ClientsController : ControllerBase
         var contacts = new List<ContactSummaryDto>();
         if (!string.IsNullOrEmpty(c.Domain))
         {
-            contacts = await _db.Contacts
-                .Where(co => co.OrganizationId == orgId
-                    && (co.Email == c.Domain || co.Email.EndsWith("@" + c.Domain)))
-                .OrderByDescending(co => co.MessageCount)
-                .Select(co => new ContactSummaryDto(co.Id, co.Email, co.Name, co.MessageCount))
-                .ToListAsync(ct);
+            contacts = await VisibleContactsAsync(_db.Contacts.Where(co => co.OrganizationId == orgId
+                && (co.Email == c.Domain || co.Email.EndsWith("@" + c.Domain))), orgId, ct);
         }
 
         var projectDtos = projects.Select(p => new ProjectDto(
@@ -228,7 +227,7 @@ public class ClientsController : ControllerBase
         var thread = await _db.MailThreads
             .Include(t => t.MailboxConnection)
             .FirstOrDefaultAsync(t => t.Id == threadId
-                && t.MailboxConnection!.User!.OrganizationId == orgId, ct);
+                && VisibleMailboxes(orgId).Any(c => c.Id == t.MailboxConnectionId), ct);
         if (thread is null) return NotFound(errorResponse("Thread not found."));
 
         var company = await _db.ThreadCompanies
@@ -239,10 +238,8 @@ public class ClientsController : ControllerBase
             .Where(tp => tp.ThreadId == threadId)
             .Select(tp => tp.Project)
             .ToListAsync(ct);
-        var contacts = await _db.ThreadContacts
-            .Where(tc => tc.ThreadId == threadId)
-            .Select(tc => new ContactSummaryDto(tc.Contact.Id, tc.Contact.Email, tc.Contact.Name, tc.Contact.MessageCount))
-            .ToListAsync(ct);
+        var contacts = await VisibleContactsAsync(_db.ThreadContacts
+            .Where(tc => tc.ThreadId == threadId).Select(tc => tc.Contact), orgId, ct);
 
         var projectDtos = projects
             .Select(p => new ProjectDto(p.Id, p.CompanyId, p.Name, p.Description, 0, 0, p.CreatedAt, p.UpdatedAt))
@@ -347,6 +344,28 @@ public class ClientsController : ControllerBase
 
     // ---------- helpers ----------
 
+    private async Task<List<ContactSummaryDto>> VisibleContactsAsync(IQueryable<Contact> contacts, int orgId, CancellationToken ct)
+    {
+        var visible = VisibleMailboxes(orgId);
+        var messages = _db.MailMessages.Where(m => visible.Any(c => c.Id == m.MailboxConnectionId));
+        // Ingest stores recipients as comma-separated addresses, optionally in angle brackets.
+        // Match complete addresses and derive names and counts only from visible messages.
+        var rows = await contacts.Select(contact => new
+        {
+            contact.Id, contact.Email,
+            Name = messages.Where(m => m.FromAddr != null && m.FromAddr.ToLower() == contact.Email)
+                .OrderByDescending(m => m.MessageDate ?? m.InternalDate ?? m.FetchedAt)
+                .Select(m => m.FromName).FirstOrDefault(),
+            Count = messages.Count(m => (m.FromAddr != null && m.FromAddr.ToLower() == contact.Email)
+                || (m.ToAddrs != null && (m.ToAddrs.ToLower() == contact.Email
+                    || m.ToAddrs.ToLower().StartsWith(contact.Email + ", ")
+                    || m.ToAddrs.ToLower().EndsWith(", " + contact.Email)
+                    || m.ToAddrs.ToLower().Contains(", " + contact.Email + ", ")
+                    || m.ToAddrs.ToLower().Contains("<" + contact.Email + ">"))))
+        }).Where(contact => contact.Count > 0).OrderByDescending(contact => contact.Count).ToListAsync(ct);
+        return rows.Select(contact => new ContactSummaryDto(contact.Id, contact.Email, contact.Name, contact.Count)).ToList();
+    }
+
     private async Task<List<ThreadSummaryDto>> LoadThreadsForCompanyAsync(Guid companyId, int orgId, CancellationToken ct)
     {
         // Threads linked directly to the company…
@@ -365,7 +384,7 @@ public class ClientsController : ControllerBase
 
         var threads = await _db.MailThreads
             .Include(t => t.MailboxConnection)
-            .Where(t => ids.Contains(t.Id) && t.MailboxConnection!.User!.OrganizationId == orgId)
+            .Where(t => ids.Contains(t.Id) && VisibleMailboxes(orgId).Any(c => c.Id == t.MailboxConnectionId))
             .OrderByDescending(t => t.LastDate)
             .ToListAsync(ct);
 
@@ -378,7 +397,7 @@ public class ClientsController : ControllerBase
     private async Task<bool> OwnsThreadAsync(Guid threadId, int orgId, CancellationToken ct) =>
         await _db.MailThreads
             .Include(t => t.MailboxConnection)
-            .AnyAsync(t => t.Id == threadId && t.MailboxConnection!.User!.OrganizationId == orgId, ct);
+            .AnyAsync(t => t.Id == threadId && VisibleMailboxes(orgId).Any(c => c.Id == t.MailboxConnectionId), ct);
 
     private async Task<bool> OwnsCompanyAsync(Guid companyId, int orgId, CancellationToken ct) =>
         await _db.Companies.AnyAsync(c => c.Id == companyId && c.OrganizationId == orgId, ct);

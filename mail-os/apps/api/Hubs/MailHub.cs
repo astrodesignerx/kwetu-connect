@@ -15,8 +15,7 @@ public class MailHub : Hub
 
     public MailHub(IServiceScopeFactory scopeFactory) => _scopeFactory = scopeFactory;
 
-    // Shared inbox: mail events go to the whole org group (see MailNotifier), while
-    // presence and collaboration events join the same per-org group below.
+    // Mail events use the user group. Presence uses the organisation group.
     public override async Task OnConnectedAsync()
     {
         var userIdStr = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier)

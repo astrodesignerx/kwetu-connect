@@ -95,7 +95,8 @@ public class AttachmentTests : IAsyncLifetime
     {
         var admin = await ApiFixture.RegisterAdminAsync(_factory);
         var member = await ApiFixture.InviteAndRegisterAsync(_factory, admin, "member@test.local");
-        var (_, _, messageId) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var (connectionId, _, messageId) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        await ApiFixture.GrantAsync(_factory, connectionId, member.UserId);
 
         var (blobKey, _) = await _factory.AttachmentStore.SaveAsync(
             new MemoryStream(Encoding.UTF8.GetBytes("shared inbox content")), CancellationToken.None);

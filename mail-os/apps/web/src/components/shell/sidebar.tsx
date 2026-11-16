@@ -37,7 +37,8 @@ export function Sidebar({ onCompose, onNavigate, compact = false }: { onCompose:
   const user = useAuthStore((state) => state.user);
   const queryClient = useQueryClient();
   const { mailboxes } = useAllDrafts();
-  const mailboxId = params.get("m") ?? mailboxes[0]?.id;
+  const requestedId = params.get("m");
+  const mailboxId = mailboxes.some((box) => box.id === requestedId) ? requestedId : mailboxes[0]?.id;
   const { data: counts } = useQuery({ queryKey: ["thread-counts", mailboxId],
     queryFn: () => api.threadCounts(mailboxId!), enabled: !!mailboxId });
   const { data: clients } = useQuery({ queryKey: ["companies"], queryFn: api.listCompanies });
@@ -106,7 +107,7 @@ export function Sidebar({ onCompose, onNavigate, compact = false }: { onCompose:
               router.push(`/mail?${next}`);
               onNavigate();
             }}>
-              {!mailboxes.length && <option value="">No mailbox connected</option>}
+              {!mailboxes.length && <option value="">{user?.role === "Admin" ? "No mailbox connected" : "No mailbox shared with you yet"}</option>}
               {mailboxes.map((mailbox) => <option key={mailbox.id} value={mailbox.id}>{mailbox.email}</option>)}
             </select>
           </label>

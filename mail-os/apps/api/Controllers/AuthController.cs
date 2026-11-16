@@ -162,7 +162,19 @@ public class AuthController : ControllerBase
         user.PasswordHash = hasher.HashPassword(user, req.Password);
 
         _db.Users.Add(user);
-        if (invitation is not null) invitation.AcceptedAt = DateTimeOffset.UtcNow;
+        if (invitation is not null)
+        {
+            invitation.AcceptedAt = DateTimeOffset.UtcNow;
+            if (user.Role != UserRole.Admin)
+            {
+                var ids = await _db.MailboxConnections.Where(c => invitation.MailboxIds.Contains(c.Id)
+                    && c.User.OrganizationId == organizationId).Select(c => c.Id).ToListAsync();
+                _db.MailboxAccess.AddRange(ids.Select(id => new MailboxAccess
+                {
+                    MailboxConnectionId = id, UserId = user.Id, GrantedByUserId = invitation.CreatedByUserId
+                }));
+            }
+        }
         try
         {
             await _db.SaveChangesAsync();

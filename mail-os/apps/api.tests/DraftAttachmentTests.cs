@@ -288,6 +288,7 @@ public sealed class DraftAttachmentTests : IAsyncLifetime
         var admin = await ApiFixture.RegisterAdminAsync(_factory);
         var member = await ApiFixture.InviteAndRegisterAsync(_factory, admin, "teammate@test.local");
         var (connectionId, _, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        await ApiFixture.GrantAsync(_factory, connectionId, member.UserId);
 
         var file = await UploadAsync(admin.Client, "shared.txt", "shared-bytes");
         var draftId = Guid.NewGuid();

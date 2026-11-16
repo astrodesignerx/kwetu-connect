@@ -29,7 +29,7 @@ export function ConversationChips({ threadId }: { threadId: string }) {
   return <div className={s.chips}>{data?.company && <StatusChip label={data.company.name} />}{data?.projects.map((project) => <StatusChip key={project.id} label={project.name} dot={false} />)}</div>;
 }
 
-export function ConversationContext({ threadId, onQuickReply }: { threadId: string; onQuickReply?: (template: EmailTemplateDto) => void } & ThreadState) {
+export function ConversationContext({ threadId, connectionId, onQuickReply }: { threadId: string; connectionId?: string; onQuickReply?: (template: EmailTemplateDto) => void } & ThreadState) {
   const [editingLinks, setEditingLinks] = useState(false);
   const associations = useQuery({ queryKey: ["thread-associations", threadId], queryFn: () => api.getThreadAssociations(threadId) });
   const flights = useQueries({ queries: (associations.data?.projects ?? []).map((project) => ({ queryKey: ["project-flights", project.id], queryFn: ({ signal }: { signal: AbortSignal }) => signalApi.flights(project.id, signal) })) });
@@ -63,8 +63,8 @@ export function ConversationContext({ threadId, onQuickReply }: { threadId: stri
       {flights.some((query) => query.isError) && <p role="alert" className={s.muted}>Flights could not load. <button onClick={() => flights.forEach((query) => void query.refetch())}>Try again</button></p>}
     </section>
     <section className={s.contextCard}><h2><Check size={14} aria-hidden />Team</h2>
-      <ThreadAssignee threadId={threadId} />
-      <ThreadNotes threadId={threadId} contextTools={false} />
+      <ThreadAssignee connectionId={connectionId} threadId={threadId} />
+      <ThreadNotes connectionId={connectionId} threadId={threadId} contextTools={false} />
     </section>
     <section className={s.contextCard}><h2><Layers size={14} aria-hidden />Quick replies<small>From templates</small></h2>
       {templates.isPending ? <p className={s.muted} role="status">Loading templates...</p> : templates.isError ? <p className={s.muted} role="alert">Templates could not load. <button type="button" className={s.retryLink} onClick={() => void templates.refetch()}>Try again</button></p> : templates.data?.length ? <div className={s.quickReplies}>{templates.data.map((template) => <button type="button" key={template.id} title={template.name} disabled={!onQuickReply || quickReply.isPending} onClick={() => quickReply.mutate(template.id)}><span>{template.name}</span><ChevronRight size={14} aria-hidden /></button>)}</div> : <p className={s.muted}>No templates yet. <Link href="/settings/templates">Manage templates</Link></p>}

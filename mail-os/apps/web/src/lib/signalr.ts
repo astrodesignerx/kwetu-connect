@@ -125,6 +125,11 @@ export function MailHubProvider({ children }: { children: React.ReactNode }) {
         invalidateMail();
       });
 
+      conn.on("mailboxAccessChanged", () => {
+        // Drop cached mail before refetching after a grant or revocation.
+        void queryClient.cancelQueries().then(() => queryClient.resetQueries());
+      });
+
       conn.on("mailboxSyncState", () => {
         void queryClient.invalidateQueries({ queryKey: ["overview"] });
         void queryClient.invalidateQueries({ queryKey: ["thread-counts"] });

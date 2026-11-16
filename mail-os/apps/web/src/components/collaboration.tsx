@@ -12,9 +12,9 @@ import { MailDisclosure } from "@/components/mail/disclosure";
 import { StickyNote, X } from "lucide-react";
 import { formatDateTime, formatWhen } from "@/lib/format";
 
-export function ThreadAssignee({ threadId }: { threadId: string }) {
+export function ThreadAssignee({ threadId, connectionId }: { threadId: string; connectionId?: string }) {
   const queryClient = useQueryClient();
-  const { data: members } = useQuery({ queryKey: ["members"], queryFn: api.listMembers });
+  const { data: members } = useQuery({ queryKey: ["members", connectionId], queryFn: () => api.listMembers(connectionId), enabled: !!connectionId });
   const { data: assignment } = useQuery({
     queryKey: ["thread-assignment", threadId],
     queryFn: () => api.getAssignment(threadId),
@@ -95,7 +95,7 @@ function AssigneePicker({
  *
  * The tinted panel is gone too. Notes are a quiet aside, not an alert.
  */
-export function ThreadNotes({ threadId, contextTools = true }: { threadId: string; contextTools?: boolean }) {
+export function ThreadNotes({ threadId, connectionId, contextTools = true }: { threadId: string; connectionId?: string; contextTools?: boolean }) {
   const queryClient = useQueryClient();
   const { data: notes, isLoading, isError: notesError, refetch: reloadNotes } = useQuery({
     queryKey: ["thread-notes", threadId],
@@ -175,7 +175,7 @@ export function ThreadNotes({ threadId, contextTools = true }: { threadId: strin
               with the notes: all three are things the team says about a
               conversation rather than part of the conversation. */}
           {contextTools && <div className="mb-3 grid gap-3 sm:grid-cols-2">
-            <ThreadAssignee threadId={threadId} />
+            <ThreadAssignee connectionId={connectionId} threadId={threadId} />
             <ThreadLinker threadId={threadId} />
           </div>}
 

@@ -1,3 +1,4 @@
+using Kompanion.Api.Services.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Kompanion.Api.Auth;
@@ -21,13 +22,19 @@ namespace Kompanion.Api.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminController : ControllerBase
 {
+    private readonly InvitationMailer _mailer;
+    private readonly MailNotifier _notifier;
+    private readonly MailboxAccessService _access;
     private readonly AppDbContext _db;
     private readonly AuditService _audit;
     private readonly TokenVersionCache _tokenVersions;
 
-    public AdminController(AppDbContext db, AuditService audit, TokenVersionCache tokenVersions)
+    public AdminController(AppDbContext db, AuditService audit, TokenVersionCache tokenVersions, InvitationMailer mailer, MailNotifier notifier, MailboxAccessService access)
     {
         _db = db;
+        _mailer = mailer;
+        _notifier = notifier;
+        _access = access;
         _audit = audit;
         _tokenVersions = tokenVersions;
     }
@@ -122,6 +129,13 @@ public class AdminController : ControllerBase
         if (await _db.Users.AnyAsync(u => u.Email == email && u.OrganizationId == orgId))
             return Conflict(new { error = "That person already has an account." });
 
+        var mailboxIds = (req.MailboxIds ?? []).Distinct().ToList();
+        var requestedIds = mailboxIds.Concat(req.SendFromMailboxId is { } sendingId ? new[] { sendingId } : []).Distinct().ToList();
+        var mailboxes = await _access.Visible(CallerId(), orgId, true).Include(c => c.User)
+            .Where(c => requestedIds.Contains(c.Id)).ToListAsync();
+        if (mailboxes.Count != requestedIds.Count)
+            return BadRequest(new { error = "Choose mailboxes in this organisation." });
+
         // Supersede any outstanding invite for the same address so only the newest link works.
         var now = DateTimeOffset.UtcNow;
         var outstanding = await _db.Invitations
@@ -137,6 +151,7 @@ public class AdminController : ControllerBase
             Email = email,
             TokenHash = AuthController.HashToken(token),
             Role = role,
+            MailboxIds = role == UserRole.Admin ? [] : mailboxIds,
             CreatedByUserId = CallerId(),
             CreatedAt = now,
             ExpiresAt = now.AddDays(7)
@@ -144,10 +159,14 @@ public class AdminController : ControllerBase
         _db.Invitations.Add(invitation);
         await _db.SaveChangesAsync();
 
+        var inviter = await _db.Users.Where(u => u.Id == CallerId()).Select(u => u.DisplayName).SingleAsync();
+        var result = await _mailer.SendAsync(invitation, token, inviter,
+            mailboxes.FirstOrDefault(c => c.Id == req.SendFromMailboxId),
+            mailboxes.Where(c => invitation.MailboxIds.Contains(c.Id)).Select(c => c.Email).ToList(), CancellationToken.None);
         await Audit("admin.invitation.create", targetEmail: email,
-            details: $"Invited as {role}; expires {invitation.ExpiresAt:u}");
+            details: $"Invited as {role}; expires {invitation.ExpiresAt:u}; mailboxes {string.Join(",", invitation.MailboxIds)}; email sent {result.Sent}");
 
-        return Ok(new CreateInvitationResponse(ToDto(invitation, now), token));
+        return Ok(new CreateInvitationResponse(ToDto(invitation, now), token, result.Sent, result.Error));
     }
 
     [HttpDelete("invitations/{id:guid}")]
@@ -164,6 +183,52 @@ public class AdminController : ControllerBase
         await _db.SaveChangesAsync();
 
         await Audit("admin.invitation.revoke", targetEmail: invitation.Email);
+        return NoContent();
+    }
+
+    [HttpGet("mailboxes/{id:guid}/access")]
+    public async Task<IActionResult> MailboxAccess(Guid id, CancellationToken ct)
+    {
+        var box = await _access.Visible(CallerId(), OrgId(), true).FirstOrDefaultAsync(c => c.Id == id, ct);
+        if (box is null) return NotFound(new { error = "Mailbox not found." });
+        var grants = await _db.MailboxAccess.Where(a => a.MailboxConnectionId == id).Select(a => a.UserId).ToListAsync(ct);
+        var members = await _db.Users.Where(u => u.OrganizationId == OrgId()).OrderBy(u => u.DisplayName).ToListAsync(ct);
+        await Audit("admin.mailbox.access.view", targetMailboxId: id);
+        return Ok(members.Select(u => new MailboxAccessMemberDto(u.Id, u.DisplayName, u.Email, u.Role.ToString(),
+            u.Role == UserRole.Admin ? "admin" : u.Id == box.UserId ? "connected" : grants.Contains(u.Id) ? "granted" : "none")));
+    }
+
+    [HttpPut("mailboxes/{id:guid}/access")]
+    public async Task<IActionResult> ReplaceMailboxAccess(Guid id, ReplaceMailboxAccessRequest req, CancellationToken ct)
+    {
+        await using var tx = await _db.Database.BeginTransactionAsync(ct);
+        // Serialise replacements for one mailbox so simultaneous saves do not merge grants.
+        var lockKey = BitConverter.ToInt64(id.ToByteArray(), 0);
+        await _db.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock({lockKey})", ct);
+        var box = await _access.Visible(CallerId(), OrgId(), true).FirstOrDefaultAsync(c => c.Id == id, ct);
+        if (box is null) return NotFound(new { error = "Mailbox not found." });
+        var ids = req.UserIds?.Distinct().ToList() ?? [];
+        var members = await _db.Users.Where(u => u.OrganizationId == OrgId()).ToListAsync(ct);
+        if (ids.Any(userId => members.All(u => u.Id != userId)))
+            return BadRequest(new { error = "Choose members of this organisation." });
+        var requested = members.Where(u => ids.Contains(u.Id) && u.Role != UserRole.Admin && u.Id != box.UserId)
+            .Select(u => u.Id).ToHashSet();
+        var existing = await _db.MailboxAccess.Where(a => a.MailboxConnectionId == id).ToListAsync(ct);
+        var removed = existing.Where(a => !requested.Contains(a.UserId)).ToList();
+        var added = requested.Except(existing.Select(a => a.UserId)).ToList();
+        _db.MailboxAccess.RemoveRange(removed);
+        _db.MailboxAccess.AddRange(added.Select(userId => new Data.MailboxAccess
+        {
+            MailboxConnectionId = id, UserId = userId, GrantedByUserId = CallerId()
+        }));
+        await _db.SaveChangesAsync(ct);
+        await Audit("admin.mailbox.access.update", targetMailboxId: id);
+        foreach (var userId in added)
+            await Audit("admin.mailbox.access.grant", targetUserId: userId, targetMailboxId: id);
+        foreach (var grant in removed)
+            await Audit("admin.mailbox.access.revoke", targetUserId: grant.UserId, targetMailboxId: id);
+        await tx.CommitAsync(ct);
+        await _notifier.NotifyAccessChangedAsync(id, added.Concat(removed.Select(a => a.UserId)));
         return NoContent();
     }
 
@@ -264,7 +329,7 @@ public class AdminController : ControllerBase
             i.AcceptedAt is not null ? "accepted"
             : i.RevokedAt is not null ? "revoked"
             : i.ExpiresAt <= now ? "expired"
-            : "pending");
+            : "pending", i.MailboxIds);
 
     private Guid CallerId() =>
         Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub")!);

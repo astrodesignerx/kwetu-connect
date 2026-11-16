@@ -13,6 +13,9 @@ namespace Kompanion.Api.Controllers;
 [ApiController, Authorize, Route("api")]
 public class SignalController(AppDbContext db, SignalMetrics metrics, AuditService audit, MailNotifier notifier) : ControllerBase
 {
+    private IQueryable<MailboxConnection> VisibleMailboxes(int orgId) =>
+        new MailboxAccessService(db).Visible(this.CallerId(), orgId, User.IsInRole("Admin"));
+
     [HttpGet("mail/brief")]
     public async Task<ActionResult<MailBriefDto>> Brief(CancellationToken ct) =>
         Ok(await metrics.BriefAsync(this.CallerOrgId(), this.CallerId(), DateTimeOffset.UtcNow, ct));
@@ -23,7 +26,7 @@ public class SignalController(AppDbContext db, SignalMetrics metrics, AuditServi
     {
         if (by is not ("client" or "user") || days is < 1 or > 365)
             return BadRequest(new { error = "Use by=client or by=user and days from 1 to 365." });
-        return Ok(await metrics.ResponseTimesAsync(this.CallerOrgId(), by, days, DateTimeOffset.UtcNow, ct));
+        return Ok(await metrics.ResponseTimesAsync(this.CallerOrgId(), this.CallerId(), by, days, DateTimeOffset.UtcNow, ct));
     }
 
     [HttpPost("mail/threads/{id:guid}/state")]
@@ -34,7 +37,7 @@ public class SignalController(AppDbContext db, SignalMetrics metrics, AuditServi
         await using var tx = await db.Database.BeginTransactionAsync(ct);
         var orgId = this.CallerOrgId();
         var thread = await db.MailThreads.Include(t => t.MailboxConnection)
-            .FirstOrDefaultAsync(t => t.Id == id && t.MailboxConnection.User!.OrganizationId == orgId, ct);
+            .FirstOrDefaultAsync(t => t.Id == id && VisibleMailboxes(orgId).Any(c => c.Id == t.MailboxConnectionId), ct);
         if (thread is null) return NotFound(new { error = "Thread not found." });
         var state = body.State == "Done" ? ReplyState.Done : ReplyState.ToReply;
         if (thread.ReplyState != state)

@@ -304,17 +304,13 @@ public class MailActionService
     /// </summary>
     private async Task<MailThread?> LoadThreadInOrgAsync(Guid threadId, Guid userId, CancellationToken ct)
     {
-        var orgId = await _db.Users
-            .Where(u => u.Id == userId)
-            .Select(u => (int?)u.OrganizationId)
-            .FirstOrDefaultAsync(ct);
-        if (orgId is null) return null;
+        var visible = await new MailboxAccessService(_db).VisibleForUserAsync(userId, ct);
 
         return await _db.MailThreads
             .Include(t => t.MailboxConnection)
             .ThenInclude(c => c!.User)
             .FirstOrDefaultAsync(
-                t => t.Id == threadId && t.MailboxConnection!.User!.OrganizationId == orgId, ct);
+                t => t.Id == threadId && visible.Any(c => c.Id == t.MailboxConnectionId), ct);
     }
 
     private static async Task<IMailFolderSession> OpenFolderOrThrowAsync(

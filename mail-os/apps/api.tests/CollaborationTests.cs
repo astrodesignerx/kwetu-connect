@@ -31,7 +31,7 @@ public class CollaborationTests : IAsyncLifetime
     public async Task Unassigning_a_thread_removes_the_assignment()
     {
         var admin = await ApiFixture.RegisterAdminAsync(_factory);
-        var (_, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var (connectionId, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
 
         var assign = await admin.Client.PostAsJsonAsync(
             $"/api/threads/{threadId}/assignment", new { userId = admin.UserId });
@@ -52,7 +52,7 @@ public class CollaborationTests : IAsyncLifetime
     public async Task Unassigning_an_unassigned_thread_is_a_no_op()
     {
         var admin = await ApiFixture.RegisterAdminAsync(_factory);
-        var (_, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var (connectionId, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
 
         var res = await admin.Client.PostAsJsonAsync(
             $"/api/threads/{threadId}/assignment", new { userId = Unassign });
@@ -65,7 +65,8 @@ public class CollaborationTests : IAsyncLifetime
     {
         var admin = await ApiFixture.RegisterAdminAsync(_factory);
         var member = await ApiFixture.InviteAndRegisterAsync(_factory, admin, "member@test.local");
-        var (_, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var (connectionId, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        await ApiFixture.GrantAsync(_factory, connectionId, member.UserId);
 
         var res = await admin.Client.PostAsJsonAsync(
             $"/api/threads/{threadId}/assignment", new { userId = member.UserId });
@@ -80,7 +81,7 @@ public class CollaborationTests : IAsyncLifetime
     public async Task Assigning_to_a_nonexistent_user_is_rejected()
     {
         var admin = await ApiFixture.RegisterAdminAsync(_factory);
-        var (_, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var (connectionId, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
 
         var res = await admin.Client.PostAsJsonAsync(
             $"/api/threads/{threadId}/assignment", new { userId = Guid.NewGuid() });
@@ -92,7 +93,7 @@ public class CollaborationTests : IAsyncLifetime
     public async Task Author_can_delete_their_own_note()
     {
         var admin = await ApiFixture.RegisterAdminAsync(_factory);
-        var (_, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var (connectionId, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
 
         var create = await admin.Client.PostAsJsonAsync(
             $"/api/threads/{threadId}/notes", new { body = "Chase the invoice on Friday" });
@@ -114,7 +115,8 @@ public class CollaborationTests : IAsyncLifetime
     {
         var admin = await ApiFixture.RegisterAdminAsync(_factory);
         var member = await ApiFixture.InviteAndRegisterAsync(_factory, admin, "member@test.local");
-        var (_, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var (connectionId, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        await ApiFixture.GrantAsync(_factory, connectionId, member.UserId);
 
         var create = await member.Client.PostAsJsonAsync(
             $"/api/threads/{threadId}/notes", new { body = "Member's note" });
@@ -131,7 +133,9 @@ public class CollaborationTests : IAsyncLifetime
         var admin = await ApiFixture.RegisterAdminAsync(_factory);
         var author = await ApiFixture.InviteAndRegisterAsync(_factory, admin, "author@test.local");
         var other = await ApiFixture.InviteAndRegisterAsync(_factory, admin, "other@test.local");
-        var (_, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var (connectionId, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        await ApiFixture.GrantAsync(_factory, connectionId, author.UserId);
+        await ApiFixture.GrantAsync(_factory, connectionId, other.UserId);
 
         var create = await author.Client.PostAsJsonAsync(
             $"/api/threads/{threadId}/notes", new { body = "Not yours to delete" });
@@ -150,7 +154,8 @@ public class CollaborationTests : IAsyncLifetime
     {
         var admin = await ApiFixture.RegisterAdminAsync(_factory);
         var member = await ApiFixture.InviteAndRegisterAsync(_factory, admin, "member@test.local");
-        var (_, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var (connectionId, threadId, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        await ApiFixture.GrantAsync(_factory, connectionId, member.UserId);
 
         (await admin.Client.PostAsJsonAsync($"/api/threads/{threadId}/notes",
             new { body = "Shared context" })).EnsureSuccessStatusCode();
@@ -158,6 +163,26 @@ public class CollaborationTests : IAsyncLifetime
         var notes = await member.Client.GetFromJsonAsync<List<NoteBody>>($"/api/threads/{threadId}/notes");
         Assert.Single(notes!);
     }
+
+    [Fact]
+    public async Task Assignment_and_member_picker_require_mailbox_access()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var admin = await ApiFixture.RegisterAdminAsync(_factory);
+        var reader = await ApiFixture.InviteAndRegisterAsync(_factory, admin, "reader@test.local");
+        var hidden = await ApiFixture.InviteAndRegisterAsync(_factory, admin, "hidden@test.local");
+        var (box, thread, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        await ApiFixture.GrantAsync(_factory, box, reader.UserId);
+        var rejected = await admin.Client.PostAsJsonAsync($"/api/threads/{thread}/assignment", new { userId = hidden.UserId }, ct);
+        Assert.Equal(HttpStatusCode.BadRequest, rejected.StatusCode);
+        Assert.Contains("That person cannot see this mailbox.", await rejected.Content.ReadAsStringAsync(ct));
+        var members = await reader.Client.GetFromJsonAsync<List<MemberBody>>($"/api/org/members?connectionId={box}", ct);
+        Assert.Equal(new[] { admin.UserId, reader.UserId }.Order(), members!.Select(m => m.Id).Order());
+        Assert.Equal(HttpStatusCode.NotFound, (await hidden.Client.GetAsync($"/api/org/members?connectionId={box}", ct)).StatusCode);
+        (await reader.Client.PostAsJsonAsync($"/api/threads/{thread}/assignment", new { userId = reader.UserId }, ct)).EnsureSuccessStatusCode();
+    }
+
+    private record MemberBody(Guid Id);
 
     private record NoteBody(Guid Id, Guid ThreadId, string Body);
 }

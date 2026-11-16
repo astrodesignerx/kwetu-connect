@@ -1,3 +1,6 @@
+using Kompanion.Api.Data;
+using Kompanion.Api.Services.Mail;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Kompanion.Api.Auth;
 using Kompanion.Api.Models;
@@ -16,11 +19,15 @@ public class AiController : ControllerBase
 {
     private readonly AiAssistant _assistant;
     private readonly LlmClient _llm;
+    private readonly AppDbContext _db;
+    private readonly MailboxAccessService _access;
 
-    public AiController(AiAssistant assistant, LlmClient llm)
+    public AiController(AiAssistant assistant, LlmClient llm, AppDbContext db, MailboxAccessService access)
     {
         _assistant = assistant;
         _llm = llm;
+        _db = db;
+        _access = access;
     }
 
     private Guid UserId() =>
@@ -36,6 +43,7 @@ public class AiController : ControllerBase
     [HttpPost("summarize")]
     public async Task<IActionResult> Summarize(SummarizeRequest body, CancellationToken ct)
     {
+        if (!await CanSeeThreadAsync(body.ThreadId, ct)) return NotFound(new { error = "Thread not found." });
         if (!_llm.IsConfigured) return Unavailable();
         try
         {
@@ -49,6 +57,7 @@ public class AiController : ControllerBase
     [HttpPost("reply")]
     public async Task<IActionResult> Reply(SuggestReplyRequest body, CancellationToken ct)
     {
+        if (!await CanSeeThreadAsync(body.ThreadId, ct)) return NotFound(new { error = "Thread not found." });
         if (!_llm.IsConfigured) return Unavailable();
         try
         {
@@ -71,6 +80,12 @@ public class AiController : ControllerBase
         }
         catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
         catch (LlmClient.LlmUnavailableException ex) { return Unavailable(ex.Message); }
+    }
+
+    private Task<bool> CanSeeThreadAsync(Guid threadId, CancellationToken ct)
+    {
+        var visible = _access.Visible(UserId(), this.CallerOrgId(), User.IsInRole("Admin"));
+        return _db.MailThreads.AnyAsync(t => t.Id == threadId && visible.Any(c => c.Id == t.MailboxConnectionId), ct);
     }
 
     private IActionResult Unavailable(string? detail = null) =>

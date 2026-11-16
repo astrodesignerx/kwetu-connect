@@ -190,12 +190,14 @@ builder.Services.AddScoped<AuditService>();
 builder.Services.AddScoped<SignalMetrics>();
 builder.Services.AddScoped<PasswordResetService>();
 builder.Services.AddScoped<MailboxVerifier>();
+builder.Services.AddScoped<InvitationMailer>();
 
 // Mail sync engine (Phase 2)
 builder.Services.AddScoped<ImapConnectionFactory>();
 builder.Services.AddScoped<IMailSessionFactory, MailKitMailSessionFactory>();
 builder.Services.AddScoped<MailIngestor>();
 builder.Services.AddScoped<ThreadingService>();
+builder.Services.AddScoped<MailboxAccessService>();
 builder.Services.AddScoped<MailActionService>();
 builder.Services.AddSingleton<MailboxSyncGate>();
 builder.Services.AddSingleton<AttachmentStore>();

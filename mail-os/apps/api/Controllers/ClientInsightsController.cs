@@ -1,3 +1,4 @@
+using Kompanion.Api.Services.Mail;
 using Kompanion.Api.Auth;
 using Kompanion.Api.Data;
 using Kompanion.Api.Services;
@@ -10,6 +11,9 @@ namespace Kompanion.Api.Controllers;
 [ApiController, Authorize, Route("api/companies")]
 public class ClientInsightsController(AppDbContext db) : ControllerBase
 {
+    private IQueryable<MailboxConnection> VisibleMailboxes(int orgId) =>
+        new MailboxAccessService(db).Visible(this.CallerId(), orgId, User.IsInRole("Admin"));
+
     [HttpGet("activity")]
     public async Task<IActionResult> Activity([FromQuery] int weeks = 8, CancellationToken ct = default)
     {
@@ -30,10 +34,10 @@ public class ClientInsightsController(AppDbContext db) : ControllerBase
         var links = await Links(orgId).ToListAsync(ct);
         var threadIds = links.Select(l => l.ThreadId).Distinct().ToList();
         var threads = await db.MailThreads.AsNoTracking().Where(t => threadIds.Contains(t.Id)
-                && t.MailboxConnection.User!.OrganizationId == orgId)
+                && VisibleMailboxes(orgId).Any(c => c.Id == t.MailboxConnectionId))
             .Select(t => new { t.Id, t.ReplyState }).ToListAsync(ct);
         var messages = await db.MailMessages.AsNoTracking().Where(m => m.ThreadId != null
-                && threadIds.Contains(m.ThreadId.Value) && m.Folder.MailboxConnection.User!.OrganizationId == orgId
+                && threadIds.Contains(m.ThreadId.Value) && VisibleMailboxes(orgId).Any(c => c.Id == m.MailboxConnectionId)
                 && (m.InternalDate ?? m.MessageDate ?? m.FetchedAt) >= since
                 && (m.InternalDate ?? m.MessageDate ?? m.FetchedAt) <= now)
             .Select(m => new { ThreadId = m.ThreadId!.Value, Date = m.InternalDate ?? m.MessageDate ?? m.FetchedAt })
@@ -72,13 +76,13 @@ public class ClientInsightsController(AppDbContext db) : ControllerBase
             return BadRequest(new { error = "Use an end date on or after start, within 366 days." });
         var ids = Links(orgId).Where(l => l.CompanyId == id).Select(l => l.ThreadId);
         var threads = db.MailThreads.AsNoTracking().Where(t => ids.Contains(t.Id)
-            && t.MailboxConnection.User!.OrganizationId == orgId);
+            && VisibleMailboxes(orgId).Any(c => c.Id == t.MailboxConnectionId));
         var recent = await threads.OrderByDescending(t => t.LastDate.HasValue).ThenByDescending(t => t.LastDate).ThenBy(t => t.Id).Take(20)
             .Select(t => new { t.Id, t.Subject, t.Participants, t.Snippet, t.LastDate, t.HasUnread,
                 ReplyState = t.ReplyState.ToString(), t.StateSince, t.NeedsNudge }).ToListAsync(ct);
         var since = now.AddDays(-30);
         var samples = await db.ThreadResponseTimes.AsNoTracking().Where(r => r.CompanyId == id
-                && r.MailboxConnection.User!.OrganizationId == orgId && r.SentAt >= since && r.SentAt <= now)
+                && VisibleMailboxes(orgId).Any(c => c.Id == r.MailboxConnectionId) && r.SentAt >= since && r.SentAt <= now)
             .Select(r => r.Seconds).ToListAsync(ct);
         return Ok(new
         {
@@ -94,10 +98,10 @@ public class ClientInsightsController(AppDbContext db) : ControllerBase
 
     // Union removes a thread linked both directly and through one or more projects.
     private IQueryable<ClientThreadLink> Links(int orgId) => db.ThreadCompanies
-        .Where(l => l.Company.OrganizationId == orgId && l.Thread.MailboxConnection.User!.OrganizationId == orgId)
+        .Where(l => l.Company.OrganizationId == orgId && VisibleMailboxes(orgId).Any(c => c.Id == l.Thread.MailboxConnectionId))
         .Select(l => new ClientThreadLink { CompanyId = l.CompanyId, ThreadId = l.ThreadId })
         .Union(db.ThreadProjects.Where(l => l.Project.Company.OrganizationId == orgId
-                && l.Thread.MailboxConnection.User!.OrganizationId == orgId)
+                && VisibleMailboxes(orgId).Any(c => c.Id == l.Thread.MailboxConnectionId))
             .Select(l => new ClientThreadLink { CompanyId = l.Project.CompanyId, ThreadId = l.ThreadId }));
 
     private sealed class ClientThreadLink

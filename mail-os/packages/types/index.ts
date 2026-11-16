@@ -45,17 +45,22 @@ export interface InvitationDto {
   acceptedAt: string | null;
   revokedAt: string | null;
   status: InvitationStatus;
+  mailboxIds: string[];
 }
 
 export interface CreateInvitationRequest {
   email: string;
   role?: Role;
+  mailboxIds?: string[];
+  sendFromMailboxId?: string;
 }
 
 export interface CreateInvitationResponse {
   invitation: InvitationDto;
   /** Shown once. Only its hash is stored server-side, so it can't be retrieved again. */
   token: string;
+  emailSent: boolean;
+  emailError: string | null;
 }
 
 export interface LoginRequest {
@@ -100,6 +105,8 @@ export interface MailboxDto {
   createdAt: string;
   lastVerifiedAt: string | null;
   ownerEmail: string | null;
+  connectedByName: string;
+  canManage: boolean;
 }
 
 export interface AdminUserDto {
@@ -532,4 +539,12 @@ export interface NoteUpsertRequest {
 
 export interface AssignRequest {
   userId: string;
+}
+
+export interface MailboxAccessMemberDto {
+  userId: string;
+  displayName: string;
+  email: string;
+  role: Role;
+  reason: "admin" | "connected" | "granted" | "none";
 }
