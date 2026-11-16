@@ -21,6 +21,9 @@ import { ClientAvatar, Segmented, StatusChip } from '@/components/signal';
 import { motionTime, reducedMotion } from "@/components/mail/motion";
 import { LoadingSkeleton } from "@/components/mail/loading-skeleton";
 import { ThreadList } from '@/components/mail/thread-list';
+import { settingsApi } from "@/lib/signal-settings";
+import { SetupCard } from "@/components/mail/setup-card";
+import { useFirstDayFlag } from "@/components/mail/first-day-state";
 import { MorningBrief } from '@/components/mail/morning-brief';
 import { MailboxHeader } from '@/components/mail/mailbox-header';
 import { ConversationContext, ConversationChips, ThreadStateControl } from '@/components/mail/conversation-context';
@@ -77,6 +80,9 @@ function MailView() {
   const searchParams = useSearchParams();
   const token = useAuthStore((s) => s.token);
   const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
+  const setupHidden = useFirstDayFlag(user?.id ?? "", "setup-hidden");
+  const workspace = useQuery({ queryKey: ["workspace-overview"], queryFn: ({ signal }) => settingsApi.overview(signal), enabled: !!token && user?.role === "Admin" });
 
   const folder = (searchParams.get("folder") as FolderKey) ?? "inbox";
   const threadId = searchParams.get("id") ?? null;
@@ -323,6 +329,9 @@ function MailView() {
   if (overviewError) return <div className={s.noMailbox}><ErrorState title="Mailboxes could not load" message="Check your connection, then try again" onRetry={() => void reloadOverview()} /></div>;
 
   if (mailboxes.length === 0 && overview) {
+    if (user?.role === "Admin" && !setupHidden) return <div className={`${s.noMailbox} ${s.setupEmpty}`}>
+      {workspace.isPending ? <p className={s.muted} role="status">Loading setup</p> : workspace.isError ? <ErrorState title="Setup could not load" onRetry={() => void workspace.refetch()} /> : workspace.data.setup && <SetupCard key={user.id} userId={user.id} setup={workspace.data.setup} memberCount={workspace.data.memberCount} />}
+    </div>;
     return <NoMailboxes />;
   }
 
@@ -356,7 +365,10 @@ function MailView() {
               <ThreadList viewKey={`${currentMailboxId}:${folder}:${activeQuery ?? ""}`} items={threadItems} loading={threadsLoading} selectedId={threadId} onSelect={(id) => { setScanning(false); setParam('id', id); }} selection={visibleSelection}
                 onToggleSelect={toggleSelect} total={threadTotal} hasMore={!!hasNextPage} loadingMore={isFetchingNextPage} onLoadMore={() => void fetchNextPage()} query={activeQuery} />}
           </section>
-          {!threadId && !activeQuery && <MorningBrief />}
+          {!threadId && !activeQuery && <div className={s.firstDayColumn}>
+            {user?.role === "Admin" && workspace.data?.setup && <SetupCard key={user.id} userId={user.id} setup={workspace.data.setup} memberCount={workspace.data.memberCount} />}
+            <MorningBrief />
+          </div>}
       </div>
 
       {composeCtx && (
