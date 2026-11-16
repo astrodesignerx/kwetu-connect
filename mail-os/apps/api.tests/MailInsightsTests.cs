@@ -40,6 +40,7 @@ public sealed class MailInsightsTests : IAsyncLifetime
         var admin = await ApiFixture.RegisterAdminAsync(_factory);
         var member = await ApiFixture.InviteAndRegisterAsync(_factory, admin, "reader@test.local");
         var (connection, thread, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        await ApiFixture.GrantAsync(_factory, connection, member.UserId);
         Guid foreignOwner;
         Guid clientId;
         await using (var db = _factory.NewDbContext())

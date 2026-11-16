@@ -96,12 +96,8 @@ public class ClientsController : ControllerBase
         var contacts = new List<ContactSummaryDto>();
         if (!string.IsNullOrEmpty(c.Domain))
         {
-            contacts = await _db.Contacts
-                .Where(co => co.OrganizationId == orgId
-                    && (co.Email == c.Domain || co.Email.EndsWith("@" + c.Domain)))
-                .OrderByDescending(co => co.MessageCount)
-                .Select(co => new ContactSummaryDto(co.Id, co.Email, co.Name, co.MessageCount))
-                .ToListAsync(ct);
+            contacts = await VisibleContactsAsync(_db.Contacts.Where(co => co.OrganizationId == orgId
+                && (co.Email == c.Domain || co.Email.EndsWith("@" + c.Domain))), orgId, ct);
         }
 
         var projectDtos = projects.Select(p => new ProjectDto(
@@ -242,10 +238,8 @@ public class ClientsController : ControllerBase
             .Where(tp => tp.ThreadId == threadId)
             .Select(tp => tp.Project)
             .ToListAsync(ct);
-        var contacts = await _db.ThreadContacts
-            .Where(tc => tc.ThreadId == threadId)
-            .Select(tc => new ContactSummaryDto(tc.Contact.Id, tc.Contact.Email, tc.Contact.Name, tc.Contact.MessageCount))
-            .ToListAsync(ct);
+        var contacts = await VisibleContactsAsync(_db.ThreadContacts
+            .Where(tc => tc.ThreadId == threadId).Select(tc => tc.Contact), orgId, ct);
 
         var projectDtos = projects
             .Select(p => new ProjectDto(p.Id, p.CompanyId, p.Name, p.Description, 0, 0, p.CreatedAt, p.UpdatedAt))
@@ -349,6 +343,28 @@ public class ClientsController : ControllerBase
     }
 
     // ---------- helpers ----------
+
+    private async Task<List<ContactSummaryDto>> VisibleContactsAsync(IQueryable<Contact> contacts, int orgId, CancellationToken ct)
+    {
+        var visible = VisibleMailboxes(orgId);
+        var messages = _db.MailMessages.Where(m => visible.Any(c => c.Id == m.MailboxConnectionId));
+        // Ingest stores recipients as comma-separated addresses, optionally in angle brackets.
+        // Match complete addresses and derive names and counts only from visible messages.
+        var rows = await contacts.Select(contact => new
+        {
+            contact.Id, contact.Email,
+            Name = messages.Where(m => m.FromAddr != null && m.FromAddr.ToLower() == contact.Email)
+                .OrderByDescending(m => m.MessageDate ?? m.InternalDate ?? m.FetchedAt)
+                .Select(m => m.FromName).FirstOrDefault(),
+            Count = messages.Count(m => (m.FromAddr != null && m.FromAddr.ToLower() == contact.Email)
+                || (m.ToAddrs != null && (m.ToAddrs.ToLower() == contact.Email
+                    || m.ToAddrs.ToLower().StartsWith(contact.Email + ", ")
+                    || m.ToAddrs.ToLower().EndsWith(", " + contact.Email)
+                    || m.ToAddrs.ToLower().Contains(", " + contact.Email + ", ")
+                    || m.ToAddrs.ToLower().Contains("<" + contact.Email + ">"))))
+        }).Where(contact => contact.Count > 0).OrderByDescending(contact => contact.Count).ToListAsync(ct);
+        return rows.Select(contact => new ContactSummaryDto(contact.Id, contact.Email, contact.Name, contact.Count)).ToList();
+    }
 
     private async Task<List<ThreadSummaryDto>> LoadThreadsForCompanyAsync(Guid companyId, int orgId, CancellationToken ct)
     {

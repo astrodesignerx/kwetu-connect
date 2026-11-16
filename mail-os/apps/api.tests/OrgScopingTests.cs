@@ -210,6 +210,41 @@ public class OrgScopingTests : IAsyncLifetime
         Assert.Contains("Visible conversation", brief.ToString());
     }
 
+    [Fact]
+    public async Task Client_contacts_use_only_visible_mail_for_names_and_counts()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var admin = await ApiFixture.RegisterAdminAsync(_factory);
+        var member = await ApiFixture.InviteAndRegisterAsync(_factory, admin, "member@test.local");
+        var (_, hidden, hiddenMessage) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var (_, visible, visibleMessage) = await ApiFixture.SeedThreadAsync(_factory, member.UserId);
+        Guid companyId;
+        await using (var db = _factory.NewDbContext())
+        {
+            var orgId = await db.Users.Where(u => u.Id == admin.UserId).Select(u => u.OrganizationId).SingleAsync(ct);
+            var company = new Company { OrganizationId = orgId, Name = "Client", Domain = "client.test" };
+            companyId = company.Id; db.Companies.Add(company);
+            db.ThreadCompanies.AddRange(new ThreadCompany { CompanyId = company.Id, ThreadId = hidden },
+                new ThreadCompany { CompanyId = company.Id, ThreadId = visible });
+            var shared = new Contact { OrganizationId = orgId, Email = "shared@client.test", Name = "Hidden name", MessageCount = 99 };
+            var privateContact = new Contact { OrganizationId = orgId, Email = "private@client.test", Name = "Private person", MessageCount = 77 };
+            db.Contacts.AddRange(shared, privateContact);
+            db.ThreadContacts.Add(new ThreadContact { ThreadId = visible, ContactId = shared.Id });
+            var privateMail = await db.MailMessages.SingleAsync(m => m.Id == hiddenMessage, ct);
+            privateMail.FromAddr = "private@client.test"; privateMail.ToAddrs = "Hidden name <shared@client.test>";
+            var visibleMail = await db.MailMessages.SingleAsync(m => m.Id == visibleMessage, ct);
+            visibleMail.FromAddr = "shared@client.test"; visibleMail.FromName = "Visible name";
+            await db.SaveChangesAsync(ct);
+        }
+        var client = await member.Client.GetFromJsonAsync<JsonElement>($"/api/companies/{companyId}", ct);
+        var contact = Assert.Single(client.GetProperty("contacts").EnumerateArray());
+        Assert.Equal("shared@client.test", contact.GetProperty("email").GetString());
+        Assert.Equal("Visible name", contact.GetProperty("name").GetString());
+        Assert.Equal(1, contact.GetProperty("messageCount").GetInt32());
+        var links = await member.Client.GetFromJsonAsync<JsonElement>($"/api/threads/{visible}/associations", ct);
+        Assert.Equal(1, Assert.Single(links.GetProperty("contacts").EnumerateArray()).GetProperty("messageCount").GetInt32());
+    }
+
     private record AdminUserBody(Guid Id, string Email, string Role);
     private record MailboxBody(Guid Id, string Email);
 }
