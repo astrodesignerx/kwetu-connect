@@ -1,7 +1,16 @@
 .section { display: grid; gap: 16px; min-width: 0; }
 .section h2 { font-size: 20px; line-height: 28px; font-weight: 600; }
 .note { margin-top: 4px; color: var(--muted); font-size: 13px; line-height: 20px; }
-.form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(96px, 148px) auto; align-items: end; gap: 12px; }
+.form { display: grid; gap: 20px; min-width: 0; }
+.form > button { justify-self: start; }
+.firstRow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(96px, 148px); align-items: end; gap: 12px; }
+.block { min-width: 0; border: 0; padding: 0; }
+.block legend { margin-bottom: 8px; font-size: 13px; line-height: 20px; font-weight: 500; }
+.sender select { width: 100%; max-width: 360px; }
+.sender small { font-size: 12px; }
+.emailStatus { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 14px; color: var(--bad); }
+.emailStatus[data-sent="true"] { color: var(--ok); }
+.emailStatus svg { flex-shrink: 0; }
 .tickets { display: grid; gap: 12px; }
 .ticket { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
 .ticket small { color: var(--muted); font-size: 12px; line-height: 16px; }
@@ -13,6 +22,6 @@
 .copyRow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0; }
 .copyRow code { flex: 1 1 200px; min-width: 0; padding: 8px; border-radius: var(--radius-control); background: var(--raise); overflow-wrap: anywhere; line-height: 20px; user-select: all; }
 @media (max-width: 650px) {
-  .form { grid-template-columns: minmax(0, 1fr); }
+  .firstRow { grid-template-columns: minmax(0, 1fr); }
   .form button { justify-self: start; }
 }
