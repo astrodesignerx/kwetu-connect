@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CornerUpLeft, Loader2, Maximize2, Send, X } from "lucide-react";
+import { Check, CornerUpLeft, Loader2, Maximize2, Send, X } from "lucide-react";
 import type { ThreadDetailDto } from "@kompanion/types";
 import { api } from "@/lib/api";
+import { motionTime } from "@/components/mail/motion";
 import { cn } from "@/lib/cn";
 import { htmlToText, isBlankHtml, textToHtml } from "@/lib/mail-frame";
 import { snapshotSendContent, useSendIdentity } from "@/lib/send-identity";
@@ -55,6 +56,18 @@ export function ReplyDock({
   className?: string;
 }) {
   const queryClient = useQueryClient();
+  const [sendPhase, setSendPhase] = useState<"idle" | "sent" | "closing">("idle");
+  const closeRef = useRef(onOpenChange);
+  useEffect(() => { closeRef.current = onOpenChange; }, [onOpenChange]);
+  useEffect(() => {
+    if (!open || sendPhase === "idle") return;
+    const timer = setTimeout(() => {
+      if (sendPhase === "sent") setSendPhase("closing");
+      else { closeRef.current(false); setSendPhase("idle"); }
+    }, sendPhase === "sent" ? 1200 : motionTime("--t2"));
+    return () => clearTimeout(timer);
+  }, [sendPhase, thread.id, open]);
+  if (!open && sendPhase !== "idle") setSendPhase("idle");
   const [localBody, setLocalBody] = useState("");
   const body = draftHtml ?? localBody;
   const setBody = (html: string) => {
@@ -90,6 +103,7 @@ export function ReplyDock({
   const [confirmNewSend, setConfirmNewSend] = useState(false);
   if (thread.id !== lastThreadId) {
     setLastThreadId(thread.id);
+    setSendPhase("idle");
     setLocalBody("");
     setError(null);
     setConfirmNewSend(false);
@@ -137,7 +151,7 @@ export function ReplyDock({
       setBody("");
       sendId.noteSuccess();
       setConfirmNewSend(false);
-      setOpen(false);
+      setSendPhase("sent");
       void queryClient.invalidateQueries({ queryKey: ["thread", thread.id] });
       void queryClient.invalidateQueries({ queryKey: ["threads"] });
       void queryClient.invalidateQueries({ queryKey: ["overview"] });
@@ -155,6 +169,7 @@ export function ReplyDock({
   });
 
   const onSend = () => {
+    if (send.isPending || sendPhase !== "idle") return;
     setError(null);
     setConfirmNewSend(false);
     if (assist.isPending) {
@@ -190,7 +205,7 @@ export function ReplyDock({
           title="Reply (r)"
         >
           <CornerUpLeft aria-hidden size={16} className="shrink-0 opacity-60" />
-          <span className="truncate">Reply to {correspondent}…</span>
+          <span className="truncate">Reply to {correspondent}...</span>
           {fromAddress && <span className={s.replyFrom} title={fromAddress}>from {fromAddress}</span>}
           <kbd className="ml-auto hidden shrink-0 rounded-tag border border-line px-1 font-mono text-xs sm:inline">
             r
@@ -204,7 +219,8 @@ export function ReplyDock({
     <div className={cn("reply-dock", className)}>
       <div
         ref={surface}
-        className={s.reply}
+        className={`${s.reply} reply-send-surface`}
+        data-closing={sendPhase === "closing"}
         onKeyDown={(e) => {
           // The mail view listens on window for j/k/r/e/u. This is where letters
           // are meant to be typed.
@@ -230,6 +246,7 @@ export function ReplyDock({
             className="editor-tool ml-auto h-6 w-6"
             title="Open in the full composer: attachments, templates and preview"
             aria-label="Open in full composer"
+            disabled={send.isPending || sendPhase !== "idle"}
           >
             <Maximize2 size={14} />
           </button>
@@ -243,6 +260,7 @@ export function ReplyDock({
             className="editor-tool h-6 w-6"
             title="Discard this reply"
             aria-label="Discard reply"
+            disabled={send.isPending || sendPhase !== "idle"}
           >
             <X size={14} />
           </button>
@@ -250,32 +268,33 @@ export function ReplyDock({
 
         {fromAddress && <div className="compose-row"><span className="compose-row-label">From</span><span className={s.replyFrom} title={fromAddress}>{fromAddress}</span></div>}
 
-        <RichTextEditor
+        <div inert={send.isPending || sendPhase !== "idle"}><RichTextEditor
           html={body}
           onHtmlChange={setBody}
           ariaLabel="Reply body"
-          placeholder="Write your reply…"
+          placeholder="Write your reply..."
           className="[--editor-pad-x:12px]"
           size="compact"
-        />
+        /></div>
 
         {aiStatus.data?.configured && <div className={s.tones} role="group" aria-label="Reply tone">
-          {TONES.map((item) => <button key={item.key} type="button" disabled={assist.isPending || send.isPending} aria-pressed={tone === item.key} onClick={() => setTone(item.key)}>{item.label}</button>)}
-          <button type="button" disabled={assist.isPending || send.isPending} onClick={() => assist.mutate(body)}>{assist.isPending ? 'Working...' : isBlankHtml(body) ? 'Suggest reply' : 'Rewrite'}</button>
+          {TONES.map((item) => <button key={item.key} type="button" disabled={sendPhase !== "idle" || assist.isPending || send.isPending} aria-pressed={tone === item.key} onClick={() => setTone(item.key)}>{item.label}</button>)}
+          <button type="button" disabled={sendPhase !== "idle" || assist.isPending || send.isPending} onClick={() => assist.mutate(body)}>{assist.isPending ? 'Working...' : isBlankHtml(body) ? 'Suggest reply' : 'Rewrite'}</button>
         </div>}
         <div className="flex items-center gap-2 border-t border-line px-3 py-2">
           <button
             type="button"
             onClick={onSend}
-            disabled={send.isPending || assist.isPending || !sendId.canSend}
+            aria-label={sendPhase !== "idle" ? "Sent" : send.isPending ? "Sending" : "Send"}
+            disabled={sendPhase !== "idle" || send.isPending || assist.isPending || !sendId.canSend}
             className={cn("reader-action reader-action-primary", send.isPending && "opacity-70")}
           >
-            {send.isPending ? (
+            {sendPhase !== "idle" ? <Check aria-hidden size={14} className="reply-sent-tick" /> : send.isPending ? (
               <Loader2 aria-hidden size={14} className="animate-spin" />
             ) : (
               <Send aria-hidden size={14} />
             )}
-            {send.isPending ? "Sending…" : "Send"}
+            {sendPhase !== "idle" ? "Sent" : send.isPending ? "Sending" : "Send"}
             <kbd className="ml-1 hidden rounded-tag border border-line px-1 text-xs font-medium opacity-70 sm:inline">
               {modKey}↵
             </kbd>

@@ -3,7 +3,7 @@
 import { ErrorState } from "@/components/empty-state";
 import { EmptyState } from "@/components/empty-state";
 import { formatDateTime, formatWhen, plural } from '@/lib/format';
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -13,12 +13,13 @@ import { useAuthStore } from "@/lib/auth-store";
 import { Button, ErrorText, buttonClass } from "@/components/ui";
 import { initialsFor } from "@/lib/avatar";
 import { frameDocument } from "@/lib/mail-frame";
-import { bulkArchiveMessage, runEach } from "@/lib/bulk";
-import { useToast } from "@/components/shell/toast";
+import { usePendingMove } from "@/components/mail/use-pending-move";
 import s from './page.module.css';
 import { signalMail } from '@/lib/signal-mail';
 import type { MailThreadDetail as SignalThreadDetail } from '@/lib/signal-mail';
 import { ClientAvatar, Segmented, StatusChip } from '@/components/signal';
+import { motionTime, reducedMotion } from "@/components/mail/motion";
+import { LoadingSkeleton } from "@/components/mail/loading-skeleton";
 import { ThreadList } from '@/components/mail/thread-list';
 import { MorningBrief } from '@/components/mail/morning-brief';
 import { MailboxHeader } from '@/components/mail/mailbox-header';
@@ -88,7 +89,7 @@ function MailView() {
     queryFn: api.mailOverview,
     enabled: !!token,
   });
-  const toast = useToast();
+  const queueMove = usePendingMove();
   const mailboxes = overview?.mailboxes ?? [];
   const currentMailboxId = searchParams.get("m") ?? mailboxes[0]?.id ?? null;
   const currentMailbox = mailboxes.find((m) => m.id === currentMailboxId);
@@ -179,17 +180,10 @@ function MailView() {
     },
   });
 
-  const move = useMutation({
-    mutationFn: ({ id, target }: { id: string; target: "Archive" | "Trash" }) =>
-      api.moveThread(id, target),
-    onSuccess: () => {
-      setParam("id", null);
-      void queryClient.invalidateQueries({ queryKey: ["threads"] });
-      void queryClient.invalidateQueries({ queryKey: ["thread-counts"] });
-      void queryClient.invalidateQueries({ queryKey: ["overview"] });
-      void queryClient.invalidateQueries({ queryKey: ["mail-brief"] });
-    },
-  });
+  const move = { isPending: false, mutate: ({ id, target }: { id: string; target: "Archive" | "Trash" }) => {
+    queueMove([id], target);
+    setParam("id", null);
+  } };
 
   const syncNow = useMutation({ mutationFn: (id: string) => api.triggerMailboxSync(id) });
 
@@ -212,6 +206,7 @@ function MailView() {
     [threadItems, threadId]
   );
 
+  const [scanning, setScanning] = useState(false);
   const [compose, setCompose] = useState<ComposeContext | null>(null);
   const [selection, setSelection] = useState<Set<string>>(new Set());
 
@@ -255,18 +250,11 @@ function MailView() {
       return next;
     });
 
-  const bulkArchive = useMutation({
-    mutationFn: (ids: string[]) => runEach(ids, (id) => api.moveThread(id, "Archive")),
-    onSuccess: ({ done, failed }) => {
-      setSelection(new Set(failed));
-      if (threadId && done.includes(threadId)) setParam("id", null);
-      if (failed.length) toast(bulkArchiveMessage(done.length, done.length + failed.length));
-      void queryClient.invalidateQueries({ queryKey: ["threads"] });
-      void queryClient.invalidateQueries({ queryKey: ["thread-counts"] });
-      void queryClient.invalidateQueries({ queryKey: ["overview"] });
-      void queryClient.invalidateQueries({ queryKey: ["mail-brief"] });
-    },
-  });
+  const bulkArchive = { isPending: false, mutate: (ids: string[]) => {
+    queueMove(ids, "Archive", true);
+    setSelection(new Set());
+    if (threadId && ids.includes(threadId)) setParam("id", null);
+  } };
 
   // Keyboard navigation. A mail client is used all day; reaching for the mouse to
   // move down a list is the single biggest ergonomic cost. Search ("/") and the
@@ -290,7 +278,7 @@ function MailView() {
       const index = threadItems.findIndex((t) => t.id === threadId);
       const go = (i: number) => {
         const next = threadItems[Math.max(0, Math.min(threadItems.length - 1, i))];
-        if (next) setParam("id", next.id);
+        if (next) { setScanning(!!threadId); setParam("id", next.id); }
       };
 
       switch (e.key) {
@@ -332,11 +320,11 @@ function MailView() {
 
   return (
     <div className={s.root}>
-      {(move.isError || bulkArchive.isError || setRead.isError) && <div className={s.actionError}><ErrorText>The mail action could not finish. Try again using its control.</ErrorText></div>}
-      <div className={`${s.workspace} scroll-cue`} data-conversation={!!threadId} data-search={!!activeQuery}>
+      {setRead.isError && <div className={s.actionError}><ErrorText>The mail action could not finish. Try again using its control.</ErrorText></div>}
+      <div className={`${s.workspace} mail-workspace-cue`} data-conversation={!!threadId} data-search={!!activeQuery}>
         {threadId && (
           threadError ? <ErrorState className={s.readerState} title="Could not open this conversation" message="It may have moved. Try again or go back to the inbox." action={<div className={s.errorActions}><Button variant="default" onClick={() => void refetchThread()}>Try again</Button><Button variant="ghost" onClick={() => setParam('id', null)}>Back to inbox</Button></div>} /> :
-          <Reader thread={thread} selected={selected} mailboxId={thread?.mailboxConnectionId ?? currentMailboxId} mailboxEmail={threadMailbox?.email}
+          <Reader key={threadId} scanning={scanning} thread={thread} selected={selected} mailboxId={thread?.mailboxConnectionId ?? currentMailboxId} mailboxEmail={threadMailbox?.email}
             syncError={threadMailbox?.syncError ?? null} onRetrySync={() => threadMailbox && syncNow.mutate(threadMailbox.id)} retrying={syncNow.isPending}
             onMarkUnread={markUnread}
             onArchive={() => threadId && move.mutate({ id: threadId, target: 'Archive' })}
@@ -357,7 +345,7 @@ function MailView() {
               onSelectAll={(all) => setSelection(all ? new Set(threadItems.map((item) => item.id)) : new Set())}
               onBulkArchive={() => bulkArchive.mutate([...visibleSelection])} bulkBusy={bulkArchive.isPending} />
             {threadsError ? <ErrorState bare title="Messages could not load" onRetry={() => void refetchThreads()} /> :
-              <ThreadList items={threadItems} loading={threadsLoading} selectedId={threadId} onSelect={(id) => setParam('id', id)} selection={visibleSelection}
+              <ThreadList viewKey={`${currentMailboxId}:${folder}:${activeQuery ?? ""}`} items={threadItems} loading={threadsLoading} selectedId={threadId} onSelect={(id) => { setScanning(false); setParam('id', id); }} selection={visibleSelection}
                 onToggleSelect={toggleSelect} total={threadTotal} hasMore={!!hasNextPage} loadingMore={isFetchingNextPage} onLoadMore={() => void fetchNextPage()} query={activeQuery} />}
           </section>
           {!threadId && !activeQuery && <MorningBrief />}
@@ -398,18 +386,26 @@ function ListToolbar({ total, loading, items, selection, onSelectAll, onBulkArch
   </div>;
 }
 
-function Reader({ thread, selected, mailboxId, mailboxEmail, syncError, onRetrySync, retrying, onMarkUnread, onArchive, onDelete, moving, replyOpen, onReplyOpenChange, onExpandReply, onBack, draftHtml, onDraftChange }: {
-  thread: SignalThreadDetail | undefined; selected: ThreadSummaryDto | undefined; mailboxId: string | null; mailboxEmail?: string; syncError: string | null;
+function Reader({ scanning, thread, selected, mailboxId, mailboxEmail, syncError, onRetrySync, retrying, onMarkUnread, onArchive, onDelete, moving, replyOpen, onReplyOpenChange, onExpandReply, onBack, draftHtml, onDraftChange }: {
+  scanning: boolean; thread: SignalThreadDetail | undefined; selected: ThreadSummaryDto | undefined; mailboxId: string | null; mailboxEmail?: string; syncError: string | null;
   onRetrySync: () => void; retrying: boolean; onMarkUnread: () => void; onArchive: () => void; onDelete: () => void; moving: boolean;
   replyOpen: boolean; onReplyOpenChange: (open: boolean) => void; onExpandReply: (ctx: ComposeContext) => void; onCompose: () => void; onBack: () => void;
   draftHtml: string; onDraftChange: (html: string) => void;
 }) {
-  if (!thread) return <div className={`${s.quiet} ${s.readerState}`} role="status">{selected ? 'Opening conversation...' : 'Loading conversation...'}</div>;
+  const [closing, setClosing] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current); }, []);
+  const back = () => {
+    if (reducedMotion()) { onBack(); return; }
+    setClosing(true);
+    closeTimer.current = setTimeout(onBack, motionTime("--t3"));
+  };
+  if (!thread) return <LoadingSkeleton reader label={selected ? "Opening conversation..." : "Loading conversation..."} />;
   const latest = thread.messages[thread.messages.length - 1];
-  return <div className={`${s.conversation} scroll-cue`} key={thread.id}>
+  return <div className={s.readerMotion} data-scanning={scanning} data-closing={closing} key={thread.id}><div className={`${s.conversation} scroll-cue`}>
     <article className={s.reader}>
       <div className={s.readerTop}>
-        <button type="button" className={s.backButton} onClick={onBack} aria-label="Back to inbox" title="Back to inbox"><ArrowLeft size={16} aria-hidden /></button>
+        <button type="button" className={s.backButton} onClick={back} aria-label="Back to inbox" title="Back to inbox"><ArrowLeft size={16} aria-hidden /></button>
         <ConversationChips threadId={thread.id} />
         <div className={s.readerActions}>
           <button type="button" className="reader-action reader-action-primary" aria-label="Reply" title="Reply" onClick={() => onReplyOpenChange(true)}><CornerUpLeft size={16} aria-hidden />Reply</button>
@@ -428,7 +424,7 @@ function Reader({ thread, selected, mailboxId, mailboxEmail, syncError, onRetryS
     </article>
     <ConversationContext threadId={thread.id} replyState={thread.replyState} stateSince={thread.stateSince} needsNudge={thread.needsNudge}
       onQuickReply={mailboxId ? (template) => onExpandReply({ ...replyContextFromThread(mailboxId, thread), prefillBody: template.bodyHtml ?? '', skipBrandWrap: template.skipBrandWrap }) : undefined} />
-  </div>;
+  </div></div>;
 }
 
 function ReaderMore({ onMarkUnread }: { onMarkUnread: () => void }) {
@@ -524,7 +520,7 @@ function MessageCard({ message, index, defaultOpen, showSender }: { message: Thr
   const [open, setOpen] = useState(defaultOpen);
   const who = message.fromName || message.fromAddr || 'Unknown';
   const to = 'to ' + (message.toAddrs || '(no recipients)');
-  return <article className={s.message}>
+  return <article className={s.message} style={{ "--message-delay": `${index * 40}ms` } as CSSProperties}>
     <button type="button" className={s.messageHead} onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label={showSender ? undefined : `Message ${to}`}>
       {showSender && <ClientAvatar name={who} size="small" />}
       <span className={s.messageWho}>{showSender && <span className={s.messageName}>{who}</span>}<span className={s.messageSnippet}>{open || !showSender ? to : message.snippet || '(no preview)'}</span></span>

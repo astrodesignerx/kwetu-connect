@@ -28,6 +28,7 @@
   --shadow-dialog: 0 2px 4px rgb(29 16 6 / .06), 0 24px 64px rgb(29 16 6 / .16);
   --overlay: rgb(29 16 6 / .48);
   --ease: cubic-bezier(0.2, 0, 0, 1);
+  --spring: var(--ease);
   --t1: 120ms;
   --t2: 200ms;
   --t3: 320ms;
@@ -668,4 +669,35 @@
       animation-range: 0px 36px, calc(100% - 36px) 100% !important;
     }
   }
+}
+
+@supports (animation-timing-function: linear(0, 1)) {
+  :root { --spring: linear(0, 0.42 24%, 0.8 48%, 1.04 76%, 1); }
+}
+.signal-toast[data-visible=true] { transition: transform var(--t2) var(--spring), opacity var(--t2) var(--ease); }
+.signal-toast[data-action=true][data-visible=true] { pointer-events: auto; }
+.signal-toast button { margin-left: 16px; text-decoration: underline; text-underline-offset: 4px; }
+.signal-toast button:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+
+.reply-sent-tick { color: var(--ok); animation: sent-tick var(--t2) var(--spring) both; }
+.reply-send-surface[data-closing=true] { transform-origin: bottom; animation: reply-collapse var(--t2) var(--ease) both; pointer-events: none; }
+@keyframes sent-tick { from { opacity: 0; transform: scale(.8); } to { opacity: 1; transform: scale(1); } }
+@keyframes reply-collapse { from { opacity: 1; transform: scaleY(1); } to { opacity: 0; transform: scaleY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .reply-sent-tick, .reply-send-surface[data-closing=true] { transform-origin: bottom; animation: none; }
+}
+
+/* The workspace itself scrolls only in the phone layout. */
+@media (max-width: 859px) {
+  @supports (animation-timeline: scroll()) {
+    .mail-workspace-cue {
+      mask-image: linear-gradient(to bottom, transparent, var(--fg) var(--cue-start), var(--fg) calc(100% - var(--cue-end)), transparent);
+      animation: cue-start linear both, cue-end linear both;
+      animation-timeline: scroll(self block), scroll(self block);
+      animation-range: 0px 36px, calc(100% - 36px) 100%;
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mail-workspace-cue { mask-image: none; animation: none; }
 }
