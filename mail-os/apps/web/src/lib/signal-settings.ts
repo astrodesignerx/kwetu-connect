@@ -65,7 +65,9 @@ export function invitationExpiry(expiresAt: string, status: string, now = Date.n
   if (status === "expired" || remaining <= 0) return "Expired";
   const hours = Math.ceil(remaining / 3_600_000);
   if (remaining < 86_400_000) return hours === 1 ? "Expires within an hour" : `Expires in ${hours} hours`;
-  const days = Math.ceil(remaining / 86_400_000);
+  // Round up, but allow an hour of slack so a fresh 7 day link, or a browser clock a
+  // little behind the server, reads 7 days rather than 8.
+  const days = Math.ceil((remaining - 3_600_000) / 86_400_000);
   return days === 1 ? "Expires in 1 day" : `Expires in ${days} days`;
 }
 
