@@ -22,6 +22,7 @@ import { motionTime, reducedMotion } from "@/components/mail/motion";
 import { LoadingSkeleton } from "@/components/mail/loading-skeleton";
 import { ThreadList } from '@/components/mail/thread-list';
 import { settingsApi } from "@/lib/signal-settings";
+import { WelcomeCard } from "@/components/mail/welcome-card";
 import { SetupCard } from "@/components/mail/setup-card";
 import { useFirstDayFlag } from "@/components/mail/first-day-state";
 import { MorningBrief } from '@/components/mail/morning-brief';
@@ -95,6 +96,7 @@ function MailView() {
     queryFn: api.mailOverview,
     enabled: !!token,
   });
+  const listRef = useRef<HTMLElement>(null);
   const queueMove = usePendingMove();
   const mailboxes = overview?.mailboxes ?? [];
   const requestedMailboxId = searchParams.get("m");
@@ -351,7 +353,7 @@ function MailView() {
             onCompose={() => currentMailboxId && setCompose({ mode: 'new', connectionId: currentMailboxId })}
             onBack={() => setParam('id', null)} />
         )}
-          <section className={`${s.list} scroll-cue`} aria-label={activeQuery ? 'Search results' : 'Messages'}>
+          <section ref={listRef} tabIndex={-1} className={`${s.list} scroll-cue`} aria-label={activeQuery ? 'Search results' : 'Messages'}>
             {activeQuery ? <><h1 className={s.searchHeading}>{activeQuery}</h1><div className={s.searchTools}><button aria-pressed="true">Conversations {threadTotal}</button><button onClick={() => setParams({ q: null, id: null })}>Clear search</button></div></> :
               <div className={s.listHead}><h1 className={s.heading}>{FOLDER_LABELS[folder] ?? 'Mail'}</h1>
                 <Segmented options={[{ value: 'inbox', label: 'All' }, { value: 'unread', label: 'Unread' }, { value: 'waiting', label: 'Waiting' }]}
@@ -367,6 +369,7 @@ function MailView() {
           </section>
           {!threadId && !activeQuery && <div className={s.firstDayColumn}>
             {user?.role === "Admin" && workspace.data?.setup && <SetupCard key={user.id} userId={user.id} setup={workspace.data.setup} memberCount={workspace.data.memberCount} />}
+            {user && user.role !== "Admin" && <WelcomeCard key={user.id} userId={user.id} displayName={user.displayName} mailboxes={mailboxes} onOpen={() => listRef.current?.focus()} />}
             <MorningBrief />
           </div>}
       </div>
