@@ -372,7 +372,7 @@ function MailView() {
   );
 }
 
-export function NoMailboxes() {
+function NoMailboxes() {
   const isAdmin = useAuthStore((state) => state.user?.role === "Admin");
   return (
     <div className={s.noMailbox}>
