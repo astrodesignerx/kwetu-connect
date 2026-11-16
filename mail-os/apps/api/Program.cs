@@ -190,6 +190,7 @@ builder.Services.AddScoped<AuditService>();
 builder.Services.AddScoped<SignalMetrics>();
 builder.Services.AddScoped<PasswordResetService>();
 builder.Services.AddScoped<MailboxVerifier>();
+builder.Services.AddScoped<InvitationMailer>();
 
 // Mail sync engine (Phase 2)
 builder.Services.AddScoped<ImapConnectionFactory>();

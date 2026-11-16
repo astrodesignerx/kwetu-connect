@@ -33,7 +33,7 @@ public record UpdateProfileRequest(
 
 /// <summary>
 /// Profile update result. <paramref name="Token"/> is non-null only when the password
-/// changed â€” every prior token is revoked at that point, so the caller must swap in
+/// changed — every prior token is revoked at that point, so the caller must swap in
 /// this one to stay signed in.
 /// </summary>
 public record UpdateProfileResponse(UserDto User, string? Token);
@@ -41,18 +41,18 @@ public record UpdateProfileResponse(UserDto User, string? Token);
 public record InvitationDto(
     Guid Id, string Email, string Role,
     DateTimeOffset CreatedAt, DateTimeOffset ExpiresAt,
-    DateTimeOffset? AcceptedAt, DateTimeOffset? RevokedAt, string Status);
+    DateTimeOffset? AcceptedAt, DateTimeOffset? RevokedAt, string Status, List<Guid> MailboxIds);
 
-public record CreateInvitationRequest(string Email, string? Role);
+public record CreateInvitationRequest(string Email, string? Role, List<Guid>? MailboxIds = null, Guid? SendFromMailboxId = null);
 
 public record MailboxAccessMemberDto(Guid UserId, string DisplayName, string Email, string Role, string Reason);
 public record ReplaceMailboxAccessRequest(List<Guid> UserIds);
 
 /// <summary>
-/// Returned once, at creation. The raw token is never stored or retrievable again â€”
-/// only its hash is persisted â€” so the admin must copy the link now.
+/// Returned once, at creation. The raw token is never stored or retrievable again —
+/// only its hash is persisted — so the admin must copy the link now.
 /// </summary>
-public record CreateInvitationResponse(InvitationDto Invitation, string Token);
+public record CreateInvitationResponse(InvitationDto Invitation, string Token, bool EmailSent, string? EmailError);
 
 public record ConnectMailboxRequest(
     string Email, string Password,

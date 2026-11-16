@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Kompanion.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
@@ -156,6 +157,57 @@ public class OrgScopingTests : IAsyncLifetime
         });
 
         Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
+    }
+
+    [Fact]
+    public async Task Sharing_and_invitation_mailbox_ids_cannot_cross_organisations()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var admin = await ApiFixture.RegisterAdminAsync(_factory);
+        var (_, foreignUser) = await SeedForeignOrgAsync();
+        var (outside, _, _) = await ApiFixture.SeedThreadAsync(_factory, foreignUser);
+        var (own, _, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        foreach (var payload in new[] {
+            new { email = "invite@test.local", mailboxIds = new[] { outside }, sendFromMailboxId = (Guid?)null },
+            new { email = "invite@test.local", mailboxIds = Array.Empty<Guid>(), sendFromMailboxId = (Guid?)outside } })
+            Assert.Equal(HttpStatusCode.BadRequest, (await admin.Client.PostAsJsonAsync("/api/admin/invitations", payload, ct)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await admin.Client.GetAsync($"/api/admin/mailboxes/{outside}/access", ct)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await admin.Client.PutAsJsonAsync($"/api/admin/mailboxes/{outside}/access", new { userIds = new[] { admin.UserId } }, ct)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await admin.Client.PutAsJsonAsync($"/api/admin/mailboxes/{own}/access", new { userIds = new[] { foreignUser } }, ct)).StatusCode);
+    }
+
+    [Fact]
+    public async Task Client_pages_and_brief_exclude_hidden_mail_but_keep_the_client()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var admin = await ApiFixture.RegisterAdminAsync(_factory);
+        var member = await ApiFixture.InviteAndRegisterAsync(_factory, admin, "member@test.local");
+        var (_, hiddenThread, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId, "Hidden conversation");
+        var (_, visibleThread, _) = await ApiFixture.SeedThreadAsync(_factory, member.UserId, "Visible conversation");
+        Guid companyId;
+        await using (var db = _factory.NewDbContext())
+        {
+            var orgId = await db.Users.Where(u => u.Id == admin.UserId).Select(u => u.OrganizationId).SingleAsync(ct);
+            var company = new Company { OrganizationId = orgId, Name = "Shared client" };
+            db.Companies.Add(company); companyId = company.Id;
+            db.ThreadCompanies.Add(new ThreadCompany { ThreadId = hiddenThread, CompanyId = companyId });
+            db.ThreadAssignments.Add(new ThreadAssignment { ThreadId = hiddenThread, UserId = member.UserId, AssignedByUserId = admin.UserId });
+            await db.SaveChangesAsync(ct);
+        }
+        var client = await member.Client.GetFromJsonAsync<JsonElement>($"/api/companies/{companyId}", ct);
+        Assert.Equal(companyId, client.GetProperty("company").GetProperty("id").GetGuid());
+        Assert.Empty(client.GetProperty("threads").EnumerateArray());
+        var list = await member.Client.GetFromJsonAsync<JsonElement>("/api/companies", ct);
+        Assert.Equal(0, list[0].GetProperty("threadCount").GetInt32());
+        var insights = await member.Client.GetFromJsonAsync<JsonElement>($"/api/companies/{companyId}/insights", ct);
+        Assert.Equal(0, insights.GetProperty("threadCount").GetInt32());
+        Assert.Empty(insights.GetProperty("recentThreads").EnumerateArray());
+        var activity = await member.Client.GetFromJsonAsync<JsonElement>("/api/companies/activity", ct);
+        Assert.Equal(0, activity[0].GetProperty("threadCount").GetInt32());
+        var brief = await member.Client.GetFromJsonAsync<JsonElement>("/api/mail/brief", ct);
+        Assert.Equal(1, brief.GetProperty("unreadCount").GetInt32());
+        Assert.DoesNotContain("Hidden conversation", brief.ToString());
+        Assert.Contains("Visible conversation", brief.ToString());
     }
 
     private record AdminUserBody(Guid Id, string Email, string Role);

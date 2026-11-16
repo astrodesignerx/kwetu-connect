@@ -10,8 +10,10 @@ namespace Kompanion.Api.Tests;
 /// sockets, no real mailboxes. Tests program <see cref="Mail"/> and
 /// <see cref="Smtp"/> and drive the real API pipeline around them.
 /// </summary>
-public sealed class FakeMailTestFactory : TestAppFactory
+public class FakeMailTestFactory : TestAppFactory
 {
+    public FakeMailTestFactory(IReadOnlyDictionary<string, string>? settings = null) : base(settings) { }
+
     public FakeMailSessionFactory Mail { get; } = new();
     public FakeSmtpTransport Smtp { get; } = new();
     public FakeSentCopyFiler Filer { get; } = new();

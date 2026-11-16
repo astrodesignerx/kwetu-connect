@@ -22,15 +22,17 @@ namespace Kompanion.Api.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminController : ControllerBase
 {
+    private readonly InvitationMailer _mailer;
     private readonly MailNotifier _notifier;
     private readonly MailboxAccessService _access;
     private readonly AppDbContext _db;
     private readonly AuditService _audit;
     private readonly TokenVersionCache _tokenVersions;
 
-    public AdminController(AppDbContext db, AuditService audit, TokenVersionCache tokenVersions, MailNotifier notifier, MailboxAccessService access)
+    public AdminController(AppDbContext db, AuditService audit, TokenVersionCache tokenVersions, InvitationMailer mailer, MailNotifier notifier, MailboxAccessService access)
     {
         _db = db;
+        _mailer = mailer;
         _notifier = notifier;
         _access = access;
         _audit = audit;
@@ -127,6 +129,13 @@ public class AdminController : ControllerBase
         if (await _db.Users.AnyAsync(u => u.Email == email && u.OrganizationId == orgId))
             return Conflict(new { error = "That person already has an account." });
 
+        var mailboxIds = (req.MailboxIds ?? []).Distinct().ToList();
+        var requestedIds = mailboxIds.Concat(req.SendFromMailboxId is { } sendingId ? new[] { sendingId } : []).Distinct().ToList();
+        var mailboxes = await _access.Visible(CallerId(), orgId, true).Include(c => c.User)
+            .Where(c => requestedIds.Contains(c.Id)).ToListAsync();
+        if (mailboxes.Count != requestedIds.Count)
+            return BadRequest(new { error = "Choose mailboxes in this organisation." });
+
         // Supersede any outstanding invite for the same address so only the newest link works.
         var now = DateTimeOffset.UtcNow;
         var outstanding = await _db.Invitations
@@ -142,6 +151,7 @@ public class AdminController : ControllerBase
             Email = email,
             TokenHash = AuthController.HashToken(token),
             Role = role,
+            MailboxIds = role == UserRole.Admin ? [] : mailboxIds,
             CreatedByUserId = CallerId(),
             CreatedAt = now,
             ExpiresAt = now.AddDays(7)
@@ -149,10 +159,14 @@ public class AdminController : ControllerBase
         _db.Invitations.Add(invitation);
         await _db.SaveChangesAsync();
 
+        var inviter = await _db.Users.Where(u => u.Id == CallerId()).Select(u => u.DisplayName).SingleAsync();
+        var result = await _mailer.SendAsync(invitation, token, inviter,
+            mailboxes.FirstOrDefault(c => c.Id == req.SendFromMailboxId),
+            mailboxes.Where(c => invitation.MailboxIds.Contains(c.Id)).Select(c => c.Email).ToList(), CancellationToken.None);
         await Audit("admin.invitation.create", targetEmail: email,
-            details: $"Invited as {role}; expires {invitation.ExpiresAt:u}");
+            details: $"Invited as {role}; expires {invitation.ExpiresAt:u}; mailboxes {string.Join(",", invitation.MailboxIds)}; email sent {result.Sent}");
 
-        return Ok(new CreateInvitationResponse(ToDto(invitation, now), token));
+        return Ok(new CreateInvitationResponse(ToDto(invitation, now), token, result.Sent, result.Error));
     }
 
     [HttpDelete("invitations/{id:guid}")]
@@ -315,7 +329,7 @@ public class AdminController : ControllerBase
             i.AcceptedAt is not null ? "accepted"
             : i.RevokedAt is not null ? "revoked"
             : i.ExpiresAt <= now ? "expired"
-            : "pending");
+            : "pending", i.MailboxIds);
 
     private Guid CallerId() =>
         Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub")!);
