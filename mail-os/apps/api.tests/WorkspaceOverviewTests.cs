@@ -244,7 +244,7 @@ public sealed class WorkspaceOverviewTests : IAsyncLifetime
         (await admin.Client.PutAsJsonAsync("/api/brand-kit", kit, Ct)).EnsureSuccessStatusCode();
         Assert.True((await Setup()).GetProperty("emailLookSaved").GetBoolean());
         Assert.False((await Setup()).GetProperty("quickReplySaved").GetBoolean());
-        (await admin.Client.PostAsJsonAsync("/api/templates", new { name = "A person wrote this", subject = "Hello", bodyHtml = "<p>Hello</p>" }, Ct)).EnsureSuccessStatusCode();
+        (await admin.Client.PostAsJsonAsync("/api/templates", new { name = "A person wrote this", subject = "Hello", bodyHtml = "<p>Hello</p>", variables = Array.Empty<string>() }, Ct)).EnsureSuccessStatusCode();
         Assert.True((await Setup()).GetProperty("quickReplySaved").GetBoolean());
         await using (var db = _factory.NewDbContext())
             await db.MailboxConnections.ExecuteUpdateAsync(set => set.SetProperty(m => m.IsActive, false), Ct);
@@ -266,7 +266,7 @@ public sealed class WorkspaceOverviewTests : IAsyncLifetime
             await db.SaveChangesAsync(Ct);
             templateId = template.Id;
         }
-        (await admin.Client.PutAsJsonAsync($"/api/templates/{templateId}", new { name = "Edited starter", subject = "Hello", bodyHtml = "<p>Hello</p>" }, Ct)).EnsureSuccessStatusCode();
+        (await admin.Client.PutAsJsonAsync($"/api/templates/{templateId}", new { name = "Edited starter", subject = "Hello", bodyHtml = "<p>Hello</p>", variables = Array.Empty<string>() }, Ct)).EnsureSuccessStatusCode();
         var body = await admin.Client.GetFromJsonAsync<JsonElement>("/api/workspace/overview", Ct);
         Assert.True(body.GetProperty("setup").GetProperty("teamInvited").GetBoolean());
         Assert.True(body.GetProperty("setup").GetProperty("quickReplySaved").GetBoolean());
