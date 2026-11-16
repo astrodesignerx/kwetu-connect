@@ -568,3 +568,19 @@ export interface WorkspaceOverview {
   setup: WorkspaceSetup | null;
   mailboxHealth: { healthy: number; pending: number; backfilling: number; needsAttention: number };
 }
+
+export interface PasswordResetRequestDto {
+  id: string;
+  userId: string;
+  displayName: string;
+  email: string;
+  createdAt: string;
+}
+
+export interface InvitationPreview {
+  email: string;
+  invitedByName: string;
+  role: Role;
+  mailboxes: string[];
+  expiresAt: string;
+}

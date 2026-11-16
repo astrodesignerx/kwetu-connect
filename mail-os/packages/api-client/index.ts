@@ -1,5 +1,7 @@
 import type {
   AdminUserDto,
+  PasswordResetRequestDto,
+  InvitationPreview,
   AiStatus,
   AssignRequest,
   AttachmentDto,
@@ -120,6 +122,11 @@ export function createApiClient(options: ApiClientOptions) {
       request<AuthResponse>("/api/auth/register", { method: "POST", body: JSON.stringify(input) }),
     login: (input: LoginRequest) =>
       request<AuthResponse>("/api/auth/login", { method: "POST", body: JSON.stringify(input) }),
+    requestPasswordReset: (identifier: string) => request<{ message: string }>("/api/auth/password-reset-requests", { method: "POST", body: JSON.stringify({ identifier }) }),
+    invitationPreview: (token: string) => request<InvitationPreview>(`/api/auth/invitations/preview?token=${encodeURIComponent(token)}`),
+    adminPasswordResetRequests: () => request<PasswordResetRequestDto[]>("/api/admin/password-reset-requests"),
+    adminResetPassword: (id: string) => request<{ newPassword: string }>(`/api/admin/users/${encodeURIComponent(id)}/reset-password`, { method: "POST" }),
+    adminDismissPasswordReset: (id: string) => request<void>(`/api/admin/password-reset-requests/${encodeURIComponent(id)}`, { method: "DELETE" }),
     me: () => request<UserDto>("/api/auth/me"),
     updateMe: (input: UpdateProfileRequest) =>
       request<UpdateProfileResponse>("/api/auth/me", { method: "PATCH", body: JSON.stringify(input) }),
