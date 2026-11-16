@@ -27,8 +27,8 @@ export function SetupCard({ userId, setup, memberCount }: { userId: string; setu
   if (complete) return finished ? null : <section className={`${mail.card} ${s.card} ${s.finished}`} role="status"><span className={s.circle} data-done="true"><Check size={12} aria-hidden /></span><span>Setup finished</span></section>;
   if (hidden) return null;
   const steps = [
-    { title: "Connect your first mailbox", done: setup.mailboxConnected, text: "", doneText: `${setup.firstMailboxEmail} is connected`, href: "/settings/mailboxes/connect", action: "Connect" },
-    { title: "Invite your team", done: setup.teamInvited, text: "Send each person a link. You choose which mailboxes they see.", doneText: `${memberCount} people in the workspace`, href: "/settings/admin/users", action: "Invite" },
+    { title: "Connect your first mailbox", done: setup.mailboxConnected, text: "Use the address and password you sign in to webmail with", doneText: `${setup.firstMailboxEmail} is connected`, href: "/settings/mailboxes/connect", action: "Connect" },
+    { title: "Invite your team", done: setup.teamInvited, text: "Send each person a link. You choose which mailboxes they see.", doneText: memberCount > 1 ? `${memberCount} people in the workspace` : "Invitation sent", href: "/settings/admin/users", action: "Invite" },
     { title: "Set how your emails look", done: setup.emailLookSaved, text: "Logo, colours and signature, added to every email you send", doneText: "Email appearance saved", href: "/settings/brand-kit", action: "Open" },
     { title: "Save your first quick reply", done: setup.quickReplySaved, text: "Starter replies are ready to edit", doneText: "Quick reply saved", href: "/settings/templates", action: "Write" },
   ];
