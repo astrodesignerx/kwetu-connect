@@ -1,3 +1,5 @@
+using Kompanion.Api.Auth;
+using Kompanion.Api.Services.Mail;
 using System.Security.Claims;
 using Kompanion.Api.Data;
 using Kompanion.Api.Jobs;
@@ -17,13 +19,15 @@ public class MailboxesController : ControllerBase
     private const string WrongPassword =
         "That email and password didn't work. Use the password you sign in to webmail with.";
 
+    private readonly MailboxAccessService _access;
     private readonly AppDbContext _db;
     private readonly CredentialVault _vault;
     private readonly MailboxVerifier _verifier;
 
-    public MailboxesController(AppDbContext db, CredentialVault vault, MailboxVerifier verifier)
+    public MailboxesController(AppDbContext db, CredentialVault vault, MailboxVerifier verifier, MailboxAccessService access)
     {
         _db = db;
+        _access = access;
         _vault = vault;
         _verifier = verifier;
     }
@@ -34,11 +38,11 @@ public class MailboxesController : ControllerBase
     public async Task<IActionResult> List()
     {
         var userId = UserId();
-        var boxes = await _db.MailboxConnections
-            .Where(m => m.UserId == userId)
+        var boxes = await _access.Visible(userId, this.CallerOrgId(), User.IsInRole("Admin"))
+            .Include(m => m.User)
             .OrderBy(m => m.CreatedAt)
             .ToListAsync();
-        return Ok(boxes.Select(m => MailboxDto.From(m)));
+        return Ok(boxes.Select(m => MailboxDto.From(m, canManage: User.IsInRole("Admin") || m.UserId == userId)));
     }
 
     [HttpPost]
@@ -51,8 +55,11 @@ public class MailboxesController : ControllerBase
             return BadRequest(new { error = "Mailbox password is required." });
 
         var userId = UserId();
-        if (await _db.MailboxConnections.AnyAsync(m => m.UserId == userId && m.Email == email))
-            return Conflict(new { error = "This mailbox is already connected." });
+        await using var tx = await _db.Database.BeginTransactionAsync(ct);
+        var duplicateKey = $"mailbox:{this.CallerOrgId()}:{email}";
+        await _db.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtext({duplicateKey}))", ct);
+        if (await _access.Visible(userId, this.CallerOrgId(), true).AnyAsync(m => m.Email == email))
+            return Conflict(new { error = "That mailbox is already connected." });
 
         var domain = email.Split('@')[1];
         var imapPort = req.ImapPort ?? 993;
@@ -92,19 +99,24 @@ public class MailboxesController : ControllerBase
 
         _db.MailboxConnections.Add(connection);
         await _db.SaveChangesAsync();
+        await tx.CommitAsync(ct);
+
+        await _db.Entry(connection).Reference(c => c.User).LoadAsync(ct);
 
         // Schedule the full backfill and the recurring incremental-sync watchdog.
         MailSyncJobs.ScheduleForMailbox(connection.Id);
 
-        return Ok(MailboxDto.From(connection));
+        return Ok(MailboxDto.From(connection, canManage: true));
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Disconnect(Guid id)
     {
         var userId = UserId();
-        var connection = await _db.MailboxConnections
-            .FirstOrDefaultAsync(m => m.Id == id && m.UserId == userId);
+        if (!await _access.CanManageAsync(id, userId, this.CallerOrgId(), User.IsInRole("Admin")))
+            return NotFound(new { error = "Mailbox connection not found." });
+        var connection = await _db.MailboxConnections.Include(m => m.User)
+            .FirstOrDefaultAsync(m => m.Id == id);
         if (connection is null) return NotFound(new { error = "Mailbox connection not found." });
 
         MailSyncJobs.UnscheduleForMailbox(id);
@@ -119,8 +131,10 @@ public class MailboxesController : ControllerBase
     public async Task<IActionResult> Reverify(Guid id, CancellationToken ct)
     {
         var userId = UserId();
-        var connection = await _db.MailboxConnections
-            .FirstOrDefaultAsync(m => m.Id == id && m.UserId == userId);
+        if (!await _access.CanManageAsync(id, userId, this.CallerOrgId(), User.IsInRole("Admin")))
+            return NotFound(new { error = "Mailbox connection not found." });
+        var connection = await _db.MailboxConnections.Include(m => m.User)
+            .FirstOrDefaultAsync(m => m.Id == id);
         if (connection is null) return NotFound(new { error = "Mailbox connection not found." });
 
         var password = _vault.Unprotect(connection.EncryptedCredentials);
@@ -132,7 +146,7 @@ public class MailboxesController : ControllerBase
         connection.LastVerifiedAt = DateTimeOffset.UtcNow;
         if (resolved is not null) connection.ImapHost = resolved;
         await _db.SaveChangesAsync();
-        return Ok(MailboxDto.From(connection));
+        return Ok(MailboxDto.From(connection, canManage: true));
     }
 
     private Guid UserId()

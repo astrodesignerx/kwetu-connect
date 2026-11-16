@@ -33,7 +33,7 @@ public record UpdateProfileRequest(
 
 /// <summary>
 /// Profile update result. <paramref name="Token"/> is non-null only when the password
-/// changed — every prior token is revoked at that point, so the caller must swap in
+/// changed â€” every prior token is revoked at that point, so the caller must swap in
 /// this one to stay signed in.
 /// </summary>
 public record UpdateProfileResponse(UserDto User, string? Token);
@@ -46,8 +46,8 @@ public record InvitationDto(
 public record CreateInvitationRequest(string Email, string? Role);
 
 /// <summary>
-/// Returned once, at creation. The raw token is never stored or retrievable again —
-/// only its hash is persisted — so the admin must copy the link now.
+/// Returned once, at creation. The raw token is never stored or retrievable again â€”
+/// only its hash is persisted â€” so the admin must copy the link now.
 /// </summary>
 public record CreateInvitationResponse(InvitationDto Invitation, string Token);
 
@@ -61,12 +61,12 @@ public record MailboxDto(
     string ImapHost, int ImapPort,
     string SmtpHost, int SmtpPort,
     bool IsActive, DateTimeOffset CreatedAt, DateTimeOffset? LastVerifiedAt,
-    string? OwnerEmail)
+    string? OwnerEmail, string ConnectedByName, bool CanManage)
 {
-    public static MailboxDto From(MailboxConnection m, bool includeOwner = false) =>
+    public static MailboxDto From(MailboxConnection m, bool includeOwner = false, bool canManage = false) =>
         new(m.Id, m.Email, m.ImapHost, m.ImapPort, m.SmtpHost, m.SmtpPort,
             m.IsActive, m.CreatedAt, m.LastVerifiedAt,
-            includeOwner ? m.User?.Email : null);
+            includeOwner ? m.User?.Email : null, m.User?.DisplayName ?? "", canManage);
 }
 
 public record AdminUserDto(
