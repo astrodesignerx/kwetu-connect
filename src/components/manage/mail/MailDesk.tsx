@@ -17,7 +17,7 @@ type Filter = "all" | "unread" | "starred";
 type Pending = { action: MailAction; row: MessageRow; timer: ReturnType<typeof setTimeout>; index: number };
 
 /** The manager's Mail page: your own mailbox, read live from its server. */
-export default function MailDesk({ initialAccounts, initialQuery }: { initialAccounts: AccountView[]; initialQuery: string }) {
+export default function MailDesk({ initialAccounts, initialQuery, demo = false }: { initialAccounts: AccountView[]; initialQuery: string; demo?: boolean }) {
   const [accounts, setAccounts] = useState(initialAccounts);
   const [accountId, setAccountId] = useState(initialAccounts[0]?.id ?? "");
   const [adding, setAdding] = useState(false);
@@ -167,7 +167,7 @@ export default function MailDesk({ initialAccounts, initialQuery }: { initialAcc
   }
 
   if (!accounts.length || adding) return <div className="mg-mail-setup">
-    <ConnectMailbox first={!accounts.length} onCancel={accounts.length ? () => setAdding(false) : undefined} onConnected={(a) => { setAccounts((list) => [...list.filter((x) => x.id !== a.id), a]); setAccountId(a.id); setAdding(false); setFolder("INBOX"); }} />
+    <ConnectMailbox demo={demo} first={!accounts.length} onCancel={accounts.length ? () => setAdding(false) : undefined} onConnected={(a) => { setAccounts((list) => [...list.filter((x) => x.id !== a.id), a]); setAccountId(a.id); setAdding(false); setFolder("INBOX"); }} />
   </div>;
 
   const folderPath = (s: Special) => boxes.find((b) => b.special === s)?.path ?? (s === "inbox" ? "INBOX" : null);

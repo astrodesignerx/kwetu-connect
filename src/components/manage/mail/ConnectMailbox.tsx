@@ -5,7 +5,7 @@ import { connectMailbox } from "@/app/manage/(staff)/mail/actions";
 import type { AccountView } from "@/lib/mail/accounts";
 
 /** First-day card: connect your own mailbox with the address and password you use for webmail. */
-export default function ConnectMailbox({ onConnected, onCancel, first }: { onConnected: (account: AccountView) => void; onCancel?: () => void; first: boolean }) {
+export default function ConnectMailbox({ onConnected, onCancel, first, demo = false }: { onConnected: (account: AccountView) => void; onCancel?: () => void; first: boolean; demo?: boolean }) {
   const id = useId();
   const [show, setShow] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,13 +26,13 @@ export default function ConnectMailbox({ onConnected, onCancel, first }: { onCon
   return <section className="mg-panel mg-mail-connect" aria-labelledby={`${id}-title`}>
     <span className="mg-eyebrow">{first ? "Set up mail" : "Another mailbox"}</span>
     <h2 id={`${id}-title`}>Connect your mailbox</h2>
-    <p className="mg-mail-muted">Use the address and password you sign in to webmail with. Your mail stays on the mail server: this page reads it from there.</p>
+    <p className="mg-mail-muted">{demo ? "Demo mode: press Connect to open a sample mailbox. No password is needed and nothing is sent." : "Use the address and password you sign in to webmail with. Your mail stays on the mail server: this page reads it from there."}</p>
     <form action={submit} className="mg-mail-form">
       <label htmlFor={`${id}-email`}>Email address</label>
-      <input id={`${id}-email`} name="email" type="email" required autoComplete="username" placeholder="you@kwetuconnectads.co.ke" maxLength={200} />
+      <input id={`${id}-email`} name="email" type="email" required={!demo} autoComplete="username" placeholder="you@kwetuconnectads.co.ke" maxLength={200} />
       <label htmlFor={`${id}-password`}>Password</label>
       <div className="mg-mail-password">
-        <input id={`${id}-password`} name="password" type={show ? "text" : "password"} required autoComplete="current-password" maxLength={500} />
+        <input id={`${id}-password`} name="password" type={show ? "text" : "password"} required={!demo} autoComplete="current-password" maxLength={500} />
         <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? "Hide password" : "Show password"} aria-pressed={show}>{show ? <EyeSlash size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}</button>
       </div>
       <details className="mg-mail-servers">
@@ -48,7 +48,7 @@ export default function ConnectMailbox({ onConnected, onCancel, first }: { onCon
       </details>
       {error && <p role="alert" className="mg-mail-error">{error}</p>}
       <div className="mg-mail-form-actions">
-        <button type="submit" className="mg-primary" disabled={pending} aria-busy={pending}>{pending ? "Checking the mailbox" : "Connect"}</button>
+        <button type="submit" className="mg-primary" disabled={pending} aria-busy={pending}>{pending ? (demo ? "Opening" : "Checking the mailbox") : "Connect"}</button>
         {onCancel && <button type="button" className="mg-pill" onClick={onCancel}>Cancel</button>}
       </div>
     </form>

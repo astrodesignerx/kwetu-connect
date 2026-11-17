@@ -5,6 +5,7 @@ import { listAccounts, loadAccount, removeAccount, saveAccount, type AccountView
 import { detectMailbox } from "@/lib/mail/autoconfig";
 import { classify, explain, MAX_ATTACHMENT_BYTES, MailError, normaliseSubject, parseSource, pathOf, testImap, transporter, verifySmtp, withImap, type Address, type MailboxInfo, type ParsedMessage } from "@/lib/mail/client";
 import { encryptSecret } from "@/lib/mail/crypto";
+import { demoAccountFields, demoAct, demoFolders, demoList, demoSend, demoThread, isDemoAccount, mailDemoEnabled } from "@/lib/mail/demo";
 
 /**
  * The manager's Mail page talks to the staff member's own mailbox through these actions. Adapted from the
@@ -48,6 +49,8 @@ export interface ConnectInput {
 
 export async function connectMailbox(input: ConnectInput) {
   return run("connect", async (me): Promise<AccountView> => {
+    // Local demo mode: Connect opens a sample mailbox, no sign-in needed.
+    if (mailDemoEnabled()) return saveAccount(me, demoAccountFields(String(input.email ?? "").slice(0, 200)));
     const email = String(input.email ?? "").trim().toLowerCase();
     const password = String(input.password ?? "");
     if (!emailOk(email) || email.length > 200) throw new MailError("Enter a valid email address.");
@@ -86,6 +89,7 @@ export async function myMailboxes() {
 export async function mailFolders(accountId: string) {
   return run("folders", async (me): Promise<{ boxes: MailboxInfo[]; unread: number }> => {
     const account = await loadAccount(me, String(accountId));
+    if (isDemoAccount(account)) return demoFolders(account);
     return withImap(account, async (c) => {
       const boxes = classify(await c.list());
       const inbox = pathOf(boxes, "inbox") ?? "INBOX";
@@ -129,6 +133,7 @@ export async function mailList(accountId: string, mailbox: string, query: ListQu
     const text = String(query.text ?? "").trim().slice(0, 200);
     const start = Math.max(0, Math.floor(Number(offset) || 0));
     const size = Math.min(60, Math.max(1, Math.floor(Number(limit) || 40)));
+    if (isDemoAccount(account)) return demoList(account, folder, { unread: !!query.unread, flagged: !!query.flagged, text }, start, size);
     return withImap(account, async (c) => {
       const lock = await c.getMailboxLock(folder);
       try {
@@ -193,6 +198,7 @@ export async function mailThread(accountId: string, mailbox: string, uid: number
     const folder = folderOk(mailbox);
     const opened = uidOk(uid);
     const key = normaliseSubject(String(subject ?? "")).slice(0, 200);
+    if (isDemoAccount(account)) return demoThread(account, folder, opened, key);
     return withImap(account, async (c) => {
       const boxes = classify(await c.list().catch(() => []));
       const sent = pathOf(boxes, "sent");
@@ -232,6 +238,7 @@ export async function mailAct(accountId: string, mailbox: string, uids: number[]
     if (!ACTIONS.includes(action)) throw new MailError("Choose what to do with the message.");
     const list = (Array.isArray(uids) ? uids : []).slice(0, 200).map(uidOk);
     if (!list.length) return true;
+    if (isDemoAccount(account)) { demoAct(account, folder, list, action); return true; }
     const set = list.join(",");
     await withImap(account, async (c) => {
       const boxes = classify(await c.list());
@@ -293,13 +300,14 @@ export async function mailSend(input: SendInput) {
       subject: String(input.subject ?? "").trim().slice(0, 300) || "(no subject)",
       html, text: htmlToText(html), inReplyTo, references: references.length ? references : undefined, attachments,
     };
+    const answers = input.answers && Number.isInteger(input.answers.uid) && input.answers.uid > 0 && typeof input.answers.mailbox === "string" && input.answers.mailbox.length <= 200 ? input.answers : null;
+    if (isDemoAccount(account)) { demoSend(account, { to, cc, subject: message.subject, html, text: message.text, inReplyTo }, answers); return true; }
     const raw = await new MailComposer(message).compile().build();
     try {
       await transporter(account).sendMail({ envelope: { from: account.email, to: [...to, ...cc] }, raw });
     } catch (e) { throw new MailError("The message was not sent. " + explain(e)); }
     // cPanel and most hosts do not keep a copy of what SMTP sends, so it is filed in Sent here.
     const fileCopy = !/gmail|googlemail|office365|outlook/i.test(account.smtp_host);
-    const answers = input.answers && Number.isInteger(input.answers.uid) && input.answers.uid > 0 && typeof input.answers.mailbox === "string" && input.answers.mailbox.length <= 200 ? input.answers : null;
     if (fileCopy || answers) {
       await withImap(account, async (c) => {
         if (fileCopy) {
