@@ -1805,6 +1805,10 @@ button.day-heading:hover, button.block-heading:hover { background: var(--accent)
 .pay-hint { margin: -6px 0 0; font-size: 11.5px; color: var(--muted-foreground); text-align: center; }
 .pay-status { font-size: 14px; line-height: 1.5; color: var(--muted-foreground); }
 .pay-alert { margin-top: 12px; padding: 8px 12px; border-radius: 12px; font-size: 13px; color: var(--destructive); background: color-mix(in srgb, var(--destructive) 10%, transparent); }
+.advert-notice { display: grid; gap: 16px; animation: quote-in var(--duration-base) var(--ease-standard) both; }
+.advert-notice h2 { font-size: 16px; font-weight: 700; }
+.advert-notice p { overflow-wrap: anywhere; white-space: pre-wrap; }
+.advert-notice .pay-code input { min-width: 0; font: inherit; letter-spacing: normal; text-transform: none; }
 .pay-ref { margin: -6px 0 0; font: 600 12px ui-monospace, monospace; color: var(--muted-foreground); word-break: break-all; }
 .pay-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0; }
 .pay-facts div { padding: 8px 12px; border-radius: 12px; background: var(--muted); }
@@ -1815,7 +1819,7 @@ button.day-heading:hover, button.block-heading:hover { background: var(--accent)
 .pay-ghost { display: flex; align-items: center; justify-content: center; height: 42px; border-radius: 12px; border: 1px solid var(--border); color: var(--foreground); font-size: 13px; font-weight: 700; text-decoration: none; transition: background-color var(--duration-base) var(--ease-standard), transform var(--duration-quick) var(--ease-standard); }
 .pay-ghost:hover { background: var(--accent); transform: translateY(-1px); }
 @media (max-width: 860px) { .saved-pay { grid-template-columns: minmax(0, 1fr); padding: 16px; } }
-@media (prefers-reduced-motion: reduce) { .pay-card, .pay-recap, .pay-recap-card, .pay-body { animation: none; } .pay-methods button, .pay-button, .pay-ghost { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .pay-card, .pay-recap, .pay-recap-card, .pay-body, .advert-notice { animation: none; } .pay-methods button, .pay-button, .pay-ghost { transition: none; } }
 
 /* Coming back to a booking (2026-11-05): progress track, Your bookings menu, keep-link card, change mode and Find your booking. */
 @keyframes stop-in { from { opacity: 0; transform: translateY(6px); } }

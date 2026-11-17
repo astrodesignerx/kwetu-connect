@@ -31,6 +31,8 @@ export type PublicBooking = Pick<Booking, "reference" | "request" | "plays" | "f
   capacity: CapacityResult; steps: PublicStep[];
   /** How many advert files came with this booking (names and files stay private). */
   adverts: number;
+  advertState: "none" | "waiting" | "approved" | "refused";
+  refusedReason?: string;
   /** Set when the customer changed the plan: the reference that replaced this one. */
   replacedBy?: string;
 };

@@ -66,6 +66,63 @@ describe("memory booking store", () => {
     await store.decideAdvert(b.reference, advert.id, "approved", "");
     expect((await store.bookingDetail(b.reference))!.adverts[0].decision).toBe("approved");
   });
+  it("exposes advert state by priority and only the newest refused file's reason", async () => {
+    const b = await paid();
+    expect(b.advertState).toBe("none");
+    await store.addAdvert(b.reference, file, 10);
+    expect((await store.publicBooking(b.reference))?.advertState).toBe("waiting");
+    const first = (await store.bookingDetail(b.reference))!.adverts[0];
+    await store.decideAdvert(b.reference, first.id, "refused", "Make the text larger.");
+    expect(await store.publicBooking(b.reference)).toMatchObject({ advertState: "refused", refusedReason: "Make the text larger." });
+    vi.advanceTimersByTime(1000);
+    await store.addAdvert(b.reference, { ...file, name: "private-replacement.mp4" }, 10);
+    const second = (await store.bookingDetail(b.reference))!.adverts[1];
+    expect(await store.publicBooking(b.reference)).toMatchObject({ advertState: "waiting" });
+    expect(await store.publicBooking(b.reference)).not.toHaveProperty("refusedReason");
+    await store.decideAdvert(b.reference, second.id, "refused", "Remove the sound.");
+    // Review the older file last: newest refers to the uploaded file, not the decision time.
+    await store.decideAdvert(b.reference, first.id, "refused", "Older file reviewed again.");
+    const view = (await store.publicBooking(b.reference))!;
+    expect(view).toMatchObject({ advertState: "refused", refusedReason: "Remove the sound." });
+    for (const secret of [file.name, second.fileName, first.id, second.id, first.bookingId, "staff@example.test"]) expect(JSON.stringify(view)).not.toContain(secret);
+    expect(view).not.toHaveProperty("filePath");
+    expect((await store.findBooking(b.reference, input.phone))?.advertState).toBe("refused");
+    await store.decideAdvert(b.reference, first.id, "approved", "");
+    expect((await store.publicBooking(b.reference))?.advertState).toBe("approved");
+    await store.addAdvert(b.reference, file, 10);
+    expect((await store.publicBooking(b.reference))?.advertState).toBe("approved");
+    expect(await store.publicBooking(b.reference)).not.toHaveProperty("refusedReason");
+  });
+  it("keeps refused files outside the live cap and retains the booking and dates on replacement", async () => {
+    const b = await paid();
+    await store.addAdvert(b.reference, file, 10);
+    const first = (await store.bookingDetail(b.reference))!.adverts[0];
+    await store.decideAdvert(b.reference, first.id, "refused", "Please replace it.");
+    const before = (await store.bookingDetail(b.reference))!;
+    const results = await Promise.allSettled(Array.from({ length: 4 }, () => store.addAdvert(b.reference, file, 10)));
+    expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(3);
+    await expect(store.addAdvert(b.reference, file, 10)).rejects.toThrow("At most 3 adverts per booking.");
+    const after = (await store.bookingDetail(b.reference))!;
+    expect(after.booking).toEqual(before.booking);
+    expect(after.history).toEqual(before.history);
+    expect(after.adverts).toHaveLength(4);
+    expect(after.adverts.filter((a) => a.decision === "waiting")).toHaveLength(3);
+    expect((await store.publicBooking(b.reference))?.advertState).toBe("waiting");
+  });
+  it("enforces the six-file hard cap even with concurrent replacements and refused files", async () => {
+    const b = await paid();
+    for (let i = 0; i < 5; i++) {
+      await store.addAdvert(b.reference, file, 10);
+      const advert = (await store.bookingDetail(b.reference))!.adverts.at(-1)!;
+      await store.decideAdvert(b.reference, advert.id, "refused", "Needs changes.");
+    }
+    const results = await Promise.allSettled(Array.from({ length: 3 }, () => store.addAdvert(b.reference, file, 10)));
+    expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+    const last = (await store.bookingDetail(b.reference))!.adverts.at(-1)!;
+    await store.decideAdvert(b.reference, last.id, "refused", "Still needs changes.");
+    await expect(store.addAdvert(b.reference, file, 10)).rejects.toThrow("This booking has reached its upload limit. Contact KCA.");
+    expect((await store.bookingDetail(b.reference))!.adverts).toHaveLength(6);
+  });
   it("accepts only MP4, PNG or JPEG adverts up to 50 MB", async () => {
     const b = await paid();
     await expect(store.addAdvert(b.reference, { ...file, name: "shop.webm", type: "video/webm" }, 10)).rejects.toThrow("MP4");

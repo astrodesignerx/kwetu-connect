@@ -31,10 +31,12 @@ function card(origin: string, b: PublicBooking) {
 }
 
 /** Booking emails are a courtesy: a missing key or a send failure never blocks the booking. */
-export async function sendBookingMail(kind: "saved" | "links", to: string, name: string, bookings: PublicBooking[], origin: string) {
+export async function sendBookingMail(kind: "saved" | "links" | "refused", to: string, name: string, bookings: PublicBooking[], origin: string, refusedReason = "") {
   if (!to || bookings.length === 0) return;
-  const subject = kind === "saved" ? `Your KCA booking ${bookings[0].reference}` : "Your KCA booking links";
-  const intro = kind === "saved"
+  const subject = kind === "refused" ? "Your KCA advert needs changes" : kind === "saved" ? `Your KCA booking ${bookings[0].reference}` : "Your KCA booking links";
+  const intro = kind === "refused"
+    ? `KCA asked for changes to your advert. ${esc(refusedReason)} Open your booking to upload a new advert at no cost.`
+    : kind === "saved"
     ? "Your booking is saved. Keep this email: the button opens your booking any time, to pay, check progress or change the plan before you pay."
     : "Here are your recent open bookings. Each button opens the booking to pay, check progress or change the plan.";
   const html = `<div style="max-width:520px;margin:0 auto;padding:24px;font-family:Arial,sans-serif;background:#f6f5f2">
