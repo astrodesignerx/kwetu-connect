@@ -8,19 +8,32 @@ namespace Kompanion.Api.Services;
 
 public sealed class InvitationMailer(ISmtpTransport transport, SmtpSender sender, IConfiguration config)
 {
+    /// <summary>
+    /// The address people open Kwetu OS at: App:WebBaseUrl, else the first allowed web origin.
+    /// Cors:WebOrigins arrives as a comma-separated string from environment variables and as a
+    /// list from JSON, so both forms are read. Null when neither is an absolute http(s) address.
+    /// </summary>
+    public static string? WebAddress(IConfiguration config)
+    {
+        var baseUrl = config["App:WebBaseUrl"];
+        if (string.IsNullOrWhiteSpace(baseUrl))
+            baseUrl = config["Cors:WebOrigins"]?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).FirstOrDefault()
+                ?? config.GetSection("Cors:WebOrigins").Get<string[]>()?.FirstOrDefault();
+        return Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri) && uri.Scheme is "https" or "http"
+            ? baseUrl!.TrimEnd('/') : null;
+    }
+
     public async Task<(bool Sent, string? Error)> SendAsync(Invitation invitation, string token,
         string invitedBy, MailboxConnection? from, IReadOnlyList<string> mailboxes, CancellationToken ct)
     {
         if (from is null) return (false, "No sending mailbox was selected.");
-        var baseUrl = config["App:WebBaseUrl"];
-        if (string.IsNullOrWhiteSpace(baseUrl)) baseUrl = config.GetSection("Cors:WebOrigins").Get<string[]>()?.FirstOrDefault();
-        if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri) || uri.Scheme is not ("https" or "http"))
-            return (false, "The web address is not configured.");
+        var baseUrl = WebAddress(config);
+        if (baseUrl is null) return (false, "The web address is not configured.");
         if (!from.IsActive) return (false, "The sending mailbox is disconnected.");
 
         try
         {
-            var link = baseUrl!.TrimEnd('/') + "/register?invite=" + Uri.EscapeDataString(token);
+            var link = baseUrl + "/register?invite=" + Uri.EscapeDataString(token);
             var access = invitation.Role == UserRole.Admin ? "As an admin, you will see every mailbox."
                 : mailboxes.Count == 0 ? "You will see no mail until an admin shares a mailbox with you."
                 : "You will see: " + string.Join(", ", mailboxes) + ".";

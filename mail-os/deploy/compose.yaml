@@ -1,0 +1,93 @@
+name: kwetu-mail
+services:
+  database:
+    image: postgres:17-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kwetu
+      POSTGRES_USER: kwetu
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/.env}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U kwetu -d kwetu']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: '8080'
+      ASPNETCORE_HTTPS_PORT: '443'
+      ConnectionStrings__Default: Host=database;Port=5432;Username=kwetu;Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD};Database=kwetu
+      Jwt__Key: ${JWT_KEY:?Set JWT_KEY in deploy/.env}
+      Jwt__Issuer: kwetu-mail
+      Jwt__Audience: kwetu-mail
+      Cors__WebOrigins: https://${MAIL_HOST:?Set MAIL_HOST in deploy/.env}
+      App__WebBaseUrl: https://${MAIL_HOST:?Set MAIL_HOST in deploy/.env}
+      ReverseProxy__KnownProxies: 172.30.88.10
+      DataProtection__KeyPath: /data/keys
+      Attachments__Path: /data/attachments
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - keys:/data/keys
+      - attachments:/data/attachments
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, --header, 'X-Forwarded-Proto: https', 'http://127.0.0.1:8080/api/health']
+      interval: 15s
+      timeout: 5s
+      retries: 12
+    networks:
+      default:
+        ipv4_address: 172.30.88.20
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+      args:
+        NEXT_PUBLIC_HUB_URL: https://${MAIL_HOST:?Set MAIL_HOST}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, node, -e, 'fetch("http://127.0.0.1:3013/login").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))']
+      interval: 15s
+      timeout: 10s
+      retries: 12
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      MAIL_HOST: ${MAIL_HOST:?Set MAIL_HOST}
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+    networks:
+      default:
+        ipv4_address: 172.30.88.10
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.30.88.0/24
+volumes:
+  postgres:
+  keys:
+  attachments:
+  caddy_data:
+  caddy_config:
