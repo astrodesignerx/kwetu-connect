@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { CapacityNotice } from "@/components/booking/BookingSummary";
 import Timetable from "@/components/booking/Timetable";
 import { occupancyByDayBlock } from "@/lib/booking/occupancy";
-import { nextAction, weeksOf } from "@/lib/booking/pipeline";
+import { liveProgress, nextAction, weeksOf } from "@/lib/booking/pipeline";
 import { dateRange } from "@/lib/format/dates";
 import BookingHeader from "./BookingHeader";
 import { ActionForm } from "@/components/manage/ActionForm";
@@ -29,6 +29,7 @@ export default function BookingDetail({ detail, settings, demo, today, moveBase,
   const contact = <section className="staff-card detail-advertiser space-y-2"><h2>Advertiser</h2><p>{a.name}</p><p>{a.business}</p><p className="break-all"><a className="underline" href={`tel:+${a.phone}`}>+{a.phone}</a></p>{a.email && <p className="break-all"><a className="underline" href={`mailto:${a.email}`}>{a.email}</a></p>}<p>{a.paysBy === "invoice" ? "Pay by invoice" : "Pay now"}</p></section>;
   const historyPanel = <section className="staff-card detail-history"><h2>Status history</h2>{!history.length && <p>No status changes yet.</p>}<ol className="space-y-4">{history.map((entry) => <li key={entry.id} className="break-words border-b border-gray-200 pb-3"><p>{entry.fromStatus} to {entry.toStatus}</p><p className="mt-1 text-sm text-gray-600">{new Date(entry.createdAt).toLocaleString("en-GB", { timeZone: "Africa/Nairobi" })} / {entry.staffEmail}</p>{entry.note && <p className="mt-1">{entry.note}</p>}</li>)}</ol></section>;
   const r = b.request;
+  const run = b.status === "Live" ? liveProgress(b, today) : null;
   const advert = adverts.find((ad) => ad.decision === "waiting") ?? adverts[adverts.length - 1];
   const advertUrl = advert?.filePath ? `/manage/bookings/${reference}/advert/${advert.id}` : null;
   const extension = advert?.fileName.split(".").pop()?.toUpperCase() ?? "";
@@ -36,9 +37,9 @@ export default function BookingDetail({ detail, settings, demo, today, moveBase,
   const advertStatus = !advert ? "No advert uploaded yet" : advert.decision === "waiting" ? "Waiting for review" : advert.decision === "approved" ? "Approved" : "Refused";
   const rate = b.plays && r.lengthSeconds ? +(b.fullPriceKes / (b.plays * r.lengthSeconds)).toFixed(2) : 0;
   const saved = b.fullPriceKes - b.priceKes;
-  const summary = <><div className="v2-detail-plan-tiles">{[["Length", r.lengthSeconds + "s"], ["Plays an hour", String(r.howOften)], ["Plays", number(b.plays)], ["Weeks", String(weeksOf(r))]].map(([label, value]) => <div key={label}><small>{label}</small><b>{value}</b></div>)}</div>
+  const summary = <><div className="v2-detail-plan-tiles">{[["Length", r.lengthSeconds + "s"], ["Plays", number(b.plays)], ["Dates", dateRange(r.startDate, r.endDate)], ["Price", "KES " + number(b.priceKes)]].map(([label, value]) => <div key={label}><small>{label}</small><b>{value}</b></div>)}</div>
     <div className="v2-booking-detail v2-summary-grid">
-      <section className="staff-card v2-hours-card"><div className="v2-card-head"><h2>Booked hours</h2><span>{dateRange(r.startDate, r.endDate)}</span></div><div className="booking-summary"><Timetable settings={settings} occupancy={occupancyByDayBlock([], r.startDate, r.endDate, settings)} selection={r} /></div></section>
+      <section className="staff-card v2-hours-card"><div className="v2-card-head"><h2>Plan and run</h2><span>{r.howOften} plays an hour / {weeksOf(r)} weeks</span></div><p className="mg-run-dates">{dateRange(r.startDate, r.endDate)}</p>{run && <div className="mg-sheet-run"><span className="mg-meter" aria-hidden="true"><i style={{ transform: `scaleX(${run.ratio})` }} /></span><p>Day {run.day} of {run.total}</p></div>}<div className="booking-summary"><Timetable settings={settings} occupancy={occupancyByDayBlock([], r.startDate, r.endDate, settings)} selection={r} /></div></section>
       <div className="v2-summary-advert">
         {b.paymentNote && <section className="staff-card v2-note-card"><h2>Payment note</h2><p>{b.paymentNote}</p></section>}
         <section className="staff-card v2-advert-card"><h2>Advert</h2><div className="v2-advert-row">
@@ -55,5 +56,5 @@ export default function BookingDetail({ detail, settings, demo, today, moveBase,
   const header = <BookingHeader business={a.business} reference={reference} status={b.status} action={nextAction({ reference, status: b.status, paymentNote: b.paymentNote, request: r }, adverts, today)} moveBase={moveBase} compact={compact}>
     <StatusControls key={b.updatedAt} detail={detail} settings={settings} today={today} moveBase={moveBase} />
   </BookingHeader>;
-  return <article className={"booking-detail v2-tabbed-booking" + (compact ? " is-compact" : "")}><BookingDetailTabs key={reference} initialTab={initialTab} header={header} confirm={confirm} panels={[summary, advertPanel, payment, contact, historyPanel].map((panel, index) => <Fragment key={index}>{panel}</Fragment>)} /></article>;
+  return <article className={"booking-detail v2-tabbed-booking mg-booking-sheet" + (compact ? " is-compact" : "")}><BookingDetailTabs key={reference} initialTab={initialTab} header={header} confirm={confirm} panels={[summary, advertPanel, payment, contact, historyPanel].map((panel, index) => <Fragment key={index}>{panel}</Fragment>)} /></article>;
 }

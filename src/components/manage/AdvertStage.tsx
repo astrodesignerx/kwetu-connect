@@ -50,7 +50,7 @@ export default function AdvertStage({ url, video, fileName, header, unavailable,
           : unavailable}
       </div>
       <i className="advert-leds" aria-hidden="true" /><i className="advert-safe" aria-hidden="true" />
-      <span className="advert-corner">{SCREEN.width} x {SCREEN.height}</span>
+      <span className="advert-corner">Screen: {SCREEN.width} x {SCREEN.height}</span>
     </div></div>
     {url && video && <div className="advert-player">
       <button type="button" onClick={toggle} aria-label={paused ? "Play" : "Pause"}>{paused ? <Play size={14} weight="fill" aria-hidden="true" /> : <Pause size={14} weight="fill" aria-hidden="true" />}</button>

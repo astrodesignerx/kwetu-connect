@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireStaff } from "@/lib/auth/server";
 import { getStore } from "@/lib/store";
+import ClockPill from "@/components/manage/ClockPill";
 import AdvertReview from "@/components/manage/AdvertReview";
 import AdvertQueue from "@/components/manage/AdvertQueue";
 import AdvertBookingCard, { type BookingFacts } from "@/components/manage/AdvertBookingCard";
@@ -44,7 +45,8 @@ export default async function AdvertsPage({ searchParams }: { searchParams: Prom
     return "/manage/adverts?" + values;
   };
   const detail = selected?.detail;
-  return <section className="pipeline-page advert-desk">
+  return <section className="pipeline-page advert-desk mg-adverts">
+    <div className="pipeline-heading"><h1 className="mg-heading">Advert desk</h1><div className="mg-intro-controls"><ClockPill now={new Date().toISOString()} /><span className="mg-pill"><i className="mg-live-dot" aria-hidden="true" />{counts.waiting} to review</span></div></div>
     <div className="advert-grid">
       {!selected && <div className="v2-card empty-state advert-empty"><h2>{query ? "No adverts match your search" : filter === "waiting" ? "The review queue is clear" : "Nothing in this queue"}</h2><p>Choose another tab to see approved files, refused files or bookings missing an advert.</p><Link className="quiet-button" href={href("all")}>See all open bookings</Link></div>}
       {selected && detail && (selected.advert

@@ -1,2 +1,2 @@
-import { StaffPageSkeleton } from "@/components/workspace/Skeletons";
-export default function Loading() { return <StaffPageSkeleton label="advert review desk" />; }
+import ManagerDeskSkeleton from "@/components/manage/ManagerDeskSkeleton";
+export default function Loading() { return <ManagerDeskSkeleton adverts />; }

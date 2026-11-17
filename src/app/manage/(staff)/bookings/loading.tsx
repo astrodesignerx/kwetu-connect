@@ -1,2 +1,2 @@
-import { BookingsSkeleton } from "@/components/workspace/Skeletons";
-export default function Loading() { return <BookingsSkeleton />; }
+import ManagerDeskSkeleton from "@/components/manage/ManagerDeskSkeleton";
+export default function Loading() { return <ManagerDeskSkeleton />; }
