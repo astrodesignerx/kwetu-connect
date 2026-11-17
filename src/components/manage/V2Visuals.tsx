@@ -1,40 +1,10 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { formatHour } from "@/lib/booking/hours";
-import { ChartBar, Clock, Coins, Play } from "@phosphor-icons/react";
 
 export function DarkIsland({ children, className = "" }: { children: ReactNode; className?: string }) {
   return <section className={"v2-card v2-dark " + className}>{children}</section>;
-}
-
-export function FolderCard({ label, value, note, colour = "teal", pill, children }: { label: string; value: ReactNode; note: string; colour?: string; pill?: string; children?: ReactNode }) {
-  const Icon = colour === "amber" ? ChartBar : colour === "violet" ? Clock : colour === "green" ? Play : Coins;
-  return <section className="v2-folder" data-colour={colour}>
-    <div className="v2-folder-label"><i aria-hidden="true"><Icon size={14} /></i>{label}{pill && <em className="v2-folder-pill">{pill}</em>}</div>
-    <div className="v2-folder-value">{value}</div><p>{note}</p>{children}
-  </section>;
-}
-
-/** Screen time sold: the billboard photo above an ember area, with a ten segment pixel meter lit to the real share. */
-export function PhotoFolderCard({ share, href }: { share: number; href: string }) {
-  const lit = Math.round(Math.min(1, Math.max(0, share)) * 10);
-  return <section className="v2-folder v2-folder-photo" data-colour="amber">
-    <div className="v2-folder-photo-band" aria-hidden="true">
-      <Image className="v2-photo-night" src="/images/evening-billboard.webp" alt="" fill sizes="(max-width: 1100px) 50vw, 25vw" />
-      <Image className="v2-photo-day" src="/images/daytime-billboard.webp" alt="" fill sizes="(max-width: 1100px) 50vw, 25vw" />
-    </div>
-    <div className="v2-folder-photo-body">
-      <div className="v2-folder-label"><i aria-hidden="true"><ChartBar size={14} /></i>Screen time sold</div>
-      <div className="v2-folder-photo-row">
-        <div className="v2-folder-value">{Math.round(share * 100)}<small>% this week</small></div>
-        <span className="v2-pixel-meter" aria-hidden="true">{Array.from({ length: 10 }, (_, index) => <i key={index} data-lit={index < lit} style={{ transitionDelay: `${index * 25}ms` }} />)}</span>
-      </div>
-    </div>
-    <Link href={href} className="v2-folder-link" aria-label={`Screen time sold, ${Math.round(share * 100)}% of saleable screen time this week. Open screen schedule`} />
-  </section>;
 }
 
 /** Round initials for the first few live bookings, then "+N" for the rest. */
@@ -43,7 +13,8 @@ export function AvatarStack({ people, extra }: { people: { name: string; colour:
 }
 
 export type HourShare = { hour: number; share: number };
-export function CapsuleBars({ hours, currentHour, label = "Planned time sold", onSelect, selectedHour }: { hours: HourShare[]; currentHour?: number; label?: string; onSelect?: (hour: number) => void; selectedHour?: number }) {
+/** Hour capsules. With readout, the chosen hour is written in a line under the bars instead of a floating tip. */
+export function CapsuleBars({ hours, currentHour, label = "Planned time sold", onSelect, selectedHour, readout = false }: { hours: HourShare[]; currentHour?: number; label?: string; onSelect?: (hour: number) => void; selectedHour?: number; readout?: boolean }) {
   const [local, setLocal] = useState<number | null>(null);
   const open = currentHour !== undefined && hours.some((item) => item.hour === currentHour);
   // Outside the open hours the next open hour stands in for "now", so the chart still points at something.
@@ -55,14 +26,15 @@ export function CapsuleBars({ hours, currentHour, label = "Planned time sold", o
   const text = active ? `${formatHour(active.hour)}, ${Math.round(active.share * 100)}% sold` : "";
   const caption = !hours.length ? "Screen closed today" : currentHour !== undefined && !open ? `Screen closed, opens ${formatHour(fallback ?? hours[0].hour)}` : "";
   return <div className="v2-capsule-chart">
-    <p className="sr-only" aria-live="polite">{text || caption}</p>
-    <p className="v2-capsule-caption" aria-hidden="true">{caption}</p>
+    {!readout && <><p className="sr-only" aria-live="polite">{text || caption}</p>
+    <p className="v2-capsule-caption" aria-hidden="true">{caption}</p></>}
     <div className="v2-capsules" role="group" aria-label={label} style={{ "--hours": Math.max(hours.length, 1) } as CSSProperties}>
       {hours.map(({ hour, share }, position) => <button type="button" key={hour} className="v2-capsule" aria-pressed={selected === hour} aria-label={`${formatHour(hour)}, ${Math.round(share * 100)}% sold, planned`} data-level={tileLevel(share)} data-current={ringed === hour} data-past={currentHour !== undefined && hour < currentHour} onClick={() => { setLocal(hour); onSelect?.(hour); }}>
-        {position === index && <em className="v2-capsule-tip" data-edge={position < 2 ? "start" : position > hours.length - 3 ? "end" : undefined} aria-hidden="true">{text}</em>}
+        {!readout && position === index && <em className="v2-capsule-tip" data-edge={position < 2 ? "start" : position > hours.length - 3 ? "end" : undefined} aria-hidden="true">{text}</em>}
         <span className="v2-capsule-track"><i style={{ transform: `scaleY(${Math.max(0.015, Math.min(1, share))})` }} /></span><small>{String(hour).padStart(2, "0")}</small>
       </button>)}
     </div>
+    {readout && <p className="v2-capsule-readout" aria-live="polite">{active && (local !== null || !caption) ? `${formatHour(active.hour)} / ${Math.round(active.share * 100)}% sold, planned` : caption}</p>}
   </div>;
 }
 
