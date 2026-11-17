@@ -83,6 +83,8 @@ public sealed class WorkspaceOverviewTests : IAsyncLifetime
         var body = await member.Client.GetFromJsonAsync<JsonElement>("/api/workspace/overview", Ct);
         Assert.Equal(2, body.GetProperty("memberCount").GetInt32());
         Assert.Equal(JsonValueKind.Null, body.GetProperty("pendingInvitations").ValueKind);
+        Assert.Equal(JsonValueKind.Null, body.GetProperty("setup").ValueKind);
+        Assert.Equal(JsonValueKind.Null, body.GetProperty("pendingPasswordResets").ValueKind);
     }
 
     [Fact]
@@ -203,6 +205,71 @@ public sealed class WorkspaceOverviewTests : IAsyncLifetime
         var after = await member.Client.GetFromJsonAsync<JsonElement>("/api/workspace/overview", Ct);
         Assert.Equal(1, after.GetProperty("mailboxCount").GetInt32());
         Assert.Equal(1, after.GetProperty("mailboxHealth").GetProperty("pending").GetInt32());
+    }
+
+
+    [Fact]
+    public async Task Setup_facts_follow_real_actions_and_ignore_defaults_and_foreign_audits()
+    {
+        var admin = await ApiFixture.RegisterAdminAsync(_factory);
+        var foreign = await ForeignUser();
+        await using (var db = _factory.NewDbContext())
+        {
+            var orgId = (await db.Users.FindAsync([admin.UserId], Ct))!.OrganizationId;
+            db.EmailTemplates.Add(new EmailTemplate { OrganizationId = orgId, Name = "Seeded starter" });
+            db.AuditLogEntries.AddRange(new AuditLogEntry { ActorUserId = foreign.Id, ActorEmail = foreign.Email, Action = "brandkit.update" },
+                new AuditLogEntry { ActorUserId = foreign.Id, ActorEmail = foreign.Email, Action = "template.create" });
+            await db.SaveChangesAsync(Ct);
+        }
+        var kit = await admin.Client.GetFromJsonAsync<JsonElement>("/api/brand-kit", Ct);
+        async Task<JsonElement> Setup() => (await admin.Client.GetFromJsonAsync<JsonElement>("/api/workspace/overview", Ct)).GetProperty("setup");
+        var before = await Setup();
+        foreach (var fact in new[] { "mailboxConnected", "teamInvited", "emailLookSaved", "quickReplySaved" })
+            Assert.False(before.GetProperty(fact).GetBoolean());
+        Assert.Equal(JsonValueKind.Null, before.GetProperty("firstMailboxEmail").ValueKind);
+        var (mailboxId, _, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var connected = await Setup();
+        Assert.True(connected.GetProperty("mailboxConnected").GetBoolean());
+        await using (var db = _factory.NewDbContext())
+            Assert.Equal((await db.MailboxConnections.FindAsync([mailboxId], Ct))!.Email, connected.GetProperty("firstMailboxEmail").GetString());
+        await ApiFixture.CreateInviteTokenAsync(admin, "invited@test.local");
+        Assert.True((await Setup()).GetProperty("teamInvited").GetBoolean());
+        // A revoked invitation still proves that a person invited the team.
+        await using (var db = _factory.NewDbContext())
+        {
+            await db.Invitations.ExecuteUpdateAsync(set => set.SetProperty(i => i.RevokedAt, DateTimeOffset.UtcNow), Ct);
+        }
+        Assert.True((await Setup()).GetProperty("teamInvited").GetBoolean());
+        (await admin.Client.PutAsJsonAsync("/api/brand-kit", kit, Ct)).EnsureSuccessStatusCode();
+        Assert.True((await Setup()).GetProperty("emailLookSaved").GetBoolean());
+        Assert.False((await Setup()).GetProperty("quickReplySaved").GetBoolean());
+        (await admin.Client.PostAsJsonAsync("/api/templates", new { name = "A person wrote this", subject = "Hello", bodyHtml = "<p>Hello</p>", variables = Array.Empty<string>() }, Ct)).EnsureSuccessStatusCode();
+        Assert.True((await Setup()).GetProperty("quickReplySaved").GetBoolean());
+        await using (var db = _factory.NewDbContext())
+            await db.MailboxConnections.ExecuteUpdateAsync(set => set.SetProperty(m => m.IsActive, false), Ct);
+        Assert.False((await Setup()).GetProperty("mailboxConnected").GetBoolean());
+    }
+
+    [Fact]
+    public async Task An_edited_starter_reply_and_an_existing_team_count_as_setup()
+    {
+        var admin = await ApiFixture.RegisterAdminAsync(_factory);
+        await ApiFixture.InviteAndRegisterAsync(_factory, admin, "member@test.local");
+        Guid templateId;
+        await using (var db = _factory.NewDbContext())
+        {
+            var orgId = (await db.Users.FindAsync([admin.UserId], Ct))!.OrganizationId;
+            var template = new EmailTemplate { OrganizationId = orgId, Name = "Starter" };
+            db.EmailTemplates.Add(template);
+            await db.Invitations.ExecuteDeleteAsync(Ct);
+            await db.SaveChangesAsync(Ct);
+            templateId = template.Id;
+        }
+        (await admin.Client.PutAsJsonAsync($"/api/templates/{templateId}", new { name = "Edited starter", subject = "Hello", bodyHtml = "<p>Hello</p>", variables = Array.Empty<string>() }, Ct)).EnsureSuccessStatusCode();
+        var body = await admin.Client.GetFromJsonAsync<JsonElement>("/api/workspace/overview", Ct);
+        Assert.True(body.GetProperty("setup").GetProperty("teamInvited").GetBoolean());
+        Assert.True(body.GetProperty("setup").GetProperty("quickReplySaved").GetBoolean());
     }
 
 }

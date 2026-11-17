@@ -5,6 +5,7 @@ import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Archive, FileText, Inbox, Layers, LogOut, Mail, MoreHorizontal, Plus, Send, Settings, Users, UserRound } from "lucide-react";
 import { api } from "@/lib/api";
+import { settingsApi } from "@/lib/signal-settings";
 import { useAuthStore } from "@/lib/auth-store";
 import { endSession } from "@/lib/session";
 import { useAllDrafts } from "@/lib/use-all-drafts";
@@ -42,6 +43,9 @@ export function Sidebar({ onCompose, onNavigate, compact = false }: { onCompose:
   const { data: counts } = useQuery({ queryKey: ["thread-counts", mailboxId],
     queryFn: () => api.threadCounts(mailboxId!), enabled: !!mailboxId });
   const { data: clients } = useQuery({ queryKey: ["companies"], queryFn: api.listCompanies });
+  const { data: workspace } = useQuery({ queryKey: ["workspace-overview"], queryFn: ({ signal }) => settingsApi.overview(signal),
+    enabled: user?.role === "Admin", staleTime: 60_000 });
+  const resets = workspace?.pendingPasswordResets ?? 0;
   const onMail = pathname === "/mail" || pathname === "/dev/mail";
   const folder = params.get("folder") ?? "inbox";
   function folderHref(key: string) {
@@ -67,7 +71,7 @@ export function Sidebar({ onCompose, onNavigate, compact = false }: { onCompose:
       <button type="button" onClick={onNavigate} aria-label="Mail folders and mailboxes" aria-haspopup="dialog"><MoreHorizontal size={18} aria-hidden /><span>More</span></button>
     </nav>
     <nav className="mail-rail-bottom" aria-label="Account">
-      <Link href="/settings" aria-label="Settings" aria-current={pathname.startsWith("/settings") && !pathname.startsWith("/settings/templates") ? "page" : undefined}><Settings size={18} aria-hidden /><span>Settings</span></Link>
+      <Link href="/settings" aria-label={resets ? `Settings, ${resets} password ${resets === 1 ? "request" : "requests"}` : "Settings"} aria-current={pathname.startsWith("/settings") && !pathname.startsWith("/settings/templates") ? "page" : undefined}><Settings size={18} aria-hidden /><span>Settings</span>{resets > 0 && <small>{resets}</small>}</Link>
       <Link href="/settings/profile" aria-label="Your profile" title={user?.displayName ?? "Your profile"} className="mail-rail-avatar">{initialsFor(user?.displayName ?? user?.email ?? "?")}</Link>
     </nav>
   </aside>;
@@ -81,7 +85,8 @@ export function Sidebar({ onCompose, onNavigate, compact = false }: { onCompose:
             ? pathname.startsWith("/settings") && !pathname.startsWith("/settings/templates")
             : pathname.startsWith(route.href);
           const count = route.href === "/mail" ? counts?.unread
-            : route.href === "/clients" ? clients?.length : undefined;
+            : route.href === "/clients" ? clients?.length
+            : route.href === "/settings" ? resets : undefined;
           return <Link key={route.href} href={route.href === "/mail" ? folderHref("inbox") : route.href}
             onClick={onNavigate} aria-current={active ? "page" : undefined}
             className={cn("signal-nav-link", active && "is-active")}>

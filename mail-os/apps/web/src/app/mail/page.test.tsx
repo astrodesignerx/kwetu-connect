@@ -6,6 +6,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import type { MailThreadDetail, MailThreadSummary } from "@/lib/signal-mail";
 import { ToastProvider } from "@/components/shell/toast";
 import MailPage from "./page";
+import { firstDayKey } from "@/components/mail/first-day-state";
 
 const mocks = vi.hoisted(() => ({
   search: "", listeners: new Set<() => void>(),
@@ -271,10 +272,13 @@ describe("V2 mail behaviour", () => {
   });
   it.each(["Member", "Admin"] as const)("uses the %s empty mailbox wording", async (role) => {
     useAuthStore.setState({ user: { id: "user", email: "user@test.local", username: "user", displayName: "User", role, createdAt: "" } });
+    // An admin sees the setup card instead until they hide it; then the plain empty state shows.
+    if (role === "Admin") localStorage.setItem(firstDayKey("user", "setup-hidden"), "true");
     mocks.overview.mockResolvedValue({ mailboxes: [] }); mount();
     expect(await screen.findByText(role === "Member" ? "No mailbox shared with you yet" : "No mailbox connected")).toBeTruthy();
     expect(screen.getByText(role === "Member" ? "Ask an admin to share one, or connect your own" : "Connect your cPanel mailbox and your mail syncs into this workspace")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Connect a mailbox" })).toBeTruthy();
+    localStorage.clear();
   });
 
   it("falls back and closes the reader when the current mailbox disappears", async () => {

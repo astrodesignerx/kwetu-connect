@@ -30,6 +30,9 @@ describe("invitation expiry", () => {
     expect(invitationExpiry("2026-10-23T11:01:00Z", "pending", now)).toBe("Expires in 24 hours");
     expect(invitationExpiry("2026-10-23T12:00:00Z", "pending", now)).toBe("Expires in 1 day");
     expect(invitationExpiry("2026-10-28T12:00:00Z", "pending", now)).toBe("Expires in 6 days");
+    expect(invitationExpiry("2026-10-29T12:00:05Z", "pending", now)).toBe("Expires in 7 days");
+    expect(invitationExpiry("2026-10-29T11:59:00Z", "pending", now)).toBe("Expires in 7 days");
+    expect(invitationExpiry("2026-10-28T14:00:00Z", "pending", now)).toBe("Expires in 7 days");
     expect(invitationExpiry("invalid", "pending", now)).toBe("Expiry unavailable");
   });
   it("respects terminal server states", () => {

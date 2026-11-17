@@ -2,6 +2,7 @@ using Kompanion.Api.Services.Mail;
 using System.Security.Claims;
 using Kompanion.Api.Auth;
 using Kompanion.Api.Data;
+using Kompanion.Api.Models;
 using Kompanion.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,23 +31,36 @@ public sealed class WorkspaceOverviewController(AppDbContext db, AuditService au
         var health = await boxes.GroupBy(m => m.SyncState)
             .Select(g => new { State = g.Key, Count = g.Count() }).ToListAsync(ct);
         int Count(MailboxSyncState state) => health.Where(g => g.State == state).Sum(g => g.Count);
+        var memberCount = await db.Users.CountAsync(u => u.OrganizationId == orgId, ct);
         int? pending = null;
+        int? pendingPasswordResets = null;
+        WorkspaceSetupDto? setup = null;
         if (User.IsInRole("Admin"))
         {
             pending = await db.Invitations.CountAsync(i => i.OrganizationId == orgId
                 && i.AcceptedAt == null && i.RevokedAt == null && i.ExpiresAt > now, ct);
+            pendingPasswordResets = await db.PasswordResetRequests.CountAsync(r => r.ResolvedAt == null
+                && r.User.OrganizationId == orgId, ct);
+            var firstMailboxEmail = await boxes.OrderBy(m => m.CreatedAt).ThenBy(m => m.Id)
+                .Select(m => m.Email).FirstOrDefaultAsync(ct);
+            var actions = db.AuditLogEntries.Where(a => db.Users.Any(u => u.Id == a.ActorUserId && u.OrganizationId == orgId));
+            setup = new WorkspaceSetupDto(firstMailboxEmail is not null, firstMailboxEmail,
+                memberCount > 1 || await db.Invitations.AnyAsync(i => i.OrganizationId == orgId, ct),
+                await actions.AnyAsync(a => a.Action == "brandkit.update", ct),
+                await actions.AnyAsync(a => a.Action == "template.create" || a.Action == "template.update", ct));
             await Audit("admin.workspace.overview");
         }
         return Ok(new
         {
             workspaceName = workspace.Name,
-            memberCount = await db.Users.CountAsync(u => u.OrganizationId == orgId, ct),
+            memberCount,
             mailboxCount = health.Sum(g => g.Count),
             templateCount = await db.EmailTemplates.CountAsync(t => t.OrganizationId == orgId, ct),
             sendsLast30Days = await db.SendOperations.CountAsync(s => s.Caller.OrganizationId == orgId
                 && VisibleMailboxes(orgId).Any(c => c.Id == s.MailboxConnectionId)
                 && s.Status == SendOperationStatus.Accepted && s.UpdatedAt >= since && s.UpdatedAt <= now, ct),
             pendingInvitations = pending,
+            pendingPasswordResets, setup,
             mailboxHealth = new { healthy = Count(MailboxSyncState.Syncing), pending = Count(MailboxSyncState.Pending),
                 backfilling = Count(MailboxSyncState.Backfilling), needsAttention = Count(MailboxSyncState.Error) }
         });

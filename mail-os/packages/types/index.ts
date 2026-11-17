@@ -548,3 +548,39 @@ export interface MailboxAccessMemberDto {
   role: Role;
   reason: "admin" | "connected" | "granted" | "none";
 }
+
+export interface WorkspaceSetup {
+  mailboxConnected: boolean;
+  firstMailboxEmail: string | null;
+  teamInvited: boolean;
+  emailLookSaved: boolean;
+  quickReplySaved: boolean;
+}
+
+export interface WorkspaceOverview {
+  workspaceName: string;
+  memberCount: number;
+  mailboxCount: number;
+  templateCount: number;
+  sendsLast30Days: number;
+  pendingInvitations: number | null;
+  pendingPasswordResets: number | null;
+  setup: WorkspaceSetup | null;
+  mailboxHealth: { healthy: number; pending: number; backfilling: number; needsAttention: number };
+}
+
+export interface PasswordResetRequestDto {
+  id: string;
+  userId: string;
+  displayName: string;
+  email: string;
+  createdAt: string;
+}
+
+export interface InvitationPreview {
+  email: string;
+  invitedByName: string;
+  role: Role;
+  mailboxes: string[];
+  expiresAt: string;
+}

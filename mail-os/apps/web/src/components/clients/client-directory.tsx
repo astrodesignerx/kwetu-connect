@@ -18,7 +18,7 @@ export function ClientDirectory({ clients }: { clients: ClientActivity[] }) {
       <input aria-label="Find a client or domain" placeholder="Find a client or domain" value={search} onChange={e => setSearch(e.target.value)} className={s.search} />
       <Segmented label="Client view" value={view} onChange={setView} options={[{ value: "grid", label: "Grid", panelId: "client-results" }, { value: "list", label: "List", panelId: "client-results" }]} />
     </div>
-    {!clients.length ? <EmptyState icon={Users} title="No clients yet" text="Create a client to bring their projects and conversations together" /> : !filtered.length ? <EmptyState icon={Search} title="No clients match that search" text="Try part of the name or the email domain" /> :
+    {!clients.length ? <EmptyState icon={Users} title="No clients yet" text="Link a conversation to a company from the reader, or add a client here." /> : !filtered.length ? <EmptyState icon={Search} title="No clients match that search" text="Try part of the name or the email domain" /> :
       <div id="client-results" className={view === "grid" ? s.grid : s.list} data-view={view} key={view}>
         {filtered.map((client) => {
           const status = client.status === "WaitingOnUs" ? "Waiting on us" : "All replied";

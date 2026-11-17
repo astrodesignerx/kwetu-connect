@@ -295,3 +295,9 @@ div.mailboxHeader { margin-top: 12px; }
 @media (prefers-reduced-motion: reduce) {
   :is(.skeletonRow, .skeletonHeader, .skeletonMessage) > span { animation: none; }
 }
+
+.firstDayColumn { order: 2; display: flex; flex-direction: column; gap: 16px; min-width: 0; overflow-y: auto; }
+.firstDayColumn > * { flex-shrink: 0; }
+.firstDayColumn > .brief { flex: 1 0 auto; overflow: visible; }
+.setupEmpty > * { width: min(640px, 100%); }
+@media (max-width: 859px) { .firstDayColumn { overflow: visible; } }

@@ -1,5 +1,6 @@
 "use client";
 
+import s from "@/components/auth-card.module.css";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -24,6 +25,18 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [remember, setRemember] = useState(true);
+  const [step, setStep] = useState<"login" | "request">("login");
+  const [sent, setSent] = useState(false);
+  const [requestIdentifier, setRequestIdentifier] = useState("");
+  const [requestBusy, setRequestBusy] = useState(false);
+  const [requestError, setRequestError] = useState<string | null>(null);
+
+  async function askForReset(event: React.FormEvent) {
+    event.preventDefault(); setRequestBusy(true); setRequestError(null);
+    try { await api.requestPasswordReset(requestIdentifier); setSent(true); }
+    catch { setRequestError("The request could not be sent. Please try again."); }
+    finally { setRequestBusy(false); }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -43,23 +56,15 @@ export default function LoginPage() {
 
   return (
     <AuthCard
-      title="Sign in"
-      subtitle="Use your Kwetu OS account"
-      footer={
-        <>
-          <Link
-            href="/register"
-            className="auth-link"
-          >
-            I have an invitation
-          </Link>
-        </>
-      }
+      title={step === "login" ? "Sign in" : "Ask for a new password"}
+      subtitle={step === "login" ? "Use your Kwetu OS account" : "An admin will help you sign in again"}
+
     >
-      <form
+      <div className={s.steps}>
+      <form data-active={step === "login"} aria-hidden={step !== "login"} inert={step !== "login"}
         onSubmit={onSubmit}
         style={{ "--i": 1 } as React.CSSProperties}
-        className="flex flex-col gap-4"
+        className={`${s.step} flex flex-col gap-4`}
       >
         <AuthField
           id="identifier"
@@ -94,17 +99,22 @@ export default function LoginPage() {
           <span className="signal-switch" data-on={remember}><span /></span>Keep me signed in
         </button>
 
-        <AuthSubmit busy={busy} busyLabel="Signing in…">
+        <AuthSubmit busy={busy} busyLabel="Signing in">
           Sign in
           <ArrowRight aria-hidden size={16} />
         </AuthSubmit>
 
-        {/* Honest about the actual recovery path: there is no self-service reset,
-            because there is no outbound mail for it. An admin runs the CLI. */}
-        <p className="text-center text-xs text-muted">
-          Forgotten your password? An admin can reset it for you.
-        </p>
+        <div className={s.links}><button type="button" className="auth-link" onClick={() => { setRequestIdentifier(identifier); setStep("request"); }}>Forgot your password?</button><Link href="/register" className="auth-link">I have an invitation</Link></div>
       </form>
+      <div className={`${s.step} flex flex-col gap-4`} data-active={step === "request"} aria-hidden={step !== "request"} inert={step !== "request"}>
+        {sent ? <p role="status">If that account exists, your admins have been asked. They will give you a new password.</p> : <form className="flex flex-col gap-4" onSubmit={askForReset}>
+          <AuthField id="reset-identifier" label="Email or username" icon={AtSign} type="text" autoComplete="username" required value={requestIdentifier} onChange={event => setRequestIdentifier(event.target.value)} />
+          <AuthError>{requestError}</AuthError>
+          <AuthSubmit busy={requestBusy} busyLabel="Asking an admin">Ask an admin to reset it</AuthSubmit>
+        </form>}
+        <div className={s.links}><button type="button" className="auth-link" onClick={() => { setStep("login"); setSent(false); }}>Back to sign in</button></div>
+      </div>
+      </div>
     </AuthCard>
   );
 }

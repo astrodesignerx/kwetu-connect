@@ -304,4 +304,56 @@ public class RegistrationTests : IAsyncLifetime
         }
     }
 
+
+    [Fact]
+    public async Task Invitation_preview_greets_the_person_and_omits_deleted_and_foreign_mailboxes()
+    {
+        var admin = await ApiFixture.RegisterAdminAsync(_factory);
+        var (box, _, _) = await ApiFixture.SeedThreadAsync(_factory, admin.UserId);
+        var token = await ApiFixture.CreateInviteTokenAsync(admin, "preview@test.local");
+        DateTimeOffset expiry;
+        string address;
+        await using (var db = _factory.NewDbContext())
+        {
+            var invitation = await db.Invitations.SingleAsync(TestContext.Current.CancellationToken);
+            invitation.MailboxIds = [box, Guid.NewGuid()];
+            expiry = invitation.ExpiresAt;
+            address = (await db.MailboxConnections.FindAsync([box], TestContext.Current.CancellationToken))!.Email;
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+        using var client = _factory.CreateClient();
+        var response = await client.GetAsync($"/api/auth/invitations/preview?token={token}", TestContext.Current.CancellationToken);
+        response.EnsureSuccessStatusCode();
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken);
+        Assert.Equal("preview@test.local", body.GetProperty("email").GetString());
+        Assert.Equal("Test Admin", body.GetProperty("invitedByName").GetString());
+        Assert.Equal("Member", body.GetProperty("role").GetString());
+        Assert.Equal(address, Assert.Single(body.GetProperty("mailboxes").EnumerateArray()).GetString());
+        Assert.Equal(expiry, body.GetProperty("expiresAt").GetDateTimeOffset());
+        Assert.True(response.Headers.CacheControl!.NoStore);
+    }
+
+    [Theory]
+    [InlineData("used")]
+    [InlineData("revoked")]
+    [InlineData("expired")]
+    [InlineData("unknown")]
+    public async Task Unusable_invitation_previews_are_all_404(string state)
+    {
+        var admin = await ApiFixture.RegisterAdminAsync(_factory);
+        var token = await ApiFixture.CreateInviteTokenAsync(admin, "preview@test.local");
+        await using (var db = _factory.NewDbContext())
+        {
+            var invitation = await db.Invitations.SingleAsync(TestContext.Current.CancellationToken);
+            if (state == "used") invitation.AcceptedAt = DateTimeOffset.UtcNow;
+            if (state == "revoked") invitation.RevokedAt = DateTimeOffset.UtcNow;
+            if (state == "expired") invitation.ExpiresAt = DateTimeOffset.UtcNow.AddSeconds(-1);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+        if (state == "unknown") token = "unknown";
+        using var client = _factory.CreateClient();
+        var response = await client.GetAsync($"/api/auth/invitations/preview?token={token}", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal("{}", await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+    }
 }

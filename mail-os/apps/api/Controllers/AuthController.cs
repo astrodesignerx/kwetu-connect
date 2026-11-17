@@ -327,6 +327,25 @@ public class AuthController : ControllerBase
         return Ok(new UpdateProfileResponse(UserDto.From(user), refreshedToken));
     }
 
+    [HttpGet("invitations/preview")]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
+    public async Task<IActionResult> InvitationPreview([FromQuery] string? token, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(token)) return NotFound(new { });
+        var hash = HashToken(token);
+        var now = DateTimeOffset.UtcNow;
+        var invitation = await _db.Invitations.AsNoTracking().Include(i => i.CreatedBy)
+            .FirstOrDefaultAsync(i => i.TokenHash == hash && i.AcceptedAt == null
+                && i.RevokedAt == null && i.ExpiresAt > now, ct);
+        if (invitation is null) return NotFound(new { });
+        var mailboxes = await _db.MailboxConnections.Where(m => m.User.OrganizationId == invitation.OrganizationId
+                && invitation.MailboxIds.Contains(m.Id))
+            .OrderBy(m => m.CreatedAt).ThenBy(m => m.Id).Select(m => m.Email).ToListAsync(ct);
+        Response.Headers.CacheControl = "no-store";
+        return Ok(new { invitation.Email, invitedByName = invitation.CreatedBy.DisplayName,
+            role = invitation.Role.ToString(), mailboxes, invitation.ExpiresAt });
+    }
+
     /// <summary>SHA-256 hex of an invite token. Only the hash is ever persisted.</summary>
     internal static string HashToken(string token) =>
         Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token))).ToLowerInvariant();

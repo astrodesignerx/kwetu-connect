@@ -1,5 +1,7 @@
 "use client";
 
+import { setupDone } from "@/components/mail/setup-card";
+import { setFirstDayFlag } from "@/components/mail/first-day-state";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, Layers, Mail, Palette, ScrollText, UserRound, Users, type LucideIcon } from "lucide-react";
@@ -26,6 +28,7 @@ export default function SettingsHubPage() {
   return <div className={s.page}>
     <SettingsHeader title="Settings" context=""
       description={`${data.workspaceName}: ${plural(data.memberCount, "person", "people")}, ${plural(data.mailboxCount, "mailbox", "mailboxes")}, ${plural(data.templateCount, "template")}, ${plural(data.sendsLast30Days, "send")} in the last 30 days`} />
+    {isAdmin && data.setup && !setupDone(data.setup) && <Link className="auth-link" href="/mail" onClick={() => setFirstDayFlag(user.id, "setup-hidden", false)}>Finish setup</Link>}
     <nav className={s.list} aria-label="Settings">
       <Row href="/settings/profile" icon={UserRound} title="Profile">
         {user ? `${user.displayName}, ${user.role}` : "Your name, sign-in and password"}

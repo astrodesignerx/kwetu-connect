@@ -3,6 +3,7 @@
 import { useState, type ComponentType } from "react";
 import { Eye, EyeOff, Loader2, type LucideProps } from "lucide-react";
 import { cn } from "@/lib/cn";
+import s from "./auth-card.module.css";
 import { Logo } from "@/components/logo";
 
 export function AuthCard({ title, subtitle, children, footer }: {
@@ -10,7 +11,7 @@ export function AuthCard({ title, subtitle, children, footer }: {
 }) {
   return (
     <main className="signal-auth">
-      <section className="signal-auth-form">
+      <div className={s.layout}><section className="signal-auth-form">
         <div className="signal-auth-content">
           <div className="signal-auth-brand"><Logo /><span>Kwetu OS</span></div>
           <header className="signal-auth-heading"><h1>{title}</h1><p>{subtitle}</p></header>
@@ -18,6 +19,7 @@ export function AuthCard({ title, subtitle, children, footer }: {
           {footer && <div className="signal-auth-footer">{footer}</div>}
         </div>
       </section>
+      <aside className={s.brand} aria-label="Kwetu OS"><Logo size={32} /><div><h2>Every client conversation, on one screen.</h2><p>The shared inbox for the Kwetu Connect Ads team.</p></div></aside></div>
     </main>
   );
 }

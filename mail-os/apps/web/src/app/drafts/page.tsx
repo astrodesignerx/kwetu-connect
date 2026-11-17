@@ -1,6 +1,7 @@
 "use client";
 
-import { ErrorText } from "@/components/ui";
+import Link from "next/link";
+import { ErrorText, buttonClass } from "@/components/ui";
 import { ErrorState } from "@/components/empty-state";
 import { FileText } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
@@ -55,7 +56,7 @@ export default function DraftsPage() {
           </button>
           <button className={s.discard} disabled={remove.isPending} onClick={() => remove.mutate(draft.id)}>Discard</button>
         </li>;
-      })}</ul> : !failed && <EmptyState icon={FileText} title="No drafts" text="Messages you start and do not send are kept here" />}
+      })}</ul> : !failed && <EmptyState icon={FileText} title="No drafts" text="Replies you start and do not send are kept here." action={<Link href="/mail" className={buttonClass()}>Open the inbox</Link>} />}
       {editing && (
         <ComposeModal ctx={editing} onClose={() => setEditing(null)} />
       )}
