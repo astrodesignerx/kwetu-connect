@@ -36,10 +36,11 @@ export default function AdvertReview({ advert, reference, business, bookedSecond
       <AdvertStage url={failed ? null : url} video={video} fileName={advert.fileName} onMeasured={setMeasured} onFailed={() => setFailed(true)}
         header={<AdvertCardHead business={business} reference={reference} downloadUrl={url} fileName={advert.fileName}
           facts={[advert.fileName, advert.seconds + " s", kindLabel(kind), "uploaded " + uploaded].join(" | ")} />}
-        unavailable={<div className="advert-unavailable"><strong>{demo ? "Demo advert" : "Preview unavailable"}</strong><span>{advert.fileName}</span><small>{demo ? "Demo mode stores file names only. No media is available." : "The file could not be shown here. Nothing is measured for it."}</small></div>} />
+        unavailable={<div className="advert-unavailable"><em>{!url ? "Placeholder" : "Preview unavailable"}</em><strong>{business}</strong><span>{advert.fileName}</span><small>{demo ? "Demo mode stores file names only. No media is available." : "The file could not be shown here. Nothing is measured for it."}</small></div>} />
+      <dl className="mg-ad-specs"><div><dt>File type</dt><dd>{kindLabel(kind)}</dd></div><div><dt>Length</dt><dd>{advert.seconds}s declared</dd></div><div><dt>Dimensions</dt><dd>{measured ? `${measured.width} x ${measured.height}` : "Not measured"}</dd></div><div><dt>Uploaded</dt><dd>{uploaded}</dd></div></dl>
     </section>
     <section className="v2-card advert-card advert-checks-card" aria-label="Checks">
-      <div className="advert-checks-head"><h2>Checks</h2><span>{checkSummary(rows, ticked)}</span></div>
+      <div className="advert-checks-head"><div><span>{checkSummary(rows, ticked)}</span><h2>Checks</h2></div><div className="mg-check-meter" aria-hidden="true">{rows.map((row) => <i key={row.id} data-state={row.state} data-ticked={Boolean(ticked[row.id])} />)}</div></div>
       <ul className="advert-checks">{rows.map((row) => row.state === "you"
         ? <li key={row.id}><label className="advert-check" data-state="you"><input type="checkbox" checked={Boolean(ticked[row.id])} onChange={(event) => setTicked({ ...ticked, [row.id]: event.target.checked })} /><Medal state="you" ticked={ticked[row.id]} /><span className="advert-check-text"><b>{row.label}</b><small>{row.detail}</small></span></label></li>
         : <li key={row.id} className="advert-check" data-state={row.state}><Medal state={row.state} /><span className="advert-check-text"><b>{row.label}<span className="sr-only">: {STATE_WORDS[row.state]}</span></b><small>{row.detail}</small></span></li>)}</ul>

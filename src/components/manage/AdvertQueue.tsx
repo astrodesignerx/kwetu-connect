@@ -14,7 +14,7 @@ function Thumb({ entry, pill }: { entry: DeskEntry; pill: { tone: PillTone; text
   const url = advert.filePath ? `/manage/bookings/${detail.booking.reference}/advert/${advert.id}` : null;
   const video = fileKind(advert.fileName) === "mp4";
   return <span className="advert-thumb" data-kind={url ? "media" : "tile"}>
-    {!url ? <span className="advert-thumb-name">{detail.advertiser.business}</span> : video ? <video muted playsInline preload="metadata" src={url + "#t=0.1"} tabIndex={-1} aria-hidden="true" /> : <Image src={url} alt="" fill unoptimized sizes="190px" />}
+    {!url ? <><em className="mg-placeholder-label">Placeholder</em><span className="advert-thumb-name">{detail.advertiser.business}</span></> : video ? <video muted playsInline preload="metadata" src={url + "#t=0.1"} tabIndex={-1} aria-hidden="true" /> : <Image src={url} alt="" fill unoptimized sizes="190px" />}
     {url && video && <span className="advert-play" aria-hidden="true"><Play size={14} weight="fill" /></span>}
     <span className="advert-length">{advert.seconds}s</span>{badge}
   </span>;

@@ -12,6 +12,8 @@ const PAGES: [path: string, title: string, note?: string][] = [
 /** Page heading row under the top bar. Overview draws its own; a single booking has its own main heading, so the title is plain text there. */
 export default function ManagerPageIntro({ now }: { now: string }) {
   const pathname = usePathname();
+  // These desks place their page-specific actions beside their own heading.
+  if (pathname === "/manage/bookings" || pathname === "/manage/adverts") return null;
   const page = PAGES.find(([path]) => pathname.startsWith(path));
   if (!page) return null;
   const Heading = pathname === page[0] ? "h1" : "p";

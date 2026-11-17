@@ -53,7 +53,7 @@ export default function BookingHeader({ business, reference, status, action, mov
       <span className="v2-popup-tile" aria-hidden="true">{business.slice(0, 2).toUpperCase()}</span>
       <div><Name className="v2-popup-name">{business}</Name>
         <button type="button" className="v2-copy-ref" onClick={copy} aria-label={`Copy reference ${reference}`}><code>{reference}</code>{copied ? <Check size={12} aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}<span className="v2-copied" data-show={copied} role="status">{copied ? "Copied" : ""}</span></button>
-      </div>
+      </div><span className="pipeline-pill" data-stage={status}>{status}</span>
     </div>
     <ol className="v2-stepper" aria-label={status === "Cancelled" ? "Booking stage, cancelled" : "Booking stage"}>{stages.map((stage, index) => <li key={stage} aria-current={stage === status ? "step" : undefined} data-done={status !== "Cancelled" && index < STATUSES.indexOf(status)}><i aria-hidden="true" /><span>{stage}</span></li>)}</ol>
     <div className="v2-popup-actions">

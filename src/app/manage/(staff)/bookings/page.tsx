@@ -1,6 +1,7 @@
 import { requireStaff } from "@/lib/auth/server";
 import { getStore } from "@/lib/store";
 import { STATUSES } from "@/lib/booking/status";
+import ClockPill from "@/components/manage/ClockPill";
 import BookingFilters from "@/components/manage/BookingFilters";
 import BookingDetail from "@/components/manage/BookingDetail";
 import BookingList from "@/components/manage/BookingList";
@@ -11,7 +12,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { number } from "@/components/booking/QuoteTotals";
 import { StageShareBar } from "@/components/manage/V2Visuals";
-import { RevenueChart } from "@/components/workspace/Charts";
+import BookedValueChart from "@/components/manage/BookedValueChart";
 import { weeklyTotals } from "@/lib/dashboard";
 import { endsThisMonth, loadCards, matchesBase, mondayOf, needsAction, parseFilters, startsThisWeek, visibleBookings } from "@/lib/booking/pipeline";
 import { DownloadSimple, Kanban, ListBullets } from "@phosphor-icons/react/dist/ssr";
@@ -40,16 +41,17 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
   exportQuery.delete("layout");
   const moveQuery = new URLSearchParams(values);
   moveQuery.set("selected", selected);
-  return <section className="pipeline-page">
+  return <section className="pipeline-page mg-bookings">
     <div className="pipeline-heading">
-      <p className="pipeline-help">{bookings.length} booking{bookings.length === 1 ? "" : "s"} | Drag a card to change its stage, you confirm every move</p>
+      <h1 className="mg-heading">Bookings pipeline</h1>
       <div className="pipeline-actions v2-heading-tools">
         <nav className="v2-segmented" aria-label="Layout"><Link href={withLayout("board")} scroll={false} aria-current={filter.layout === "board" ? "page" : undefined}><Kanban size={14} aria-hidden="true" />Board</Link><Link href={withLayout("list")} scroll={false} aria-current={filter.layout === "list" ? "page" : undefined}><ListBullets size={14} aria-hidden="true" />List</Link></nav>
         <a className="quiet-button v2-export" href={"/manage/bookings/export" + (exportQuery.toString() ? "?" + exportQuery : "")}><DownloadSimple size={14} aria-hidden="true" />Export CSV</a>
       </div>
     </div>
+    <div className="mg-desk-note"><p className="pipeline-help">{bookings.length} booking{bookings.length === 1 ? "" : "s"} | Drag a card to change its stage, you confirm every move</p><ClockPill now={new Date().toISOString()} /></div>
     <BookingFilters filter={filter} counts={counts} today={today}>
-      <div className="v2-bookings-summary"><StageShareBar stages={STATUSES.filter((status) => status !== "Cancelled").map((label) => ({ label, count: stageCounts.filter((booking) => booking.status === label).length }))} /><section className="v2-card v2-booked-value"><h2>Booked value</h2><strong>KES {number(all.filter((booking) => booking.status !== "Cancelled").reduce((total, booking) => total + booking.priceKes, 0))}</strong><RevenueChart weeks={weeklyTotals(all, monday)} /></section></div>
+      <div className="v2-bookings-summary"><StageShareBar stages={STATUSES.filter((status) => status !== "Cancelled").map((label) => ({ label, count: stageCounts.filter((booking) => booking.status === label).length, value: stageCounts.filter((booking) => booking.status === label).reduce((sum, booking) => sum + booking.priceKes, 0) }))} /><section className="v2-card v2-booked-value"><h2>Booked value <small>Cancelled excluded</small></h2><strong><small>KES</small> {number(all.filter((booking) => booking.status !== "Cancelled").reduce((total, booking) => total + booking.priceKes, 0))}</strong><BookedValueChart weeks={weeklyTotals(all, monday)} /></section></div>
       {filter.from && filter.to && filter.from > filter.to && <p role="alert">The end date is before the start date.</p>}
       {filter.layout === "list"
         ? <BookingList bookings={bookings} query={values.toString()} selected={selected} today={today} />
