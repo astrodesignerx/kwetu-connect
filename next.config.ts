@@ -22,6 +22,10 @@ const contentSecurityPolicy = [
   "upgrade-insecure-requests",
 ].join("; ");
 
+// The manager's Mail page shows people's email, which links pictures from anywhere on the web. Its
+// frames run no scripts, so the only change for that page is letting https pictures load.
+const mailContentSecurityPolicy = contentSecurityPolicy.replace("img-src 'self' data: blob:", "img-src 'self' data: blob: https:");
+
 const securityHeaders = [
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -39,10 +43,15 @@ const nextConfig: NextConfig = {
   turbopack: { root: __dirname },
   experimental: { serverActions: { bodySizeLimit: "55mb" } },
   async headers() {
+    const mailHeaders = securityHeaders.map((h) => (h.key === "Content-Security-Policy" ? { ...h, value: mailContentSecurityPolicy } : h));
     return [
       {
-        source: "/(.*)",
+        source: "/((?!manage/mail$).*)",
         headers: securityHeaders,
+      },
+      {
+        source: "/manage/mail",
+        headers: mailHeaders,
       },
     ];
   },
