@@ -40,6 +40,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // The dev server would otherwise print every form action's arguments, mailbox passwords included.
+  logging: { serverFunctions: false },
   turbopack: { root: __dirname },
   experimental: { serverActions: { bodySizeLimit: "55mb" } },
   async headers() {
