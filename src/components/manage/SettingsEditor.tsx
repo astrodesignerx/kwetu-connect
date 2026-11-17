@@ -1,19 +1,15 @@
 ﻿"use client";
 import { useActionState, useState } from "react";
-import { Clock, Coins, FilmStrip, Hourglass, Percent, Play, Timer, X } from "@phosphor-icons/react";
+import { X } from "@phosphor-icons/react";
+import SettingsRuleTiles, { TITLES, type Section } from "./SettingsRuleTiles";
 import { saveSettings } from "@/app/manage/actions";
 import type { BookingSettings } from "@/lib/booking/settings";
 import { quote } from "@/lib/booking/quote";
 import { validateSettings } from "@/lib/store/validation";
 import { RULEBOOK_EXAMPLES } from "@/lib/store/examples";
 
-// Settings, concept C "Summary first" (2026-11-05): the page reads as a fact sheet of how the screen is sold.
-// Tap a tile to edit that part in the side panel, which shows the impact on the rulebook examples before saving.
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const WEEK = [1, 2, 3, 4, 5, 6, 0];
-type Section = "price" | "discounts" | "capacity" | "lengths" | "often" | "lead" | "blocks" | "hours";
-const TITLES: Record<Section, string> = { price: "Price", discounts: "Discounts", capacity: "For sale each hour", lengths: "Lengths", often: "Plays an hour", lead: "Booking lead", blocks: "Time blocks", hours: "Screen hours" };
 const HINTS: Record<Section, string> = {
   price: "Price per second and minimum order.",
   discounts: "Applies to the whole order when its play threshold is reached.",
@@ -24,30 +20,8 @@ const HINTS: Record<Section, string> = {
   blocks: "Hour groups offered when booking.",
   hours: "Screen opening hours and time blocks.",
 };
-const ICONS = { price: Coins, discounts: Percent, capacity: Hourglass, lengths: FilmStrip, often: Play, lead: Timer, blocks: Clock, hours: Clock };
 const n = (value: number) => value.toLocaleString("en-GB");
-const hh = (hour: number) => String(hour).padStart(2, "0");
 
-/** "Mon to Thu 06 to 22, Fri to Sun 06 to 24": consecutive days with the same hours are grouped. */
-function hourGroups(hours: BookingSettings["screenHours"]) {
-  const groups: { from: number; to: number; open: number; close: number }[] = [];
-  for (const day of WEEK) {
-    const h = hours[day]; const last = groups[groups.length - 1];
-    if (last && last.open === h.open && last.close === h.close) last.to = day;
-    else groups.push({ from: day, to: day, open: h.open, close: h.close });
-  }
-  return groups;
-}
-function hoursSummary(hours: BookingSettings["screenHours"]) {
-  return hourGroups(hours).map((g) => (g.from === g.to ? SHORT[g.from] : SHORT[g.from] + " to " + SHORT[g.to]) + (g.open >= g.close ? " closed" : " " + hh(g.open) + " to " + hh(g.close))).join(", ");
-}
-
-/** "Fri to Sun" or "Mon, Wed": days (Monday first) as short names, runs of three or more joined with "to". */
-function dayList(days: number[]) {
-  const runs: number[][] = [];
-  for (const day of WEEK.filter((d) => days.includes(d))) { const last = runs[runs.length - 1]; if (last && WEEK.indexOf(day) === WEEK.indexOf(last[last.length - 1]) + 1) last.push(day); else runs.push([day]); }
-  return runs.map((run) => run.length > 2 ? SHORT[run[0]] + " to " + SHORT[run[run.length - 1]] : run.map((d) => SHORT[d]).join(", ")).join(", ");
-}
 /** A number field with its unit inside the box on the right. */
 const Unit = ({ unit, children }: { unit: string; children: React.ReactNode }) => <span className="settings-input">{children}<em aria-hidden="true">{unit}</em></span>;
 
@@ -62,24 +36,6 @@ export default function SettingsEditor({ initial, activeBookings }: { initial: B
   try { validateSettings(candidate); } catch (e) { error = e instanceof Error ? e.message : "Check your settings."; }
   const unsaved = JSON.stringify(candidate) !== JSON.stringify(initial);
   function update(change: (next: BookingSettings) => void) { setSettings((current) => { const next = structuredClone(current); change(next); return next; }); }
-
-  const steps = [...candidate.discountSteps].sort((a, b) => a.minPlays - b.minPlays);
-  const lens = [...candidate.lengths].filter(Number.isFinite).sort((a, b) => a - b);
-  const plays = candidate.howOften.map((o) => o.plays).sort((a, b) => a - b);
-  // A rule is only stated when the hours really follow it: the late block open on some days but not all.
-  const late = candidate.timeBlocks.late;
-  const lateDays = late ? WEEK.filter((day) => candidate.screenHours[day].close > late.startHour && candidate.screenHours[day].open < late.endHour) : [];
-  const hoursRule = late && lateDays.length > 0 && lateDays.length < 7 ? `${late.label} block runs ${dayList(lateDays)} only` : "";
-  const tiles: { id: Section; value: React.ReactNode; sig: string; note: string; aside?: string; wide?: boolean }[] = [
-    { id: "price", value: <>KES {n(candidate.kesPerSecond)} <small>a second</small></>, sig: String(candidate.kesPerSecond), note: `Smallest order KES ${n(candidate.minOrderKes)}` },
-    { id: "discounts", value: steps.length ? steps.map((s) => s.percent).join(" / ") + "%" : "None", sig: steps.map((s) => s.percent).join(), aside: "by plays booked", note: steps.length ? `From ${n(steps[0].minPlays)} plays` : "No discount steps" },
-    { id: "capacity", value: `${n(Math.round(candidate.secondsForSalePerHour / 60))} min`, sig: String(candidate.secondsForSalePerHour), note: `${n(candidate.secondsForSalePerHour)} s, up to ${candidate.maxPlaysPerAdvertiserPerHour} plays per advertiser` },
-    { id: "lengths", value: lens.length ? `${lens[0]} to ${lens[lens.length - 1]}s` : "None", sig: lens.join(), note: "" },
-    { id: "often", value: plays.length ? `${plays[0]} to ${plays[plays.length - 1]}` : "None", sig: plays.join(), note: "" },
-    { id: "lead", value: `${candidate.leadWorkingDays} ${candidate.leadWorkingDays === 1 ? "day" : "days"}`, sig: String(candidate.leadWorkingDays), note: "Before the first play" },
-    { id: "blocks", value: `${Object.keys(candidate.timeBlocks).length} blocks`, sig: "blocks", note: "" },
-    { id: "hours", value: hoursSummary(candidate.screenHours), sig: hoursSummary(candidate.screenHours), note: "", aside: hoursRule, wide: true },
-  ];
 
   const field = (key: keyof Pick<BookingSettings, "kesPerSecond" | "minOrderKes" | "secondsForSalePerHour" | "maxPlaysPerAdvertiserPerHour" | "leadWorkingDays">, label: string, unit: string) =>
     <label key={key}>{label}<Unit unit={unit}><input type="number" min={1} step={1} required value={settings[key]} onChange={(e) => update((s) => { s[key] = Number(e.target.value); })} /></Unit></label>;
@@ -112,12 +68,7 @@ export default function SettingsEditor({ initial, activeBookings }: { initial: B
 
   return <form action={action} className="staff-form settings-c">
     <input type="hidden" name="settings" value={JSON.stringify(candidate)} />
-    <div className="settings-tiles">{tiles.map((tile) => { const Icon = ICONS[tile.id]; return <button key={tile.id} type="button" className={`settings-tile${tile.wide ? " is-wide" : ""}`} data-section={tile.id} aria-pressed={open === tile.id} aria-controls="settings-panel" onClick={() => setOpen(open === tile.id ? null : tile.id)}>
-      <span className="settings-tile-label"><span className="v2-setting-icon"><Icon size={17} aria-hidden="true" /></span>{TITLES[tile.id]}{tile.aside && <small className="settings-tile-aside">{tile.aside}</small>}</span><strong key={tile.sig}>{tile.value}</strong>{tile.note && <span className="settings-tile-note">{tile.note}</span>}
-      {(tile.id === "lengths" || tile.id === "often" || tile.id === "blocks") && <span className="v2-rule-chips" aria-hidden="true">{(tile.id === "lengths" ? lens.map((length) => length + "s") : tile.id === "often" ? plays.map(String) : Object.values(candidate.timeBlocks).map((block) => `${block.label} ${hh(block.startHour)} to ${hh(block.endHour)}`)).map((label) => <span key={label}>{label}</span>)}</span>}
-      {tile.id === "discounts" && <span className="v2-discount-stair" aria-hidden="true">{[{ minPlays: 0, percent: 0 }, ...steps].map((step) => <span key={step.minPlays + ":" + step.percent}><i style={{ "--p": Math.min(99, step.percent) } as React.CSSProperties}>{step.percent}%</i><small>{step.minPlays ? n(step.minPlays) : "Under " + n(steps[0].minPlays)}</small></span>)}</span>}
-      {tile.id === "hours" && <span className="v2-screen-hours" aria-hidden="true"><span />{Array.from({ length: 24 }, (_, hour) => <small key={hour}>{hour % 3 === 0 ? hh(hour) : ""}</small>)}{hourGroups(candidate.screenHours).map((group) => <span className="v2-screen-hour-row" key={group.from}><span>{SHORT[group.from]}{group.from !== group.to ? " to " + SHORT[group.to] : ""}</span>{Array.from({ length: 24 }, (_, hour) => <i key={hour} data-open={hour >= group.open && hour < group.close} />)}</span>)}</span>}
-    </button>; })}</div>
+    <SettingsRuleTiles candidate={candidate} open={open} onSelect={setOpen} />
     <aside id="settings-panel" className="settings-panel" aria-label="Edit settings" data-open={open !== null}>
       <fieldset disabled={pending} className="settings-fields" key={open ?? "none"}>
         {open ? <><div className="settings-panel-head"><h2>Editing <span>{TITLES[open]}</span></h2><span className="settings-state" data-draft={unsaved}>{unsaved ? "Draft" : "Saved"}</span><button type="button" className="settings-remove" aria-label="Close panel" onClick={() => setOpen(null)}><X size={14} aria-hidden="true" /></button></div><p className="settings-sub">{HINTS[open]}</p>{editors[open]}</>
@@ -137,7 +88,7 @@ export default function SettingsEditor({ initial, activeBookings }: { initial: B
         <div><span>Active bookings</span><span>{n(activeBookings)} keep {activeBookings === 1 ? "its" : "their"} booked price</span></div>
       </div>
       <div className="settings-footer">
-        <button className="staff-button" disabled={Boolean(error) || !unsaved || pending}>{pending ? "Saving..." : unsaved ? "Save changes" : "No changes to save"}</button>
+        <button className="staff-button mg-primary" disabled={Boolean(error) || !unsaved || pending}>{pending ? "Saving..." : unsaved ? "Save changes" : "No changes to save"}</button>
         <button type="button" className="settings-reset" disabled={!unsaved || pending} onClick={() => { setSettings(initial); setLengths(initial.lengths.join(", ")); setHolidays(initial.publicHolidays.join("\n")); }}>Reset</button>
       </div>
 
