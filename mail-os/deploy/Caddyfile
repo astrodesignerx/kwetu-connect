@@ -1,0 +1,17 @@
+{$MAIL_HOST} {
+    encode zstd gzip
+    request_body {
+        max_size 55MB
+    }
+    handle /api/* {
+        reverse_proxy api:8080
+    }
+    handle /hubs/* {
+        reverse_proxy api:8080 {
+            flush_interval -1
+        }
+    }
+    handle {
+        reverse_proxy web:3013
+    }
+}

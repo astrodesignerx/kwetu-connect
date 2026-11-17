@@ -10,6 +10,8 @@ import { resolve } from "node:path";
 const apiUrl = process.env.API_URL ?? "http://localhost:5280";
 
 const nextConfig: NextConfig = {
+  output: process.env.MAIL_STANDALONE === "1" ? "standalone" : undefined,
+  outputFileTracingRoot: resolve(__dirname, "../.."),
   // Keep the independent mail workspace separate from the public site's proxy.
   turbopack: { root: resolve(__dirname, "../..") },
   transpilePackages: ["@kompanion/types", "@kompanion/api-client"],

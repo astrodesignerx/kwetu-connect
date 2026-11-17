@@ -22,6 +22,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSignalR();
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    ReverseProxyConfiguration.Configure(options, builder.Configuration["ReverseProxy:KnownProxies"]));
 
 var connectionString = builder.Configuration.GetConnectionString("Default")
     ?? "Host=127.0.0.1;Port=5432;Username=postgres;Password=postgres;Database=clientcomms";
@@ -228,6 +230,10 @@ builder.Services.AddHangfireServer(o => o.WorkerCount = 4);
 
 var app = builder.Build();
 
+if (InvitationMailer.WebAddress(app.Configuration) is null)
+    app.Logger.LogWarning("App:WebBaseUrl is not set, so invitation emails cannot be sent. " +
+        "Set it to the address people open Kwetu OS at.");
+
 // Maintenance commands (reset-password, list-users) share the API's configuration and
 // database, then exit without starting the web host or the sync workers.
 // Collection import is additive maintenance against an existing schema, including dry runs.
@@ -290,6 +296,8 @@ app.UseExceptionHandler(errorApp => errorApp.Run(async context =>
         detail = app.Environment.IsDevelopment() ? feature?.Error.Message : null
     });
 }));
+
+app.UseForwardedHeaders();
 
 if (!app.Environment.IsDevelopment())
 {

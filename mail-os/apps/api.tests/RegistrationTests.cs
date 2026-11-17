@@ -270,6 +270,7 @@ public class RegistrationTests : IAsyncLifetime
     [Theory]
     [InlineData("https://configured.test", "https://fallback.test", true, "https://configured.test")]
     [InlineData(null, "https://fallback.test", true, "https://fallback.test")]
+    [InlineData(null, "https://first.test, https://second.test", true, "https://first.test")]
     [InlineData(null, null, false, null)]
     [InlineData("invalid", "https://fallback.test", false, null)]
     public async Task Invitation_mailer_resolves_the_configured_or_first_CORS_web_address(string? configured,
@@ -283,7 +284,8 @@ public class RegistrationTests : IAsyncLifetime
         var connection = await db.MailboxConnections.Include(c => c.User).SingleAsync(c => c.Id == box, ct);
         var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["App:WebBaseUrl"] = configured, ["Cors:WebOrigins:0"] = fallback
+            // Environment variables give a comma-separated string, JSON gives a list.
+            ["App:WebBaseUrl"] = configured, [fallback?.Contains(',') == true ? "Cors:WebOrigins" : "Cors:WebOrigins:0"] = fallback
         }).Build();
         var mailer = new InvitationMailer(_factory.Smtp, scope.ServiceProvider.GetRequiredService<SmtpSender>(), config);
         string? text = null;
