@@ -13,7 +13,7 @@ const PAGES: [path: string, title: string, note?: string][] = [
 export default function ManagerPageIntro({ now }: { now: string }) {
   const pathname = usePathname();
   // These desks place their page-specific actions beside their own heading.
-  if (pathname === "/manage/bookings" || pathname === "/manage/adverts") return null;
+  if (["/manage/bookings", "/manage/adverts", "/manage/schedule", "/manage/settings"].includes(pathname)) return null;
   const page = PAGES.find(([path]) => pathname.startsWith(path));
   if (!page) return null;
   const Heading = pathname === page[0] ? "h1" : "p";
