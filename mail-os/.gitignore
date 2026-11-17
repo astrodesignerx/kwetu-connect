@@ -23,6 +23,9 @@ infra/dpkeys/
 # Attachment blob store (dev)
 infra/attachments/
 
+# Database backups (real mail data)
+infra/backups/
+
 # Desktop packaging output
 apps/desktop/dist/
 
