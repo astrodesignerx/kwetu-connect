@@ -3805,9 +3805,11 @@ label.advert-check:hover .advert-medal[data-state="you"] { transform: scale(1.08
 .mg-schedule .v2-hour-donut { display: flex; flex-direction: column; background: radial-gradient(ellipse at top right, var(--mg-glow), transparent 70%), var(--mg-panel); }
 .mg-schedule .v2-hour-donut .mg-pill { padding: 6px 10px; font-size: 11px; }
 .mg-schedule .v2-donut-content { flex: 1; display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1fr); align-items: center; gap: 16px; margin: 16px 0; animation: surface-in var(--duration-base) var(--ease-out) both; }
-.mg-schedule .v2-donut { width: 100%; max-width: 176px; }
-.mg-schedule .v2-donut b { font-family: inherit; font-size: 28px; font-weight: 500; }
-.mg-schedule .v2-donut small { font-family: inherit; font-size: 10px; }
+.mg-schedule .v2-donut { width: 100%; max-width: 176px; height: auto; aspect-ratio: 1; }
+.mg-schedule .v2-donut svg { display: block; width: 100%; height: 100%; }
+.mg-schedule .v2-donut > div { padding: 16%; }
+.mg-schedule .v2-donut b { font-family: inherit; font-size: clamp(18px, 2.2vw, 28px); line-height: 1; font-weight: 500; }
+.mg-schedule .v2-donut small { font-family: inherit; font-size: 10px; line-height: 1.2; }
 .mg-schedule .v2-donut-legend { min-width: 0; width: 100%; }
 .mg-schedule .v2-donut-legend :is(a, div) { display: grid; grid-template-columns: 8px minmax(0, 1fr) auto; gap: 7px; align-items: center; font-size: 11px; }
 .mg-schedule .v2-donut-legend a:hover { opacity: .8; }
