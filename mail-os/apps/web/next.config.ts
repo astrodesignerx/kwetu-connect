@@ -15,6 +15,9 @@ const nextConfig: NextConfig = {
   // Keep the independent mail workspace separate from the public site's proxy.
   turbopack: { root: resolve(__dirname, "../..") },
   transpilePackages: ["@kompanion/types", "@kompanion/api-client"],
+  experimental: {
+    agentUpgrade: "security",
+  },
 
   async rewrites() {
     return [
