@@ -7,5 +7,5 @@ export default async function SettingsPage() {
   const [settings, bookings] = await Promise.all([store.getSettings(), store.listBookings()]);
   // Saved bookings store their own price, so a rule change never touches them.
   const active = bookings.filter((booking) => booking.status !== "Cancelled" && booking.status !== "Finished").length;
-  return <section className="settings-page"><SettingsEditor initial={settings} activeBookings={active} /></section>;
+  return <section className="settings-page mg-settings"><div className="mg-intro"><h1 className="mg-heading">Screen settings</h1><span className="mg-pill">Changes apply to new quotes only</span></div><SettingsEditor initial={settings} activeBookings={active} /></section>;
 }

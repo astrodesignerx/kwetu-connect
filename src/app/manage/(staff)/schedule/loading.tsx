@@ -1,2 +1,2 @@
-import { StaffPageSkeleton } from "@/components/workspace/Skeletons";
-export default function Loading() { return <StaffPageSkeleton label="schedule" />; }
+import ManagerScreenSkeleton from "@/components/manage/ManagerScreenSkeleton";
+export default function Loading() { return <ManagerScreenSkeleton />; }
