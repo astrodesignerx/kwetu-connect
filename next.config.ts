@@ -22,6 +22,12 @@ const contentSecurityPolicy = [
   "upgrade-insecure-requests",
 ].join("; ");
 
+// The message frame blocks remote content until the reader asks to show pictures.
+// The mail page allows https pictures so that explicit choice can load them.
+const mailContentSecurityPolicy = contentSecurityPolicy
+  .replace("img-src 'self' data: blob:", "img-src 'self' data: blob: https:")
+  .replace("frame-src https:", "frame-src 'self' https:");
+
 const securityHeaders = [
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -36,13 +42,20 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // The dev server would otherwise print every form action's arguments, mailbox passwords included.
+  logging: { serverFunctions: false },
   turbopack: { root: __dirname },
   experimental: { serverActions: { bodySizeLimit: "55mb" } },
   async headers() {
+    const mailHeaders = securityHeaders.map((h) => (h.key === "Content-Security-Policy" ? { ...h, value: mailContentSecurityPolicy } : h));
     return [
       {
-        source: "/(.*)",
+        source: "/((?!mail(?:/|$)).*)",
         headers: securityHeaders,
+      },
+      {
+        source: "/mail/:path*",
+        headers: mailHeaders,
       },
     ];
   },

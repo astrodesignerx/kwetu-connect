@@ -39,8 +39,11 @@ export type PublicBooking = Pick<Booking, "reference" | "request" | "plays" | "f
 export type BookingFilter = { status?: string; from?: string; to?: string };
 export type BookingListItem = Booking & { business: string };
 export type AdvertUpload = { name: string; type: string; size: number; arrayBuffer(): Promise<ArrayBuffer> };
+/** Private staff workspace data, read together without booking mutations. */
+export type MailDirectory = { advertisers: Advertiser[]; bookings: Booking[]; adverts: Advert[]; settings: BookingSettings };
 export interface BookingStore {
   readonly mode: "memory" | "supabase";
+  mailDirectory(): Promise<MailDirectory>;
   getSettings(): Promise<BookingSettings>;
   saveSettings(settings: unknown): Promise<void>;
   isStaff(email: string): Promise<boolean>;

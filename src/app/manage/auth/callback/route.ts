@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const client = await authClient();
     const { error } = tokenHash && type ? await client.auth.verifyOtp({ token_hash: tokenHash, type }) : await client.auth.exchangeCodeForSession(code!);
     const { data: { user } } = await client.auth.getUser();
-    if (!error && user?.email && await getStore().isStaff(user.email)) return NextResponse.redirect(new URL("/manage", request.url));
+    if (!error && user?.email && await getStore().isStaff(user.email)) return NextResponse.redirect(new URL(params.get("next") === "/mail" ? "/mail" : "/manage", request.url));
     await client.auth.signOut();
   }
   return NextResponse.redirect(new URL("/manage/sign-in?error=link", request.url));

@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
-  if (request.nextUrl.pathname.startsWith("/manage") && [process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, process.env.SUPABASE_SERVICE_ROLE_KEY].every((s) => s?.trim())) {
+  if ((request.nextUrl.pathname.startsWith("/manage") || request.nextUrl.pathname === "/mail" || request.nextUrl.pathname.startsWith("/mail/")) && [process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, process.env.SUPABASE_SERVICE_ROLE_KEY].every((s) => s?.trim())) {
     const client = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
       cookies: {
         getAll: () => request.cookies.getAll(),
@@ -21,4 +21,4 @@ export async function proxy(request: NextRequest) {
   response.headers.set("X-Robots-Tag", "noindex, nofollow");
   return response;
 }
-export const config = { matcher: ["/manage/:path*", "/book/q/:path*"] };
+export const config = { matcher: ["/manage/:path*", "/mail/:path*", "/book/q/:path*"] };

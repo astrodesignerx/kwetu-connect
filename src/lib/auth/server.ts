@@ -13,13 +13,15 @@ export async function authClient() {
     },
   });
 }
-export async function requireStaff(): Promise<{ email: string }> {
+export async function requireStaff(returnTo: "/manage" | "/mail" = "/manage"): Promise<{ email: string }> {
+  const signIn = returnTo === "/mail" ? "/manage/sign-in?next=/mail" : "/manage/sign-in";
   if (isMemoryMode()) {
-    if ((await cookies()).get("kca_demo")?.value !== "1") redirect("/manage/sign-in");
+    if (returnTo === "/mail" && process.env.NODE_ENV === "development") return { email: "demo@kca.local" };
+    if ((await cookies()).get("kca_demo")?.value !== "1") redirect(signIn);
     return { email: "demo@kca.local" };
   }
   const auth = await authClient();
   const { data: { user }, error } = await auth.auth.getUser();
-  if (error || !user?.email || !(await getStore().isStaff(user.email))) redirect("/manage/sign-in");
+  if (error || !user?.email || !(await getStore().isStaff(user.email))) redirect(signIn);
   return { email: user.email };
 }
