@@ -121,6 +121,7 @@ export interface MessageRow {
   mailbox: string;
   from: Address;
   to: Address[];
+  cc?: Address[];
   subject: string;
   date: string | null;
   seen: boolean;
@@ -182,6 +183,7 @@ export async function mailList(accountId: string, mailbox: string, query: ListQu
             uid: m.uid, mailbox: folder,
             from: { name: from?.name || "", address: from?.address || "" },
             to: (m.envelope?.to ?? []).map((a) => ({ name: a.name || "", address: a.address || "" })),
+            cc: (m.envelope?.cc ?? []).map((a) => ({ name: a.name || "", address: a.address || "" })),
             subject: m.envelope?.subject || "(no subject)",
             date: date ? new Date(date).toISOString() : null,
             seen: m.flags?.has("\\Seen") ?? false,

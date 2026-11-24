@@ -62,6 +62,10 @@ export abstract class BaseStore implements BookingStore {
     return reference;
   }
   async getSettings() { return structuredClone(this.settings(await this.read())); }
+  async mailDirectory() {
+    const data = await this.read();
+    return structuredClone({ advertisers: data.advertisers, bookings: data.bookings, adverts: data.adverts, settings: this.settings(data) });
+  }
   async saveSettings(input: unknown) {
     const settings = validateSettings(input);
     await this.transaction((data) => { data.settings = settings; });

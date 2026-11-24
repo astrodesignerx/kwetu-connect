@@ -65,6 +65,10 @@ function seed(me: string): DemoBox {
   add({ mailbox: "Archive", from: { name: "Peter Kamau", address: "peter@greenleafhotel.example" }, subject: "Thank you for October", hours: 400, seen: true, body: ["The October campaign brought us many bookings. We will be back in the new year.", "Peter"] });
   add({ mailbox: "Spam", from: { name: "Prize Desk", address: "winner@prizes.example" }, subject: "You have won a holiday", hours: 12, body: ["Click here to claim."] });
   add({ mailbox: "Drafts", from: you, to: [{ name: "Grace Muthoni", address: "grace@eldoretarts.example" }], subject: "Re: Question about advert length", hours: 1, seen: true, body: ["Hi Grace,", "Yes, 15 seconds is fine. It"] });
+  add({from:{name:"David Otieno",address:"DAVID@example.com"},subject:"Checking our screen run",hours:18,body:["Hello team, can you confirm the dates for our pharmacy advert?", "Thank you, David"]});
+  add({from:{name:"Agnes Jeptoo",address:"agnes@example.com"},subject:"Advert attached for review",hours:10,body:["Please review the attached picture for our booking KCA-DE40000000000010."]});
+  rows[rows.length-1].attachments=[{index:0,filename:"sample-advert.png",size:1992,contentType:"image/png",inline:false}];
+  add({from:{name:"Payment desk",address:"payments@example.net"},subject:"Payment note for KCA-DE40000000000012",hours:8,body:["Please check the payment for this booking in the manager."]});
   return { nextUid: rows.length + 1, messages: rows.map((m, i) => ({ ...m, uid: i + 1 })) };
 }
 
@@ -108,7 +112,12 @@ export function demoThread(account: MailAccount, folder: string, uid: number, su
   return b.messages
     .filter((m) => m === opened || ((m.mailbox === folder || m.mailbox === "Sent") && normaliseSubject(m.subject) === key))
     .sort((a, b2) => (a.date ?? "").localeCompare(b2.date ?? ""))
-    .map((m): ParsedMessage & { mailbox: string; seen: boolean; flagged: boolean } => ({ ...m }));
+    .map((m): ParsedMessage & { mailbox: string; seen: boolean; flagged: boolean } => {
+      const message = { ...m };
+      // Attachment bytes stay on the server and are downloaded through the protected route.
+      delete message.files;
+      return message;
+    });
 }
 
 export function demoAct(account: MailAccount, folder: string, uids: number[], action: string) {
@@ -137,6 +146,9 @@ export function demoSend(account: MailAccount, message: { to: string[]; cc: stri
 export function demoAttachment(account: MailAccount, folder: string, uid: number, index: number) {
   const message = box(account).messages.find((m) => m.mailbox === folder && m.uid === uid);
   const file = message?.attachments.find((a) => a.index === index);
+  if(file?.filename==="sample-advert.png") return {filename:file.filename,contentType:"image/png",content:Buffer.from(SAMPLE_ADVERT_PNG,"base64")};
   if (message?.files?.[index]) return message.files[index];
   return file ? { filename: file.filename, contentType: "text/plain", content: Buffer.from("Sample campaign brief for an Eldoret bakery on the Kisumu Ndogo Road screen. No live booking.\n") } : null;
 }
+
+const SAMPLE_ADVERT_PNG = "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";

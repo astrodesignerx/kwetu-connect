@@ -103,3 +103,49 @@ html[data-theme="dark"] .mail-app { --mail-bg: #151917; --mail-panel: #202623; -
 
 .mail-app .mg-mail-message[data-open] .mg-mail-message-who small { font-weight: 400; }
 .mail-app .mg-mail-message:not([data-open]) .mg-mail-message-who small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 400; }
+.mail-card { border: 1px solid var(--mail-line); border-radius: 5px; padding: 12px; margin: 12px 0; min-width: 0; overflow-wrap: anywhere; }
+.mail-card h3 { margin-bottom: 8px; }
+.mail-app h3 { font-size: 15px; }
+.mail-templates-wrap { grid-column: 1 / -1; min-height: 0; overflow: auto; }
+.mail-context-layout { display: grid; grid-template-columns: minmax(0,1fr); gap: 16px; min-width: 0; }
+@media (min-width: 1180px) {
+  .mail-context-layout { grid-template-columns: minmax(0,1fr) 260px; align-items: start; }
+  .mail-context-layout .mail-inspector { border-top: 0; margin-top: 0; padding-top: 0; }
+}
+.mail-card p { margin: 7px 0; }
+.mail-card dl { display: grid; grid-template-columns: 55px minmax(0,1fr); gap: 5px 10px; margin-bottom: 10px; }
+.mail-card dt { color: var(--mail-muted); }
+.mail-card dd { margin: 0; overflow-wrap: anywhere; }
+.mail-card progress { display: block; width: 100%; margin: 6px 0; }
+.mail-inspector { border-top: 1px solid var(--mail-line); margin-top: 16px; padding-top: 12px; }
+.mail-inspector .mail-card > button { margin: 4px; }
+.mail-note-editor, .mail-note-editor label, .mail-quote > label, .mail-templates form, .mail-templates label { display: grid; gap: 7px; }
+.mail-note-editor textarea, .mail-templates textarea { width: 100%; resize: vertical; }
+.mail-quote > label { margin-top: 10px; }
+.mail-quote summary { cursor: pointer; font-weight: 600; }
+.mail-quote-cells { display: grid; grid-template-columns: repeat(auto-fit,minmax(85px,1fr)); gap: 8px; }
+.mail-quote-cells label { display: flex; align-items: center; gap: 4px; font-size: 12px; }
+.mail-quote fieldset { border: 1px solid var(--mail-line); padding: 8px; margin: 10px 0; min-width: 0; }
+.mail-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; overflow-wrap: anywhere; }
+.mail-summary-row { display: grid; gap: 4px; border-top: 1px solid var(--mail-line); padding: 10px 0; }
+.mail-summary-row button { justify-self: start; }
+.mail-templates { grid-column: 1 / -1; padding: 20px; overflow: auto; min-width: 0; }
+.mail-template-body { white-space: pre-wrap; }
+.mail-clients { display: grid; grid-column: 1 / -1; grid-template-columns: minmax(220px,320px) minmax(0,1fr); min-height: 0; min-width: 0; }
+.mail-client-detail { display: grid; gap: 8px; }
+.mail-advert-check { margin-top: 8px; font-size: 12px; }
+.mail-advert-check p { margin: 5px 0; }
+.mail-app .mg-mail-files > li { max-width: 100%; }
+.mail-app .mg-mail-files a { max-width: 100%; flex-wrap: wrap; }
+.mail-app :is(.mail-card,.mail-client-detail,.mail-brief,.mail-templates,.mg-mail-reader,.mail-chips) { animation: mail-enter var(--mail-fast) var(--mail-ease) both; }
+.mail-inspector .mail-card:nth-child(2) { animation-delay: 25ms; }
+.mail-app :is(a,summary) { transition: opacity var(--mail-fast) var(--mail-ease),transform var(--mail-fast) var(--mail-ease); }
+.mail-app :is(a,summary):hover { opacity: .8; }
+@media (max-width: 800px) {
+  .mail-clients { grid-template-columns: minmax(0,1fr); }
+  .mail-shell .mail-clients .mg-mail-side { display: flex; }
+  .mail-shell .mail-clients .mg-mail-main { display: none; }
+  .mail-shell .mail-clients[data-detail] .mg-mail-side { display: none; }
+  .mail-shell .mail-clients[data-detail] .mg-mail-main { display: block; }
+  .mail-templates { padding: 8px; }
+}

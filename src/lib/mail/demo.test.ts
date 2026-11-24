@@ -46,4 +46,13 @@ describe("demo mailbox", () => {
     demoSend(a, { to: ["x@example.com"], cc: [], subject: "Hello", html: "<p>Hi</p>", text: "Hi" }, null);
     expect(demoList(a, "Sent", { text: "hello" }, 0, 40).total).toBe(1);
   });
+
+  it("keeps sent attachment bytes out of the client conversation payload", () => {
+    const a = account();
+    demoSend(a, { to: ["client@example.com"], cc: [], subject: "Sample advert", html: "<p>Attached</p>", text: "Attached", attachments: [{ filename: "sample.mp4", content: Buffer.from([1,2,3]), contentType: "video/mp4" }] }, null);
+    const row = demoList(a, "Sent", { text: "Sample advert" }, 0, 40).items[0];
+    const messages = demoThread(a, row.mailbox, row.uid, row.subject);
+    expect(messages[0]).not.toHaveProperty("files");
+    expect(messages[0].attachments[0]).toMatchObject({ filename: "sample.mp4", size: 3 });
+  });
 });

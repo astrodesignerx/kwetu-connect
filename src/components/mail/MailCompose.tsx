@@ -4,10 +4,11 @@ import { mailSaveDraft, mailSend, mailDraftUploads, mailDeleteDraft } from "@/ap
 import type { DraftData, SavedDraft, UploadView } from "@/lib/mail/drafts";
 import { mailRequest } from "./mail-request";
 import { fileSize, splitAddresses, textToHtml } from "./mail-format";
+import type { Template } from "@/lib/mail/kca-data";
 
 export interface Draft extends Partial<DraftData> { title: string; to: string; cc: string; subject: string; saved?: SavedDraft }
 
-export default function MailCompose({ accountId, from, draft, onSent, onClose }: { accountId: string; from: string; draft: Draft; onSent: () => void; onClose: () => void }) {
+export default function MailCompose({ accountId, from, draft, onSent, onClose, templates = [] }: { accountId: string; from: string; draft: Draft; onSent: () => void; onClose: () => void; templates?: Template[] }) {
   const label = useId();
   const [id] = useState(() => draft.saved?.id ?? crypto.randomUUID());
   const [data, setData] = useState<DraftData>(() => ({ title: draft.title, to: draft.to, cc: draft.cc, subject: draft.subject, body: draft.body ?? "", quoted: draft.quoted, inReplyTo: draft.inReplyTo, references: draft.references, answers: draft.answers, uploadIds: draft.uploadIds ?? [] }));
@@ -22,6 +23,7 @@ export default function MailCompose({ accountId, from, draft, onSent, onClose }:
   const blocked = useRef(!!draft.saved && draft.saved.send_state !== "draft");
   const locked = useRef(false);
   const alive = useRef(true);
+  const body = useRef<HTMLTextAreaElement>(null);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   const change = (next: Partial<DraftData>) => { const value = { ...current.current, ...next }; current.current = value; setData(value); };
 
@@ -104,7 +106,8 @@ export default function MailCompose({ accountId, from, draft, onSent, onClose }:
     <label className="mg-mail-field">To<input name="to" value={data.to} required disabled={readOnly} autoComplete="off" onChange={(e) => change({ to: e.target.value })} /></label>
     <label className="mg-mail-field">Copy<input name="cc" value={data.cc} disabled={readOnly} autoComplete="off" onChange={(e) => change({ cc: e.target.value })} /></label>
     <label className="mg-mail-field">Subject<input name="subject" maxLength={300} value={data.subject} disabled={readOnly} onChange={(e) => change({ subject: e.target.value })} /></label>
-    <label className="mg-mail-field">Message<textarea name="body" rows={8} maxLength={500000} value={data.body} disabled={readOnly} onChange={(e) => change({ body: e.target.value })} autoFocus /></label>
+    <label className="mg-mail-field">Quick reply<select aria-label="Insert quick reply" value="" disabled={readOnly || !templates.length} onChange={(e) => { const template=templates.find((t) => t.id===e.target.value); if(!template) return; const start=body.current?.selectionStart ?? current.current.body.length, end=body.current?.selectionEnd ?? start; const old=current.current.body; const next=old.slice(0,start)+template.body+old.slice(end); if(next.length>500000) {setError("The message is too long for this quick reply.");return;} change({body:next}); const caret=start+template.body.length;  requestAnimationFrame(() => {body.current?.focus();body.current?.setSelectionRange(caret,caret);}); }}><option value="">{templates.length ? "Choose a template" : "No quick replies available"}</option>{templates.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
+    <label className="mg-mail-field">Message<textarea ref={body} name="body" rows={8} maxLength={500000} value={data.body} disabled={readOnly} onChange={(e) => change({ body: e.target.value })} autoFocus /></label>
     {data.quoted && <p>The earlier message is included below yours.{draft.title === "Forward" ? " Attach any files you want to forward." : ""}</p>}
     <ul className="mg-mail-files" aria-label="Attached files">{data.uploadIds.map((uploadId) => { const f = files.find((x) => x.id === uploadId); return <li key={uploadId}>{f?.file_name ?? "Attachment"} ({f ? fileSize(f.size_bytes) : "unavailable"}) <button type="button" disabled={readOnly} onClick={() => change({ uploadIds: current.current.uploadIds.filter((x) => x !== uploadId) })}>Remove</button></li>; })}</ul>
     {error && <p className="mg-mail-error" role="alert">{error}</p>}

@@ -4,14 +4,16 @@ import { Archive, ArrowBendDoubleUpLeft, ArrowBendUpLeft, ArrowBendUpRight, Arro
 import type { MailAction, ThreadMessage } from "@/app/mail/actions";
 import type { Special } from "@/lib/mail/client";
 import MessageFrame from "./MessageFrame";
+import AdvertAttachment from "./AdvertAttachment";
 import { fileSize, fullTime, initials, senderName } from "./mail-format";
 
 export type ReplyKind = "reply" | "replyAll" | "forward";
 
 /** The open conversation: every message in order, the newest open, with Reply first and the rest as quiet pills. */
-export default function MailReader({ accountId, special, messages, loading, error, flagged, onAct, onReply, onBack, onRetry, children }: {
+export default function MailReader({ accountId, special, messages, loading, error, flagged, onAct, onReply, onBack, onRetry, children, chips, bookedSeconds }: {
   accountId: string; special: Special; messages: ThreadMessage[]; loading: boolean; error: string | null; flagged: boolean;
   onAct: (action: MailAction) => void; onReply: (kind: ReplyKind, message: ThreadMessage) => void; onBack: () => void; onRetry: () => void; children?: React.ReactNode;
+  chips?: React.ReactNode; bookedSeconds?: number;
 }) {
   const [open, setOpen] = useState<Set<string>>(new Set());
   const latest = messages[messages.length - 1];
@@ -23,6 +25,7 @@ export default function MailReader({ accountId, special, messages, loading, erro
     <header className="mg-mail-reader-head">
       <button type="button" className="mg-icon-button mg-mail-back" onClick={onBack} aria-label="Back to the list"><ArrowLeft size={16} aria-hidden="true" /></button>
       <h2 id="mg-mail-subject">{latest.subject}</h2>
+      {chips}
       <div className="mg-mail-actions" role="toolbar" aria-label="Conversation">
         <button type="button" className="mg-primary" onClick={() => onReply("reply", latest)}><ArrowBendUpLeft size={14} aria-hidden="true" />Reply</button>
         {many && <button type="button" className="mg-pill" onClick={() => onReply("replyAll", latest)}><ArrowBendDoubleUpLeft size={14} aria-hidden="true" />Reply all</button>}
@@ -53,7 +56,7 @@ export default function MailReader({ accountId, special, messages, loading, erro
             {m.attachments.some((a) => !a.inline) && <ul className="mg-mail-files" aria-label="Attachments">
               {m.attachments.filter((a) => !a.inline).map((a) => {
                 const href = `/mail/attachment?${new URLSearchParams({ account: accountId, mailbox: m.mailbox, uid: String(m.uid), i: String(a.index) })}`;
-                return <li key={a.index}><a className="mg-pill" href={href} download={a.filename}><FileArrowDown size={14} aria-hidden="true" /><span>{a.filename}</span><small>{fileSize(a.size)}</small></a></li>;
+                return <li key={a.index}><a className="mg-pill" href={href} download={a.filename}><FileArrowDown size={14} aria-hidden="true" /><span>{a.filename}</span><small>{fileSize(a.size)}</small></a><AdvertAttachment href={href} filename={a.filename} type={a.contentType} size={a.size} seconds={bookedSeconds} /></li>;
               })}
             </ul>}
           </>}

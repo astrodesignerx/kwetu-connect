@@ -5,6 +5,9 @@ import type { MessageRow, ThreadMessage } from "@/app/mail/actions";
 vi.mock("@/app/mail/actions", () => ({
   connectMailbox: vi.fn(), disconnectMailbox: vi.fn(), mailAct: vi.fn(), mailFolders: vi.fn(), mailList: vi.fn(), mailThread: vi.fn(), mailSend: vi.fn(), myMailboxes: vi.fn(),
 }));
+vi.mock("@/app/mail/kca-actions", () => ({
+  mailWorkspace: vi.fn(), mailAssigned: vi.fn(), mailWaiting: vi.fn(), mailClientConversations: vi.fn(), mailAssign: vi.fn(), mailSaveNote: vi.fn(), mailSaveTemplate: vi.fn(), mailDeleteTemplate: vi.fn(),
+}));
 
 import MailDesk from "./MailDesk";
 import MailList from "./MailList";
