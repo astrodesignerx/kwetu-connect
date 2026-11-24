@@ -1,6 +1,6 @@
 "use client";
 import { Clock, Paperclip, Star } from "@phosphor-icons/react";
-import type { MessageRow } from "@/app/manage/(staff)/mail/actions";
+import type { MessageRow } from "@/app/mail/actions";
 import { dayGroup, initials, listTime, senderName, waitingFor } from "./mail-format";
 
 export const rowKey = (m: Pick<MessageRow, "mailbox" | "uid">) => `${m.mailbox}:${m.uid}`;

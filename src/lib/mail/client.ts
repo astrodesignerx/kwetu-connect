@@ -24,6 +24,10 @@ export interface MailAccount {
   /** The encrypted mailbox password. */
   password_enc: string;
   created_at: string;
+  last_synced_at?: string | null;
+  last_unread_count?: number;
+  last_error?: string | null;
+  last_error_at?: string | null;
 }
 
 export type Servers = Pick<MailAccount, "imap_host" | "imap_port" | "imap_secure" | "smtp_host" | "smtp_port" | "smtp_secure" | "username">;
@@ -46,10 +50,16 @@ function imapFor(a: Pick<Servers, "imap_host" | "imap_port" | "imap_secure" | "u
   return client;
 }
 
-export async function withImap<T>(a: MailAccount, fn: (c: ImapFlow) => Promise<T>): Promise<T> {
+export async function withImap<T>(a: MailAccount, fn: (c: ImapFlow) => Promise<T>, budgetMs = 50_000): Promise<T> {
   const client = imapFor(a, decryptSecret(a.password_enc));
-  try { await client.connect(); } catch (e) { throw new MailError(explain(e)); }
-  try { return await fn(client); } finally { await client.logout().catch(() => client.close()); }
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => { timer = setTimeout(() => { client.close(); reject(new MailError("The mail server took too long to answer. Try again.")); }, budgetMs); });
+  try {
+    return await Promise.race([(async () => {
+      try { await client.connect(); } catch (e) { throw new MailError(explain(e)); }
+      return await fn(client);
+    })(), timeout]);
+  } finally { clearTimeout(timer); client.close(); }
 }
 
 /** Vercel refuses request bodies over 4.5 MB, so attachments stop a little below that. */
@@ -61,29 +71,34 @@ export class MailError extends Error {}
 /** Plain-language reason for a connection failure. */
 export function explain(e: unknown): string {
   if (e instanceof MailError) return e.message;
-  const msg = e instanceof Error ? e.message : String(e);
+  const msg = (e instanceof Error ? e.message : String(e)) + " " + String((e as { code?: string })?.code ?? "");
   const failed = (e as { authenticationFailed?: boolean })?.authenticationFailed;
   if (/certificate|altname|self.signed|CERT_/i.test(msg)) return "The mail server's security certificate does not match its name. Check the server name, or ask your mail host.";
-  if (failed || /auth|credential|login|password|invalid/i.test(msg)) return "The mailbox did not accept the sign-in. Check the address and password.";
   if (/ENOTFOUND|EAI_AGAIN/i.test(msg)) return "That mail server could not be found. Check the server name.";
+  if (failed || /auth|credential|login|password|invalid/i.test(msg)) return "The mailbox did not accept the sign-in. Check the address and password.";
   if (/ETIMEDOUT|timeout/i.test(msg)) return "The mail server took too long to answer. Try again.";
   return "The mailbox could not be reached. Try again in a minute.";
 }
 
 export async function testImap(a: Servers, pass: string) {
   const client = imapFor(a, pass);
-  try { await client.connect(); } finally { await client.logout().catch(() => client.close()); }
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try { await Promise.race([client.connect(), new Promise<never>((_, reject) => { timer = setTimeout(() => { client.close(); reject(new Error("timeout")); }, 5_000); })]); }
+  finally { clearTimeout(timer); client.close(); }
 }
 
 function smtpFor(a: Pick<Servers, "smtp_host" | "smtp_port" | "smtp_secure" | "username">, pass: string) {
   return nodemailer.createTransport({
-    host: a.smtp_host, port: a.smtp_port, secure: a.smtp_secure, auth: { user: a.username, pass },
-    connectionTimeout: 15_000, greetingTimeout: 15_000,
+    host: a.smtp_host, port: a.smtp_port, secure: a.smtp_secure, requireTLS: !a.smtp_secure, auth: { user: a.username, pass },
+    connectionTimeout: 5_000, greetingTimeout: 5_000, socketTimeout: 15_000, logger: false, debug: false,
   });
 }
 
 export async function verifySmtp(a: Servers, pass: string) {
-  await smtpFor(a, pass).verify();
+  const transport = smtpFor(a, pass);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try { await Promise.race([transport.verify(), new Promise<never>((_, reject) => { timer = setTimeout(() => { transport.close(); reject(new Error("timeout")); }, 5_000); })]); }
+  finally { clearTimeout(timer); transport.close(); }
 }
 
 export function transporter(a: MailAccount) {

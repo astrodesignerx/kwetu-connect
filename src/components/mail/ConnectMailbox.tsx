@@ -1,7 +1,8 @@
 "use client";
 import { useId, useState, useTransition } from "react";
 import { Eye, EyeSlash, LockSimple } from "@phosphor-icons/react";
-import { connectMailbox } from "@/app/manage/(staff)/mail/actions";
+import { connectMailbox } from "@/app/mail/actions";
+import { mailRequest } from "./mail-request";
 import type { AccountView } from "@/lib/mail/accounts";
 
 /** First-day card: connect your own mailbox with the address and password you use for webmail. */
@@ -14,12 +15,12 @@ export default function ConnectMailbox({ onConnected, onCancel, first, demo = fa
     setError(null);
     const value = (name: string) => String(form.get(name) ?? "").trim();
     start(async () => {
-      const result = await connectMailbox({
+      const result = await mailRequest(connectMailbox({
         email: value("email"), password: String(form.get("password") ?? ""),
         imapHost: value("imapHost") || undefined, imapPort: Number(value("imapPort")) || undefined,
         smtpHost: value("smtpHost") || undefined, smtpPort: Number(value("smtpPort")) || undefined,
         username: value("username") || undefined,
-      });
+      }));
       if (result.ok) onConnected(result.data); else setError(result.error);
     });
   }

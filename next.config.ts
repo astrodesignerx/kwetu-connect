@@ -22,9 +22,11 @@ const contentSecurityPolicy = [
   "upgrade-insecure-requests",
 ].join("; ");
 
-// The manager's Mail page shows people's email, which links pictures from anywhere on the web. Its
+// The Mail page shows people's email, which links pictures from anywhere on the web. Its
 // frames run no scripts, so the only change for that page is letting https pictures load.
-const mailContentSecurityPolicy = contentSecurityPolicy.replace("img-src 'self' data: blob:", "img-src 'self' data: blob: https:");
+const mailContentSecurityPolicy = contentSecurityPolicy
+  .replace("img-src 'self' data: blob:", "img-src 'self' data: blob: https:")
+  .replace("frame-src https:", "frame-src 'self' https:");
 
 const securityHeaders = [
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
@@ -48,11 +50,11 @@ const nextConfig: NextConfig = {
     const mailHeaders = securityHeaders.map((h) => (h.key === "Content-Security-Policy" ? { ...h, value: mailContentSecurityPolicy } : h));
     return [
       {
-        source: "/((?!manage/mail$).*)",
+        source: "/((?!mail(?:/|$)).*)",
         headers: securityHeaders,
       },
       {
-        source: "/manage/mail",
+        source: "/mail/:path*",
         headers: mailHeaders,
       },
     ];

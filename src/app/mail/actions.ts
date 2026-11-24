@@ -1,9 +1,11 @@
 "use server";
+import { createHash } from "node:crypto";
 import MailComposer from "nodemailer/lib/mail-composer";
 import { requireStaff } from "@/lib/auth/server";
-import { listAccounts, loadAccount, removeAccount, saveAccount, type AccountView } from "@/lib/mail/accounts";
-import { detectMailbox } from "@/lib/mail/autoconfig";
-import { classify, explain, MAX_ATTACHMENT_BYTES, MailError, normaliseSubject, parseSource, pathOf, testImap, transporter, verifySmtp, withImap, type Address, type MailboxInfo, type ParsedMessage } from "@/lib/mail/client";
+import { listAccounts, loadAccount, removeAccount, saveAccount, recordSync, type AccountView } from "@/lib/mail/accounts";
+import { connectionCandidates, detectMailbox } from "@/lib/mail/autoconfig";
+import { classify, explain, MAX_ATTACHMENT_BYTES, MailError, normaliseSubject, parseSource, pathOf, testImap, transporter, verifySmtp, withImap, type MailAccount, type Address, type MailboxInfo, type ParsedMessage } from "@/lib/mail/client";
+import { saveDraft, listDrafts, deleteDraft, loadUploads, sendOnce, type DraftData } from "@/lib/mail/drafts";
 import { encryptSecret } from "@/lib/mail/crypto";
 import { demoAccountFields, demoAct, demoFolders, demoList, demoSend, demoThread, isDemoAccount, mailDemoEnabled } from "@/lib/mail/demo";
 
@@ -16,7 +18,7 @@ import { demoAccountFields, demoAct, demoFolders, demoList, demoSend, demoThread
 export type Result<T> = { ok: true; data: T } | { ok: false; error: string };
 
 async function run<T>(what: string, fn: (me: string) => Promise<T>): Promise<Result<T>> {
-  const staff = await requireStaff(); // Redirects to sign-in, so it stays outside the try.
+  const staff = await requireStaff("/mail"); // Redirects to sign-in, so it stays outside the try.
   try { return { ok: true, data: await fn(staff.email) }; } catch (e) {
     if (e instanceof MailError) return { ok: false, error: e.message };
     console.error(`Mail ${what} failed:`, e instanceof Error ? e.name : "unknown");
@@ -65,16 +67,26 @@ export async function connectMailbox(input: ConnectInput) {
       const smtpPort = port(input.smtpPort, 465);
       imap = [host(input.imapHost!.trim()), imapPort, imapPort === 993];
       smtp = [host(input.smtpHost!.trim()), smtpPort, smtpPort === 465];
-    } else {
-      const found = await detectMailbox(email).catch(() => ({ imap: undefined, smtp: undefined }));
-      imap = found.imap; smtp = found.smtp;
-      if (!imap || !smtp) throw new MailError("The servers for this address could not be found. Open Server settings and enter them.");
     }
-    const servers = { imap_host: imap[0], imap_port: imap[1], imap_secure: imap[2], smtp_host: smtp[0], smtp_port: smtp[1], smtp_secure: smtp[2], username: (input.username?.trim() || email).slice(0, 200) };
-    // Prove both directions work before anything is saved.
-    try { await testImap(servers, password); } catch (e) { throw new MailError(explain(e)); }
-    try { await verifySmtp(servers, password); } catch (e) { throw new MailError("Reading mail works, but sending does not. " + explain(e)); }
-    return saveAccount(me, { ...servers, email, label: email, password_enc: encryptSecret(password) });
+    const username = (input.username?.trim() || email).slice(0, 200);
+    const makeServers = (incoming: [string, number, boolean], outgoing: [string, number, boolean]) => ({ imap_host: incoming[0], imap_port: incoming[1], imap_secure: incoming[2], smtp_host: outgoing[0], smtp_port: outgoing[1], smtp_secure: outgoing[2], username });
+    const found = manualHost ? null : await detectMailbox(email).catch(() => ({ label: email.split("@")[1] }));
+    const candidates = found ? connectionCandidates(email, found) : null;
+    const incoming = imap ? [imap] : candidates!.imap;
+    let lastError: unknown;
+    let servers: ReturnType<typeof makeServers> | undefined;
+    for (const candidate of incoming) {
+      try { const trial = makeServers(candidate, smtp ?? [candidate[0], 465, true]); await testImap(trial, password); imap = candidate; servers = trial; break; }
+      catch (e) { lastError = e; if (/sign-in/.test(explain(e))) break; }
+    }
+    if (!servers || !imap) throw new MailError("IMAP sign-in failed. " + explain(lastError) + " Open Server settings to check the incoming server.");
+    let sendingWorks = false;
+    for (const candidate of smtp ? [smtp] : candidates!.smtp(imap[0])) {
+      try { const trial = makeServers(imap, candidate); await verifySmtp(trial, password); servers = trial; sendingWorks = true; break; }
+      catch (e) { lastError = e; if (/sign-in/.test(explain(e))) break; }
+    }
+    if (!sendingWorks) throw new MailError("SMTP sign-in failed. Reading mail works, but sending does not. " + explain(lastError) + " Open Server settings to check the outgoing server.");
+    return saveAccount(me, { ...servers, email, label: email.slice(0, 60), password_enc: encryptSecret(password) });
   });
 }
 
@@ -89,12 +101,15 @@ export async function myMailboxes() {
 export async function mailFolders(accountId: string) {
   return run("folders", async (me): Promise<{ boxes: MailboxInfo[]; unread: number }> => {
     const account = await loadAccount(me, String(accountId));
-    if (isDemoAccount(account)) return demoFolders(account);
+    if (isDemoAccount(account)) { const result = demoFolders(account); await recordSync(account.id, result.unread, null); return result; }
     return withImap(account, async (c) => {
       const boxes = classify(await c.list());
       const inbox = pathOf(boxes, "inbox") ?? "INBOX";
-      const status = await c.status(inbox, { unseen: true }).catch(() => null);
-      return { boxes, unread: status && typeof status === "object" ? status.unseen ?? 0 : 0 };
+      const status = await c.status(inbox, { unseen: true });
+      const unread = status && typeof status === "object" ? status.unseen ?? 0 : 0;
+      await recordSync(account.id, unread, null);
+      return { boxes, unread };
+
     });
   });
 }
@@ -133,6 +148,7 @@ export async function mailList(accountId: string, mailbox: string, query: ListQu
     const text = String(query.text ?? "").trim().slice(0, 200);
     const start = Math.max(0, Math.floor(Number(offset) || 0));
     const size = Math.min(60, Math.max(1, Math.floor(Number(limit) || 40)));
+    if (folder === "__starred__") return starredMessages(account, text, !!query.unread, start, size);
     if (isDemoAccount(account)) return demoList(account, folder, { unread: !!query.unread, flagged: !!query.flagged, text }, start, size);
     return withImap(account, async (c) => {
       const lock = await c.getMailboxLock(folder);
@@ -271,6 +287,9 @@ export interface SendInput {
   html: string;
   inReplyTo?: string | null;
   references?: string[];
+  draftId?: string;
+  expectedVersion?: number;
+  uploadIds?: string[];
   attachments?: { filename: string; contentBase64: string; contentType: string }[];
   /** The message this replies to: it is marked answered, which ends its waiting time. */
   answers?: { mailbox: string; uid: number };
@@ -292,6 +311,8 @@ export async function mailSend(input: SendInput) {
       filename: String(a.filename).slice(0, 200), content: Buffer.from(String(a.contentBase64), "base64"), contentType: String(a.contentType || "application/octet-stream").slice(0, 120),
     }));
     if (attachments.reduce((n, a) => n + a.content.length, 0) > MAX_ATTACHMENT_BYTES) throw new MailError("Attachments can be up to 4 MB in total.");
+    const staged = await loadUploads(me, input.draftId ?? "", input.uploadIds ?? []);
+    attachments.push(...staged.map((a) => ({ filename: a.file_name, content: Buffer.from(a.data_base64, "base64"), contentType: a.content_type })));
     const html = String(input.html ?? "").slice(0, 500_000);
     const references = clean(input.references).filter((r) => /^<[^<>\s]+>$/.test(r));
     const inReplyTo = input.inReplyTo && /^<[^<>\s]+>$/.test(input.inReplyTo) ? input.inReplyTo : undefined;
@@ -301,11 +322,15 @@ export async function mailSend(input: SendInput) {
       html, text: htmlToText(html), inReplyTo, references: references.length ? references : undefined, attachments,
     };
     const answers = input.answers && Number.isInteger(input.answers.uid) && input.answers.uid > 0 && typeof input.answers.mailbox === "string" && input.answers.mailbox.length <= 200 ? input.answers : null;
-    if (isDemoAccount(account)) { demoSend(account, { to, cc, subject: message.subject, html, text: message.text, inReplyTo }, answers); return true; }
     const raw = await new MailComposer(message).compile().build();
-    try {
-      await transporter(account).sendMail({ envelope: { from: account.email, to: [...to, ...cc] }, raw });
-    } catch (e) { throw new MailError("The message was not sent. " + explain(e)); }
+    const fingerprint = { ...message, attachments: attachments.map((a) => ({ filename: a.filename, contentType: a.contentType, hash: createHash("sha256").update(a.content).digest("hex") })) };
+    const submitted = await sendOnce(me, input.draftId ?? "", account.id, input.expectedVersion ?? -1, fingerprint, async () => {
+      if (isDemoAccount(account)) { demoSend(account, { to, cc, subject: message.subject, html, text: message.text, inReplyTo, attachments }, answers); return; }
+      const transport = transporter(account);
+      try { await transport.sendMail({ envelope: { from: account.email, to: [...to, ...cc] }, raw }); }
+      finally { transport.close?.(); }
+    });
+    if (!submitted || isDemoAccount(account)) return true;
     // cPanel and most hosts do not keep a copy of what SMTP sends, so it is filed in Sent here.
     const fileCopy = !/gmail|googlemail|office365|outlook/i.test(account.smtp_host);
     if (fileCopy || answers) {
@@ -321,5 +346,50 @@ export async function mailSend(input: SendInput) {
       }).catch(() => undefined);
     }
     return true;
+  });
+}
+
+export async function mailSaveDraft(id: string, accountId: string, version: number, data: DraftData) {
+  return run("save draft", (me) => saveDraft(me, id, accountId, version, data));
+}
+export async function mailDrafts(accountId: string) {
+  return run("read drafts", (me) => listDrafts(me, accountId));
+}
+export async function mailDeleteDraft(id: string, version: number) {
+  return run("delete draft", async (me) => { await deleteDraft(me, id, version); return true; });
+}
+export async function mailDraftUploads(id: string, ids: string[]) {
+  return run("read attachments", async (me) => (await loadUploads(me, id, ids)).map((u) => ({ id: u.id, file_name: u.file_name, size_bytes: u.size_bytes })));
+}
+export async function mailUnreadCount() {
+  return run("read unread count", async (me) => (await listAccounts(me)).reduce((n, a) => n + (a.last_unread_count ?? 0), 0));
+}
+
+async function starredMessages(account: MailAccount, text: string, unread: boolean, offset: number, size: number) {
+  if (isDemoAccount(account)) {
+    const items = demoFolders(account).boxes.flatMap((box) => demoList(account, box.path, { flagged: true, text, unread }, 0, 1000).items).sort((a,b) => (b.date ?? "").localeCompare(a.date ?? ""));
+    return { items: items.slice(offset, offset + size), total: items.length };
+  }
+  return withImap(account, async (client) => {
+    const items: MessageRow[] = [];
+    let total = 0;
+    for (const box of classify(await client.list()).filter((b) => b.special !== "starred")) {
+      const lock = await client.getMailboxLock(box.path);
+      try {
+        const query: Record<string, unknown> = { flagged: true };
+        if (unread) query.seen = false;
+        if (text) query.or = [{ subject: text }, { from: text }, { body: text }];
+        const matches = (await client.search(query, { uid: true }) || []).sort((a,b) => b-a);
+        total += matches.length;
+        if (!matches.length) continue;
+        for await (const m of client.fetch(matches.slice(0, offset + size).join(","), { uid: true, envelope: true, flags: true, internalDate: true, bodyStructure: true }, { uid: true })) {
+          const from = m.envelope?.from?.[0];
+          const date = m.envelope?.date ?? m.internalDate;
+          items.push({ uid: m.uid, mailbox: box.path, from: { name: from?.name || "", address: from?.address || "" }, to: (m.envelope?.to ?? []).map((a) => ({ name: a.name || "", address: a.address || "" })), subject: m.envelope?.subject || "(no subject)", date: date ? new Date(date).toISOString() : null, seen: m.flags?.has("\\Seen") ?? false, flagged: true, answered: m.flags?.has("\\Answered") ?? false, hasAttachments: hasAttachment(m.bodyStructure as never), messageId: m.envelope?.messageId ?? null, thread: 1 });
+        }
+      } finally { lock.release(); }
+    }
+    items.sort((a,b) => (b.date ?? "").localeCompare(a.date ?? ""));
+    return { items: items.slice(offset, offset + size), total };
   });
 }

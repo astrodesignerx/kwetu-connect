@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { mailDb as db, mailMemoryMode as memoryMode } from "./db";
 import { MailError, type MailAccount, type Servers } from "./client";
 
 /**
@@ -7,21 +7,14 @@ import { MailError, type MailAccount, type Servers } from "./client";
  * the Mjengo suite): nobody else can list, open or remove it. With Supabase configured the rows live in
  * public.staff_mailboxes (service role only); without it, as in local demo mode, they live in memory.
  */
-export interface AccountView { id: string; label: string; email: string }
+export interface AccountView { id: string; label: string; email: string; last_synced_at?: string | null; last_unread_count?: number; last_error?: string | null }
 
-const COLUMNS = "id, owner_email, label, email, imap_host, imap_port, imap_secure, smtp_host, smtp_port, smtp_secure, username, password_enc, created_at";
+const COLUMNS = "last_synced_at, last_unread_count, last_error, last_error_at, id, owner_email, label, email, imap_host, imap_port, imap_secure, smtp_host, smtp_port, smtp_secure, username, password_enc, created_at";
 
-function memoryMode() {
-  return ![process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, process.env.SUPABASE_SERVICE_ROLE_KEY].every((s) => s?.trim());
-}
-
-type Shared = typeof globalThis & { kcaMailAccounts?: Map<string, MailAccount>; kcaMailDb?: SupabaseClient };
+type Shared = typeof globalThis & { kcaMailAccounts?: Map<string, MailAccount> };
 const shared = globalThis as Shared;
 const memory = () => (shared.kcaMailAccounts ??= new Map());
-function db() {
-  return (shared.kcaMailDb ??= createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false, autoRefreshToken: false } }));
-}
-const view = (a: Pick<MailAccount, "id" | "label" | "email">): AccountView => ({ id: a.id, label: a.label, email: a.email });
+const view = (a: AccountView): AccountView => ({ id: a.id, label: a.label, email: a.email, last_synced_at: a.last_synced_at, last_unread_count: a.last_unread_count, last_error: a.last_error });
 const owner = (email: string) => email.trim().toLowerCase();
 function failed(what: string, error: { code?: string } | null): never {
   console.error(`Staff mailbox ${what} failed:`, error?.code ?? "unknown");
@@ -31,7 +24,7 @@ function failed(what: string, error: { code?: string } | null): never {
 export async function listAccounts(ownerEmail: string): Promise<AccountView[]> {
   const me = owner(ownerEmail);
   if (memoryMode()) return [...memory().values()].filter((a) => a.owner_email === me).sort((a, b) => a.created_at.localeCompare(b.created_at)).map(view);
-  const { data, error } = await db().from("staff_mailboxes").select("id, label, email").eq("owner_email", me).order("created_at");
+  const { data, error } = await db().from("staff_mailboxes").select("id, label, email, last_synced_at, last_unread_count, last_error").eq("owner_email", me).order("created_at");
   if (error) failed("read", error);
   return (data ?? []).map(view);
 }
@@ -60,7 +53,7 @@ export async function saveAccount(ownerEmail: string, input: Servers & { email: 
     memory().set(row.id, row);
     return view(row);
   }
-  const { data, error } = await db().from("staff_mailboxes").upsert({ ...input, owner_email: me }, { onConflict: "owner_email,email" }).select("id, label, email").single();
+  const { data, error } = await db().from("staff_mailboxes").upsert({ ...input, label: input.label.slice(0, 60), owner_email: me }, { onConflict: "owner_email,email" }).select("id, label, email, last_synced_at, last_unread_count, last_error").single();
   if (error || !data) failed("save", error);
   return view(data);
 }
@@ -74,4 +67,21 @@ export async function removeAccount(ownerEmail: string, id: string): Promise<voi
   if (!/^[0-9a-f-]{36}$/i.test(id)) return;
   const { error } = await db().from("staff_mailboxes").delete().eq("id", id).eq("owner_email", me);
   if (error) failed("remove", error);
+}
+
+/** Used only by the secret-protected cron route. Credentials stay on the server. */
+export async function accountsToWatch(before = new Date().toISOString(), limit = 4): Promise<MailAccount[]> {
+  if (memoryMode()) return [];
+  const { data, error } = await db().from("staff_mailboxes").select(COLUMNS).or(`last_checked_at.is.null,last_checked_at.lt.${before}`).order("last_checked_at", { nullsFirst: true }).limit(limit);
+  if (error) failed("read", error);
+  return data as MailAccount[];
+}
+export async function recordSync(id: string, unread: number | null, errorText: string | null) {
+  const patch = { last_checked_at: new Date().toISOString(), ...(unread === null ? { last_error: errorText, last_error_at: new Date().toISOString() } : { last_unread_count: unread, last_synced_at: new Date().toISOString(), last_error: null, last_error_at: null }) };
+  if (memoryMode()) { const row = memory().get(id); if (row) memory().set(id, { ...row, ...patch }); return; }
+  const { error } = await db().from("staff_mailboxes").update(patch).eq("id", id);
+  if (error) failed("update", error);
+}
+export async function cachedUnread(ownerEmail: string) {
+  return (await listAccounts(ownerEmail)).reduce((n, a) => n + (a.last_unread_count ?? 0), 0);
 }

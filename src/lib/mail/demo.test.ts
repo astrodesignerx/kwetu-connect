@@ -31,7 +31,7 @@ describe("demo mailbox", () => {
   it("reads a conversation with the reply from Sent and marks it read", () => {
     const a = account();
     const row = demoList(a, "INBOX", { unread: true }, 0, 40).items.find((i) => i.subject.startsWith("Re: Booking"))!;
-    const thread = demoThread(a, "INBOX", row.uid, "booking for the thika road screen in december");
+    const thread = demoThread(a, "INBOX", row.uid, "booking for the kisumu ndogo road screen in december");
     expect(thread.map((m) => m.mailbox)).toEqual(["INBOX", "Sent", "INBOX"]);
     expect(demoList(a, "INBOX", { unread: true }, 0, 40).items.some((i) => i.uid === row.uid)).toBe(false);
   });

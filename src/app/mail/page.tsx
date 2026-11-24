@@ -1,14 +1,14 @@
 import { requireStaff } from "@/lib/auth/server";
-import { listAccounts, type AccountView } from "@/lib/mail/accounts";
+import { listAccounts, saveAccount, type AccountView } from "@/lib/mail/accounts";
 import { encryptionConfigured } from "@/lib/mail/crypto";
-import { mailDemoEnabled } from "@/lib/mail/demo";
-import MailDesk from "@/components/manage/mail/MailDesk";
+import { demoAccountFields, mailDemoEnabled } from "@/lib/mail/demo";
+import MailDesk from "@/components/mail/MailDesk";
 
 // Mail is read live from the mailbox's own server; a slow server gets up to a minute per step.
 export const maxDuration = 60;
 
 export default async function MailPage({ searchParams }: { searchParams: Promise<{ q?: string | string[] }> }) {
-  const staff = await requireStaff();
+  const staff = await requireStaff("/mail");
   const q = (await searchParams).q;
   const demo = mailDemoEnabled();
   if (!demo && !encryptionConfigured()) return <section className="mg-mail-setup"><div className="mg-panel mg-mail-connect" role="status">
@@ -18,7 +18,7 @@ export default async function MailPage({ searchParams }: { searchParams: Promise
   </div></section>;
   let accounts: AccountView[] = [];
   let failed = false;
-  try { accounts = await listAccounts(staff.email); } catch { failed = true; }
+  try { accounts = await listAccounts(staff.email); if (demo && !accounts.length) accounts = [await saveAccount(staff.email, demoAccountFields("you@kwetuconnectads.co.ke"))]; } catch { failed = true; }
   if (failed) return <section className="mg-mail-setup"><div className="mg-panel mg-mail-connect" role="alert">
     <span className="mg-eyebrow">Mail</span>
     <h1 className="mg-heading">Your mailboxes could not be loaded</h1>

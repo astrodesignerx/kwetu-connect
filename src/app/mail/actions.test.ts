@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 
 const mocks = vi.hoisted(() => ({
   staff: { email: "amina@example.test" },
@@ -7,7 +7,7 @@ const mocks = vi.hoisted(() => ({
   imap: null as null | Record<string, unknown>,
 }));
 vi.mock("@/lib/auth/server", () => ({ requireStaff: async () => mocks.staff }));
-vi.mock("@/lib/mail/autoconfig", () => ({ detectMailbox: mocks.detect }));
+vi.mock("@/lib/mail/autoconfig", async (original) => ({ ...await original<typeof import("@/lib/mail/autoconfig")>(), detectMailbox: mocks.detect }));
 vi.mock("@/lib/mail/client", async (original) => {
   const real = await original<typeof import("@/lib/mail/client")>();
   return {
@@ -21,6 +21,7 @@ vi.mock("@/lib/mail/client", async (original) => {
 
 import { connectMailbox, disconnectMailbox, mailAct, mailList, mailSend, mailThread, myMailboxes } from "./actions";
 import { saveAccount } from "@/lib/mail/accounts";
+import { saveDraft } from "@/lib/mail/drafts";
 import { encryptSecret } from "@/lib/mail/crypto";
 
 const servers = { imap_host: "mail.example.test", imap_port: 993, imap_secure: true, smtp_host: "mail.example.test", smtp_port: 465, smtp_secure: true, username: "sales@example.test" };
@@ -81,16 +82,16 @@ describe("connecting a mailbox", () => {
   it("checks reading and sending before saving, and stores the password encrypted", async () => {
     const result = await connectMailbox({ email: " Sales@Example.test ", password: "webmail-pass" });
     expect(result).toMatchObject({ ok: true, data: { email: "sales@example.test" } });
-    expect(mocks.testImap).toHaveBeenCalledWith(expect.objectContaining({ imap_host: "mail.example.test", username: "sales@example.test" }), "webmail-pass");
+    expect(mocks.testImap).toHaveBeenCalledWith(expect.objectContaining({ imap_host: "webmail.example.test", username: "sales@example.test" }), "webmail-pass");
     expect(mocks.verifySmtp).toHaveBeenCalled();
     expect(await myMailboxes()).toMatchObject({ ok: true, data: [{ email: "sales@example.test" }] });
   });
 
   it("saves nothing when the sign-in or sending fails, and says why in plain words", async () => {
     mocks.testImap.mockRejectedValueOnce(Object.assign(new Error("NO [AUTHENTICATIONFAILED]"), { authenticationFailed: true }));
-    expect(await connectMailbox({ email: "sales@example.test", password: "wrong" })).toEqual({ ok: false, error: "The mailbox did not accept the sign-in. Check the address and password." });
-    mocks.verifySmtp.mockRejectedValueOnce(new Error("ETIMEDOUT"));
-    expect(await connectMailbox({ email: "sales@example.test", password: "pw" })).toMatchObject({ ok: false, error: expect.stringMatching(/^Reading mail works, but sending does not/) });
+    expect(await connectMailbox({ email: "sales@example.test", password: "wrong" })).toEqual({ ok: false, error: "IMAP sign-in failed. The mailbox did not accept the sign-in. Check the address and password. Open Server settings to check the incoming server." });
+    mocks.verifySmtp.mockRejectedValue(new Error("ETIMEDOUT"));
+    expect(await connectMailbox({ email: "sales@example.test", password: "pw" })).toMatchObject({ ok: false, error: expect.stringMatching(/^SMTP sign-in failed. Reading mail works, but sending does not/) });
     expect(await myMailboxes()).toEqual({ ok: true, data: [] });
   });
 
@@ -99,8 +100,9 @@ describe("connecting a mailbox", () => {
     expect(await connectMailbox({ email: "a@example.test", password: "" })).toMatchObject({ ok: false, error: "Enter the mailbox password." });
     expect(await connectMailbox({ email: "a@example.test", password: "x", imapHost: "bad host;", smtpHost: "mail.example.test" })).toMatchObject({ ok: false });
     mocks.detect.mockResolvedValueOnce({ label: "example.test" });
+    mocks.testImap.mockRejectedValue(new Error("ENOTFOUND"));
     expect(await connectMailbox({ email: "a@example.test", password: "x" })).toMatchObject({ ok: false, error: expect.stringMatching(/Server settings/) });
-    expect(mocks.testImap).not.toHaveBeenCalled();
+    expect(mocks.testImap).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -147,7 +149,8 @@ describe("sending", () => {
   it("sends, files a copy in Sent and marks the original answered", async () => {
     const account = await connected();
     const imap = fakeImap();
-    const result = await mailSend({ accountId: account.id, to: ["brian@client.test"], subject: "Re: Quote", html: "<p>Thanks</p>", inReplyTo: "<9@client.test>", references: ["<9@client.test>"], answers: { mailbox: "INBOX", uid: 9 } });
+    const draft = await saveDraft(mocks.staff.email, randomUUID(), account.id, 0, { title: "Reply", to: "brian@client.test", cc: "", subject: "Re: Quote", body: "Thanks", uploadIds: [] });
+    const result = await mailSend({ draftId: draft.id, expectedVersion: draft.row_version, accountId: account.id, to: ["brian@client.test"], subject: "Re: Quote", html: "<p>Thanks</p>", inReplyTo: "<9@client.test>", references: ["<9@client.test>"], answers: { mailbox: "INBOX", uid: 9 } });
     expect(result).toEqual({ ok: true, data: true });
     expect(mocks.sendMail).toHaveBeenCalledWith(expect.objectContaining({ envelope: { from: "sales@example.test", to: ["brian@client.test"] } }));
     expect(String(mocks.sendMail.mock.calls[0][0].raw)).toMatch(/In-Reply-To: <9@client.test>/);

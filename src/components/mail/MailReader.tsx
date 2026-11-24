@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Archive, ArrowBendDoubleUpLeft, ArrowBendUpLeft, ArrowBendUpRight, ArrowLeft, EnvelopeSimple, FileArrowDown, Star, Trash, Tray, WarningOctagon } from "@phosphor-icons/react";
-import type { MailAction, ThreadMessage } from "@/app/manage/(staff)/mail/actions";
+import type { MailAction, ThreadMessage } from "@/app/mail/actions";
 import type { Special } from "@/lib/mail/client";
 import MessageFrame from "./MessageFrame";
 import { fileSize, fullTime, initials, senderName } from "./mail-format";
@@ -52,7 +52,7 @@ export default function MailReader({ accountId, special, messages, loading, erro
             <MessageFrame html={m.html} text={m.text} title={`Message from ${senderName(from)}`} />
             {m.attachments.some((a) => !a.inline) && <ul className="mg-mail-files" aria-label="Attachments">
               {m.attachments.filter((a) => !a.inline).map((a) => {
-                const href = `/manage/mail/attachment?${new URLSearchParams({ account: accountId, mailbox: m.mailbox, uid: String(m.uid), i: String(a.index) })}`;
+                const href = `/mail/attachment?${new URLSearchParams({ account: accountId, mailbox: m.mailbox, uid: String(m.uid), i: String(a.index) })}`;
                 return <li key={a.index}><a className="mg-pill" href={href} download={a.filename}><FileArrowDown size={14} aria-hidden="true" /><span>{a.filename}</span><small>{fileSize(a.size)}</small></a></li>;
               })}
             </ul>}

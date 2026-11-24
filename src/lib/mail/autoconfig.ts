@@ -24,7 +24,10 @@ const KNOWN: Record<string, Detected> = {
 };
 
 const withTimeout = <T>(p: Promise<T>, ms: number): Promise<T> =>
-  Promise.race([p, new Promise<T>((_, reject) => setTimeout(() => reject(new Error("timeout")), ms))]);
+  new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("timeout")), ms);
+    p.then(resolve, reject).finally(() => clearTimeout(timer));
+  });
 
 async function mxHosts(domain: string): Promise<string[]> {
   try {
@@ -81,8 +84,16 @@ export async function detectMailbox(email: string): Promise<Detected> {
   const auto = await autoconfig(domain, local);
   if (auto) return auto;
 
-  for (const host of [`mail.${domain}`, `imap.${domain}`, `webmail.${domain}`, ...mx.slice(0, 1)]) {
+  for (const host of [`webmail.${domain}`, `mail.${domain}`, `imap.${domain}`, ...mx.slice(0, 1)]) {
     if (await resolves(host)) return { label: domain, imap: [host, 993, true], smtp: [host, 465, true] };
   }
   return { label: domain };
+}
+
+export function connectionCandidates(email: string, detected: Detected) {
+  const domain = email.split("@")[1];
+  const unique = (servers: Server[]) => servers.filter((s, i) => servers.findIndex((x) => x[0] === s[0] && x[1] === s[1]) === i);
+  const generic = !detected.imap || !Object.values(PRESETS).some((p) => p.imap[0] === detected.imap?.[0] && p !== PRESETS.kca);
+  const imap = generic ? unique([[`webmail.${domain}`, 993, true], [`mail.${domain}`, 993, true], ...(detected.imap ? [detected.imap] : [])]) : [detected.imap!];
+  return { imap, smtp: (imapHost: string): Server[] => generic ? unique([[`mail.${domain}`, 465, true], [imapHost, 465, true], [`smtp.${domain}`, 465, true], ...(detected.smtp ? [detected.smtp] : [])]) : detected.smtp ? [detected.smtp] : [] };
 }

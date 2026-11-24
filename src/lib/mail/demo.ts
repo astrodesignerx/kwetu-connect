@@ -31,7 +31,7 @@ const FOLDERS: MailboxInfo[] = [
   { path: "Trash", name: "Trash", special: "trash" },
 ];
 
-interface DemoMessage extends ParsedMessage { mailbox: string; seen: boolean; flagged: boolean; answered: boolean }
+interface DemoMessage extends ParsedMessage { files?: { filename: string; content: Buffer; contentType: string }[]; mailbox: string; seen: boolean; flagged: boolean; answered: boolean }
 interface DemoBox { nextUid: number; messages: DemoMessage[] }
 
 type Shared = typeof globalThis & { kcaMailDemo?: Map<string, DemoBox> };
@@ -50,21 +50,21 @@ function seed(me: string): DemoBox {
       mailbox: m.mailbox ?? "INBOX", messageId: id, inReplyTo: null, references: [],
       subject: m.subject, from: [m.from], to: m.to ?? [you], cc: [], date: hoursAgo(m.hours),
       html: para(m.body), text: m.body.join("\n\n"),
-      attachments: m.attachment ? [{ index: 0, filename: m.attachment, size: 482_133, contentType: "application/pdf", inline: false }] : [],
+      attachments: m.attachment ? [{ index: 0, filename: m.attachment, size: 95, contentType: "text/plain", inline: false }] : [],
       seen: m.seen ?? false, flagged: m.flagged ?? false, answered: m.answered ?? false,
     });
   };
-  const amina = { name: "Amina Wanjiru", address: "amina@savannahbakery.example" };
-  add({ from: amina, subject: "Booking for the Thika Road screen in December", hours: 70, seen: true, answered: true, body: ["Hello,", "We would like to run our festive advert on the Thika Road screen for two weeks from 1 December. Morning and evening rush hours if possible.", "Could you send a quote?", "Thanks,<br>Amina"] });
-  add({ mailbox: "Sent", from: you, to: [amina], subject: "Re: Booking for the Thika Road screen in December", hours: 66, seen: true, body: ["Hi Amina,", "Thank you for getting in touch. Two weeks of morning and evening slots comes to KES 84,000. I have held the dates for you until Friday.", "Kind regards,<br>Kwetu Connect Advertising"] });
-  add({ from: amina, subject: "Re: Booking for the Thika Road screen in December", hours: 3, flagged: true, body: ["That works for us. I have attached the artwork, 1920 by 1080 as you asked.", "Please confirm once it is approved.", "Amina"], attachment: "savannah-festive-advert.pdf" });
+  const amina = { name: "Amina Wanjiru", address: "amina@eldoretbakery.example" };
+  add({ from: amina, subject: "Booking for the Kisumu Ndogo Road screen in December", hours: 70, seen: true, answered: true, body: ["Hello,", "We would like to run our festive advert on the Kisumu Ndogo Road screen for two weeks from 1 December. Morning and evening rush hours if possible.", "Could you send a quote?", "Thanks,<br>Amina"] });
+  add({ mailbox: "Sent", from: you, to: [amina], subject: "Re: Booking for the Kisumu Ndogo Road screen in December", hours: 66, seen: true, body: ["Hi Amina,", "Thank you for getting in touch. Two weeks of morning and evening slots comes to KES 84,000. I have held the dates for you until Friday.", "Kind regards,<br>Kwetu Connect Advertising"] });
+  add({ from: amina, subject: "Re: Booking for the Kisumu Ndogo Road screen in December", hours: 3, flagged: true, body: ["That works for us. I have attached the campaign brief for our Eldoret bakery.", "Please confirm once it is approved.", "Amina"], attachment: "eldoret-festive-brief.txt" });
   add({ from: { name: "M-Pesa Paybill", address: "notifications@payments.example" }, subject: "Payment received: KES 42,000 from Rift Motors", hours: 5, body: ["You have received KES 42,000.00 from RIFT MOTORS LTD, account KCA-1187.", "This is a sample notification."] });
   add({ from: { name: "Brian Otieno", address: "brian@riftmotors.example" }, subject: "Deposit paid for the November campaign", hours: 6, seen: true, body: ["Hi team,", "We have paid the 50% deposit this morning. When can we see the first proof on screen?", "Brian"] });
-  add({ from: { name: "Grace Muthoni", address: "grace@nairobiarts.example" }, subject: "Question about advert length", hours: 26, body: ["Good afternoon,", "Is a 15 second advert allowed, or do you only take 10 seconds?", "Grace"] });
+  add({ from: { name: "Grace Muthoni", address: "grace@eldoretarts.example" }, subject: "Question about advert length", hours: 26, body: ["Good afternoon,", "Is a 15 second advert allowed, or do you only take 10 seconds?", "Grace"] });
   add({ from: { name: "Screen monitor", address: "alerts@kwetuconnectads.co.ke" }, subject: "Weekly screen report: 99.2% on air", hours: 30, seen: true, body: ["The screen was on air 99.2% of scheduled hours this week.", "Longest break: 12 minutes on Tuesday, power."] });
   add({ mailbox: "Archive", from: { name: "Peter Kamau", address: "peter@greenleafhotel.example" }, subject: "Thank you for October", hours: 400, seen: true, body: ["The October campaign brought us many bookings. We will be back in the new year.", "Peter"] });
   add({ mailbox: "Spam", from: { name: "Prize Desk", address: "winner@prizes.example" }, subject: "You have won a holiday", hours: 12, body: ["Click here to claim."] });
-  add({ mailbox: "Drafts", from: you, to: [{ name: "Grace Muthoni", address: "grace@nairobiarts.example" }], subject: "Re: Question about advert length", hours: 1, seen: true, body: ["Hi Grace,", "Yes, 15 seconds is fine. It"] });
+  add({ mailbox: "Drafts", from: you, to: [{ name: "Grace Muthoni", address: "grace@eldoretarts.example" }], subject: "Re: Question about advert length", hours: 1, seen: true, body: ["Hi Grace,", "Yes, 15 seconds is fine. It"] });
   return { nextUid: rows.length + 1, messages: rows.map((m, i) => ({ ...m, uid: i + 1 })) };
 }
 
@@ -123,13 +123,20 @@ export function demoAct(account: MailAccount, folder: string, uids: number[], ac
   }
 }
 
-export function demoSend(account: MailAccount, message: { to: string[]; cc: string[]; subject: string; html: string; text: string; inReplyTo?: string }, answers: { mailbox: string; uid: number } | null) {
+export function demoSend(account: MailAccount, message: { to: string[]; cc: string[]; subject: string; html: string; text: string; inReplyTo?: string; attachments?: { filename: string; content: Buffer; contentType: string }[] }, answers: { mailbox: string; uid: number } | null) {
   const b = box(account);
   b.messages.push({
     uid: b.nextUid++, mailbox: "Sent", messageId: `<demo-${b.nextUid}@kwetuconnectads.co.ke>`, inReplyTo: message.inReplyTo ?? null, references: [],
     subject: message.subject, from: [{ name: "", address: account.email }], to: message.to.map((address) => ({ name: "", address })),
     cc: message.cc.map((address) => ({ name: "", address })), date: new Date().toISOString(), html: message.html, text: message.text,
-    attachments: [], seen: true, flagged: false, answered: false,
+    attachments: (message.attachments ?? []).map((a, index) => ({ index, filename: a.filename, size: a.content.length, contentType: a.contentType, inline: false })), files: message.attachments, seen: true, flagged: false, answered: false,
   });
   if (answers) { const m = b.messages.find((x) => x.mailbox === answers.mailbox && x.uid === answers.uid); if (m) m.answered = true; }
+}
+
+export function demoAttachment(account: MailAccount, folder: string, uid: number, index: number) {
+  const message = box(account).messages.find((m) => m.mailbox === folder && m.uid === uid);
+  const file = message?.attachments.find((a) => a.index === index);
+  if (message?.files?.[index]) return message.files[index];
+  return file ? { filename: file.filename, contentType: "text/plain", content: Buffer.from("Sample campaign brief for an Eldoret bakery on the Kisumu Ndogo Road screen. No live booking.\n") } : null;
 }

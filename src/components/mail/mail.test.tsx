@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { MessageRow, ThreadMessage } from "@/app/manage/(staff)/mail/actions";
+import type { MessageRow, ThreadMessage } from "@/app/mail/actions";
 
-vi.mock("@/app/manage/(staff)/mail/actions", () => ({
+vi.mock("@/app/mail/actions", () => ({
   connectMailbox: vi.fn(), disconnectMailbox: vi.fn(), mailAct: vi.fn(), mailFolders: vi.fn(), mailList: vi.fn(), mailThread: vi.fn(), mailSend: vi.fn(), myMailboxes: vi.fn(),
 }));
 
@@ -62,7 +62,7 @@ describe("Mail page", () => {
     expect(html).toContain("<h1 class=\"mg-heading\">Mail</h1>");
     expect(html).toContain("sales@example.test");
     expect(html).toContain("Results for &ldquo;quote&rdquo;".replace("&ldquo;", "“").replace("&rdquo;", "”"));
-    expect(html).toContain("aria-current=\"true\"");
+    expect(html).toContain("aria-current=\"page\"");
     expect(html.match(/mg-primary/g)).toHaveLength(1);
   });
 
@@ -89,7 +89,7 @@ describe("Mail page", () => {
     expect(inbox.match(/mg-primary/g)).toHaveLength(1);
     expect(inbox).toContain("Reply all");
     expect(inbox).toContain("aria-label=\"Archive\"");
-    expect(inbox).toContain("/manage/mail/attachment?account=a&amp;mailbox=INBOX&amp;uid=2&amp;i=0");
+    expect(inbox).toContain("/mail/attachment?account=a&amp;mailbox=INBOX&amp;uid=2&amp;i=0");
     expect(inbox).toContain("sandbox=\"allow-same-origin allow-popups allow-popups-to-escape-sandbox\"");
     const bin = renderToStaticMarkup(<MailReader {...props} special="trash" />);
     expect(bin).toContain("Move to inbox");

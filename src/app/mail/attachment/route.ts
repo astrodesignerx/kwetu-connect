@@ -2,13 +2,14 @@ import type { NextRequest } from "next/server";
 import { simpleParser } from "mailparser";
 import { requireStaff } from "@/lib/auth/server";
 import { loadAccount } from "@/lib/mail/accounts";
+import { demoAttachment, isDemoAccount } from "@/lib/mail/demo";
 import { fetchSource } from "@/lib/mail/client";
 
 export const maxDuration = 60;
 
 /** Downloads one attachment of one message from a mailbox the signed-in staff member connected. */
 export async function GET(request: NextRequest) {
-  const staff = await requireStaff();
+  const staff = await requireStaff("/mail");
   const params = request.nextUrl.searchParams;
   const account = params.get("account") ?? "";
   const mailbox = params.get("mailbox") ?? "";
@@ -16,8 +17,8 @@ export async function GET(request: NextRequest) {
   const index = Number(params.get("i"));
   if (!account || !mailbox || mailbox.length > 200 || !Number.isInteger(uid) || uid < 1 || !Number.isInteger(index) || index < 0) return new Response("Bad request", { status: 400 });
   try {
-    const parsed = await simpleParser(await fetchSource(await loadAccount(staff.email, account), mailbox, uid));
-    const file = parsed.attachments?.[index];
+    const loaded = await loadAccount(staff.email, account);
+    const file = isDemoAccount(loaded) ? demoAttachment(loaded, mailbox, uid, index) : (await simpleParser(await fetchSource(loaded, mailbox, uid))).attachments?.[index];
     if (!file) return new Response("Not found", { status: 404 });
     const name = encodeURIComponent(file.filename ?? `attachment-${index + 1}`);
     // Pictures and PDFs open in place when asked; anything else, and anything risky, downloads.
