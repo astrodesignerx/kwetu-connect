@@ -25,7 +25,7 @@ export function NoteEditor({ email, note, onSaved }: { email: string; note?: Cli
   const [value, setValue] = useState(note?.note ?? ""), [message, setMessage] = useState(""), [busy, setBusy] = useState(false);
   return <form className="mail-note-editor" onSubmit={async (e) => { e.preventDefault(); setBusy(true); const r = await mailRequest(mailSaveNote(email,value)); setBusy(false); if (r.ok) { onSaved(r.data); setMessage("Note saved"); } else setMessage(r.error); }}>
     <label>Client note<textarea aria-label="Client note" maxLength={10000} rows={3} value={value} onChange={(e) => setValue(e.target.value)} /></label><button disabled={busy}>Save note</button>
-    {note && <small>Updated by {note.updated_by} on {new Date(note.updated_at).toLocaleString("en-GB", { timeZone: "Africa/Nairobi" })}</small>}<p role="status">{message}</p>
+    {note && <small>Updated {note.updated_by ? `by ${note.updated_by} ` : ""}on {new Date(note.updated_at).toLocaleString("en-GB", { timeZone: "Africa/Nairobi" })}</small>}<p role="status">{message}</p>
   </form>;
 }
 export function Inspector({ match, workspace: w, accountId, subject, onClient, onReplyText, onUpdated, onNote }: { match: Match; workspace: Workspace; accountId: string; subject: string; onClient: (id: string) => void; onReplyText: (text: string) => void; onUpdated: () => void; onNote: (note: ClientNote) => void }) {

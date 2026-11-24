@@ -17,7 +17,7 @@ create index mail_thread_meta_assigned on public.mail_thread_meta (assigned_emai
 create table public.mail_client_notes (
   advertiser_email text primary key check (advertiser_email = lower(advertiser_email)),
   note text not null default '' check (char_length(note) <= 10000),
-  updated_by text not null references public.staff(email),
+  updated_by text references public.staff(email) on delete set null,
   updated_at timestamptz not null default now()
 );
 alter table public.mail_templates enable row level security;

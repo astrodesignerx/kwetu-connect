@@ -6,7 +6,7 @@ import { emailKey, threadKey } from "./kca";
 
 export type Template = { id: string; name: string; body: string; sort_order: number; created_by: string | null };
 export type ThreadMeta = { mailbox_id: string; thread_key: string; assigned_email: string | null; updated_at: string };
-export type ClientNote = { advertiser_email: string; note: string; updated_by: string; updated_at: string };
+export type ClientNote = { advertiser_email: string; note: string; updated_by: string | null; updated_at: string };
 export const STARTER_REPLIES = [
   ["Advert approved", "Your advert has passed our review. You can check the booking status and planned dates on your booking page."],
   ["Payment received", "Thank you for your payment. Please check your booking page for confirmation of the amount and status."],
