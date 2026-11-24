@@ -22,8 +22,8 @@ const contentSecurityPolicy = [
   "upgrade-insecure-requests",
 ].join("; ");
 
-// The Mail page shows people's email, which links pictures from anywhere on the web. Its
-// frames run no scripts, so the only change for that page is letting https pictures load.
+// The message frame blocks remote content until the reader asks to show pictures.
+// The mail page allows https pictures so that explicit choice can load them.
 const mailContentSecurityPolicy = contentSecurityPolicy
   .replace("img-src 'self' data: blob:", "img-src 'self' data: blob: https:")
   .replace("frame-src https:", "frame-src 'self' https:");

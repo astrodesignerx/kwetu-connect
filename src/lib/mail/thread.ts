@@ -79,8 +79,14 @@ details.ss-quoted[open]>summary{margin-bottom:8px}
 ${FRAME_CSS}`;
 
 /** The full document a message is shown in, with quoted history folded. */
-export function messageDoc(opts: { html: string | null; text: string }): { doc: string; trimmed: boolean } {
+export function hasRemoteContent(html: string) {
+  return /(?:\b(?:src|background)\s*=\s*["']?\s*(?:https?:|\/\/)|\bsrcset\s*=\s*["'][^"']*(?:https?:|\/\/)|url\(\s*["']?\s*(?:https?:|\/\/)|<link\b[^>]*\brel\s*=\s*["']?stylesheet|@import\s)/i.test(html);
+}
+export function messageDoc(opts: { html: string | null; text: string; showPictures?: boolean; origin?: string }): { doc: string; trimmed: boolean } {
   const raw = opts.html ?? `<pre style="font:inherit">${esc(opts.text)}</pre>`;
   const { html, trimmed } = trimQuoted(raw);
-  return { doc: `<!doctype html><html><head><meta charset="utf-8"><meta name="referrer" content="no-referrer"><base target="_blank"><style>${CSS}</style></head><body>${html}</body></html>`, trimmed };
+  const origin = (opts.origin || (typeof location !== "undefined" ? location.origin : "https://kwetuconnectads.co.ke")).replace(/[^a-zA-Z0-9:./-]/g, "");
+  const local = `data: blob: cid: ${origin}/mail/attachment`;
+  const policy = opts.showPictures ? "" : `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${local}; media-src ${local}; font-src ${local}; style-src 'unsafe-inline'; script-src 'none'; object-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">`;
+  return { doc: `<!doctype html><html><head><meta charset="utf-8">${policy}<meta name="referrer" content="no-referrer"><base target="_blank"><style>${CSS}</style></head><body>${html}</body></html>`, trimmed };
 }

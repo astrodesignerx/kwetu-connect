@@ -3,6 +3,7 @@ import nodemailer from "nodemailer";
 import { simpleParser, type ParsedMail } from "mailparser";
 import sanitizeHtml from "sanitize-html";
 import { decryptSecret } from "./crypto";
+import { hasRemoteContent } from "./thread";
 
 /**
  * Reading and sending mail straight from the mailbox's own servers (IMAP and SMTP), one short connection per
@@ -172,6 +173,7 @@ export function cleanHtml(html: string): string {
 }
 
 export interface ParsedMessage {
+  remoteContent?: boolean;
   uid: number;
   messageId: string | null;
   inReplyTo: string | null;
@@ -197,6 +199,7 @@ export async function parseSource(uid: number, source: Buffer): Promise<ParsedMe
     html = cleanHtml(html);
   }
   return {
+    remoteContent: hasRemoteContent(typeof m.html === "string" ? m.html : ""),
     uid,
     messageId: m.messageId ?? null,
     inReplyTo: m.inReplyTo ?? null,

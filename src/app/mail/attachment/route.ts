@@ -34,6 +34,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch {
-    return new Response("The attachment could not be fetched. Try again.", { status: 502 });
+    return new Response("Not found", { status: 404 });
   }
 }

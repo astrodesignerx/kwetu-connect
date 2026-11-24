@@ -2,11 +2,12 @@
 import { createHash } from "node:crypto";
 import MailComposer from "nodemailer/lib/mail-composer";
 import { requireStaff } from "@/lib/auth/server";
-import { listAccounts, loadAccount, removeAccount, saveAccount, recordSync, type AccountView } from "@/lib/mail/accounts";
+import { listAccounts, loadAccount, ownedAccount, removeAccount, saveAccount, recordSync, mailboxPeople, staffDirectory, addMember, removeMember, renameAccount, type AccountView } from "@/lib/mail/accounts";
 import { connectionCandidates, detectMailbox } from "@/lib/mail/autoconfig";
 import { classify, explain, MAX_ATTACHMENT_BYTES, MailError, normaliseSubject, parseSource, pathOf, testImap, transporter, verifySmtp, withImap, type MailAccount, type Address, type MailboxInfo, type ParsedMessage } from "@/lib/mail/client";
 import { saveDraft, listDrafts, deleteDraft, loadUploads, sendOnce, type DraftData } from "@/lib/mail/drafts";
 import { encryptSecret } from "@/lib/mail/crypto";
+import { moveMessages, undoMove, type MoveKind, type MoveReceipt } from "@/lib/mail/moves";
 import { demoAccountFields, demoAct, demoFolders, demoList, demoSend, demoThread, isDemoAccount, mailDemoEnabled } from "@/lib/mail/demo";
 
 /**
@@ -39,6 +40,7 @@ const uidOk = (uid: unknown): number => {
 /* Mailboxes */
 
 export interface ConnectInput {
+  accountId?: string;
   email: string;
   password: string;
   /** Only when the servers cannot be worked out from the address. */
@@ -48,9 +50,18 @@ export interface ConnectInput {
   smtpPort?: number;
   username?: string;
 }
+export async function mailDiscover(email: string) {
+  return run("find servers", async () => {
+    if (!emailOk(email)) throw new MailError("Enter a valid email address.");
+    if (mailDemoEnabled()) return { label: "Sample mail servers", imap: ["demo.invalid", 993, true] as [string, number, boolean], smtp: ["demo.invalid", 465, true] as [string, number, boolean] };
+    return detectMailbox(email);
+  });
+}
 
 export async function connectMailbox(input: ConnectInput) {
   return run("connect", async (me): Promise<AccountView> => {
+    const existing = input.accountId ? await ownedAccount(me, input.accountId) : null;
+    if (existing && existing.email !== String(input.email).trim().toLowerCase()) throw new MailError("Reconnect with the same email address.");
     // Local demo mode: Connect opens a sample mailbox, no sign-in needed.
     if (mailDemoEnabled()) return saveAccount(me, demoAccountFields(String(input.email ?? "").slice(0, 200)));
     const email = String(input.email ?? "").trim().toLowerCase();
@@ -97,6 +108,21 @@ export async function disconnectMailbox(id: string) {
 export async function myMailboxes() {
   return run("list", (me) => listAccounts(me));
 }
+export async function mailSharing(id: string) {
+  return run("read sharing", async (me) => {
+    const account = await loadAccount(me, id);
+    return { me, owner: account.owner_email, people: await mailboxPeople(me, id), staff: account.owner_email === me.toLowerCase() ? await staffDirectory() : [] };
+  });
+}
+export async function mailAddMember(id: string, email: string) { return run("share", async (me) => { await addMember(me, id, email); return true; }); }
+export async function mailRemoveMember(id: string, email: string) { return run("remove member", async (me) => { await removeMember(me, id, email); return true; }); }
+export async function mailRename(id: string, label: string) { return run("rename", async (me) => { await renameAccount(me, id, label); return true; }); }
+export async function mailServerSettings(id: string) {
+  return run("read settings", async (me) => {
+    const a = await ownedAccount(me, id);
+    return { imap_host:a.imap_host, imap_port:a.imap_port, smtp_host:a.smtp_host, smtp_port:a.smtp_port, username:a.username };
+  });
+}
 
 export async function mailFolders(accountId: string) {
   return run("folders", async (me): Promise<{ boxes: MailboxInfo[]; unread: number }> => {
@@ -117,6 +143,7 @@ export async function mailFolders(accountId: string) {
 /* Messages */
 
 export interface MessageRow {
+  snippet?: string;
   uid: number;
   mailbox: string;
   from: Address;
@@ -176,10 +203,13 @@ export async function mailList(accountId: string, mailbox: string, query: ListQu
           range = `${Math.max(1, end - size + 1)}:${end}`;
         }
         const items: MessageRow[] = [];
-        for await (const m of c.fetch(range, { uid: true, envelope: true, flags: true, internalDate: true, bodyStructure: true }, { uid: byUid })) {
+        for await (const m of c.fetch(range, { uid: true, envelope: true, flags: true, internalDate: true, bodyStructure: true, source: { start: 0, maxLength: 4096 } }, { uid: byUid })) {
           const from = m.envelope?.from?.[0];
           const date = m.envelope?.date ?? (m.internalDate ? new Date(m.internalDate) : null);
+          let snippet = "";
+          if (m.source) try { snippet = (await parseSource(m.uid, m.source)).text.replace(/\s+/g, " ").trim().slice(0, 160); } catch {}
           items.push({
+            snippet,
             uid: m.uid, mailbox: folder,
             from: { name: from?.name || "", address: from?.address || "" },
             to: (m.envelope?.to ?? []).map((a) => ({ name: a.name || "", address: a.address || "" })),
@@ -247,6 +277,16 @@ export async function mailThread(accountId: string, mailbox: string, uid: number
 
 export type MailAction = "archive" | "trash" | "spam" | "inbox" | "read" | "unread" | "star" | "unstar";
 const ACTIONS: MailAction[] = ["archive", "trash", "spam", "inbox", "read", "unread", "star", "unstar"];
+export async function mailMove(accountId: string, mailbox: string, uids: number[], action: MoveKind) {
+  return run("move", async (me) => {
+    const account = await loadAccount(me, accountId);
+    if (!["archive", "trash", "spam", "inbox"].includes(action)) throw new MailError("Choose a destination.");
+    return moveMessages(account, folderOk(mailbox), uids, action);
+  });
+}
+export async function mailUndoMove(receipt: MoveReceipt) {
+  return run("undo move", async (me) => { await undoMove(await loadAccount(me, receipt.accountId), receipt); return true; });
+}
 
 /** Moves or marks messages. Moving to the bin is reversible, there is no permanent delete here. */
 export async function mailAct(accountId: string, mailbox: string, uids: number[], action: MailAction) {

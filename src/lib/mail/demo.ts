@@ -1,4 +1,5 @@
 import { MailError, normaliseSubject, type MailAccount, type MailboxInfo, type ParsedMessage } from "./client";
+import type { MoveKind, MoveReceipt } from "./moves";
 
 /**
  * A sample mailbox for local demo mode, so the Mail page can be tried without a real mailbox. It only ever
@@ -69,7 +70,10 @@ function seed(me: string): DemoBox {
   add({from:{name:"Agnes Jeptoo",address:"agnes@example.com"},subject:"Advert attached for review",hours:10,body:["Please review the attached picture for our booking KCA-DE40000000000010."]});
   rows[rows.length-1].attachments=[{index:0,filename:"sample-advert.png",size:1992,contentType:"image/png",inline:false}];
   add({from:{name:"Payment desk",address:"payments@example.net"},subject:"Payment note for KCA-DE40000000000012",hours:8,body:["Please check the payment for this booking in the manager."]});
-  return { nextUid: rows.length + 1, messages: rows.map((m, i) => ({ ...m, uid: i + 1 })) };
+  add({from:{name:"Mercy Kiplagat",address:"mercy@eldoretflowers.example"},subject:"December flower promotion pictures",hours:2,body:["Hello, here is a picture for our Eldoret flower promotion.", '<img src="https://kwetuconnectads.co.ke/logo-icon.svg" alt="Sample promotion picture" width="320" height="180">', "Please let us know what else you need."]});
+  const selectedRows = me.startsWith("studio@") ? rows.filter((m) => ["agnes@example.com", "DAVID@example.com", "alerts@kwetuconnectads.co.ke"].includes(m.from[0]?.address)) : rows;
+  if (me.startsWith("studio@")) for (const row of selectedRows) row.subject = "Studio: " + row.subject;
+  return { nextUid: rows.length + 1, messages: selectedRows.map((m, i) => ({ ...m, uid: i + 1 })) };
 }
 
 function box(account: MailAccount): DemoBox {
@@ -98,6 +102,7 @@ export function demoList(account: MailAccount, folder: string, query: { unread?:
     items: page.map((m) => ({
       uid: m.uid, mailbox: m.mailbox, from: m.from[0] ?? { name: "", address: "" }, to: m.to, subject: m.subject, date: m.date,
       seen: m.seen, flagged: m.flagged, answered: m.answered, hasAttachments: m.attachments.length > 0, messageId: m.messageId,
+      snippet: m.text.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").slice(0, 160),
       thread: counts.get(normaliseSubject(m.subject)) ?? 1,
     })),
   };
@@ -130,6 +135,19 @@ export function demoAct(account: MailAccount, folder: string, uids: number[], ac
     else if (action === "unstar") m.flagged = false;
     else if (move[action]) m.mailbox = move[action];
   }
+}
+export function demoMove(account: MailAccount, source: string, uids: number[], kind: MoveKind) {
+  const b = box(account), target = { archive: "Archive", trash: "Trash", spam: "Spam", inbox: "INBOX" }[kind];
+  const rows = b.messages.filter((m) => m.mailbox === source && uids.includes(m.uid));
+  if (!rows.length) throw new MailError("Those messages are no longer there.");
+  const messages = rows.map((m) => { const oldUid = m.uid; m.mailbox = target; m.uid = b.nextUid++; return { oldUid, uid: m.uid, messageId: m.messageId }; });
+  return { target, validity: "1", messages };
+}
+export function demoRestore(account: MailAccount, receipt: MoveReceipt) {
+  const b = box(account);
+  const rows = receipt.messages.map((r) => b.messages.find((m) => m.mailbox === receipt.target && m.messageId === r.messageId && m.uid === r.uid));
+  if (rows.some((m) => !m)) throw new MailError("Undo failed. The message moved again.");
+  for (const m of rows) { m!.mailbox = receipt.source; m!.uid = b.nextUid++; }
 }
 
 export function demoSend(account: MailAccount, message: { to: string[]; cc: string[]; subject: string; html: string; text: string; inReplyTo?: string; attachments?: { filename: string; content: Buffer; contentType: string }[] }, answers: { mailbox: string; uid: number } | null) {

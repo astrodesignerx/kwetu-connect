@@ -33,5 +33,5 @@ export default function AdvertAttachment({ href, filename, type, size, seconds }
     return () => {live=false;controller.abort();};
   },[href,filename,type,size,seconds,media]);
   if(!media) return null;
-  return <div className="mail-advert-check" aria-live="polite"><b>{message}</b>{results.map((r) => <p key={r.id} data-check={r.state}>{r.label}: {r.detail}</p>)}{seconds===undefined && <p>Length not checked: no matched booking.</p>}</div>;
+  return <details className="mail-advert-check" aria-live="polite"><summary>{message}</summary>{results.map((r) => <p key={r.id} data-check={r.state}>{r.label}: {r.detail}</p>)}{seconds===undefined && <p>Length not checked: no matched booking.</p>}</details>;
 }

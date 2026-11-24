@@ -1,12 +1,18 @@
 /** Formatting for the Mail page. Every time is shown in Nairobi time, whatever the browser's zone. */
 const ZONE = "Africa/Nairobi";
 const day = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: ZONE, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+const dateValue = (value: string) => new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? value + "T12:00:00+03:00" : value);
+const daysBetween = (a: Date, b: Date) => Math.round((Date.parse(day(a)) - Date.parse(day(b))) / 86_400_000);
 
 /** "18:23" today, "29 Jun" this year, "29 Jun 2025" before. */
 export function listTime(iso: string | null, now = new Date()): string {
   if (!iso) return "";
   const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return "";
   if (day(d) === day(now)) return new Intl.DateTimeFormat("en-GB", { timeZone: ZONE, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d);
+  const age = daysBetween(now, d);
+  if (age === 1) return "Yesterday";
+  if (age >= 2 && age <= 6) return new Intl.DateTimeFormat("en-GB", { timeZone: ZONE, weekday: "short" }).format(d);
   const sameYear = day(d).slice(0, 4) === day(now).slice(0, 4);
   return new Intl.DateTimeFormat("en-GB", { timeZone: ZONE, day: "numeric", month: "short", ...(sameYear ? {} : { year: "numeric" }) }).format(d);
 }
@@ -14,7 +20,27 @@ export function listTime(iso: string | null, now = new Date()): string {
 /** "17 Nov 2026, 18:23" for the reader. */
 export function fullTime(iso: string | null): string {
   if (!iso) return "";
-  return new Intl.DateTimeFormat("en-GB", { timeZone: ZONE, day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso));
+  const d = dateValue(iso);
+  if (!Number.isFinite(d.getTime())) return "";
+  return briefDate(iso) + ", " + new Intl.DateTimeFormat("en-GB", { timeZone: ZONE, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d);
+}
+export function briefDate(iso: string | Date = new Date()) {
+  const d = typeof iso === "string" ? dateValue(iso) : iso;
+  return new Intl.DateTimeFormat("en-GB", { timeZone: ZONE, weekday: "short", day: "numeric", month: "short", year: "numeric" }).format(d).replace(",", "");
+}
+export function bookingDates(start: string, end?: string, now = new Date()) {
+  const a = dateValue(start), b = dateValue(end || start);
+  const year = day(a).slice(0, 4), otherYear = day(b).slice(0, 4);
+  const withYear = year !== day(now).slice(0, 4) || otherYear !== year;
+  const format = (d: Date) => new Intl.DateTimeFormat("en-GB", { timeZone: ZONE, day: "numeric", month: "short", ...(withYear ? { year: "numeric" } : {}) }).format(d);
+  return format(a) + (end && end !== start ? " to " + format(b) : "");
+}
+export const number = (value: number) => value.toLocaleString("en-GB");
+export const money = (value: number) => "KES " + number(value);
+export function checkedAgo(iso?: string | null, now = new Date()) {
+  if (!iso) return "Not checked yet";
+  const minutes = Math.max(0, Math.floor((now.getTime() - new Date(iso).getTime()) / 60_000));
+  return minutes < 1 ? "checked just now" : minutes < 60 ? `checked ${minutes} minute${minutes === 1 ? "" : "s"} ago` : `checked ${listTime(iso, now)}`;
 }
 
 /** Which heading a message sits under in the list. */
@@ -22,8 +48,9 @@ export function dayGroup(iso: string | null, now = new Date()): "Today" | "Yeste
   if (!iso) return "Earlier";
   const d = new Date(iso);
   if (day(d) === day(now)) return "Today";
-  if (day(d) === day(new Date(now.getTime() - 86_400_000))) return "Yesterday";
-  return now.getTime() - d.getTime() < 7 * 86_400_000 ? "This week" : "Earlier";
+  const age = daysBetween(now, d);
+  if (age === 1) return "Yesterday";
+  return age >= 2 && age <= 6 ? "This week" : "Earlier";
 }
 
 /**

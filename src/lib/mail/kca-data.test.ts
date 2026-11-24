@@ -17,7 +17,7 @@ describe("mail workspace persistence",() => {
   it("authorises mailbox ownership and prevents assignment impersonation",async () => {
     const account=await saveAccount("owner@example.com",demoAccountFields("sales@example.com"));
     await expect(assignThread("intruder@example.com",account.id,"Campaign","intruder@example.com")).rejects.toThrow("not connected");
-    await expect(assignThread("owner@example.com",account.id,"Campaign","other@example.com")).rejects.toThrow("only be assigned to you");
+    await expect(assignThread("owner@example.com",account.id,"Campaign","other@example.com")).rejects.toThrow("access to this mailbox");
     await assignThread("owner@example.com",account.id,"Re: Campaign","OWNER@example.com");
     expect(await listMeta("owner@example.com",account.id)).toMatchObject([{thread_key:"campaign",assigned_email:"owner@example.com"}]);
     await assignThread("owner@example.com",account.id,"Campaign",null);

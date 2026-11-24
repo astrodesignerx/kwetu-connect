@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import MailIcon from "./MailIcon";
 
 export default function MailTheme() {
   const [preference, setPreference] = useState("system");
@@ -19,8 +20,12 @@ export default function MailTheme() {
   function change(value: string) {
     setPreference(value);
     try { if (value === "system") localStorage.removeItem("kca-theme"); else localStorage.setItem("kca-theme", value); } catch {}
+    applyPreference(value);
+  }
+  return <div className="theme-seg" role="group" aria-label="Theme">{[["light", "sun"], ["dark", "moon"], ["system", "system"]].map(([value, icon]) => <button key={value} type="button" data-t={value} aria-label={`${value[0].toUpperCase() + value.slice(1)} theme`} title={value} aria-pressed={preference === value} onClick={() => change(value)}><MailIcon name={icon} size="sm" /></button>)}</div>;
+}
+
+function applyPreference(value:string) {
     document.cookie = value === "system" ? "kca-theme=;path=/;max-age=0;SameSite=Lax" : `kca-theme=${value};path=/;max-age=31536000;SameSite=Lax`;
     document.documentElement.dataset.theme = value === "system" ? matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light" : value;
-  }
-  return <label>Theme<select aria-label="Theme" value={preference} onChange={(e) => change(e.target.value)}><option value="dark">Dark</option><option value="light">Light</option><option value="system">System</option></select></label>;
 }

@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { mailDb, mailMemoryMode } from "./db";
 import { MailError } from "./client";
-import { loadAccount } from "./accounts";
+import { loadAccount, mailboxPeople } from "./accounts";
 import { emailKey, threadKey } from "./kca";
 
 export type Template = { id: string; name: string; body: string; sort_order: number; created_by: string | null };
-export type ThreadMeta = { mailbox_id: string; thread_key: string; assigned_email: string | null; updated_at: string };
+export type ThreadMeta = { mailbox_id: string; thread_key: string; assigned_email: string | null; updated_at: string; done_message_id?: string | null; done_at?: string | null; done_by?: string | null };
 export type ClientNote = { advertiser_email: string; note: string; updated_by: string | null; updated_at: string };
 export const STARTER_REPLIES = [
   ["Advert approved", "Your advert has passed our review. You can check the booking status and planned dates on your booking page."],
@@ -48,18 +48,36 @@ export async function deleteTemplate(id: string) {
 export async function listMeta(me: string, accountId: string): Promise<ThreadMeta[]> {
   await loadAccount(me, accountId);
   if (mailMemoryMode()) return structuredClone([...memory().meta.values()].filter((m) => m.mailbox_id === accountId));
-  const { data, error } = await mailDb().from("mail_thread_meta").select("mailbox_id,thread_key,assigned_email,updated_at").eq("mailbox_id", accountId);
+  const { data, error } = await mailDb().from("mail_thread_meta").select("mailbox_id,thread_key,assigned_email,updated_at,done_message_id,done_at,done_by").eq("mailbox_id", accountId);
   if (error) throw fail(); return data ?? [];
 }
 export async function assignThread(me: string, accountId: string, subject: string, assignee: string | null) {
   await loadAccount(me, accountId);
-  // Phase 1 mailboxes are personal. Assign only to their authenticated owner until sharing exists.
-  if (assignee !== null && emailKey(assignee) !== emailKey(me)) throw new MailError("This personal mailbox can only be assigned to you.");
+  if (assignee !== null && !(await mailboxPeople(me, accountId)).some((p) => p.email === emailKey(assignee))) throw new MailError("Choose someone with access to this mailbox.");
   if (typeof subject !== "string" || !subject.trim() || subject.length > 500) throw new MailError("Choose a conversation.");
-  const row: ThreadMeta = { mailbox_id: accountId, thread_key: threadKey(subject), assigned_email: assignee === null ? null : emailKey(me), updated_at: new Date().toISOString() };
-  if (mailMemoryMode()) memory().meta.set(`${accountId}:${row.thread_key}`, row);
+  const row: ThreadMeta = { mailbox_id: accountId, thread_key: threadKey(subject), assigned_email: assignee === null ? null : emailKey(assignee), updated_at: new Date().toISOString() };
+  if (mailMemoryMode()) memory().meta.set(`${accountId}:${row.thread_key}`, { ...memory().meta.get(`${accountId}:${row.thread_key}`), ...row });
   else { const { error } = await mailDb().from("mail_thread_meta").upsert(row, { onConflict: "mailbox_id,thread_key" }); if (error) throw fail(); }
   return row;
+}
+export async function clearAssignments(accountId: string, person: string) {
+  for (const [key, row] of memory().meta) if (row.mailbox_id === accountId && row.assigned_email === person) memory().meta.set(key, { ...row, assigned_email: null, updated_at: new Date().toISOString() });
+}
+export async function setDone(me: string, accountId: string, subject: string, messageId: string | null, expectedMessageId?: string) {
+  await loadAccount(me, accountId);
+  const key = threadKey(subject);
+  if (!key || (messageId !== null && (!messageId || messageId.length > 1000))) throw new MailError("Choose a conversation.");
+  const patch = { mailbox_id: accountId, thread_key: key, done_message_id: messageId, done_at: messageId ? new Date().toISOString() : null, done_by: messageId ? emailKey(me) : null, updated_at: new Date().toISOString() };
+  if (mailMemoryMode()) {
+    if (expectedMessageId && memory().meta.get(`${accountId}:${key}`)?.done_message_id !== expectedMessageId) throw new MailError("Undo failed. Someone has updated this conversation.");
+    const row = { assigned_email: null, ...memory().meta.get(`${accountId}:${key}`), ...patch };
+    memory().meta.set(`${accountId}:${key}`, row); return row;
+  }
+  const query = expectedMessageId ? mailDb().from("mail_thread_meta").update(patch).eq("mailbox_id", accountId).eq("thread_key", key).eq("done_message_id", expectedMessageId) : mailDb().from("mail_thread_meta").upsert(patch, { onConflict: "mailbox_id,thread_key" });
+  const { data, error } = await query.select("*").maybeSingle();
+  if (error) throw fail();
+  if (!data) throw new MailError("Undo failed. Someone has updated this conversation.");
+  return data as ThreadMeta;
 }
 export async function listNotes(): Promise<ClientNote[]> {
   if (mailMemoryMode()) return structuredClone([...memory().notes.values()]);

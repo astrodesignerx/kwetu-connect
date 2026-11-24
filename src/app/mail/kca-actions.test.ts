@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mock=vi.hoisted(() => ({auth:vi.fn(),directory:vi.fn(),account:vi.fn(),templates:vi.fn(),notes:vi.fn(),meta:vi.fn(),assign:vi.fn(),save:vi.fn(),remove:vi.fn(),saveNote:vi.fn(),rows:vi.fn()}));
 vi.mock("@/lib/auth/server",() => ({requireStaff:mock.auth}));
 vi.mock("@/lib/store",() => ({getStore:() => ({mailDirectory:mock.directory})}));
-vi.mock("@/lib/mail/accounts",() => ({loadAccount:mock.account}));
+vi.mock("@/lib/mail/accounts",() => ({loadAccount:mock.account,mailboxPeople:async()=>[],listAccounts:async()=>[]}));
 vi.mock("@/lib/mail/conversations",() => ({conversationRows:mock.rows}));
 vi.mock("@/lib/mail/kca-data",() => ({listTemplates:mock.templates,listNotes:mock.notes,listMeta:mock.meta,assignThread:mock.assign,saveTemplate:mock.save,deleteTemplate:mock.remove,saveNote:mock.saveNote}));
 import { mailAssign, mailAssigned, mailClientConversations, mailDeleteTemplate, mailSaveNote, mailSaveTemplate, mailWaiting, mailWorkspace } from "./kca-actions";

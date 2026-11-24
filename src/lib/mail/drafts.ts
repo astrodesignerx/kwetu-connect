@@ -42,9 +42,10 @@ function cleanData(input: DraftData): DraftData {
 }
 export async function getDraft(owner: string, id: string): Promise<SavedDraft | null> {
   if (!validId(id)) return null;
-  if (mailMemoryMode()) { const row = drafts().get(id); return row?.owner_email === owner ? structuredClone(row) : null; }
+  if (mailMemoryMode()) { const row = drafts().get(id); if (row?.owner_email !== owner) return null; await loadAccount(owner, row.mailbox_id); return structuredClone(row); }
   const { data, error } = await mailDb().from("mail_drafts").select("*").eq("owner_email", owner).eq("id", id).maybeSingle();
   if (error) failed(error);
+  if (data) await loadAccount(owner, data.mailbox_id);
   return data as SavedDraft | null;
 }
 export async function listDrafts(owner: string, accountId: string): Promise<SavedDraft[]> {
@@ -82,6 +83,7 @@ export async function saveDraft(owner: string, id: string, accountId: string, ve
 
 /** An atomic database claim prevents two Vercel invocations from submitting the same draft. */
 export async function sendOnce(owner: string, id: string, accountId: string, version: number, payload: unknown, send: () => Promise<void>) {
+  await loadAccount(owner, accountId);
   const hash = createHash("sha256").update(JSON.stringify(payload)).digest("hex");
   const row = await getDraft(owner, id);
   if (!row || row.mailbox_id !== accountId) throw new MailError("Save this email to Drafts before sending.");
@@ -144,6 +146,7 @@ export async function loadUploads(owner: string, draftId: string, ids: string[])
   const wanted = [...new Set(ids)];
   if (wanted.length > 10 || wanted.some((id) => !validId(id))) throw new MailError("Choose up to ten attachments.");
   if (!wanted.length) return [];
+  if (!await getDraft(owner, draftId)) throw new MailError("An attachment expired or is unavailable. Remove it and attach it again.");
   const cutoff = new Date(Date.now() - 86_400_000).toISOString();
   let rows: Upload[];
   if (mailMemoryMode()) rows = wanted.map((id) => uploads().get(id)).filter((u): u is Upload => !!u && u.owner_email === owner && u.draft_id === draftId && u.created_at >= cutoff);

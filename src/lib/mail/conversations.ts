@@ -3,10 +3,12 @@ import { classify, withImap } from "./client";
 import { loadAccount, listAccounts } from "./accounts";
 import { demoList, demoFolders, isDemoAccount } from "./demo";
 import { emailKey, threadKey } from "./kca";
+import { listMeta, type ThreadMeta } from "./kca-data";
+import { isWaiting } from "./status";
 
 export type ConversationRow = MessageRow & { accountId: string };
 export type ConversationQuery = { kind: "waiting" } | { kind: "client"; emails: string[] } | { kind: "assigned"; subjects: string[] };
-export function filterConversations(items: MessageRow[], query: ConversationQuery, me: string, inboxPaths = ["INBOX"]) {
+export function filterConversations(items: MessageRow[], query: ConversationQuery, me: string, inboxPaths = ["INBOX"], meta: ThreadMeta[] = []) {
   const emails = query.kind === "client" ? new Set(query.emails.map(emailKey)) : new Set<string>();
   const subjects = query.kind === "assigned" ? new Set(query.subjects) : new Set<string>();
   const sorted = [...items].sort((a,b) => (b.date ?? "").localeCompare(a.date ?? ""));
@@ -19,7 +21,7 @@ export function filterConversations(items: MessageRow[], query: ConversationQuer
     groups.set(key, row);
   }
   const result = [...groups.values()];
-  return query.kind === "waiting" ? result.filter((r) => inboxPaths.includes(r.mailbox) && !r.answered && emailKey(r.from.address) !== emailKey(me) && !/^(no-?reply|notifications?|alerts?)@/i.test(r.from.address)).sort((a,b) => (a.date ?? "").localeCompare(b.date ?? "")) : result;
+  return query.kind === "waiting" ? result.filter((r) => inboxPaths.includes(r.mailbox) && isWaiting(r, me, meta.find((m) => m.thread_key === threadKey(r.subject)))).sort((a,b) => (a.date ?? "").localeCompare(b.date ?? "")) : result;
 }
 
 /** One connection per account. Searches and reads are bounded; the UI discloses a partial result. */
@@ -44,8 +46,8 @@ export async function conversationRows(me: string, query: ConversationQuery, onl
               const search = query.kind === "client" ? { or: query.emails.flatMap((email) => [{ from: email }, { to: email }, { cc: email }]) } : { all: true };
               const found = (await c.search(search, { uid: true }) || []).sort((a,b) => a-b);
               if (found.length > 300) partial = true;
-              // Waiting needs the oldest messages. Client and Assigned show the newest page.
-              const uids = query.kind === "waiting" ? found.slice(0,300) : found.slice(-300);
+              // Keep recent replies so an older incoming message cannot look unanswered.
+              const uids = found.slice(-300);
               if (!uids.length) continue;
               for await (const m of c.fetch(uids.join(","), { uid: true, envelope: true, flags: true }, { uid: true })) {
                 const env = m.envelope;
@@ -57,7 +59,8 @@ export async function conversationRows(me: string, query: ConversationQuery, onl
           return rows;
         });
       }
-      return { items: filterConversations(items, query, account.email, inboxPaths).map((r) => ({ ...r, accountId: account.id })), partial, error: null };
+      const meta = query.kind === "waiting" ? await listMeta(me, account.id) : [];
+      return { items: filterConversations(items, query, account.email, inboxPaths, meta).map((r) => ({ ...r, accountId: account.id })), partial, error: null };
     } catch { return { items: [], partial: true, error: `Conversations could not be read from ${account.email}.` }; }
   }));
   return { items: results.flatMap((r) => r.items).sort((a,b) => query.kind === "waiting" ? (a.date ?? "").localeCompare(b.date ?? "") : (b.date ?? "").localeCompare(a.date ?? "")), partial: results.some((r) => r.partial), errors: results.flatMap((r) => r.error ? [r.error] : []) };

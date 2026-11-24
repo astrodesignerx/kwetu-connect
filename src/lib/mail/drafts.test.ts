@@ -26,7 +26,7 @@ describe("persistent draft contract", () => {
     const row = await saveDraft(owner, randomUUID(), account, 0, content);
     expect(await getDraft("other@example.test", row.id)).toBeNull();
     await expect(saveDraft("other@example.test", row.id, account, 1, content)).rejects.toThrow("not connected");
-    await expect(sendOnce("other@example.test", row.id, account, 1, content, vi.fn())).rejects.toThrow("Save this email");
+    await expect(sendOnce("other@example.test", row.id, account, 1, content, vi.fn())).rejects.toThrow("not connected");
     await expect(deleteDraft(owner, row.id, 0)).rejects.toBeInstanceOf(DraftConflict);
   });
   it("submits once across a retry and blocks a concurrent send and late autosave", async () => {

@@ -1,25 +1,22 @@
 "use client";
-import Link from "next/link";
-import { useState } from "react";
-import { disconnectMailbox } from "@/app/mail/actions";
+import { useEffect, useState } from "react";
+import { disconnectMailbox, mailSharing, mailAddMember, mailRemoveMember, mailRename } from "@/app/mail/actions";
 import type { AccountView } from "@/lib/mail/accounts";
 import ConnectMailbox from "./ConnectMailbox";
-import MailTheme from "./MailTheme";
-
-export default function MailSettings({ accounts: initial, demo }: { accounts: AccountView[]; demo: boolean }) {
-  const [accounts, setAccounts] = useState(initial);
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  async function disconnect(account: AccountView) {
-    if (!confirm(`Disconnect ${account.email}? You can connect it again later.`)) return;
-    setBusy(true);
-    try { const r = await disconnectMailbox(account.id); if (r.ok) setAccounts((rows) => rows.filter((a) => a.id !== account.id)); else setError(r.error); }
-    catch { setError("The mailbox could not be disconnected. Try again."); }
-    finally { setBusy(false); }
-  }
-  return <section className="mail-settings"><Link href="/mail">Back to Mail</Link><h1>Mail settings</h1><MailTheme />
-    <ul>{accounts.map((a) => <li key={a.id}><span>{a.email}<small>{a.last_error ? ` | ${a.last_error}` : a.last_synced_at ? ` | Last checked ${new Date(a.last_synced_at).toLocaleString("en-GB")}` : " | Not checked yet"}</small></span><button type="button" disabled={busy} onClick={() => void disconnect(a)}>Disconnect</button></li>)}</ul>
-    {error && <p role="alert">{error}</p>}
-    <ConnectMailbox demo={demo} first={!accounts.length} onConnected={(account) => setAccounts((rows) => [...rows.filter((a) => a.id !== account.id), account])} />
-  </section>;
+import MailIcon from "./MailIcon";
+import { checkedAgo } from "./mail-format";
+import { mailRequest } from "./mail-request";
+export default function MailSettings({accounts,demo,onAccounts}:{accounts:AccountView[];demo:boolean;onAccounts?:(accounts:AccountView[])=>void}) {
+  const [reconnect,setReconnect]=useState<AccountView|undefined>();
+  return <section className="panel main mail-settings-panel"><div className="main-scroll"><div className="mbx-page"><div><h2>Mailboxes</h2><p>Connect an address once and share it with the colleagues who answer it. Mail is checked every 5 minutes, and when you open the inbox.</p>{accounts.map((a)=><MailboxCard key={a.id} account={a} onReconnect={()=>setReconnect(a)} onChanged={(patch)=>onAccounts?.(accounts.map((row)=>row.id===a.id?{...row,...patch}:row))} onRemoved={()=>onAccounts?.(accounts.filter((row)=>row.id!==a.id))}/>)}<p className="fine"><MailIcon name="lock" size="sm"/><span>Passwords are encrypted before storage. Colleagues can answer a shared address without seeing its password.</span></p></div><ConnectMailbox key={reconnect?.id??"connect"} demo={demo} first={!accounts.length} account={reconnect} onCancel={reconnect?()=>setReconnect(undefined):undefined} onConnected={(account)=>{onAccounts?.([...accounts.filter((a)=>a.id!==account.id),account]);setReconnect(undefined);}}/></div></div></section>;
+}
+function MailboxCard({account:a,onReconnect,onRemoved,onChanged}:{account:AccountView;onReconnect:()=>void;onRemoved:()=>void;onChanged:(patch:Partial<AccountView>)=>void}) {
+  const [sharing,setSharing]=useState<Extract<Awaited<ReturnType<typeof mailSharing>>,{ok:true}>["data"]|null>(null),[error,setError]=useState(""),[busy,setBusy]=useState(false),[editing,setEditing]=useState(false),[tick,setTick]=useState(0);
+  useEffect(()=>{let live=true;void mailRequest(mailSharing(a.id)).then((r)=>{if(live){if(r.ok)setSharing(r.data);else setError(r.error);}});return()=>{live=false;};},[a.id,tick]);
+  const owned=!!sharing&&sharing.me.toLowerCase()===sharing.owner,ownerName=sharing?.people.find((p)=>p.email===sharing.owner)?.name??a.owner_email??"the owner";
+  const action=async(fn:Promise<{ok:true;data:unknown}|{ok:false;error:string}>,remove=false)=>{setBusy(true);setError("");const r=await mailRequest(fn);setBusy(false);if(r.ok){if(remove)onRemoved();else setTick((n)=>n+1);}else setError(r.error);};
+  return <article className={`mailbox-card ${a.last_error?"err":""}`}><div className="mbx"><span className="av"><MailIcon name="inbox"/></span><div><b>{a.label!==a.email?a.label:a.email}</b>{a.label!==a.email&&<span>{a.email}</span>}<span><i className={`dot ${a.last_error?"warn":""}`}/>{a.last_error||checkedAgo(a.last_synced_at)}</span></div>{owned&&<button type="button" className="btn line sm" onClick={()=>setEditing((v)=>!v)}>Settings</button>}</div><div className="mailbox-sharing">{!sharing?<p className="muted">Loading sharing</p>:owned?<><b>Shared with</b>{sharing.people.filter((p)=>p.email!==sharing.owner).map((p)=><div className="member-row" key={p.email}><span>{p.name}<small>{p.email}</small></span><button type="button" className="btn ghost sm" disabled={busy} onClick={()=>void action(mailRemoveMember(a.id,p.email))}>Remove {p.name}</button></div>)}{sharing.people.length===1&&<p className="muted">Only you have access.</p>}<form className="member-add" onSubmit={(e)=>{e.preventDefault();const email=String(new FormData(e.currentTarget).get("email")??"");if(email)void action(mailAddMember(a.id,email));}}><label className="sr" htmlFor={`member-${a.id}`}>Add staff member</label><select id={`member-${a.id}`} name="email" aria-label={`Share ${a.email} with`} required defaultValue=""><option value="">Choose a colleague</option>{sharing.staff.filter((p)=>!sharing.people.some((m)=>m.email===p.email)).map((p)=><option key={p.email} value={p.email}>{p.name}</option>)}</select><button className="btn line sm" disabled={busy}>Share</button></form></>:<div className="member-row"><span>Shared by {ownerName}</span><button type="button" className="btn line sm" disabled={busy} onClick={()=>void action(mailRemoveMember(a.id,sharing.me),true)}>Leave</button></div>}
+    {owned&&editing&&<div className="mailbox-owner-settings"><form className="member-add" onSubmit={async(e)=>{e.preventDefault();const label=String(new FormData(e.currentTarget).get("label"));setBusy(true);const r=await mailRequest(mailRename(a.id,label));setBusy(false);if(r.ok){onChanged({label});setEditing(false);}else setError(r.error);}}><label>Mailbox name<input name="label" defaultValue={a.label} required maxLength={60}/></label><button className="btn line sm" disabled={busy}>Rename</button></form><div className="btn-row"><button type="button" className="btn line sm" onClick={onReconnect}>Reconnect / server settings</button><button type="button" className="btn ghost sm" disabled={busy} onClick={()=>{if(confirm(`Remove ${a.email} and its shared access?`))void action(disconnectMailbox(a.id),true);}}>Remove mailbox</button></div></div>}
+    {owned&&a.last_error&&<button type="button" className="link" onClick={onReconnect}>Reconnect</button>}{error&&<p className="alert" role="alert">{error}</p>}
+  </div></article>;
 }

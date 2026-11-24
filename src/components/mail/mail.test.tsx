@@ -56,13 +56,13 @@ describe("Mail page", () => {
     const html = renderToStaticMarkup(<MailDesk initialAccounts={[]} initialQuery="" />);
     expect(html).toContain("Connect your mailbox");
     expect(html).toContain("Use the address and password you sign in to webmail with.");
-    expect(html).toContain("Only you see this mailbox. The password is stored encrypted.");
+    expect(html).toContain("Connect an address once, then share it with the colleagues who answer it. The password is stored encrypted.");
     expect(html.match(/mg-primary/g)).toHaveLength(1);
   });
 
   it("opens on the inbox of the first mailbox with New email as the one gold action", () => {
     const html = renderToStaticMarkup(<MailDesk initialAccounts={[{ id: "a", label: "sales@example.test", email: "sales@example.test" }]} initialQuery="quote" />);
-    expect(html).toContain("<h1 class=\"mg-heading\">Mail</h1>");
+    expect(html).toContain("<h1 class=\"sr\">Mail</h1>");
     expect(html).toContain("sales@example.test");
     expect(html).toContain("Results for &ldquo;quote&rdquo;".replace("&ldquo;", "“").replace("&rdquo;", "”"));
     expect(html).toContain("aria-current=\"page\"");
@@ -71,10 +71,10 @@ describe("Mail page", () => {
 
   it("lists mail under day headings, bold when unread, with ember waiting times in the inbox only", () => {
     vi.useFakeTimers({ now: NOW });
-    const items = [row({ uid: 2, seen: false, hasAttachments: true, thread: 3 }), row({ uid: 1, date: "2026-11-10T08:00:00Z", answered: true })];
+    const items = [row({ uid: 2, seen: false, hasAttachments: true, thread: 3 }), row({ uid: 1, subject: "Earlier screen enquiry", date: "2026-11-10T08:00:00Z", answered: true })];
     const inbox = renderToStaticMarkup(<MailList items={items} selected="INBOX:2" sentFolder={false} inbox loading={false} error={null} hasMore onOpen={() => undefined} onMore={() => undefined} onRetry={() => undefined} />);
-    expect(inbox).toContain(">Today</h3>");
-    expect(inbox).toContain(">Earlier</h3>");
+    expect(inbox).toContain(">Today</span>");
+    expect(inbox).toContain(">Earlier</span>");
     expect(inbox).toContain("data-unread=\"true\"");
     expect(inbox).toContain("Waiting 3h for a reply");
     expect(inbox).toContain("3 messages");

@@ -1,3 +1,4 @@
+import { bookingDates } from "@/components/mail/mail-format";
 import type { Advertiser, Booking, MailDirectory } from "@/lib/store/types";
 import { addDays, bookedHours, type BookingRequest } from "@/lib/booking/hours";
 import { quote } from "@/lib/booking/quote";
@@ -65,5 +66,5 @@ export function managerBrief(data: MailDirectory, today: string) {
 export function quickQuote(request: BookingRequest, settings: BookingSettings) {
   const result = quote(request, settings);
   const href = "/book?" + buildQuery(request);
-  return { result, href, reply: result.ok ? `For ${request.lengthSeconds} second plays from ${request.startDate} to ${request.endDate}, your plan gives ${result.plays.toLocaleString("en-GB")} plays for KES ${result.priceKes.toLocaleString("en-GB")}. ${result.belowMinimum ? `This is below the minimum order of KES ${settings.minOrderKes.toLocaleString("en-GB")}. Please extend the plan.` : "Subject to availability and booking confirmation."}\nView the plan: https://kwetuconnectads.co.ke${href}` : "" };
+  return { result, href, reply: result.ok ? `For ${request.lengthSeconds} second plays from ${bookingDates(request.startDate,request.endDate)}, your plan gives ${result.plays.toLocaleString("en-GB")} plays for KES ${result.priceKes.toLocaleString("en-GB")}. ${result.belowMinimum ? `This is below the minimum order of KES ${settings.minOrderKes.toLocaleString("en-GB")}. Please extend the plan.` : "Subject to availability and booking confirmation."}\nView the plan: https://kwetuconnectads.co.ke${href}` : "" };
 }

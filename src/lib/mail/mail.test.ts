@@ -124,7 +124,7 @@ describe("personal mailboxes", () => {
     await saveAccount("brian@example.test", { ...servers, email: "brian@example.test", label: "brian@example.test", password_enc: encryptSecret("p") });
     expect((await listAccounts("amina@example.test")).map((x) => x.email)).toEqual(["sales@example.test"]);
     await expect(loadAccount("brian@example.test", a.id)).rejects.toThrow(/not connected/);
-    await removeAccount("brian@example.test", a.id);
+    await expect(removeAccount("brian@example.test", a.id)).rejects.toThrow("not connected");
     expect(await loadAccount("amina@example.test", a.id)).toMatchObject({ email: "sales@example.test" });
     const again = await saveAccount("amina@example.test", { ...servers, email: "sales@example.test", label: "sales@example.test", password_enc: encryptSecret("new") });
     expect(again.id).toBe(a.id);
