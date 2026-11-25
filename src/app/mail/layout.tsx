@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+import { MailAppearance } from "@/components/mail/MailTheme";
 import { requireStaff } from "@/lib/auth/server";
 import { Archivo, Geist_Mono } from "next/font/google";
 import "./mail.css";
@@ -9,5 +11,6 @@ const mono = Geist_Mono({ subsets: ["latin"], variable: "--mail-geist-mono", dis
 
 export default async function MailLayout({ children }: { children: React.ReactNode }) {
   await requireStaff("/mail");
-  return <div className={`mail-app ${archivo.variable} ${mono.variable}`}>{children}</div>;
+  const initialGraphite = (await cookies()).get("kca-mail-theme")?.value === "graphite";
+  return <MailAppearance className={`mail-app ${archivo.variable} ${mono.variable}`} initialGraphite={initialGraphite}>{children}</MailAppearance>;
 }

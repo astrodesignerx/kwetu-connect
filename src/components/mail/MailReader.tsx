@@ -7,10 +7,10 @@ import MailIcon from "./MailIcon";
 import { fileSize, fullTime, initials, senderName } from "./mail-format";
 
 export type ReplyKind = "reply" | "replyAll" | "forward";
-export default function MailReader({ accountId, special, messages, loading, error, flagged, onAct, onReply, onBack, onRetry, children, chips, bookedSeconds, onDone, done, waiting, onInspector, inspector }: {
+export default function MailReader({ accountId, special, messages, loading, error, flagged, onAct, onReply, replyPrimary = true, onBack, onRetry, children, chips, bookedSeconds, onDone, done, waiting, onInspector, inspector }: {
   accountId: string; special: Special; messages: ThreadMessage[]; loading: boolean; error: string | null; flagged: boolean;
   onAct: (action: MailAction) => void; onReply: (kind: ReplyKind, message: ThreadMessage) => void; onBack: () => void; onRetry: () => void;
-  children?: React.ReactNode; chips?: React.ReactNode; bookedSeconds?: number; onDone?: () => void; done?: boolean; waiting?: boolean; onInspector?: () => void; inspector?: boolean;
+  replyPrimary?: boolean; children?: React.ReactNode; chips?: React.ReactNode; bookedSeconds?: number; onDone?: () => void; done?: boolean; waiting?: boolean; onInspector?: () => void; inspector?: boolean;
 }) {
   const latest = messages.at(-1);
   if (error && !latest) return <div className="empty-state" role="alert"><div><p>{error}</p><button type="button" className="btn line" onClick={onRetry}>Try again</button></div></div>;
@@ -27,12 +27,22 @@ export default function MailReader({ accountId, special, messages, loading, erro
   return <article className="mail-reader" aria-busy={loading} aria-labelledby="mail-subject">
     <header className="toolbar" role="toolbar" aria-label="Conversation actions">
       {button("left","Back to the list",onBack,undefined,"back-btn")}
-      <button type="button" className="btn gold sm mg-primary" onClick={() => onReply("reply",latest)}><MailIcon name="reply" size="sm" />Reply</button>
-      <button type="button" className="btn ghost sm" onClick={onDone} disabled={!onDone || done} title="Mark done  D"><MailIcon name="check" size="sm" /><span className="tb-hide-phone">{done ? "Done" : "Mark done"}</span></button>
+      <button type="button" className={`btn sm ${replyPrimary ? "gold mg-primary" : "ghost"}`} onClick={() => onReply("reply",latest)}><MailIcon name="reply" size="sm" />Reply</button>
+      <button type="button" className="btn ghost sm" onClick={onDone} disabled={!onDone || done} aria-label={done ? "Done" : "Mark done"} title="Mark done  D"><MailIcon name="check" size="sm" /><span className="tb-hide-phone">{done ? "Done" : "Mark done"}</span></button>
       <span className="tb-sep tb-hide-phone" />
       {special === "inbox" ? button("archive","Archive",() => onAct("archive"),"E") : special !== "sent" && button("inbox","Move to inbox",() => onAct("inbox"))}
-      {button("star",flagged ? "Remove star" : "Star",() => onAct(flagged ? "unstar" : "star"),"S",flagged ? "star-on" : "")}
-      <details className="menu-wrap"><summary className="btn ghost sm">More<MailIcon name="down" size="xs" /></summary><div className="menu" role="menu">
+      {button("star",flagged ? "Remove star" : "Star",() => onAct(flagged ? "unstar" : "star"),"S",flagged ? "tb-star star-on" : "tb-star")}
+      <details className="menu-wrap"><summary className="btn ghost sm" aria-label="More conversation actions">
+        <span className="tb-more-label">More</span>
+        <span className="tb-more-chevron"><MailIcon name="down" size="xs" /></span>
+        <span className="tb-more-icon"><MailIcon name="more" size="sm" /></span>
+      </summary><div className="menu" role="menu">
+        <button type="button" className="tb-narrow" role="menuitem" onClick={(event) => {
+          event.currentTarget.closest("details")?.removeAttribute("open");
+          onAct(flagged ? "unstar" : "star");
+        }}>
+          <MailIcon name="star" size="sm" />{flagged ? "Remove star" : "Star"}<kbd>S</kbd>
+        </button>
         {([["replyAll","replyall","Reply all","A"],["forward","forward","Forward","F"]] as const).map(([kind,icon,label,key]) => <button key={kind} type="button" role="menuitem" onClick={(e) => {e.currentTarget.closest("details")?.removeAttribute("open");onReply(kind,latest);}}><MailIcon name={icon} size="sm" />{label}<kbd>{key}</kbd></button>)}
         <button type="button" role="menuitem" onClick={() => onAct("unread")}><MailIcon name="unread" size="sm" />Mark unread<kbd>U</kbd></button><hr />
         {special !== "spam" && <button type="button" role="menuitem" onClick={() => onAct("spam")}><MailIcon name="spam" size="sm" />Report spam</button>}

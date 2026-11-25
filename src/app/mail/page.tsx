@@ -12,18 +12,16 @@ export default async function MailPage({ searchParams }: { searchParams: Promise
   const staff = await requireStaff("/mail");
   const q = (await searchParams).q;
   const demo = mailDemoEnabled();
-  if (!demo && !encryptionConfigured()) return <section className="mg-mail-setup"><div className="mg-panel mg-mail-connect" role="status">
-    <span className="mg-eyebrow">Set up mail</span>
-    <h1 className="mg-heading">Mail is not switched on yet</h1>
-    <p className="mg-mail-muted">The server needs MAIL_ENCRYPTION_KEY before mailbox passwords can be stored. Ask whoever manages the website to add it.</p>
-  </div></section>;
+  if (!demo && !encryptionConfigured()) return <section className="panel mail-unavailable" role="status">
+    <h1>Mail setup is incomplete</h1>
+    <p>Ask your site administrator to configure mailbox password encryption.</p>
+  </section>;
   let accounts: AccountView[] = [];
   let failed = false;
   try { if (demo) await seedDemoMailboxes(staff.email); accounts = await listAccounts(staff.email); } catch { failed = true; }
-  if (failed) return <section className="mg-mail-setup"><div className="mg-panel mg-mail-connect" role="alert">
-    <span className="mg-eyebrow">Mail</span>
-    <h1 className="mg-heading">Your mailboxes could not be loaded</h1>
-    <p className="mg-mail-muted">Reload the page to try again.</p>
-  </div></section>;
+  if (failed) return <section className="panel mail-unavailable" role="alert">
+    <h1>Could not load your mailboxes</h1>
+    <p>Reload the page to try again.</p>
+  </section>;
   return <MailDesk me={staff.email} demo={demo} initialAccounts={accounts} initialQuery={(Array.isArray(q) ? q[0] : q)?.slice(0, 200) ?? ""} />;
 }

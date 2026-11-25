@@ -13,6 +13,7 @@ vi.mock("@/app/manage/auth-actions", () => ({ signOut: vi.fn() }));
 import MailDesk from "./MailDesk";
 import MailList from "./MailList";
 import MailReader from "./MailReader";
+import MailTheme, { MailAppearance } from "./MailTheme";
 import { dayGroup, initials, listTime, quoteBlock, replySubject, splitAddresses, textToHtml, waitingFor } from "./mail-format";
 
 const NOW = new Date("2026-11-17T15:00:00Z"); // 18:00 in Nairobi
@@ -87,6 +88,27 @@ describe("Mail page", () => {
     expect(sent).toContain("To sales@example.test");
     expect(sent).not.toContain("Waiting");
     vi.useRealTimers();
+  });
+
+  it("renders the stored Graphite theme before hydration", () => {
+    const html = renderToStaticMarkup(
+      <MailAppearance className="mail-app" initialGraphite>
+        <MailTheme />
+      </MailAppearance>,
+    );
+    expect(html).toContain('data-mail-theme="graphite"');
+    expect(html).toContain('<option value="graphite" selected="">Graphite</option>');
+    expect(html).toContain('<option value="system">System</option>');
+  });
+
+  it("drops a recipient-only preview and keeps one message count in a grouped inbox", () => {
+    const html = renderToStaticMarkup(<MailList items={[row({ thread: 3, snippet: " Sales@example.test " })]}
+      selected="INBOX:1" sentFolder={false} inbox waitingKeys={new Set()} loading={false} error={null} hasMore={false}
+      onOpen={() => undefined} onMore={() => undefined} onRetry={() => undefined} />);
+    expect(html).toContain("Other mail");
+    expect(html).not.toContain("row-snip");
+    expect(html.match(/3 messages/g)).toHaveLength(1);
+    expect(html).toContain('aria-hidden="true">3</span>');
   });
 
   it("shows a conversation with Reply as the gold action and folder-appropriate moves", () => {
