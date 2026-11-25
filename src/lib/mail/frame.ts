@@ -5,20 +5,67 @@
  * frame's own height, so every measure made it taller and the message scrolled forever with nothing to read.
  * The frame is shrunk to 1px while it is measured, so only real content counts, and the frame never scrolls itself.
  *
- * Links: blue and underlined, and a long web address is clipped with an ellipsis (the full address is the tooltip).
+ * Links use the reader palette and are underlined. Long addresses are clipped, with the full address in a tooltip.
  */
 
-export const LINK_BLUE = "#1a56db";
-
-/** Appended to a message's own CSS. */
-export const FRAME_CSS = `html{height:auto!important;min-height:0!important;overflow-y:hidden!important;overflow-x:auto}
-body{height:auto!important;min-height:0!important;overflow-wrap:anywhere}
-a{color:${LINK_BLUE};text-decoration:underline;text-underline-offset:2px}
-a.ss-clip{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}`;
+/** The iframe uses the Mail surface behind it. MessageFrame copies the active colour scheme into the document. */
+export const FRAME_CSS = `
+html {
+	color-scheme: light dark;
+	--ss-link: light-dark(#1a56db, #a3c9f2);
+	--ss-quote-text: light-dark(#7a695d, #bdc5cf);
+	height: auto !important;
+	min-height: 0 !important;
+	overflow-y: hidden !important;
+	overflow-x: auto;
+}
+body {
+	margin: 0;
+	padding: 18px 20px;
+	font: 15px/1.6 "DM Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
+	color: light-dark(#2b2119, #eceef0);
+	height: auto !important;
+	min-height: 0 !important;
+	overflow-wrap: anywhere;
+}
+img { max-width: 100%; height: auto; }
+pre { white-space: pre-wrap; font: inherit; }
+table { max-width: 100%; }
+blockquote {
+	margin: 8px 0;
+	padding-left: 12px;
+	border-left: 3px solid light-dark(#e9c9a8, #68717b);
+	color: var(--ss-quote-text);
+}
+details.ss-quoted { margin-top: 12px; }
+details.ss-quoted > summary {
+	display: inline-flex;
+	align-items: center;
+	cursor: pointer;
+	list-style: none;
+	padding: 3px 11px;
+	border-radius: 999px;
+	background: light-dark(#f2e9de, #34383f);
+	color: var(--ss-quote-text);
+	font-size: 12px;
+	user-select: none;
+}
+details.ss-quoted > summary::-webkit-details-marker { display: none; }
+details.ss-quoted > summary:hover { background: light-dark(#eadccb, #41464e); }
+details.ss-quoted[open] > summary { margin-bottom: 8px; }
+a { color: var(--ss-link); text-decoration: underline; text-underline-offset: 2px; }
+a.ss-clip {
+	display: inline-block;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	vertical-align: bottom;
+}`;
 
 const transparent = (c: string) => c === "transparent" || /rgba\(\s*\d+,\s*\d+,\s*\d+,\s*0\s*\)/.test(c);
 
-/** Blue links, unless the link is a coloured button; long plain-text links are clipped. */
+/** Apply the reader's link colour except to coloured buttons, and clip long plain-text links. */
 export function polishLinks(d: Document) {
 	const win = d.defaultView;
 	if (!win) return;
@@ -34,7 +81,7 @@ export function polishLinks(d: Document) {
 			if (p.tagName === "BODY" || (p.textContent ?? "").trim() !== mine) break;
 			if (!transparent(win.getComputedStyle(p).backgroundColor)) coloured = true;
 		}
-		if (!hasMedia && !coloured) a.style.setProperty("color", LINK_BLUE, "important");
+		if (!hasMedia && !coloured) a.style.setProperty("color", "var(--ss-link)", "important");
 		const text = (a.textContent ?? "").trim();
 		if (!hasMedia && text.length > 48 && !/\s/.test(text.slice(0, 40))) {
 			a.classList.add("ss-clip");

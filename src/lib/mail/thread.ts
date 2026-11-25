@@ -68,16 +68,6 @@ export function trimQuoted(html: string): { html: string; trimmed: boolean } {
   return { html: body.innerHTML, trimmed: true };
 }
 
-const CSS = `body{margin:0;padding:18px 20px;font:15px/1.6 "DM Sans",-apple-system,"Segoe UI",Roboto,sans-serif;color:#2b2119;background:#fffdf9;word-wrap:break-word}
-img{max-width:100%;height:auto}pre{white-space:pre-wrap;font:inherit}table{max-width:100%}
-blockquote{margin:8px 0;padding-left:12px;border-left:3px solid #e9c9a8;color:#7a695d}
-details.ss-quoted{margin-top:12px}
-details.ss-quoted>summary{display:inline-flex;align-items:center;cursor:pointer;list-style:none;padding:3px 11px;border-radius:999px;background:#f2e9de;color:#7a695d;font-size:12px;user-select:none}
-details.ss-quoted>summary::-webkit-details-marker{display:none}
-details.ss-quoted>summary:hover{background:#eadccb}
-details.ss-quoted[open]>summary{margin-bottom:8px}
-${FRAME_CSS}`;
-
 /** The full document a message is shown in, with quoted history folded. */
 export function hasRemoteContent(html: string) {
   return /(?:\b(?:src|background)\s*=\s*["']?\s*(?:https?:|\/\/)|\bsrcset\s*=\s*["'][^"']*(?:https?:|\/\/)|url\(\s*["']?\s*(?:https?:|\/\/)|<link\b[^>]*\brel\s*=\s*["']?stylesheet|@import\s)/i.test(html);
@@ -88,5 +78,5 @@ export function messageDoc(opts: { html: string | null; text: string; showPictur
   const origin = (opts.origin || (typeof location !== "undefined" ? location.origin : "https://kwetuconnectads.co.ke")).replace(/[^a-zA-Z0-9:./-]/g, "");
   const local = `data: blob: cid: ${origin}/mail/attachment`;
   const policy = opts.showPictures ? "" : `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${local}; media-src ${local}; font-src ${local}; style-src 'unsafe-inline'; script-src 'none'; object-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">`;
-  return { doc: `<!doctype html><html><head><meta charset="utf-8">${policy}<meta name="referrer" content="no-referrer"><base target="_blank"><style>${CSS}</style></head><body>${html}</body></html>`, trimmed };
+  return { doc: `<!doctype html><html><head><meta charset="utf-8">${policy}<meta name="referrer" content="no-referrer"><base target="_blank"><style>${FRAME_CSS}</style></head><body>${html}</body></html>`, trimmed };
 }

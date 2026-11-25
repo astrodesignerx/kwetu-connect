@@ -950,7 +950,7 @@ to { transform: scaleX(0); }
 .mail-app .msg-head { flex-wrap:wrap; }
 .mail-app .msg-head time { font-size:11px; }
 .mail-app .who { min-width:0; }
-.mail-app .mg-mail-frame { width:100%; border:0; border-radius:10px; background:#fffdf9; display:block; flex:none; }
+.mail-app .mg-mail-frame { width:100%; border:0; border-radius:10px; background:light-dark(#fffdf9, var(--raise)); display:block; flex:none; }
 .mail-app .earlier > summary { cursor:pointer; padding:10px 12px; font-size:13px; color:var(--muted); }
 .mail-app .earlier .mail-message { padding:12px; }
 .mail-app .menu-wrap > summary { list-style:none; cursor:pointer; }

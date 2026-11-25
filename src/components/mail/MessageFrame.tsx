@@ -4,7 +4,7 @@ import { fitFrame } from "@/lib/mail/frame";
 import { hasRemoteContent, messageDoc } from "@/lib/mail/thread";
 
 /**
- * One email, on white paper in both themes, inside a frame with scripts switched off so its HTML and CSS
+ * One email on the current Mail surface, inside a frame with scripts switched off so its HTML and CSS
  * cannot touch the page. The frame grows to fit the message; links open in a new tab.
  */
 export default function MessageFrame({ html, text, title, remoteContent = false }: { html: string | null; text: string; title: string; remoteContent?: boolean }) {
@@ -15,11 +15,24 @@ export default function MessageFrame({ html, text, title, remoteContent = false 
   useEffect(() => {
     const el = frame.current;
     if (!el) return;
+    const applyScheme = () => {
+      const root = el.contentDocument?.documentElement;
+      if (root) root.style.colorScheme = getComputedStyle(el).colorScheme;
+    };
     let stop = () => undefined as void;
-    const ready = () => { stop(); stop = fitFrame(el, setHeight, { min: 60 }); };
+    const ready = () => {
+      applyScheme();
+      stop();
+      stop = fitFrame(el, setHeight, { min: 60 });
+    };
+    const theme = new MutationObserver(applyScheme);
+    theme.observe(document.documentElement, { attributeFilter: ["data-theme"] });
+    const mail = el.closest(".mail-app");
+    if (mail) theme.observe(mail, { attributeFilter: ["data-mail-theme"] });
     el.addEventListener("load", ready);
     if (el.contentDocument?.readyState === "complete") ready();
-    return () => { el.removeEventListener("load", ready); stop(); };
+    else applyScheme();
+    return () => { theme.disconnect(); el.removeEventListener("load", ready); stop(); };
   }, [doc]);
   return <>{!showPictures && (remoteContent || hasRemoteContent(html ?? "")) && <div className="pictures-bar"><span>Pictures in this email are hidden.</span><button type="button" className="link" onClick={() => setShowPictures(true)}>Show pictures</button></div>}<iframe ref={frame} className="mg-mail-frame" title={title} srcDoc={doc} style={{ height }} sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerPolicy="no-referrer" /></>;
 }
