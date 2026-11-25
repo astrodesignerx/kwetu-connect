@@ -8,6 +8,7 @@ vi.mock("@/app/mail/actions", () => ({
 vi.mock("@/app/mail/kca-actions", () => ({
   mailWorkspace: vi.fn(), mailAssigned: vi.fn(), mailWaiting: vi.fn(), mailClientConversations: vi.fn(), mailAssign: vi.fn(), mailSaveNote: vi.fn(), mailSaveTemplate: vi.fn(), mailDeleteTemplate: vi.fn(),
 }));
+vi.mock("@/app/manage/auth-actions", () => ({ signOut: vi.fn() }));
 
 import MailDesk from "./MailDesk";
 import MailList from "./MailList";
@@ -53,10 +54,13 @@ describe("mail formatting", () => {
 
 describe("Mail page", () => {
   it("asks for a mailbox first, with the webmail hint and no other gold action", () => {
-    const html = renderToStaticMarkup(<MailDesk initialAccounts={[]} initialQuery="" />);
+    const html = renderToStaticMarkup(<MailDesk initialAccounts={[]} initialQuery="" me="staff@example.test" />);
     expect(html).toContain("Connect your mailbox");
     expect(html).toContain("Use the address and password you sign in to webmail with.");
     expect(html).toContain("Connect an address once, then share it with the colleagues who answer it. The password is stored encrypted.");
+    expect(html).toContain('aria-label="Staff account"');
+    expect(html).toContain('class="staff-account-email">staff@example.test</p>');
+    expect(html).toContain(">Sign out</button>");
     expect(html.match(/mg-primary/g)).toHaveLength(1);
   });
 
