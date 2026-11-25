@@ -857,6 +857,27 @@ body:has(.nightshift) > main { margin-top: 0; background: var(--background); }
 .ns-input, .nightshift .staff-form :is(input:not([type="hidden"]),select,textarea), .timetable-sheet .staff-form :is(input:not([type="hidden"]),select,textarea) { width: 100%; min-width: 0; min-height: 40px; border: 1px solid var(--input); border-radius: 10px; padding: 8px 12px; background: var(--card); color: var(--foreground); font-size: 13px; }
 .ns-input::placeholder { color: var(--muted-foreground); }
 .nightshift .staff-form label, .timetable-sheet .staff-form label { display: grid; gap: 6px; font-size: 12px; color: var(--muted-foreground); }
+.staff-password { display: flex; align-items: center; gap: 8px; }
+.staff-password input { flex: 1 1 auto; }
+.staff-eye {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--input);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+.staff-eye:hover { color: var(--foreground); background: var(--accent); }
+.staff-eye:focus-visible, .staff-text-link:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 6px; }
+.staff-auth-links { display: flex; flex-wrap: wrap; gap: 8px 16px; padding-top: 8px; border-top: 1px solid var(--border); }
+.staff-text-link { background: transparent; border: 0; padding: 2px 0; font-size: 12px; color: var(--muted-foreground); text-decoration: none; cursor: pointer; }
+.staff-text-link:hover { color: var(--foreground); }
+.staff-alert { font-size: 13px; color: var(--destructive); }
 .ns-badge, .status-tag { display: inline-flex; align-items: center; width: fit-content; white-space: nowrap; border-radius: 6px; border: 1px solid var(--border); padding: 4px 8px; font-size: 10px; color: var(--muted-foreground); background: var(--muted); }
 .status-tag[data-status="Live"] { color: var(--live-text); }
 .status-tag[data-status="Paid"], .status-tag[data-status="Approved"] { color: var(--amber-text); }

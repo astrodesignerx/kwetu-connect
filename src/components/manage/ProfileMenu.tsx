@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { SignOut } from "@phosphor-icons/react";
+import Link from "next/link";
+import { LockSimple, SignOut } from "@phosphor-icons/react";
 
 /** The profile pill: the signed-in staff member, with their email and sign out in a small menu. */
 export default function ProfileMenu({ email, signOut }: { email: string; signOut: () => Promise<void> }) {
@@ -23,6 +24,7 @@ export default function ProfileMenu({ email, signOut }: { email: string; signOut
     </button>
     <div id="mg-profile-menu" className="mg-profile-menu">
       <p><small>Signed in as</small><b>{email}</b></p>
+      <Link href="/manage/password" className="mg-menu-item" onClick={() => setOpen(false)}><LockSimple size={15} aria-hidden="true" />Password</Link>
       <form action={signOut}><button type="submit" className="mg-menu-item"><SignOut size={15} aria-hidden="true" />Sign out</button></form>
     </div>
   </div>;
