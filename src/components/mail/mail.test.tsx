@@ -13,7 +13,7 @@ vi.mock("@/app/manage/auth-actions", () => ({ signOut: vi.fn() }));
 import MailDesk from "./MailDesk";
 import MailList from "./MailList";
 import MailReader from "./MailReader";
-import { dayGroup, initials, listTime, quoteBlock, replySubject, splitAddresses, textToHtml, waitingFor } from "./mail-format";
+import { dayGroup, initials, listTime, quoteBlock, replyRecipients, replySubject, splitAddresses, textToHtml, waitingFor } from "./mail-format";
 
 const NOW = new Date("2026-11-17T15:00:00Z"); // 18:00 in Nairobi
 const row = (over: Partial<MessageRow>): MessageRow => ({
@@ -22,6 +22,14 @@ const row = (over: Partial<MessageRow>): MessageRow => ({
 });
 
 describe("mail formatting", () => {
+  it("honours Reply-To and deduplicates reply-all recipients across To and Cc", () => {
+    const addr = (address:string)=>({name:"",address});
+    const message = {from:[addr("robot@client.test")], replyTo:[addr("desk@client.test")], to:[addr("SALES@example.test")], cc:[addr("DESK@client.test"),addr("Ada@client.test"),addr("ada@client.test")]};
+    expect(replyRecipients("replyAll", message, "sales@example.test")).toEqual({to:"desk@client.test", cc:"Ada@client.test"});
+    expect(replyRecipients("reply", message, "sales@example.test")).toEqual({to:"desk@client.test", cc:""});
+    expect(replyRecipients("replyAll", {...message, from:message.to, to:message.replyTo}, "sales@example.test")).toEqual({to:"desk@client.test", cc:"Ada@client.test"});
+    expect(replyRecipients("forward", message, "sales@example.test")).toEqual({to:"",cc:""});
+  });
   it("shows times in Nairobi and groups by day", () => {
     expect(listTime("2026-11-17T12:05:00Z", NOW)).toBe("15:05");
     expect(listTime("2026-06-29T08:00:00Z", NOW)).toBe("29 Jun");

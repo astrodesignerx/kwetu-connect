@@ -1,3 +1,24 @@
+import type { ParsedMessage } from "@/lib/mail/client";
+
+export function replyRecipients(kind: "reply" | "replyAll" | "forward", message: Pick<ParsedMessage, "from" | "replyTo" | "to" | "cc">, mailbox: string) {
+  if (kind === "forward") return { to: "", cc: "" };
+  const own = mailbox.trim().toLowerCase();
+  const outgoing = message.from.some((a) => a.address.toLowerCase() === own);
+  const recipients = outgoing ? message.to : message.replyTo?.length ? message.replyTo : message.from;
+  const used = new Set<string>();
+  function unique(list: typeof message.to) {
+    return list.map((a) => a.address.trim()).filter((address) => {
+      const key = address.toLowerCase();
+      if (!key || used.has(key)) return false;
+      used.add(key);
+      return true;
+    }).join(", ");
+  }
+  const to = unique(recipients);
+  used.add(own);
+  return { to, cc: kind === "replyAll" ? unique([...message.to, ...message.cc]) : "" };
+}
+
 /** Formatting for the Mail page. Every time is shown in Nairobi time, whatever the browser's zone. */
 const ZONE = "Africa/Nairobi";
 const day = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: ZONE, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);

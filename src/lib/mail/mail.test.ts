@@ -83,7 +83,7 @@ describe("mail client helpers", () => {
 
   it("parses a message with an attachment and an embedded picture", async () => {
     const raw = Buffer.from([
-      "From: Amina <amina@example.test>", "To: sales@example.test", "Subject: Quote", "Message-ID: <q1@example.test>",
+      "From: Amina <amina@example.test>", "Reply-To: Desk <desk@example.test>", "To: sales@example.test", "Subject: Quote", "Message-ID: <q1@example.test>",
       "Date: Tue, 17 Nov 2026 09:00:00 +0300", "MIME-Version: 1.0", 'Content-Type: multipart/mixed; boundary="b"', "",
       "--b", "Content-Type: text/html; charset=utf-8", "", '<p>Hello</p><img src="cid:logo"><script>x()</script>',
       "--b", "Content-Type: image/png", "Content-ID: <logo>", "Content-Disposition: inline", "Content-Transfer-Encoding: base64", "", "iVBORw0KGgo=",
@@ -93,6 +93,7 @@ describe("mail client helpers", () => {
     const m = await parseSource(7, raw);
     expect(m.subject).toBe("Quote");
     expect(m.from).toEqual([{ name: "Amina", address: "amina@example.test" }]);
+    expect(m.replyTo).toEqual([{ name: "Desk", address: "desk@example.test" }]);
     expect(m.html).toContain("data:image/png;base64,");
     expect(m.html).not.toContain("<script");
     expect(m.attachments.find((a) => a.filename === "quote.pdf")?.inline).toBe(false);

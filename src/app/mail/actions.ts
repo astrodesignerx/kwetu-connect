@@ -255,7 +255,10 @@ export async function mailThread(accountId: string, mailbox: string, uid: number
         const lock = await c.getMailboxLock(path);
         try {
           const found = key ? ((await c.search({ subject: key }, { uid: true })) || []) : [];
-          const uids = [...new Set(path === folder ? [opened, ...found] : found)].sort((a, b) => b - a).slice(0, 12);
+          const recent = found.sort((a, b) => b - a);
+          const uids = path === folder
+            ? [opened, ...recent.filter((uid) => uid !== opened).slice(0, 11)]
+            : recent.slice(0, 12);
           if (!uids.length) continue;
           for await (const m of c.fetch(uids.join(","), { uid: true, flags: true, source: true }, { uid: true })) {
             if (!m.source) continue;
