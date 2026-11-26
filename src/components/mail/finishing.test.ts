@@ -21,7 +21,7 @@ describe("five second browser send hold",()=>{
  it("undo or disposal leaves the saved draft unsent",()=>{vi.useFakeTimers();const send=vi.fn(),cancel=holdSend(send);expect(cancel()).toBe(true);expect(cancel()).toBe(false);vi.advanceTimersByTime(10000);expect(send).not.toHaveBeenCalled();});
 });
 describe("keyboard typing protection",()=>{
- it.each(["INPUT","TEXTAREA","SELECT"])("does not run shortcuts in %s",(tagName)=>{const target={tagName,isContentEditable:false,closest:()=>null} as unknown as EventTarget;expect(typingIn(target)).toBe(true);for(const key of ["j","k","e","d","s","u","r","a","f","i","z","/","?","k"])expect(shortcut({key,target,ctrlKey:key==="k",metaKey:false,altKey:false})).toBeNull();});
+ it.each(["INPUT","TEXTAREA","SELECT"])("does not run shortcuts in %s",(tagName)=>{const target={tagName,isContentEditable:false,closest:()=>null} as unknown as EventTarget;expect(typingIn(target)).toBe(true);for(const key of ["j","k","e","d","s","u","r","a","f","i","z","/","?"])expect(shortcut({key,target,ctrlKey:false,metaKey:false,altKey:false})).toBeNull();expect(shortcut({key:"k",target,ctrlKey:true,metaKey:false,altKey:false})).toBe("search");});
  it("does not run shortcuts in editable rich text",()=>expect(shortcut({key:"e",target:{isContentEditable:true,tagName:"DIV"} as unknown as EventTarget,ctrlKey:false,metaKey:false,altKey:false})).toBeNull());
  it.each([['j','next'],['k','previous'],['e','archive'],['d','done'],['s','star'],['u','unread'],['r','reply'],['a','replyAll'],['f','forward'],['i','inspector'],['z','undo'],['/','search'],['?','help'],['Escape','escape']])("maps %s to %s",(key,action)=>expect(shortcut({key,target:null,ctrlKey:false,metaKey:false,altKey:false})).toBe(action));
 });

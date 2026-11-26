@@ -20,7 +20,7 @@ export default function MailCompose({ accountId, from, draft, onSent, onClose, t
   const cancelHold = useRef<(() => boolean) | null>(null);
   const undoHold = useRef<(() => void) | null>(null);
   const [files, setFiles] = useState<UploadView[]>([]);
-  const [notice, setNotice] = useState("Saving draft");
+  const [notice, setNotice] = useState(draft.saved ? "Draft saved" : "");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [stopped, setStopped] = useState(!!draft.saved && draft.saved.send_state !== "draft");
@@ -31,8 +31,16 @@ export default function MailCompose({ accountId, from, draft, onSent, onClose, t
   const locked = useRef(false);
   const alive = useRef(true);
   const body = useRef<HTMLTextAreaElement>(null);
+  // A reply opened and closed untouched is not kept: nothing is stored until something changes.
+  const stored = useRef(!!draft.saved);
+  const [untouched] = useState(() => JSON.stringify(data));
+  const pristine = () => !stored.current && JSON.stringify(current.current) === untouched;
+  const closing = useRef(false);
   useEffect(() => { alive.current = true; return () => { alive.current = false; cancelHold.current?.(); }; }, []);
-  const change = (next: Partial<DraftData>) => { const value = { ...current.current, ...next }; current.current = value; setData(value); };
+  const change = (next: Partial<DraftData>) => {
+    const value = { ...current.current, ...next }; current.current = value; setData(value);
+    if (!blocked.current) setNotice(pristine() ? "" : "Saving draft");
+  };
 
   function insert(text: string) {
     const start = body.current?.selectionStart ?? current.current.body.length, end = body.current?.selectionEnd ?? start;
@@ -47,12 +55,14 @@ export default function MailCompose({ accountId, from, draft, onSent, onClose, t
       const result = await mailSaveDraft(id, accountId, version.current, current.current);
       if (!result.ok) { blocked.current = true; setStopped(true); if (alive.current) { setError(result.error); setNotice("Draft not saved"); } return null; }
       version.current = result.data.row_version;
+      stored.current = true;
       if (alive.current) setNotice("Draft saved");
       return result.data;
     }).catch(() => { blocked.current = true; setStopped(true); if (alive.current) setError("The draft could not be saved. Keep this window open and copy your message before reloading."); return null; });
     return queue.current;
   }
   useEffect(() => {
+    if (pristine()) return;
     const timer = setTimeout(() => { if (!locked.current) void save(); }, 650);
     return () => clearTimeout(timer);
     // A save reads the latest form and serialises behind any earlier save.
@@ -64,12 +74,12 @@ export default function MailCompose({ accountId, from, draft, onSent, onClose, t
   }, [draft.uploadIds, id]);
 
   async function close() {
-    if (busy) return;
-    if (blocked.current) { onClose(); return; }
-    setBusy(true); locked.current = true;
+    if (busy || closing.current) return;
+    if (blocked.current || pristine()) { onClose(); return; }
+    closing.current = true; setBusy(true); locked.current = true;
     const result = await save();
     if (result) onClose();
-    else { setBusy(false); locked.current = false; }
+    else { closing.current = false; setBusy(false); locked.current = false; }
   }
   async function attach(picked: File[]) {
     if (picked.some((f) => f.size > 4 * 1024 * 1024)) { setError("Each attachment can be up to 4 MB."); return; }
@@ -117,12 +127,18 @@ export default function MailCompose({ accountId, from, draft, onSent, onClose, t
   async function discard() {
     if (busy || blocked.current) return;
     setBusy(true); locked.current = true;
+    await queue.current;
+    if (!stored.current) { onClose(); return; }
     const row = await save();
     if (row) { const result = await mailDeleteDraft(id, row.row_version); if (result.ok) { onClose(); return; } setError(result.error); }
     setBusy(false); locked.current = false;
   }
   const readOnly = busy || stopped;
-  return <form className="dock open mg-mail-compose" aria-labelledby={label} onSubmit={send} onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); e.currentTarget.requestSubmit(); } }}>
+  return <form className="dock open mg-mail-compose" aria-labelledby={label} onSubmit={send} onKeyDown={(e) => {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); e.currentTarget.requestSubmit(); }
+    // Escape saves and closes from any field. Handling it here also stops a modal from closing twice.
+    else if (e.key === "Escape" && !holding) { e.preventDefault(); e.stopPropagation(); void close(); }
+  }}>
     <header className="dock-top"><h2 className="sr" id={label}>{data.title}</h2>{modes ? <div className="seg" role="group" aria-label="Reply type">{(["reply","replyAll","forward"] as const).map((kind) => <button type="button" key={kind} disabled={readOnly} aria-pressed={data.title === modes[kind]?.title} onClick={() => {const next=modes[kind];if(next) change({...next,body:current.current.body,uploadIds:current.current.uploadIds});}}>{kind === "replyAll" ? "Reply all" : kind === "forward" ? "Forward" : "Reply"}</button>)}</div> : <b>{data.title}</b>}<span className="dock-from">From <b className="mono">{from}</b></span><button type="button" className="btn ghost icon" disabled={busy} onClick={() => void close()} aria-label="Save and close"><MailIcon name="x" size="sm" /></button></header>
     {draft.saved && draft.saved.send_state !== "draft" && <p className="alert" role="alert">Sending was already started. Check Sent before creating another email. This copy cannot be sent again.</p>}
     <label className="dock-to">To<input name="to" aria-label="To" value={data.to} required disabled={readOnly} autoComplete="off" onChange={(e) => change({to:e.target.value})}/></label>

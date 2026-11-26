@@ -68,13 +68,38 @@ export function trimQuoted(html: string): { html: string; trimmed: boolean } {
   return { html: body.innerHTML, trimmed: true };
 }
 
+const REMOTE_SRC = /^\s*(?:https?:|\/\/)/i;
+
+/**
+ * While pictures are hidden, a remote picture would show as a broken-image icon. A described picture becomes a
+ * quiet label with its description, and an undescribed one (usually a spacer or tracking pixel) is left out.
+ * The content policy still blocks every remote request; this only changes what the reader sees.
+ */
+export function placeholdRemotePictures(html: string): string {
+  if (typeof window === 'undefined' || !html || !/<img\b/i.test(html)) return html;
+  const doc = new DOMParser().parseFromString(`<body>${html}</body>`, 'text/html');
+  let changed = false;
+  for (const img of Array.from(doc.body.querySelectorAll('img'))) {
+    if (!REMOTE_SRC.test(img.getAttribute('src') ?? '')) continue;
+    changed = true;
+    const alt = (img.getAttribute('alt') ?? '').trim();
+    if (!alt) { img.remove(); continue; }
+    const label = doc.createElement('span');
+    label.className = 'ss-pic';
+    label.textContent = alt;
+    img.replaceWith(label);
+  }
+  return changed ? doc.body.innerHTML : html;
+}
+
 /** The full document a message is shown in, with quoted history folded. */
 export function hasRemoteContent(html: string) {
   return /(?:\b(?:src|background)\s*=\s*["']?\s*(?:https?:|\/\/)|\bsrcset\s*=\s*["'][^"']*(?:https?:|\/\/)|url\(\s*["']?\s*(?:https?:|\/\/)|<link\b[^>]*\brel\s*=\s*["']?stylesheet|@import\s)/i.test(html);
 }
 export function messageDoc(opts: { html: string | null; text: string; showPictures?: boolean; origin?: string }): { doc: string; trimmed: boolean } {
   const raw = opts.html ?? `<pre style="font:inherit">${esc(opts.text)}</pre>`;
-  const { html, trimmed } = trimQuoted(raw);
+  const { html: folded, trimmed } = trimQuoted(raw);
+  const html = opts.showPictures ? folded : placeholdRemotePictures(folded);
   const origin = (opts.origin || (typeof location !== "undefined" ? location.origin : "https://kwetuconnectads.co.ke")).replace(/[^a-zA-Z0-9:./-]/g, "");
   const local = `data: blob: cid: ${origin}/mail/attachment`;
   const policy = opts.showPictures ? "" : `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${local}; media-src ${local}; font-src ${local}; style-src 'unsafe-inline'; script-src 'none'; object-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">`;

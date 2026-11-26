@@ -29,6 +29,16 @@ body {
 	overflow-wrap: anywhere;
 }
 img { max-width: 100%; height: auto; }
+.ss-pic {
+	display: inline-block;
+	max-width: 100%;
+	padding: 3px 10px;
+	border: 1px dashed light-dark(#d9c7b4, #4c535c);
+	border-radius: 8px;
+	color: var(--ss-quote-text);
+	font-size: 12px;
+	line-height: 1.6;
+}
 pre { white-space: pre-wrap; font: inherit; }
 table { max-width: 100%; }
 blockquote {

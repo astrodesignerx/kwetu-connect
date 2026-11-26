@@ -1,23 +1,36 @@
 "use client";
 import type { MessageRow, MailAction } from "@/app/mail/actions";
 import MailIcon from "./MailIcon";
+import { threadKey } from "@/lib/mail/kca";
 import { dayGroup, initials, listTime, senderName, waitingFor } from "./mail-format";
 export const rowKey = (m: Pick<MessageRow,"mailbox"|"uid"> & {accountId?:string}) => `${m.accountId ? m.accountId + ":" : ""}${m.mailbox}:${m.uid}`;
-export default function MailList({items, selected, sentFolder, inbox, loading, error, hasMore, onOpen, onMore, onRetry, selectedKeys = [], onSelect, onAct, business, assignment, waitingKeys}: {
+/** One row per conversation: the first (newest) message of each subject in each mailbox. The list and J / K share it. */
+export function threadRows<T extends MessageRow>(items: T[]): T[] {
+  const seen = new Set<string>();
+  return items.filter((m) => {
+    const identity = `${(m as MessageRow & {accountId?:string}).accountId ?? ""}:${threadKey(m.subject)}`;
+    if (seen.has(identity)) return false;
+    seen.add(identity);
+    return true;
+  });
+}
+/** The headed groups in the order the list shows them. J and K walk `listGroups(...).flatMap(([, rows]) => rows)`. */
+export function listGroups<T extends MessageRow>(items: T[], inbox: boolean, waitingKeys?: Set<string>, now = new Date()): [string, T[]][] {
+  const groups = new Map<string, T[]>();
+  for (const m of threadRows(items)) {
+    const g = inbox && waitingKeys ? waitingKeys.has(rowKey(m)) ? "Needs your reply" : "Other mail" : dayGroup(m.date, now);
+    groups.set(g, [...(groups.get(g) ?? []), m]);
+  }
+  return [...groups].sort(([a], [b]) => a === "Needs your reply" ? -1 : b === "Needs your reply" ? 1 : 0);
+}
+export default function MailList({items, selected, sentFolder, inbox, loading, error, hasMore, onOpen, onMore, onRetry, selectedKeys = [], onSelect, onAct, business, assignment, waitingKeys, empty}: {
   items:MessageRow[]; selected:string|null; sentFolder:boolean; inbox:boolean; loading:boolean; error:string|null; hasMore:boolean;
   onOpen:(m:MessageRow)=>void; onMore:()=>void; onRetry:()=>void; selectedKeys?:string[]; onSelect?:(m:MessageRow)=>void; onAct?:(m:MessageRow,action:MailAction)=>void;
-  business?:(m:MessageRow)=>string; assignment?:(m:MessageRow)=>string; waitingKeys?:Set<string>;
+  business?:(m:MessageRow)=>string; assignment?:(m:MessageRow)=>string; waitingKeys?:Set<string>; empty?:{title:string;detail?:string};
 }) {
   if(error && !items.length) return <div className="empty-state" role="alert"><div><p>{error}</p><button type="button" className="btn line" onClick={onRetry}>Try again</button></div></div>;
-  if(!items.length) return loading ? <div className="list-scroll" aria-label="Loading mail" aria-busy="true">{Array.from({length:6},(_,i)=><div key={i} className="mg-mail-skeleton"><span/><span/><span/></div>)}</div> : <div className="empty-state"><div><b>No conversations</b></div></div>;
-  const now=new Date(), groups=new Map<string,MessageRow[]>(), seen=new Set<string>();
-  for(const m of items) {
-    const identity = `${(m as MessageRow & {accountId?:string}).accountId ?? ""}:${m.subject.replace(/^(?:(?:re|fw|fwd):\s*)+/ig,"").trim().toLowerCase()}`;
-    if(seen.has(identity)) continue; seen.add(identity);
-    const g=inbox && waitingKeys ? waitingKeys.has(rowKey(m)) ? "Needs your reply" : "Other mail" : dayGroup(m.date,now);
-    groups.set(g,[...(groups.get(g)??[]),m]);
-  }
-  const ordered = [...groups].sort(([a],[b]) => a === "Needs your reply" ? -1 : b === "Needs your reply" ? 1 : 0);
+  if(!items.length) return loading ? <div className="list-scroll" aria-label="Loading mail" aria-busy="true">{Array.from({length:6},(_,i)=><div key={i} className="mg-mail-skeleton"><span/><span/><span/></div>)}</div> : <div className="empty-state"><div><b>{empty?.title ?? "No conversations"}</b>{empty?.detail && <p>{empty.detail}</p>}</div></div>;
+  const now=new Date(), ordered=listGroups(items,inbox,waitingKeys,now);
   return <div className="list-scroll" aria-busy={loading}>{ordered.map(([group,rows])=><section key={group} aria-label={group}><h3 className="group-h"><span>{group}</span><span className="mono">{rows.length}</span></h3>{rows.map((m)=>{
     const person=sentFolder ? m.to[0] ? senderName(m.to[0]) : "No recipient" : senderName(m.from), key=rowKey(m);
     const waiting=inbox && (!waitingKeys || waitingKeys.has(key)) ? waitingFor(m.date,m.answered,m.from.address,now) : null;

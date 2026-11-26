@@ -23,6 +23,7 @@ const PATHS: Record<string, string> = {
   replyall: '<path d="M10 5 5 10l5 5"/><path d="M6 5 1 10l5 5"/><path d="M5 10h6.5a5.5 5.5 0 0 1 5.5 5.5"/>',
   forward: '<path d="m12 5 5 5-5 5"/><path d="M17 10H8.5A5.5 5.5 0 0 0 3 15.5"/>',
   clip: '<path d="m15.5 9.5-5.8 5.8a3.5 3.5 0 0 1-5-5l6.2-6.2a2.3 2.3 0 0 1 3.3 3.3l-6 6a1.2 1.2 0 0 1-1.7-1.7l5.5-5.5"/>',
+  refresh: '<path d="M16 10a6 6 0 1 1-1.8-4.3"/><path d="M16.5 3.5v3.2h-3.2"/>',
   clock: '<circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2"/>',
   down: '<path d="m5.5 8 4.5 4.5L14.5 8"/>',
   left: '<path d="M12.5 4.5 7 10l5.5 5.5"/>',
