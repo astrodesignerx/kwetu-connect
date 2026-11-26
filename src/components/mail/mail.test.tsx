@@ -59,7 +59,7 @@ describe("Mail page", () => {
     expect(html).toContain("Connect your mailbox");
     expect(html).toContain("Use the address and password you sign in to webmail with.");
     expect(html).toContain("Connect an address once, then share it with the colleagues who answer it. The password is stored encrypted.");
-    expect(html).toContain('aria-label="Staff account"');
+    expect(html).toContain('aria-label="Staff account and appearance"');
     expect(html).toContain('class="staff-account-email">staff@example.test</p>');
     expect(html).toContain(">Sign out</button>");
     expect(html.match(/mg-primary/g)).toHaveLength(1);
@@ -97,8 +97,8 @@ describe("Mail page", () => {
       </MailAppearance>,
     );
     expect(html).toContain('data-mail-theme="graphite"');
-    expect(html).toContain('<option value="graphite" selected="">Graphite</option>');
-    expect(html).toContain('<option value="system">System</option>');
+    expect(html).toMatch(/aria-pressed="true"[^>]*>.*?Graphite/);
+    expect(html).toMatch(/aria-pressed="false"[^>]*>.*?System/);
   });
 
   it("drops a recipient-only preview and keeps one message count in a grouped inbox", () => {

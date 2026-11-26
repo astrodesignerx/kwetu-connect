@@ -73,10 +73,45 @@ export const senderName = (a: { name: string; address: string }) => a.name.trim(
 
 const escapeHtml = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
-/** What someone typed, as simple email HTML: a paragraph per blank line, a line break per new line. */
+/**
+ * What someone typed, as simple email HTML: a paragraph per blank line and a line break per new line, plus the
+ * formatting the compose toolbar writes: **bold**, *italic*, [text](https://link), bare links, "- " and "1. " lists.
+ * Everything is escaped first, so typed HTML stays text.
+ */
 export function textToHtml(text: string): string {
-  return text.trim().split(/\n{2,}/).map((p) => `<p>${escapeHtml(p).replace(/\n/g, "<br>")}</p>`).join("");
+  return text.trim().split(/\n{2,}/).map(formatBlock).join("");
 }
+const BULLET = /^\s*[-*\u2022]\s+(?=\S)/, NUMBERED = /^\s*\d{1,3}[.)]\s+(?=\S)/;
+function formatBlock(block: string): string {
+  const out: string[] = [];
+  let lines: string[] = [], list: { tag: "ul" | "ol"; items: string[] } | null = null;
+  const endLines = () => { if (lines.length) out.push(`<p>${lines.map(formatInline).join("<br>")}</p>`); lines = []; };
+  const endList = () => { if (list) out.push(`<${list.tag}>${list.items.map((item) => `<li>${formatInline(item)}</li>`).join("")}</${list.tag}>`); list = null; };
+  for (const line of block.split("\n")) {
+    const tag = BULLET.test(line) ? "ul" : NUMBERED.test(line) ? "ol" : null;
+    if (!tag) { endList(); lines.push(line); continue; }
+    endLines();
+    if (list && list.tag !== tag) endList();
+    if (!list) list = { tag, items: [] };
+    list.items.push(line.replace(tag === "ul" ? BULLET : NUMBERED, ""));
+  }
+  endLines(); endList();
+  return out.join("");
+}
+function formatInline(line: string): string {
+  // Links are set aside first, so an underscore or star inside an address is never read as formatting.
+  const kept: string[] = [];
+  const keep = (html: string) => `\u0000${kept.push(html) - 1}\u0000`;
+  return escapeHtml(line)
+    .replace(/\[([^\]\n]{1,200})\]\(((?:https?:\/\/|mailto:)[^\s)]+)\)/gi, (_, label: string, url: string) => keep(`<a href="${url}">${label}</a>`))
+    .replace(/\bhttps?:\/\/[^\s<\u0000]*[^\s<\u0000.,;:!?)\]'"]/gi, (url) => keep(`<a href="${url}">${url}</a>`))
+    .replace(/\*\*(?=\S)([^*\n]*?\S)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[\s(])\*(?=\S)([^*\n]*?\S)\*(?=$|[\s.,;:!?)])/g, "$1<em>$2</em>")
+    .replace(/(^|[\s(])_(?=\S)([^_\n]*?\S)_(?=$|[\s.,;:!?)])/g, "$1<em>$2</em>")
+    .replace(/\u0000(\d+)\u0000/g, (_, i: string) => kept[Number(i)]);
+}
+/** A mailbox signature under the message, above any quoted email. */
+export const signatureHtml = (signature: string) => signature.trim() ? `<div class="kca-signature" style="margin-top:18px">${textToHtml(signature)}</div>` : "";
 
 /** The earlier message under a reply or forward, quoted the usual way. */
 export function quoteBlock(m: { from: { name: string; address: string }[]; date: string | null; html: string | null; text: string }): string {
@@ -98,3 +133,23 @@ export function fileSize(bytes: number): string {
 
 /** Splits "a@x.com, b@y.com; c@z.com" into addresses. */
 export const splitAddresses = (value: string) => value.split(/[,;\s]+/).map((s) => s.trim()).filter(Boolean);
+
+/* Snooze and follow-up times, always in Nairobi time (UTC+3, no daylight saving). */
+const NAIROBI = 3 * 3_600_000;
+function nairobiAt(now: Date, days: number, hour: number) {
+  const n = new Date(now.getTime() + NAIROBI);
+  return new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate() + days, hour) - NAIROBI);
+}
+/** "Fri 08:00" */
+export const shortWhen = (iso: string | Date) => new Intl.DateTimeFormat("en-GB", { timeZone: ZONE, weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(typeof iso === "string" ? new Date(iso) : iso);
+export function snoozeChoices(now = new Date()): { label: string; at: Date }[] {
+  const n = new Date(now.getTime() + NAIROBI), hour = n.getUTCHours(), weekday = n.getUTCDay();
+  const later = new Date(now.getTime() + 3 * 3_600_000);
+  return [
+    ...(hour < 18 ? [{ label: "Later today", at: later }] : []),
+    { label: "Tomorrow morning", at: nairobiAt(now, 1, 8) },
+    ...(weekday >= 1 && weekday <= 3 ? [{ label: "Friday morning", at: nairobiAt(now, 5 - weekday, 8) }] : []),
+    { label: "Next week", at: nairobiAt(now, ((8 - weekday) % 7) || 7, 8) },
+  ];
+}
+export const REMIND_DAYS = [[1, "Tomorrow"], [3, "In 3 days"], [7, "In a week"]] as const;

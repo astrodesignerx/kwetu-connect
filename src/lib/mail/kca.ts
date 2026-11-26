@@ -8,11 +8,43 @@ import type { BookingSettings } from "@/lib/booking/settings";
 export const emailKey = (email: string) => email.trim().toLowerCase();
 // Match the conversation grouping used by the mailbox reader, including across folders.
 export const threadKey = (subject: string) => subject.replace(/^\s*((re|fwd?|aw|sv)\s*:\s*)+/i, "").trim().toLowerCase().slice(0, 200) || "(no subject)";
-export type Client = { id: string; advertiser: Advertiser; emails: string[]; bookings: Booking[] };
+type Addr = { address: string };
+/** The other side of a conversation: the first address that is not the mailbox itself (sender, then recipients). */
+export function partyOf(m: { from: Addr | Addr[]; to?: Addr[]; cc?: Addr[] }, mine: string | Iterable<string>): string {
+  const own = new Set((typeof mine === "string" ? [mine] : [...mine]).map(emailKey));
+  for (const a of [...(Array.isArray(m.from) ? m.from : [m.from]), ...(m.to ?? []), ...(m.cc ?? [])]) {
+    const email = emailKey(a?.address ?? "");
+    if (email && !own.has(email)) return email;
+  }
+  return "";
+}
+/**
+ * One conversation is one subject with one other party, so two clients who both write "Invoice" stay apart.
+ * Without a party (mail between our own mailboxes) the subject alone is the key, as it was before.
+ */
+export const conversationKey = (subject: string, party = "") => party ? `${threadKey(subject).slice(0, 140)} | ${emailKey(party).slice(0, 57)}` : threadKey(subject);
+/** Workspace data for a conversation. Rows saved before conversations had a party use the subject alone. */
+export function metaFor<T extends { thread_key: string }>(meta: T[], subject: string, party = ""): T | undefined {
+  const key = conversationKey(subject, party), legacy = threadKey(subject);
+  return meta.find((m) => m.thread_key === key) ?? meta.find((m) => m.thread_key === legacy);
+}
+type Linkable = { from: Addr[]; to: Addr[]; cc: Addr[]; messageId: string | null; inReplyTo: string | null; references: string[] };
+/**
+ * Which same-subject messages belong with the opened one: the same other party, or a direct reply link.
+ * Two clients who both write "Invoice" are two conversations, so a reply cannot go to the wrong one.
+ */
+export function sameConversation<T extends Linkable>(opened: T, messages: T[], mailboxEmail: string): T[] {
+  const party = partyOf(opened, mailboxEmail);
+  const linked = (m: T) => (!!m.messageId && (opened.references.includes(m.messageId) || opened.inReplyTo === m.messageId))
+    || (!!opened.messageId && (m.references.includes(opened.messageId) || m.inReplyTo === opened.messageId));
+  return messages.filter((m) => m === opened || !party || partyOf(m, mailboxEmail) === party || linked(m));
+}
+export type ClientLink = { sender_email: string; client_id: string; linked_by: string | null; linked_at: string };
+export type Client = { id: string; advertiser: Advertiser; emails: string[]; bookings: Booking[]; linked?: string[] };
 export type MatchInput = { subject: string; text?: string; html?: string | null; addresses: string[] };
 export type Match = { client: Client | null; booking: Booking | null; by: "reference" | "email" | null; unknownReference?: string };
 
-export function clientsFrom(data: MailDirectory): Client[] {
+export function clientsFrom(data: MailDirectory, links: ClientLink[] = []): Client[] {
   const groups = new Map<string, Client>();
   for (const a of [...data.advertisers].sort((a,b) => b.createdAt.localeCompare(a.createdAt))) {
     // Contact records are private to a booking. Only a shared email is a reliable identity.
@@ -22,12 +54,17 @@ export function clientsFrom(data: MailDirectory): Client[] {
     client.bookings.push(...data.bookings.filter((b) => b.advertiserId === a.id));
   }
   for (const c of groups.values()) c.bookings.sort((a,b) => b.createdAt.localeCompare(a.createdAt));
+  // Addresses linked by hand match the client too. The booking email stays first, so notes keep their key.
+  for (const link of links) {
+    const client = groups.get(link.client_id), email = emailKey(link.sender_email);
+    if (client && email && !client.emails.includes(email)) { client.emails.push(email); (client.linked ??= []).push(email); }
+  }
   return [...groups.values()].sort((a,b) => a.advertiser.business.localeCompare(b.advertiser.business));
 }
 
 /** Build once per directory load, then reuse for every row and full conversation. */
-export function matchIndex(data: MailDirectory) {
-  const clients = clientsFrom(data);
+export function matchIndex(data: MailDirectory, links: ClientLink[] = []) {
+  const clients = clientsFrom(data, links);
   const byEmail = new Map(clients.flatMap((c) => c.emails.map((email) => [email, c] as const)));
   const byRef = new Map(clients.flatMap((c) => c.bookings.map((b) => [b.reference.toUpperCase(), { client: c, booking: b }] as const)));
   return (input: MatchInput): Match => {

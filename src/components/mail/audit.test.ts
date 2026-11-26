@@ -20,7 +20,7 @@ describe("Mail audit fixes", () => {
   it("orders J and K like the inbox: conversations needing a reply first", () => {
     const rows = [row(9, "Receipt"), row(8, "Question"), row(7, "Re: Question"), row(6, "Brief")];
     const waiting = new Set([rowKey(rows[1]), rowKey(rows[3])]);
-    expect(listGroups(rows, true, waiting).map(([group, items]) => [group, items.map((r) => r.uid)]))
+    expect(listGroups(rows, { inbox: true, waitingKeys: waiting }).map(([group, items]) => [group, items.map((r) => r.uid)]))
       .toEqual([["Needs your reply", [8, 6]], ["Other mail", [9]]]);
   });
 

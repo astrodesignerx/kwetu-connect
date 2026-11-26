@@ -7,6 +7,8 @@ export interface DraftData {
   title: string; to: string; cc: string; subject: string; body: string;
   quoted?: string; inReplyTo?: string | null; references?: string[];
   answers?: { mailbox: string; uid: number }; uploadIds: string[];
+  /** Leave the mailbox signature off this email. */ noSignature?: boolean;
+  /** Days after sending to list it under No reply yet. */ remindDays?: number;
 }
 export interface SavedDraft {
   id: string; owner_email: string; mailbox_id: string; data: DraftData;
@@ -38,6 +40,8 @@ function cleanData(input: DraftData): DraftData {
     references: (Array.isArray(input.references) ? input.references : []).slice(-20).map((r) => clip(r, 500)),
     answers: input.answers && Number.isInteger(input.answers.uid) && input.answers.uid > 0 && typeof input.answers.mailbox === "string" && input.answers.mailbox.length <= 200 ? input.answers : undefined,
     uploadIds: [...new Set((Array.isArray(input.uploadIds) ? input.uploadIds : []).filter(validId))].slice(0, 10),
+    ...(input.noSignature === true ? { noSignature: true } : {}),
+    ...([1, 3, 7].includes(Number(input.remindDays)) ? { remindDays: Number(input.remindDays) } : {}),
   };
 }
 export async function getDraft(owner: string, id: string): Promise<SavedDraft | null> {

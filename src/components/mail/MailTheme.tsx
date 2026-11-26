@@ -86,19 +86,16 @@ export function MailAppearance({ children, className, initialGraphite }: {
   </Appearance.Provider>;
 }
 
+const icons: Record<Preference, string> = { light: "sun", dark: "moon", graphite: "graphite", system: "system" };
+
+/** The appearance choices, shown inside the staff account menu. */
 export default function MailTheme() {
   const appearance = useContext(Appearance);
   if (!appearance) return null;
-
-  return <label className="mail-appearance">
-    <MailIcon name="system" size="sm" />
-    <span className="sr">Appearance</span>
-    <select disabled={!appearance.ready} value={appearance.preference} onChange={(event) => {
-      const choice = choices.find(([value]) => value === event.target.value);
-      if (choice) appearance.change(choice[0]);
-    }}>
-      {choices.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-    </select>
-    <MailIcon name="down" size="xs" />
-  </label>;
+  return <div className="theme-options" role="group" aria-label="Appearance">
+    <p className="menu-label">Appearance</p>
+    {choices.map(([value, label]) => <button key={value} type="button" aria-pressed={appearance.preference === value} disabled={!appearance.ready} onClick={() => appearance.change(value)}>
+      <MailIcon name={icons[value]} size="sm" />{label}{appearance.preference === value && <MailIcon name="check" size="xs" className="theme-check" />}
+    </button>)}
+  </div>;
 }

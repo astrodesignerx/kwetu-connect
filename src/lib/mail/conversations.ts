@@ -2,33 +2,51 @@ import type { MessageRow } from "@/app/mail/actions";
 import { classify, withImap } from "./client";
 import { loadAccount, listAccounts } from "./accounts";
 import { demoList, demoFolders, isDemoAccount } from "./demo";
-import { emailKey, threadKey } from "./kca";
+import { conversationKey, emailKey, metaFor, partyOf, threadKey } from "./kca";
 import { listMeta, type ThreadMeta } from "./kca-data";
 import { isWaiting } from "./status";
 
 export type ConversationRow = MessageRow & { accountId: string };
-export type ConversationQuery = { kind: "waiting" } | { kind: "client"; emails: string[] } | { kind: "assigned"; subjects: string[] };
-export function filterConversations(items: MessageRow[], query: ConversationQuery, me: string, inboxPaths = ["INBOX"], meta: ThreadMeta[] = []) {
+/** `subjects` holds conversation keys; older subject-only keys still match. */
+export type ConversationQuery = { kind: "waiting" } | { kind: "client"; emails: string[] } | { kind: "assigned"; subjects: string[] } | { kind: "followup" };
+const snoozed = (meta: ThreadMeta | undefined, now: number) => !!meta?.snoozed_until && Date.parse(meta.snoozed_until) > now;
+export function filterConversations(items: MessageRow[], query: ConversationQuery, me: string, inboxPaths = ["INBOX"], meta: ThreadMeta[] = [], now = Date.now()) {
   const emails = query.kind === "client" ? new Set(query.emails.map(emailKey)) : new Set<string>();
   const subjects = query.kind === "assigned" ? new Set(query.subjects) : new Set<string>();
   const sorted = [...items].sort((a,b) => (b.date ?? "").localeCompare(a.date ?? ""));
-  const groups = new Map<string, MessageRow>();
+  // One row per conversation (subject and other party), the newest message, plus when the other party last wrote.
+  const groups = new Map<string, { row: MessageRow; party: string; heard: string }>();
   for (const row of sorted) {
-    const key = threadKey(row.subject);
-    if (groups.has(key)) continue;
+    const party = partyOf(row, me), key = conversationKey(row.subject, party);
+    const incoming = inboxPaths.includes(row.mailbox) && emailKey(row.from.address) !== emailKey(me);
+    const seen = groups.get(key);
+    if (seen) { if (incoming && !seen.heard) seen.heard = row.date ?? ""; continue; }
     if (query.kind === "client" && ![row.from, ...row.to, ...(row.cc ?? [])].some((a) => emails.has(emailKey(a.address)))) continue;
-    if (query.kind === "assigned" && !subjects.has(key)) continue;
-    groups.set(key, row);
+    if (query.kind === "assigned" && !subjects.has(key) && !subjects.has(threadKey(row.subject))) continue;
+    groups.set(key, { row, party, heard: incoming ? row.date ?? "" : "" });
   }
   const result = [...groups.values()];
-  return query.kind === "waiting" ? result.filter((r) => inboxPaths.includes(r.mailbox) && isWaiting(r, me, meta.find((m) => m.thread_key === threadKey(r.subject)))).sort((a,b) => (a.date ?? "").localeCompare(b.date ?? "")) : result;
+  const oldestFirst = (a: MessageRow, b: MessageRow) => (a.date ?? "").localeCompare(b.date ?? "");
+  if (query.kind === "waiting") return result.filter(({ row, party }) => {
+    const m = metaFor(meta, row.subject, party);
+    return inboxPaths.includes(row.mailbox) && !snoozed(m, now) && isWaiting(row, me, m);
+  }).map((g) => g.row).sort(oldestFirst);
+  // Due, and the other party has not written since the reminder was set.
+  if (query.kind === "followup") return result.filter(({ row, party, heard }) => {
+    const m = metaFor(meta, row.subject, party);
+    return !!m?.remind_at && Date.parse(m.remind_at) <= now && (!heard || heard <= (m.remind_since ?? ""));
+  }).map((g) => g.row).sort(oldestFirst);
+  return result.map((g) => g.row);
 }
 
 /** One connection per account. Searches and reads are bounded; the UI discloses a partial result. */
 export async function conversationRows(me: string, query: ConversationQuery, onlyAccount?: string) {
   const accounts = onlyAccount ? [await loadAccount(me, onlyAccount)] : await Promise.all((await listAccounts(me)).map((a) => loadAccount(me, a.id)));
   if (query.kind === "assigned" && !query.subjects.length) return { items: [], partial: false, errors: [] };
-  const results = await Promise.all(accounts.map(async (account) => {
+  const pairs = await Promise.all(accounts.map(async (account) => [account, ["waiting", "followup"].includes(query.kind) ? await listMeta(me, account.id).catch(() => []) : []] as const));
+  // Follow-ups only open the mailboxes that have a reminder due.
+  const due = (meta: ThreadMeta[]) => meta.some((m) => m.remind_at && Date.parse(m.remind_at) <= Date.now());
+  const results = await Promise.all(pairs.filter(([, meta]) => query.kind !== "followup" || due(meta)).map(async ([account, meta]) => {
     try {
       let partial = false;
       const inboxPaths = ["INBOX"];
@@ -38,7 +56,7 @@ export async function conversationRows(me: string, query: ConversationQuery, onl
       } else {
         items = await withImap(account, async (c) => {
           const rows: MessageRow[] = [];
-          const boxes = classify(await c.list()).filter((b) => !["spam", "trash", "drafts"].includes(b.special) && (query.kind !== "waiting" || ["inbox", "sent"].includes(b.special)));
+          const boxes = classify(await c.list()).filter((b) => !["spam", "trash", "drafts"].includes(b.special) && (!["waiting", "followup"].includes(query.kind) || ["inbox", "sent"].includes(b.special)));
           for (const box of boxes) {
             if (box.special === "inbox") inboxPaths.push(box.path);
             const lock = await c.getMailboxLock(box.path);
@@ -59,9 +77,8 @@ export async function conversationRows(me: string, query: ConversationQuery, onl
           return rows;
         });
       }
-      const meta = query.kind === "waiting" ? await listMeta(me, account.id) : [];
       return { items: filterConversations(items, query, account.email, inboxPaths, meta).map((r) => ({ ...r, accountId: account.id })), partial, error: null };
     } catch { return { items: [], partial: true, error: `Conversations could not be read from ${account.email}.` }; }
   }));
-  return { items: results.flatMap((r) => r.items).sort((a,b) => query.kind === "waiting" ? (a.date ?? "").localeCompare(b.date ?? "") : (b.date ?? "").localeCompare(a.date ?? "")), partial: results.some((r) => r.partial), errors: results.flatMap((r) => r.error ? [r.error] : []) };
+  return { items: results.flatMap((r) => r.items).sort((a,b) => query.kind === "waiting" || query.kind === "followup" ? (a.date ?? "").localeCompare(b.date ?? "") : (b.date ?? "").localeCompare(a.date ?? "")), partial: results.some((r) => r.partial), errors: results.flatMap((r) => r.error ? [r.error] : []) };
 }

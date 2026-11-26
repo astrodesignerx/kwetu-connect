@@ -53,7 +53,7 @@ describe("mail quote and manager brief",() => {
 const row=(subject:string,date:string,extra:Partial<MessageRow>={}):MessageRow => ({uid:1,mailbox:"INBOX",from:{name:"Client",address:"client@example.com"},to:[{name:"",address:"me@example.com"}],subject,date,seen:true,flagged:false,answered:false,hasAttachments:false,messageId:null,thread:1,...extra});
 describe("conversation sections",() => {
   it("keeps waiting conversations oldest first and removes a later outgoing reply",() => {
-    const rows=[row("Older","2026-11-20"),row("Newer","2026-11-23"),row("Re: Done","2026-11-24",{mailbox:"Sent",from:{name:"Me",address:"me@example.com"}}),row("Done","2026-11-21")];
+    const rows=[row("Older","2026-11-20"),row("Newer","2026-11-23"),row("Re: Done","2026-11-24",{mailbox:"Sent",from:{name:"Me",address:"me@example.com"},to:[{name:"Client",address:"client@example.com"}]}),row("Done","2026-11-21")];
     expect(filterConversations(rows,{kind:"waiting"},"me@example.com").map((r) => r.subject)).toEqual(["Older","Newer"]);
   });
   it("matches clients from CC and assigned conversations across subject prefixes",() => {

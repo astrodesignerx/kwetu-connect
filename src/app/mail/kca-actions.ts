@@ -2,8 +2,8 @@
 import { requireStaff } from "@/lib/auth/server";
 import { getStore } from "@/lib/store";
 import { MailError } from "@/lib/mail/client";
-import { clientsFrom, emailKey, threadKey } from "@/lib/mail/kca";
-import { listTemplates, saveTemplate, deleteTemplate, listMeta, assignThread, listNotes, saveNote, setDone, type Template } from "@/lib/mail/kca-data";
+import { clientsFrom, emailKey, metaFor, partyOf } from "@/lib/mail/kca";
+import { listTemplates, saveTemplate, deleteTemplate, listMeta, assignThread, listNotes, saveNote, setDone, snoozeThread, remindThread, listLinks, linkClient, readSignature, saveSignature, type Template } from "@/lib/mail/kca-data";
 import { conversationRows } from "@/lib/mail/conversations";
 import { loadAccount, listAccounts, mailboxPeople } from "@/lib/mail/accounts";
 import { mailThread } from "./actions";
@@ -19,9 +19,11 @@ async function run<T>(fn: (me: string) => Promise<T>): Promise<Result<T>> {
 export async function mailWorkspace(accountId: string) {
   return run(async (me) => {
     await loadAccount(me, accountId);
-    const [directory, templates, notes, meta, people] = await Promise.allSettled([getStore().mailDirectory(), listTemplates(), listNotes(), listMeta(me, accountId), mailboxPeople(me, accountId)]);
+    const [directory, templates, notes, meta, people, links, signature] = await Promise.allSettled([getStore().mailDirectory(), listTemplates(), listNotes(), listMeta(me, accountId), mailboxPeople(me, accountId), listLinks(), readSignature(me, accountId)]);
     return { me: emailKey(me), today: todayInNairobi(), directory: directory.status === "fulfilled" ? directory.value : null,
       templates: templates.status === "fulfilled" ? templates.value : [], notes: notes.status === "fulfilled" ? notes.value : [], meta: meta.status === "fulfilled" ? meta.value : [], people: people.status === "fulfilled" ? people.value : [],
+      // Optional until migration 0009: without it these are empty and the rest of the workspace still loads.
+      links: links.status === "fulfilled" ? links.value : [], signature: signature.status === "fulfilled" ? signature.value : "",
       errors: [directory.status === "rejected" ? "Bookings could not be loaded. Mail is still available." : "", templates.status === "rejected" ? "Quick replies could not be loaded. Check migration 0007." : "", notes.status === "rejected" ? "Client notes could not be loaded." : "", meta.status === "rejected" ? "Assignments could not be loaded." : ""].filter(Boolean) };
   });
 }
@@ -49,17 +51,18 @@ export async function mailDone(accountId: string, mailbox: string, uid: number, 
     if (!result.ok) throw new MailError(result.error);
     const latest = result.data.at(-1);
     if (!latest) throw new MailError("That message is no longer there.");
-    return setDone(me, accountId, latest.subject, messageIdentity(latest));
+    const party = partyOf(latest, (await loadAccount(me, accountId)).email);
+    return { ...(await setDone(me, accountId, latest.subject, messageIdentity(latest), undefined, party)), party };
   });
 }
-export async function mailUndoDone(accountId: string, subject: string, messageId: string) {
+export async function mailUndoDone(accountId: string, subject: string, messageId: string, party = "") {
   return run(async (me) => {
-    const current = (await listMeta(me, accountId)).find((m) => m.thread_key === threadKey(subject));
+    const current = metaFor(await listMeta(me, accountId), subject, party);
     if (current?.done_message_id !== messageId) throw new MailError("Undo failed. Someone has updated this conversation.");
-    return setDone(me, accountId, subject, null, messageId);
+    return setDone(me, accountId, subject, null, messageId, party);
   });
 }
-export async function mailAssign(accountId: string, subject: string, assignee: string | null) { return run((me) => assignThread(me, accountId, subject, assignee)); }
+export async function mailAssign(accountId: string, subject: string, assignee: string | null, party?: string) { return run((me) => assignThread(me, accountId, subject, assignee, party)); }
 export async function mailSaveNote(email: string, note: string) {
   return run(async (me) => {
     const data = await getStore().mailDirectory();
@@ -69,3 +72,21 @@ export async function mailSaveNote(email: string, note: string) {
 }
 export async function mailSaveTemplate(input: Pick<Template, "name" | "body" | "sort_order"> & { id?: string }) { return run((me) => saveTemplate(me, input)); }
 export async function mailDeleteTemplate(id: string) { return run(async () => { await deleteTemplate(String(id)); return true; }); }
+
+export async function mailSnooze(accountId: string, subject: string, party: string, until: string | null) { return run((me) => snoozeThread(me, accountId, subject, party, until)); }
+export async function mailRemind(accountId: string, subject: string, party: string, at: string | null) { return run((me) => remindThread(me, accountId, subject, party, at)); }
+/** Conversations with a reminder due and no answer since: "No reply yet". */
+export async function mailFollowUps() { return run((me) => conversationRows(me, { kind: "followup" })); }
+export async function mailLinkClient(sender: string, clientId: string | null) {
+  return run(async (me) => {
+    if (clientId !== null) {
+      const clients = clientsFrom(await getStore().mailDirectory());
+      if (!clients.some((c) => c.id === clientId)) throw new MailError("Choose a client from bookings.");
+      // An address on a booking already identifies its client and is never moved by hand.
+      if (clients.some((c) => c.id !== clientId && c.emails.includes(emailKey(String(sender))))) throw new MailError("That address belongs to another client's booking.");
+    }
+    return linkClient(me, sender, clientId);
+  });
+}
+export async function mailReadSignature(accountId: string) { return run((me) => readSignature(me, accountId)); }
+export async function mailSaveSignature(accountId: string, text: string) { return run((me) => saveSignature(me, accountId, text)); }

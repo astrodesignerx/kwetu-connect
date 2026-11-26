@@ -1,5 +1,6 @@
 import { MailError, normaliseSubject, type MailAccount, type MailboxInfo, type ParsedMessage } from "./client";
 import type { MoveKind, MoveReceipt } from "./moves";
+import { conversationKey, partyOf, sameConversation } from "./kca";
 
 /**
  * A sample mailbox for local demo mode, so the Mail page can be tried without a real mailbox. It only ever
@@ -62,6 +63,8 @@ function seed(me: string): DemoBox {
   add({ from: { name: "M-Pesa Paybill", address: "notifications@payments.example" }, subject: "Payment received: KES 42,000 from Rift Motors", hours: 5, body: ["You have received KES 42,000.00 from RIFT MOTORS LTD, account KCA-1187.", "This is a sample notification."] });
   add({ from: { name: "Brian Otieno", address: "brian@riftmotors.example" }, subject: "Deposit paid for the November campaign", hours: 6, seen: true, body: ["Hi team,", "We have paid the 50% deposit this morning. When can we see the first proof on screen?", "Brian"] });
   add({ from: { name: "Grace Muthoni", address: "grace@eldoretarts.example" }, subject: "Question about advert length", hours: 26, body: ["Good afternoon,", "Is a 15 second advert allowed, or do you only take 10 seconds?", "Grace"] });
+  // Same subject, different client: a separate conversation.
+  add({ from: { name: "Joseph Njoroge", address: "joseph@nakurugrill.example" }, subject: "Question about advert length", hours: 40, seen: true, body: ["Hello,", "How long can a restaurant advert be? We have a 30 second clip.", "Joseph"] });
   add({ from: { name: "Screen monitor", address: "alerts@kwetuconnectads.co.ke" }, subject: "Weekly screen report: 99.2% on air", hours: 30, seen: true, body: ["The screen was on air 99.2% of scheduled hours this week.", "Longest break: 12 minutes on Tuesday, power."] });
   add({ mailbox: "Archive", from: { name: "Peter Kamau", address: "peter@greenleafhotel.example" }, subject: "Thank you for October", hours: 400, seen: true, body: ["The October campaign brought us many bookings. We will be back in the new year.", "Peter"] });
   add({ mailbox: "Spam", from: { name: "Prize Desk", address: "winner@prizes.example" }, subject: "You have won a holiday", hours: 12, body: ["Click here to claim."] });
@@ -95,15 +98,15 @@ export function demoList(account: MailAccount, folder: string, query: { unread?:
     .filter((m) => !text || [m.subject, m.text, m.from[0]?.name, m.from[0]?.address].some((v) => v?.toLowerCase().includes(text)))
     .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
   const page = matches.slice(offset, offset + size);
-  const counts = new Map<string, number>();
-  for (const m of page) counts.set(normaliseSubject(m.subject), (counts.get(normaliseSubject(m.subject)) ?? 0) + 1);
+  const counts = new Map<string, number>(), key = (m: DemoMessage) => conversationKey(m.subject, partyOf(m, account.email));
+  for (const m of page) counts.set(key(m), (counts.get(key(m)) ?? 0) + 1);
   return {
     total: matches.length,
     items: page.map((m) => ({
       uid: m.uid, mailbox: m.mailbox, from: m.from[0] ?? { name: "", address: "" }, to: m.to, subject: m.subject, date: m.date,
       seen: m.seen, flagged: m.flagged, answered: m.answered, hasAttachments: m.attachments.length > 0, messageId: m.messageId,
       snippet: m.text.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").slice(0, 160),
-      thread: counts.get(normaliseSubject(m.subject)) ?? 1,
+      thread: counts.get(key(m)) ?? 1,
     })),
   };
 }
@@ -114,8 +117,7 @@ export function demoThread(account: MailAccount, folder: string, uid: number, su
   if (!opened) throw new MailError("That message is no longer there.");
   opened.seen = true;
   const key = normaliseSubject(subject);
-  return b.messages
-    .filter((m) => m === opened || ((m.mailbox === folder || m.mailbox === "Sent") && normaliseSubject(m.subject) === key))
+  return sameConversation(opened, b.messages.filter((m) => m === opened || ((m.mailbox === folder || m.mailbox === "Sent") && normaliseSubject(m.subject) === key)), account.email)
     .sort((a, b2) => (a.date ?? "").localeCompare(b2.date ?? ""))
     .map((m): ParsedMessage & { mailbox: string; seen: boolean; flagged: boolean } => {
       const message = { ...m };

@@ -9,6 +9,8 @@ import { saveDraft, listDrafts, deleteDraft, loadUploads, sendOnce, type DraftDa
 import { encryptSecret } from "@/lib/mail/crypto";
 import { moveMessages, undoMove, type MoveKind, type MoveReceipt } from "@/lib/mail/moves";
 import { demoAccountFields, demoAct, demoFolders, demoList, demoSend, demoThread, isDemoAccount, mailDemoEnabled } from "@/lib/mail/demo";
+import { conversationKey, partyOf, sameConversation } from "@/lib/mail/kca";
+import { remindThread } from "@/lib/mail/kca-data";
 
 /**
  * The manager's Mail page talks to the staff member's own mailbox through these actions. Adapted from the
@@ -156,7 +158,7 @@ export interface MessageRow {
   answered: boolean;
   hasAttachments: boolean;
   messageId: string | null;
-  /** How many messages in this page share the subject. */
+  /** How many messages in this page belong to the same conversation (subject and other party). */
   thread: number;
 }
 
@@ -225,9 +227,9 @@ export async function mailList(accountId: string, mailbox: string, query: ListQu
           });
         }
         items.sort((a, b) => b.uid - a.uid);
-        const counts = new Map<string, number>();
-        for (const i of items) counts.set(normaliseSubject(i.subject), (counts.get(normaliseSubject(i.subject)) ?? 0) + 1);
-        for (const i of items) i.thread = counts.get(normaliseSubject(i.subject)) ?? 1;
+        const counts = new Map<string, number>(), key = (i: MessageRow) => conversationKey(i.subject, partyOf(i, account.email));
+        for (const i of items) counts.set(key(i), (counts.get(key(i)) ?? 0) + 1);
+        for (const i of items) i.thread = counts.get(key(i)) ?? 1;
         return { items, total };
       } finally { lock.release(); }
     });
@@ -237,7 +239,7 @@ export async function mailList(accountId: string, mailbox: string, query: ListQu
 export interface ThreadMessage extends ParsedMessage { mailbox: string; seen: boolean; flagged: boolean }
 
 /**
- * A whole conversation in one connection: the opened message, plus the other messages with the same subject in
+ * A whole conversation in one connection: the opened message, plus the other messages in the same conversation in
  * this folder and in Sent, so your own replies read in order. The opened message is marked as read.
  */
 export async function mailThread(accountId: string, mailbox: string, uid: number, subject: string) {
@@ -255,7 +257,7 @@ export async function mailThread(accountId: string, mailbox: string, uid: number
         const lock = await c.getMailboxLock(path);
         try {
           const found = key ? ((await c.search({ subject: key }, { uid: true })) || []) : [];
-          const uids = [...new Set(path === folder ? [opened, ...found] : found)].sort((a, b) => b - a).slice(0, 12);
+          const uids = [...new Set(path === folder ? [opened, ...found] : found)].sort((a, b) => b - a).slice(0, 30);
           if (!uids.length) continue;
           for await (const m of c.fetch(uids.join(","), { uid: true, flags: true, source: true }, { uid: true })) {
             if (!m.source) continue;
@@ -269,8 +271,9 @@ export async function mailThread(accountId: string, mailbox: string, uid: number
           if (path === folder) await c.messageFlagsAdd(String(opened), ["\\Seen"], { uid: true }).catch(() => undefined);
         } finally { lock.release(); }
       }
-      if (!out.some((m) => m.mailbox === folder && m.uid === opened)) throw new MailError("That message is no longer there.");
-      return out.sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""));
+      const openedMessage = out.find((m) => m.mailbox === folder && m.uid === opened);
+      if (!openedMessage) throw new MailError("That message is no longer there.");
+      return sameConversation(openedMessage, out, account.email).sort((a, b) => (a.date ?? "").localeCompare(b.date ?? "")).slice(-12);
     });
   });
 }
@@ -335,6 +338,8 @@ export interface SendInput {
   attachments?: { filename: string; contentBase64: string; contentType: string }[];
   /** The message this replies to: it is marked answered, which ends its waiting time. */
   answers?: { mailbox: string; uid: number };
+  /** List the conversation under "No reply yet" if the recipient has not written back after this many days. */
+  remindDays?: number;
 }
 
 const htmlToText = (html: string) =>
@@ -372,6 +377,9 @@ export async function mailSend(input: SendInput) {
       try { await transport.sendMail({ envelope: { from: account.email, to: [...to, ...cc] }, raw }); }
       finally { transport.close?.(); }
     });
+    // A reminder is a convenience: a failure to save it never turns a sent email into an error.
+    const remindDays = [1, 2, 3, 7, 14].includes(Number(input.remindDays)) ? Number(input.remindDays) : 0;
+    if (submitted && remindDays) await remindThread(me, account.id, message.subject, partyOf({ from: [], to: to.map((address) => ({ address })) }, account.email), new Date(Date.now() + remindDays * 86_400_000).toISOString()).catch(() => undefined);
     if (!submitted || isDemoAccount(account)) return true;
     // cPanel and most hosts do not keep a copy of what SMTP sends, so it is filed in Sent here.
     const fileCopy = !/gmail|googlemail|office365|outlook/i.test(account.smtp_host);
@@ -402,6 +410,10 @@ export async function mailDeleteDraft(id: string, version: number) {
 }
 export async function mailDraftUploads(id: string, ids: string[]) {
   return run("read attachments", async (me) => (await loadUploads(me, id, ids)).map((u) => ({ id: u.id, file_name: u.file_name, size_bytes: u.size_bytes })));
+}
+/** Mailbox status from the database, kept fresh by the background check. Cheap enough to poll from a hidden tab. */
+export async function mailStatus() {
+  return run("read mailbox status", (me) => listAccounts(me));
 }
 export async function mailUnreadCount() {
   return run("read unread count", async (me) => (await listAccounts(me)).reduce((n, a) => n + (a.last_unread_count ?? 0), 0));

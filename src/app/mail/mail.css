@@ -137,49 +137,9 @@
 
 .mail-app .dot.warn { background: var(--ember); box-shadow: 0 0 0 3px var(--ember-soft); }
 
-.mail-app .mail-appearance {
-  position: relative;
-  display: inline-grid;
-  grid-template-columns: 16px 1fr 13px;
-  align-items: center;
-  width: 116px;
-  min-height: 36px;
-  padding-inline: 10px;
-  border: 1px solid var(--control-line);
-  border-radius: var(--r-control);
-  background: var(--surface);
-  color: var(--muted);
-}
 
-.mail-app .mail-appearance select {
-  z-index: 1;
-  grid-column: 1 / -1;
-  grid-row: 1;
-  width: calc(100% + 20px);
-  margin-inline: -10px;
-  min-height: 34px;
-  padding: 0 24px 0 32px;
-  border: 0;
-  border-radius: inherit;
-  appearance: none;
-  background: transparent;
-  color: var(--fg);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.mail-app .mail-appearance select:disabled { cursor: default; }
-.mail-app .mail-appearance option { background: var(--surface); color: var(--fg); }
-.mail-app .mail-appearance > .ic { grid-row: 1; pointer-events: none; }
-.mail-app .mail-appearance > .ic:first-child { grid-column: 1; }
-.mail-app .mail-appearance > .ic:last-child { grid-column: 3; justify-self: end; }
-.mail-app .mail-appearance:hover { background: var(--raise); }
-.mail-app .mail-appearance:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
-.mail-app .mail-appearance select:focus-visible { outline: none; }
 
 @media (forced-colors: active) {
-  .mail-app .mail-appearance:focus-within { outline-color: Highlight; }
 }
 
 .mail-app .btn { height: 36px; padding: 0 14px; border-radius: var(--r-control); display: inline-flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 500; white-space: nowrap; transition: opacity var(--t1) var(--ease), transform var(--t1) var(--ease); }
@@ -1182,7 +1142,7 @@ to { transform: scaleX(0); }
 .mail-app .mail-unavailable h1 { margin: 0 0 8px; font-size: 22px; line-height: 1.3; font-weight: 650; }
 .mail-app .mail-unavailable p { margin: 0; color: var(--muted); }
 
-/* Audit fixes: search note, empty-state detail, even phone navigation and a compact phone appearance control. */
+/* Audit fixes: search note, empty-state detail and even phone navigation. */
 .mail-app .search-note { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0; font-size: 12.5px; color: var(--muted); }
 .mail-app .search-note span { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .mail-app .search-note .link { flex: none; font-size: 12.5px; }
@@ -1191,13 +1151,76 @@ to { transform: scaleX(0); }
   .mail-app .rail-group { display: contents; }
   .mail-app .rail > .rail-item, .mail-app .rail-group > .rail-item, .mail-app .rail-phone-more { flex: 1 1 0; min-width: 0; }
   .mail-app .rail-phone-more > summary { width: 100%; }
-  .mail-app .topbar .mail-appearance { width: 44px; min-height: 44px; padding: 0; grid-template-columns: 1fr; justify-items: center; }
-  .mail-app .topbar .mail-appearance select { width: 100%; margin: 0; padding: 0; color: transparent; }
-  .mail-app .topbar .mail-appearance > .ic:first-child { grid-column: 1; }
-  .mail-app .topbar .mail-appearance > .ic:last-child { display: none; }
 }
 @container app (max-width: 720px) {
   /* Buttons carry 2px side padding into their flex basis; the More wrapper matches it so every tab is equal. */
   .mail-app .rail-phone-more { display: flex; padding-inline: 2px; }
   .mail-app .rail-phone-more > summary { flex: 1; padding-inline: 0; }
 }
+
+/* Workflow: account menu appearance, snooze, reminders, formatting, signatures, selection, drafts, client links. */
+.mail-app .staff-account .menu { min-width: 232px; }
+.mail-app .menu-label { margin: 4px 10px 2px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--faint); }
+.mail-app .theme-options { display: flex; flex-direction: column; }
+.mail-app .theme-options button[aria-pressed="true"] { color: var(--fg); font-weight: 500; }
+.mail-app .theme-options .theme-check { margin-left: auto; color: var(--gold-text); }
+.mail-app .menu .menu-hint { margin-left: auto; font: 500 11.5px/16px var(--f-mono); color: var(--faint); }
+.mail-app .menu-form { display: flex; gap: 6px; align-items: center; padding: 6px 4px 2px; }
+.mail-app .menu-form label { flex: 1; min-width: 0; }
+.mail-app .menu-form input { width: 100%; height: 30px; padding: 0 8px; border: 1px solid var(--control-line); border-radius: 8px; background: var(--bg); color: var(--fg); font-size: 12.5px; color-scheme: inherit; }
+.mail-app .menu-form .btn { width: auto; height: 30px; flex: none; }
+.mail-app .snooze-wrap .menu { min-width: 250px; left: auto; right: auto; }
+.mail-app .subj .pill .ic { margin-right: 1px; }
+
+.mail-app .fmt-bar { display: flex; gap: 2px; padding: 6px 10px 0; }
+.mail-app .fmt-bar .btn.icon { width: 28px; height: 28px; padding: 0; color: var(--muted); }
+.mail-app .fmt-bar .btn.icon:hover { color: var(--fg); }
+.mail-app .sig-toggle { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 0 14px 8px; font-size: 12.5px; color: var(--muted); }
+.mail-app .sig-toggle input { accent-color: var(--gold); }
+.mail-app .sig-preview { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--faint); }
+.mail-app .remind-pick { position: relative; display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 4px 0 8px; margin-right: auto; border-radius: 8px; color: var(--muted); }
+.mail-app .remind-pick:hover, .mail-app .remind-pick:focus-within { background: var(--raise); color: var(--fg); }
+.mail-app .remind-pick select { height: 28px; border: 0; background: transparent; color: inherit; font-size: 12.5px; cursor: pointer; }
+.mail-app .remind-pick select option { background: var(--surface); color: var(--fg); }
+
+.mail-app .sel-all { flex: none; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 7px; border: 1px solid var(--control-line); color: transparent; }
+.mail-app .sel-all:hover, .mail-app .sel-all:focus-visible { color: var(--muted); background: var(--raise); }
+.mail-app .bulk { flex-wrap: wrap; row-gap: 2px; }
+.mail-app .bulk b { margin-right: 6px; }
+.mail-app .bulk .link { font-size: 12.5px; margin-right: auto; }
+.mail-app .bulk-actions { display: inline-flex; gap: 2px; margin-left: auto; }
+
+.mail-app .rail-item .badge.quiet { background: var(--raise-2); color: var(--muted); }
+.mail-app .rail-item .badge.ember { background: var(--ember); color: #fff; }
+
+.mail-app .draft-row { position: relative; display: flex; align-items: flex-start; gap: 10px; }
+.mail-app .draft-row .row-main { flex: 1; min-width: 0; text-align: left; }
+.mail-app .draft-row .draft-del { flex: none; width: 32px; height: 32px; padding: 0; color: var(--muted); opacity: .7; }
+.mail-app .draft-row:hover .draft-del, .mail-app .draft-row .draft-del:focus-visible { opacity: 1; }
+.mail-app .draft-row .draft-del:hover { color: var(--bad); background: var(--bad-soft); }
+
+.mail-app .link-client { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; }
+.mail-app .link-client label { flex: 1 1 180px; display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+.mail-app .link-client select { width: 100%; min-width: 0; border: 1px solid var(--control-line); border-radius: 8px; background: var(--bg); color: var(--fg); padding: 7px 8px; }
+.mail-app .link-client p, .mail-app .link-client small { flex-basis: 100%; margin: 0; font-size: 12.5px; }
+
+.mail-app .signature-editor { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.mail-app .signature-editor label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 500; }
+.mail-app .signature-editor textarea { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--control-line); border-radius: 10px; background: var(--bg); color: var(--fg); font: inherit; font-size: 13.5px; resize: vertical; }
+.mail-app .signature-preview { padding: 10px 12px; border-radius: 10px; background: var(--raise); font-size: 13px; color: var(--muted); }
+.mail-app .signature-preview p { margin: 0 0 4px; }
+.mail-app .signature-preview a { color: var(--info); }
+.mail-app .signature-editor .btn-row { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--muted); }
+
+@container app (max-width: 720px) {
+  .mail-app .remind-pick select { max-width: 132px; }
+  .mail-app .fmt-bar .btn.icon { width: 36px; height: 36px; }
+  .mail-app .sel-all { width: 32px; height: 32px; color: var(--faint); }
+}
+/* Five filters fit one row in the 340 px list. */
+.mail-app .filters { flex-wrap: nowrap; }
+.mail-app .filters .seg { flex-wrap: nowrap; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.mail-app .filters .seg button { flex: none; padding: 0 7px; white-space: nowrap; }
+.mail-app .filters { gap: 6px; }
+.mail-app .filters .seg button { padding: 0 5px; }
+.mail-app .sel-all { width: 24px; height: 24px; }

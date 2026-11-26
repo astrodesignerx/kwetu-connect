@@ -4,7 +4,7 @@ vi.mock("@/lib/auth/server",() => ({requireStaff:mock.auth}));
 vi.mock("@/lib/store",() => ({getStore:() => ({mailDirectory:mock.directory})}));
 vi.mock("@/lib/mail/accounts",() => ({loadAccount:mock.account,mailboxPeople:async()=>[],listAccounts:async()=>[]}));
 vi.mock("@/lib/mail/conversations",() => ({conversationRows:mock.rows}));
-vi.mock("@/lib/mail/kca-data",() => ({listTemplates:mock.templates,listNotes:mock.notes,listMeta:mock.meta,assignThread:mock.assign,saveTemplate:mock.save,deleteTemplate:mock.remove,saveNote:mock.saveNote}));
+vi.mock("@/lib/mail/kca-data",() => ({listTemplates:mock.templates,listNotes:mock.notes,listMeta:mock.meta,assignThread:mock.assign,saveTemplate:mock.save,deleteTemplate:mock.remove,saveNote:mock.saveNote,listLinks:async()=>[],readSignature:async()=>""}));
 import { mailAssign, mailAssigned, mailClientConversations, mailDeleteTemplate, mailSaveNote, mailSaveTemplate, mailWaiting, mailWorkspace } from "./kca-actions";
 beforeEach(() => {vi.resetAllMocks();mock.auth.mockResolvedValue({email:"staff@example.com"});mock.account.mockResolvedValue({});mock.templates.mockResolvedValue([]);mock.notes.mockResolvedValue([]);mock.meta.mockResolvedValue([]);});
 describe("private KCA mail actions",() => {
@@ -22,6 +22,6 @@ describe("private KCA mail actions",() => {
   it("never trusts a claimed owner and delegates the authenticated actor",async () => {
     mock.assign.mockResolvedValue({assigned_email:"staff@example.com"});
     await mailAssign("a","Subject","staff@example.com");
-    expect(mock.assign).toHaveBeenCalledWith("staff@example.com","a","Subject","staff@example.com");
+    expect(mock.assign).toHaveBeenCalledWith("staff@example.com","a","Subject","staff@example.com",undefined);
   });
 });
