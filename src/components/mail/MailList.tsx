@@ -37,8 +37,9 @@ export default function MailList({items, selected, sentFolder, inbox, loading, e
   business?:(m:MessageRow)=>string; assignment?:(m:MessageRow)=>string; waitingKeys?:Set<string>; empty?:{title:string;detail?:string};
   party?:Party; returned?:(m:MessageRow)=>boolean; marks?:(m:MessageRow)=>RowMarks; now?:number;
 }) {
+  const olderButton = hasMore && <button type="button" className="btn line mail-more" onClick={onMore} disabled={loading}>{loading ? "Loading" : "Show older"}</button>;
   if(error && !items.length) return <div className="empty-state" role="alert"><div><p>{error}</p><button type="button" className="btn line" onClick={onRetry}>Try again</button></div></div>;
-  if(!items.length) return loading ? <div className="list-scroll" aria-label="Loading mail" aria-busy="true">{Array.from({length:6},(_,i)=><div key={i} className="mg-mail-skeleton"><span/><span/><span/></div>)}</div> : <div className="empty-state"><div><b>{empty?.title ?? "No conversations"}</b>{empty?.detail && <p>{empty.detail}</p>}</div></div>;
+  if(!items.length) return loading ? <div className="list-scroll" aria-label="Loading mail" aria-busy="true">{Array.from({length:6},(_,i)=><div key={i} className="mg-mail-skeleton"><span/><span/><span/></div>)}</div> : <div className="empty-state"><div><b>{hasMore ? "No matches on this page" : empty?.title ?? "No conversations"}</b>{hasMore ? olderButton : empty?.detail && <p>{empty.detail}</p>}</div></div>;
   const now=clock ? new Date(clock) : new Date(), ordered=listGroups(items,{inbox,waitingKeys,party,returned,now});
   return <div className="list-scroll" aria-busy={loading}>{ordered.map(([group,rows])=><section key={group} aria-label={group}><h3 className="group-h"><span>{group}</span><span className="mono">{rows.length}</span></h3>{rows.map((m)=>{
     const person=sentFolder ? m.to[0] ? senderName(m.to[0]) : "No recipient" : senderName(m.from), key=rowKey(m);
@@ -72,5 +73,5 @@ export default function MailList({items, selected, sentFolder, inbox, loading, e
       </button>
       {onAct&&<div className="row-tools" role="group" aria-label="Quick actions">{([["archive","Archive"],[m.flagged ? "unstar" : "star",m.flagged ? "Remove star" : "Star"],["unread","Mark unread"]] as [MailAction,string][]).map(([action,label])=><button key={action} type="button" aria-label={`${label}: ${m.subject}`} onClick={()=>onAct(m,action)}><MailIcon name={action==="unstar" ? "star" : action} size="sm"/></button>)}</div>}
     </div>;
-  })}</section>)}{error&&<p className="alert" role="alert">{error}</p>}{hasMore&&<button type="button" className="btn line mail-more" onClick={onMore} disabled={loading}>{loading ? "Loading" : "Show older"}</button>}</div>;
+  })}</section>)}{error&&<p className="alert" role="alert">{error}</p>}{olderButton}</div>;
 }

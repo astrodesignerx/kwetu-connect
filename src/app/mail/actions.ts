@@ -257,7 +257,10 @@ export async function mailThread(accountId: string, mailbox: string, uid: number
         const lock = await c.getMailboxLock(path);
         try {
           const found = key ? ((await c.search({ subject: key }, { uid: true })) || []) : [];
-          const uids = [...new Set(path === folder ? [opened, ...found] : found)].sort((a, b) => b - a).slice(0, 30);
+          const recent = found.sort((a, b) => b - a);
+          const uids = path === folder
+            ? [opened, ...recent.filter((u) => u !== opened).slice(0, 29)]
+            : recent.slice(0, 30);
           if (!uids.length) continue;
           for await (const m of c.fetch(uids.join(","), { uid: true, flags: true, source: true }, { uid: true })) {
             if (!m.source) continue;
@@ -273,7 +276,14 @@ export async function mailThread(accountId: string, mailbox: string, uid: number
       }
       const openedMessage = out.find((m) => m.mailbox === folder && m.uid === opened);
       if (!openedMessage) throw new MailError("That message is no longer there.");
-      return sameConversation(openedMessage, out, account.email).sort((a, b) => (a.date ?? "").localeCompare(b.date ?? "")).slice(-12);
+      const conversation = sameConversation(openedMessage, out, account.email);
+      const newest = (a: ThreadMessage, b: ThreadMessage) => (b.date ?? "").localeCompare(a.date ?? "") || b.uid - a.uid;
+      const keep = (path: string) => {
+        const rows = conversation.filter((m) => m.mailbox === path);
+        return path === folder ? [openedMessage, ...rows.filter((m) => m.uid !== opened).sort(newest).slice(0, 11)] : rows.sort(newest).slice(0, 12);
+      };
+      const kept = sent && sent !== folder ? [...keep(folder), ...keep(sent)] : keep(folder);
+      return kept.sort((a, b) => (a.date ?? "").localeCompare(b.date ?? "") || a.uid - b.uid);
     });
   });
 }

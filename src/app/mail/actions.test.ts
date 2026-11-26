@@ -40,8 +40,9 @@ function fakeImap(messages: { uid: number; subject: string; seen?: boolean }[] =
     status: async () => ({ unseen: 1 }),
     getMailboxLock: async (path: string) => { calls.push(["lock", path]); return { release: () => undefined }; },
     search: async (q: unknown) => { calls.push(["search", q]); return messages.map((m) => m.uid); },
-    fetch: async function* () {
-      for (const m of messages) yield {
+    fetch: async function* (range: string, _fields: unknown, options: {uid:boolean}) {
+      const requested = options.uid ? new Set(range.split(",").map(Number)) : null;
+      for (const m of messages.filter((m) => !requested || requested.has(m.uid))) yield {
         uid: m.uid, flags: new Set(m.seen ? ["\\Seen"] : []), internalDate: new Date("2026-11-17T06:00:00Z"),
         envelope: { subject: m.subject, from: [{ name: "Brian", address: "brian@client.test" }], to: [{ name: "", address: "sales@example.test" }], date: new Date("2026-11-17T06:00:00Z"), messageId: `<${m.uid}@client.test>` },
         bodyStructure: {}, source: Buffer.from(`From: Brian <brian@client.test>\r\nSubject: ${m.subject}\r\nMessage-ID: <${m.uid}@client.test>\r\n\r\nHello ${m.uid}`),
@@ -132,6 +133,17 @@ describe("reading and acting on mail", () => {
     if (!result.ok) throw new Error(result.error);
     expect(result.data.map((m) => m.mailbox)).toEqual(["INBOX", "INBOX.Sent"]);
     expect(imap.calls).toContainEqual(["flag", "9", ["\\Seen"], { uid: true }]);
+  });
+
+  it("keeps the opened message in a bounded thread with many newer replies", async () => {
+    const account = await connected();
+    fakeImap(Array.from({length:20}, (_,i)=>({uid:i+1, subject:"Quote"})));
+    const result = await mailThread(account.id, "INBOX", 1, "Quote");
+    if (!result.ok) throw new Error(result.error);
+    const inbox = result.data.filter((m)=>m.mailbox==="INBOX");
+    expect(inbox).toHaveLength(12);
+    expect(inbox.map((m)=>m.uid)).toEqual([1, ...Array.from({length:11}, (_,i)=>10+i)]);
+    expect(await mailThread(account.id, "INBOX", 99, "Quote")).toMatchObject({ok:false, error:"That message is no longer there."});
   });
 
   it("moves to the folder with that job, and refuses actions and folders it does not know", async () => {

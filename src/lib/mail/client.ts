@@ -180,6 +180,7 @@ export interface ParsedMessage {
   references: string[];
   subject: string;
   from: Address[];
+  replyTo?: Address[];
   to: Address[];
   cc: Address[];
   date: string | null;
@@ -206,6 +207,7 @@ export async function parseSource(uid: number, source: Buffer): Promise<ParsedMe
     references: Array.isArray(m.references) ? m.references : m.references ? [m.references] : [],
     subject: m.subject ?? "(no subject)",
     from: toAddresses(m.from),
+    replyTo: toAddresses(m.replyTo),
     to: toAddresses(m.to),
     cc: toAddresses(m.cc),
     date: m.date ? m.date.toISOString() : null,

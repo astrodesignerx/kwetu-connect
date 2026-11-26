@@ -20,7 +20,7 @@ import MailSettings from "./MailSettings";
 import MailIcon, {KcaMark} from "./MailIcon";
 import MailTheme from "./MailTheme";
 import { mailRequest } from "./mail-request";
-import { checkedAgo, initials, listTime, quoteBlock, replySubject, senderName, shortWhen, splitAddresses } from "./mail-format";
+import { checkedAgo, initials, listTime, quoteBlock, replyRecipients, replySubject, senderName, shortWhen, splitAddresses } from "./mail-format";
 import { ClientsView, Inspector, MorningBrief, TemplatesView, type FollowUpResult, type WaitingResult, type Workspace } from "./KcaPanels";
 import { MailModal, SearchPalette, ShortcutsSheet, type PaletteItem } from "./MailOverlay";
 import { shortcut } from "./shortcuts";
@@ -31,6 +31,8 @@ const SPECIAL:Partial<Record<View,Special>>={Inbox:"inbox",Sent:"sent",Archive:"
 const MOVES=["archive","trash","spam","inbox"] as const;
 type Move=typeof MOVES[number];
 type Picked={accountId:string;row:MessageRow};
+type MailScope={accountId:string;view:View;folder:string;search:string;filter:string};
+type MailPage={scope:MailScope;items:ConversationRow[];total:number;error:string|null};
 type Toast={id:number;text:string;accessible?:string;undo?:()=>void|Promise<void>};
 const newestFirst=(a:MessageRow,b:MessageRow)=>(b.date??"").localeCompare(a.date??"");
 const WEEK=7*86_400_000;
@@ -38,7 +40,7 @@ const daysFromNow=(days:number)=>new Date(Date.now()+days*86_400_000).toISOStrin
 export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",initialView="Inbox"}:{initialAccounts:AccountView[];initialQuery:string;demo?:boolean;me?:string;initialView?:View}) {
   const [accounts,setAccounts]=useState(initialAccounts),[accountId,setAccountId]=useState(initialAccounts[0]?.id??""),[view,setView]=useState<View>(initialView);
   const [boxes,setBoxes]=useState<MailboxInfo[]>([]),[workspace,setWorkspace]=useState<Workspace|null>(null),[workspaceError,setWorkspaceError]=useState("");
-  const [list,setList]=useState<{items:MessageRow[];total:number;error:string|null}>({items:[],total:0,error:null}),[loading,setLoading]=useState(true),[tick,setTick]=useState(0);
+  const [page,setPage]=useState<MailPage|null>(null),[tick,setTick]=useState(0);
   const [waiting,setWaiting]=useState<WaitingResult|null>(null),[followUps,setFollowUps]=useState<FollowUpResult|null>(null),[unread,setUnread]=useState(initialAccounts[0]?.last_unread_count??0),[checking,setChecking]=useState(true),[syncError,setSyncError]=useState("");
   const [picked,setPicked]=useState<Picked|null>(null),[thread,setThread]=useState<{messages:ThreadMessage[];loading:boolean;error:string|null}>({messages:[],loading:false,error:null});
   const [saved,setSaved]=useState<SavedDraft[]>([]),[draftsState,setDraftsState]=useState<{loading:boolean;error:string|null}>({loading:true,error:null}),[draftsTick,setDraftsTick]=useState(0);
@@ -46,12 +48,20 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
   const [clientId,setClientId]=useState(""),[inspector,setInspector]=useState(false),[briefOpen,setBriefOpen]=useState(false),[palette,setPalette]=useState(false),[help,setHelp]=useState(false);
   const [draft,setDraft]=useState<Draft|null>(null),[toast,setToast]=useState<Toast|null>(null),[busy,setBusy]=useState(false),[clock,setClock]=useState(()=>Date.now());
   const [signingOut, startSignOut] = useTransition();
-  const compose=useRef<MailComposeHandle>(null),afterClose=useRef<(()=>void)|null>(null),openSequence=useRef(0),mutation=useRef(false),toastTimer=useRef<ReturnType<typeof setTimeout>|null>(null),anchor=useRef<string|null>(null),known=useRef({unread,accountId});
+  const compose=useRef<MailComposeHandle>(null),afterClose=useRef<(()=>void)|null>(null),openSequence=useRef(0),listVersion=useRef(0),mutation=useRef(false),toastTimer=useRef<ReturnType<typeof setTimeout>|null>(null),anchor=useRef<string|null>(null),known=useRef({unread,accountId});
   const account=accounts.find((a)=>a.id===accountId),selected=picked?.row??null,special=SPECIAL[view]??"inbox";
   const folder=view==="Starred"?"__starred__":boxes.find((b)=>b.special===special)?.path??(special==="inbox"?"INBOX":"");
   const nonMail=["Clients","Templates","Mailboxes"].includes(view),setup=!accounts.length;
+  const scope=useMemo<MailScope>(()=>({accountId,view,folder,search,filter}),[accountId,view,folder,search,filter]);
+  const loading=page?.scope!==scope;
+  const list=page?.scope===scope?page:{items:[],total:0,error:null};
   const showInspector = selected && inspector && workspace && !thread.loading;
-  useEffect(()=>{const wide=matchMedia("(min-width: 1100px)"),fit=()=>setInspector(wide.matches),timer=setTimeout(fit,0);wide.addEventListener("change",fit);return()=>{clearTimeout(timer);wide.removeEventListener("change",fit);};},[]);
+  useEffect(()=>{
+    const wide=typeof matchMedia==="function"?matchMedia("(min-width: 1100px)"):null;
+    const fit=()=>setInspector(wide?wide.matches:window.innerWidth>=1100),timer=setTimeout(fit,0);
+    wide?.addEventListener?.("change",fit);
+    return()=>{clearTimeout(timer);wide?.removeEventListener?.("change",fit);};
+  },[]);
   useEffect(()=>()=>{if(toastTimer.current)clearTimeout(toastTimer.current);},[]);
   useEffect(()=>{const timer=setInterval(()=>setClock(Date.now()),30_000);return()=>clearInterval(timer);},[]);
   function notify(text:string,undo?:Toast["undo"],accessible?:string) {
@@ -63,8 +73,13 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
   function closeDraft(){setDraft(null);setDraftsTick((n)=>n+1);const next=afterClose.current;afterClose.current=null;next?.();}
   function withDraftClosed(fn:()=>void){if(draft){afterClose.current=fn;compose.current?.close();}else fn();}
   function navigate(next:View){withDraftClosed(()=>{openSequence.current++;setPicked(null);setView(next);setFilter("all");setSearch("");setSelectedKeys([]);setBriefOpen(false);});}
-  function changeAccount(id:string){withDraftClosed(()=>{openSequence.current++;setPicked(null);setAccountId(id);setBoxes([]);setView("Inbox");setSearch("");setFilter("all");setSelectedKeys([]);});}
-  function updatedAccounts(rows:AccountView[]){setAccounts(rows);if(!rows.some((a)=>a.id===accountId)){setAccountId(rows[0]?.id??"");setPicked(null);}setTick((n)=>n+1);}
+  function selectMailbox(id:string) {
+    if (id === accountId) return;
+    setAccountId(id); setBoxes([]); setSelectedKeys([]); setSaved([]); setDraftsState({loading:true,error:null}); setWorkspace(null); setWorkspaceError(""); setSyncError("");
+    setUnread(accounts.find((a)=>a.id===id)?.last_unread_count ?? 0); setChecking(true);
+  }
+  function changeAccount(id:string){withDraftClosed(()=>{openSequence.current++;setPicked(null);selectMailbox(id);setView("Inbox");setSearch("");setFilter("all");setSelectedKeys([]);});}
+  function updatedAccounts(rows:AccountView[]){setAccounts(rows);if(!rows.some((a)=>a.id===accountId)){openSequence.current++;selectMailbox(rows[0]?.id??"");setPicked(null);}setTick((n)=>n+1);}
 
   /* Loading */
   useEffect(()=>{
@@ -79,12 +94,23 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
   useEffect(()=>{if(!accountId)return;let live=true;void mailRequest(mailWaiting()).then((r)=>{if(live)setWaiting(r);});void mailRequest(mailFollowUps()).then((r)=>{if(live)setFollowUps(r);});return()=>{live=false;};},[accountId,tick]);
   // Drafts are read on their own, so the list can mark conversations with a draft and a reply can resume one.
   useEffect(()=>{if(!accountId)return;let live=true;void mailRequest(mailDrafts(accountId)).then((r)=>{if(!live)return;if(r.ok)setSaved(r.data);setDraftsState({loading:false,error:r.ok?null:r.error});});return()=>{live=false;};},[accountId,tick,draftsTick]);
-  useEffect(()=>{if(!accountId||nonMail||view==="Drafts")return;let live=true;queueMicrotask(()=>{if(live)setLoading(true);});
-    if(view==="Assigned")void mailRequest(mailAssigned()).then((r)=>{if(live){setList(r.ok?{items:r.data.items,total:r.data.items.length,error:r.data.errors.join(" ")||(r.data.partial?"Some conversations could not be read. Results are partial.":null)}:{items:[],total:0,error:r.error});setLoading(false);}});
-    else if(folder)void mailRequest(mailList(accountId,folder,{text:search,unread:filter==="unread",flagged:view==="Starred"||filter==="starred"})).then((r)=>{if(live){setList(r.ok?{...r.data,error:null}:{items:[],total:0,error:r.error});setLoading(false);}});
-    else queueMicrotask(()=>{if(live)setLoading(false);});
+  useEffect(()=>{
+    if(!scope.accountId||nonMail||scope.view==="Drafts")return;
+    let live=true;
+    const version=++listVersion.current;
+    const empty:MailPage={scope,items:[],total:0,error:null};
+    async function load() {
+      if(scope.view==="Assigned"){
+        const r=await mailRequest(mailAssigned());
+        if(live&&listVersion.current===version)setPage(r.ok?{scope,items:r.data.items,total:r.data.items.length,error:r.data.errors.join(" ")||(r.data.partial?"Some conversations could not be read. Results are partial.":null)}:{...empty,error:r.error});
+      }else if(scope.folder){
+        const r=await mailRequest(mailList(scope.accountId,scope.folder,{text:scope.search,unread:scope.filter==="unread",flagged:scope.view==="Starred"||scope.filter==="starred"}));
+        if(live&&listVersion.current===version)setPage(r.ok?{scope,total:r.data.total,items:r.data.items.map((row)=>({...row,accountId:scope.accountId})),error:null}:{...empty,error:r.error});
+      }
+    }
+    void load();
     return()=>{live=false;};
-  },[accountId,view,folder,search,filter,tick,nonMail]);
+  },[scope,tick,nonMail]);
   useEffect(()=>{const refresh=()=>{if(document.visibilityState==="visible")setTick((n)=>n+1);};const timer=setInterval(refresh,120000);document.addEventListener("visibilitychange",refresh);return()=>{clearInterval(timer);document.removeEventListener("visibilitychange",refresh);};},[]);
   // The background check updates every mailbox every 5 minutes. Reading its result is cheap, so a hidden tab
   // keeps its title count current, and a visible one reloads when new mail has arrived.
@@ -120,7 +146,7 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
   const waitRows=waiting?.ok?waiting.data.items:[],quietRows=followUps?.ok?followUps.data.items:[];
   const waits=(row:MessageRow)=>waitRows.some((w)=>w.accountId===rowAccount(row)&&w.mailbox===row.mailbox&&w.uid===row.uid);
   const inbox=view==="Inbox";
-  const visibleItems=list.items.filter((r)=>(filter!=="waiting"||waits(r))&&(filter!=="unread"||!r.seen)&&(!inbox||(filter==="snoozed")===!!snoozedUntil(r)));
+  const visibleItems=list.items.filter((r)=>(filter!=="waiting"||waits(r))&&(filter!=="unread"||!r.seen)&&(filter!=="starred"||r.flagged)&&(!inbox||(filter==="snoozed")===!!snoozedUntil(r)));
   const waitingKeys=new Set(visibleItems.filter(waits).map(rowKey));
   // J, K and "open the next waiting one" follow the list exactly as it is shown: one row per conversation, in its groups.
   const conversations=listGroups(visibleItems,{inbox,waitingKeys,party:rowParty,returned,now:new Date(clock)}).flatMap(([,rows])=>rows);
@@ -136,7 +162,7 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
   const findMatch=useMemo(()=>directory?matchIndex(directory,links):null,[directory,links]);
   const match=useMemo(()=>findMatch?.({subject:thread.messages.map((m)=>m.subject).join("\n")||selected?.subject||"",text:thread.messages.map((m)=>m.text).join("\n"),html:thread.messages.map((m)=>m.html??"").join("\n"),addresses:thread.messages.length?thread.messages.flatMap((m)=>[...m.from,...m.to,...m.cc].map((a)=>a.address)):selected?[selected.from.address,...selected.to.map((a)=>a.address),...(selected.cc??[]).map((a)=>a.address)]:[]})??{client:null,booking:null,by:null},[findMatch,selected,thread.messages]);
   const selectedMeta=selected?metaOf(selected):undefined;
-  const latest=thread.messages.at(-1),done=!!latest&&selectedMeta?.done_message_id===messageIdentity(latest);
+  const latest=selected?thread.messages.at(-1):undefined,done=!!latest&&selectedMeta?.done_message_id===messageIdentity(latest);
   const noReply=!!selected&&quietRows.some((r)=>sameConversation(r,selected));
   const newEmailPrimary = !!account && !draft && !(selected && latest) && !(view === "Clients" && clientId);
   const rowBusiness = (row: MessageRow) => {
@@ -147,49 +173,50 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
 
   /* Opening and replying */
   async function openRaw(row:MessageRow,replyNow=false){
-    const id=rowAccount(row),sequence=++openSequence.current;setAccountId(id);if(nonMail||view==="Drafts")setView("Inbox");setPicked({accountId:id,row});setBriefOpen(false);setDraft(null);setThread({messages:[],loading:true,error:null});
+    const id=rowAccount(row),sequence=++openSequence.current,openScope=scope;
+    selectMailbox(id);if(nonMail||view==="Drafts")setView("Inbox");setPicked({accountId:id,row});setBriefOpen(false);setDraft(null);setThread({messages:[],loading:true,error:null});
     if(returned(row)){const p=rowParty(row);void mailRequest(mailSnooze(id,row.subject,p,null)).then((r)=>{if(r.ok)patchMeta(r.data);});}
     const r=await mailRequest(mailThread(id,row.mailbox,row.uid,row.subject));if(sequence!==openSequence.current)return;
     setThread(r.ok?{messages:r.data,loading:false,error:null}:{messages:[],loading:false,error:r.error});
     if(r.ok){
       setPicked({accountId:id,row:{...row,seen:true}});
-      if(!row.seen&&row.mailbox===(boxes.find((b)=>b.special==="inbox")?.path??"INBOX"))setUnread((n)=>Math.max(0,n-1));
-      setList((l)=>({...l,items:l.items.map((m)=>m.uid===row.uid&&m.mailbox===row.mailbox?{...m,seen:true}:m)}));
+      if(!row.seen&&row.mailbox===(boxes.find((b)=>b.special==="inbox")?.path??"INBOX")&&id===accountId)setUnread((n)=>Math.max(0,n-1));
+      setPage((old)=>old?.scope===openScope?{...old,items:old.items.map((m)=>rowAccount(m)===id&&m.uid===row.uid&&m.mailbox===row.mailbox?{...m,seen:true}:m)}:old);
       if(replyNow&&r.data.length)reply("reply",r.data.at(-1)!,"",id);
     }
   }
   function open(row:MessageRow,replyNow=false){withDraftClosed(()=>{void openRaw(row,replyNow);});}
-  function draftFor(kind:ReplyKind,m:ThreadMessage):Draft {
-    const address=account?.email.toLowerCase(),sender=m.from[0]?.address??"",others=[...new Set([...m.to,...m.cc].map((a)=>a.address).filter((a)=>a&&a.toLowerCase()!==address&&a.toLowerCase()!==sender.toLowerCase()))];
-    return {title:kind==="forward"?"Forward":kind==="replyAll"?"Reply all":"Reply",to:kind==="forward"?"":sender.toLowerCase()===address?m.to.map((a)=>a.address).join(", "):sender,cc:kind==="replyAll"?others.join(", "):"",subject:replySubject(m.subject,kind==="forward"?"forward":"reply"),quoted:quoteBlock(m),inReplyTo:kind==="forward"?null:m.messageId,references:kind==="forward"?[]:[...m.references,...(m.messageId?[m.messageId]:[])].slice(-20),answers:kind==="forward"?undefined:{mailbox:m.mailbox,uid:m.uid}};
+  function draftFor(kind:ReplyKind,m:ThreadMessage,id=accountId):Draft {
+    const recipients = replyRecipients(kind, m, accountEmail(id));
+    return {title:kind==="forward"?"Forward":kind==="replyAll"?"Reply all":"Reply",...recipients,subject:replySubject(m.subject,kind==="forward"?"forward":"reply"),quoted:quoteBlock(m),inReplyTo:kind==="forward"?null:m.messageId,references:kind==="forward"?[]:[...m.references,...(m.messageId?[m.messageId]:[])].slice(-20),answers:kind==="forward"?undefined:{mailbox:m.mailbox,uid:m.uid}};
   }
   /** A saved draft for this conversation, so a second R continues it instead of starting over. */
   function savedReply(kind:ReplyKind,m:ThreadMessage,id=accountId){
     const key=id+":"+conversationKey(m.subject,partyOf(m,accountEmail(id)));
     return saved.find((d)=>d.send_state==="draft"&&(kind==="forward")===(d.data.title==="Forward")&&draftKey(d)===key);
   }
-  function reply(kind:ReplyKind,m:ThreadMessage,text="",id=accountId){
+  function reply(kind:ReplyKind,m:ThreadMessage,text="",id=picked?.accountId??accountId){
     if(draft){compose.current?.insert(text);return;}
-    setAccountId(id);
+    selectMailbox(id);
     const resume=savedReply(kind,m,id);
     if(resume){setDraft({...resume.data,saved:resume,body:text?[resume.data.body.trimEnd(),text].filter(Boolean).join("\n\n"):resume.data.body});return;}
-    setDraft({...draftFor(kind,m),body:text});
+    setDraft({...draftFor(kind,m,id),body:text});
   }
   function replyText(text:string){if(draft)compose.current?.insert(text);else if(latest)reply("reply",latest,text);}
   function nextWaiting(row:MessageRow){const at=conversations.findIndex((r)=>sameConversation(r,row));return [...conversations.slice(at+1),...conversations.slice(0,Math.max(0,at))].find((r)=>!sameConversation(r,row)&&waits(r));}
   function leave(row:MessageRow){const next=nextWaiting(row);if(next)void openRaw(next);else{setPicked(null);openSequence.current++;}return next;}
 
   /* Acting on conversations. The list changes at once; the mail server catches up, and a failure puts it back. */
-  function patchRows(hit:(r:MessageRow)=>boolean,patch:Partial<MessageRow>){
-    setList((l)=>({...l,items:l.items.map((r)=>hit(r)?{...r,...patch}:r)}));
+  function patchRows(hit:(r:MessageRow)=>boolean,patch:Partial<MessageRow>,targetScope=scope){
+    setPage((old)=>old?.scope===targetScope?{...old,items:old.items.map((r)=>hit(r)?{...r,...patch}:r)}:old);
     setPicked((p)=>p&&hit(p.row)?{...p,row:{...p.row,...patch}}:p);
   }
   async function moveConversation(row:MessageRow,action:Move){
-    const id=rowAccount(row),inConversation=(r:MessageRow)=>sameConversation(r,row)&&r.mailbox===row.mailbox;
+    const id=rowAccount(row),moveScope=scope,inConversation=(r:MessageRow)=>sameConversation(r,row)&&r.mailbox===row.mailbox;
     const isOpen=!!selected&&picked?.accountId===id&&sameConversation(selected,row);
     const removed=list.items.filter(inConversation);
     const uids=[...new Set([row.uid,...removed.map((r)=>r.uid),...(isOpen?thread.messages.filter((m)=>m.mailbox===row.mailbox).map((m)=>m.uid):[])])];
-    setList((l)=>({...l,items:l.items.filter((r)=>!inConversation(r)),total:Math.max(0,l.total-removed.length)}));
+    setPage((old)=>old?.scope===moveScope?{...old,items:old.items.filter((r)=>!inConversation(r)),total:Math.max(0,old.total-removed.length)}:old);
     setSelectedKeys((keys)=>keys.filter((key)=>!removed.some((r)=>rowKey(r)===key)));
     const next=isOpen?leave(row):undefined;
     const pending=mailRequest(mailMove(id,row.mailbox,uids,action));
@@ -201,18 +228,18 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
       if(restored.ok){const hit=restored.data.items.find((m)=>m.messageId===row.messageId)||restored.data.items.find((m)=>sameConversation({...m,accountId:id} as ConversationRow,row));if(hit)void openRaw({...hit,accountId:id} as ConversationRow);}
     });
     const moved=await pending;
-    if(!moved.ok){setList((l)=>({...l,items:[...l.items,...removed.filter((r)=>!l.items.some((x)=>rowKey(x)===rowKey(r)))].sort(newestFirst),total:l.total+removed.length}));notify(moved.error);return;}
+    if(!moved.ok){setPage((old)=>old?.scope===moveScope?{...old,items:[...old.items,...removed.filter((r)=>!old.items.some((x)=>rowKey(x)===rowKey(r)))].sort(newestFirst),total:old.total+removed.length}:old);notify(moved.error);return;}
     setTick((n)=>n+1);
   }
   async function actRow(row:MessageRow,action:MailAction){
     if((MOVES as readonly string[]).includes(action))return moveConversation(row,action as Move);
-    const id=rowAccount(row),hit=(r:MessageRow)=>rowAccount(r)===id&&r.mailbox===row.mailbox&&r.uid===row.uid;
+    const id=rowAccount(row),actScope=scope,hit=(r:MessageRow)=>rowAccount(r)===id&&r.mailbox===row.mailbox&&r.uid===row.uid;
     const patch:Partial<MessageRow>=action==="star"?{flagged:true}:action==="unstar"?{flagged:false}:{seen:action==="read"};
     const before:Partial<MessageRow>={flagged:row.flagged,seen:row.seen},inInbox=row.mailbox===(boxes.find((b)=>b.special==="inbox")?.path??"INBOX")&&id===accountId;
     const change=action==="unread"&&row.seen?1:action==="read"&&!row.seen?-1:0;
-    patchRows(hit,patch);if(inInbox&&change)setUnread((n)=>Math.max(0,n+change));
+    patchRows(hit,patch,actScope);if(inInbox&&change)setUnread((n)=>Math.max(0,n+change));
     const r=await mailRequest(mailAct(id,row.mailbox,[row.uid],action));
-    if(!r.ok){patchRows(hit,before);if(inInbox&&change)setUnread((n)=>Math.max(0,n-change));notify(r.error);return;}
+    if(!r.ok){patchRows(hit,before,actScope);if(inInbox&&change)setUnread((n)=>Math.max(0,n-change));notify(r.error);return;}
     notify(action==="unread"?"Marked unread":action==="star"?"Starred":action==="unstar"?"Star removed":"Marked read");
   }
   async function markDone(){
@@ -251,26 +278,43 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
   }
   async function bulk(action:"archive"|"read"){
     if(mutation.current)return;mutation.current=true;setBusy(true);
+    const bulkScope=scope,sequence=openSequence.current;
     const chosen=conversations.filter((r)=>selectedKeys.includes(rowKey(r)));
     // Every message of each chosen conversation, so no older message is left behind to take its place.
     const rows=list.items.filter((r)=>chosen.some((c)=>sameConversation(c,r)&&c.mailbox===r.mailbox));
-    const groups=new Map<string,{id:string;folder:string;rows:MessageRow[]}>();
+    const groups=new Map<string,{id:string;folder:string;rows:ConversationRow[]}>();
     for(const row of rows){const id=rowAccount(row),key=id+":"+row.mailbox;const g=groups.get(key)??{id,folder:row.mailbox,rows:[]};g.rows.push(row);groups.set(key,g);}
-    if(action==="archive")setList((l)=>({...l,items:l.items.filter((r)=>!rows.includes(r)),total:Math.max(0,l.total-rows.length)}));else patchRows((r)=>rows.includes(r),{seen:true});
+    if(action==="archive")setPage((old)=>old?.scope===bulkScope?{...old,items:old.items.filter((r)=>!rows.includes(r)),total:Math.max(0,old.total-rows.length)}:old);else patchRows((r)=>rows.includes(r as ConversationRow),{seen:true},bulkScope);
     if(selected&&chosen.some((c)=>sameConversation(c,selected))&&action==="archive"){setPicked(null);openSequence.current++;}
     setSelectedKeys([]);
-    const receipts:MoveReceipt[]=[],failed:MessageRow[]=[];
+    const receipts:MoveReceipt[]=[],failed:ConversationRow[]=[];
     try{
       for(const g of groups.values()){
         const r=action==="archive"?await mailRequest(mailMove(g.id,g.folder,g.rows.map((r)=>r.uid),"archive")):await mailRequest(mailAct(g.id,g.folder,g.rows.map((r)=>r.uid),"read"));
         if(!r.ok)failed.push(...g.rows);else if(action==="archive")receipts.push(r.data as MoveReceipt);
       }
-      if(failed.length){if(action==="archive")setList((l)=>({...l,items:[...l.items,...failed].sort(newestFirst),total:l.total+failed.length}));setSelectedKeys(chosen.filter((c)=>failed.some((f)=>sameConversation(f,c))).map(rowKey));}
+      if(failed.length){
+        if(action==="archive")setPage((old)=>old?.scope===bulkScope?{...old,items:[...old.items,...failed].sort(newestFirst),total:old.total+failed.length}:old);
+        if(openSequence.current===sequence)setSelectedKeys(chosen.filter((c)=>failed.some((f)=>sameConversation(f,c))).map(rowKey));
+      }
       notify(failed.length?`${failed.length} messages could not be updated. They stay selected.`:action==="archive"?`${chosen.length} conversation${chosen.length===1?"":"s"} archived`:"Marked read",receipts.length?async()=>{let errors=0;for(const receipt of receipts){const r=await mailRequest(mailUndoMove(receipt));if(!r.ok)errors++;}if(errors)throw new Error(`Undo failed for ${errors} move${errors===1?"":"s"}. Other moves were restored.`);}:undefined);
       setTick((n)=>n+1);
     }finally{mutation.current=false;setBusy(false);}
   }
-  async function more(){if(busy)return;setBusy(true);const r=await mailRequest(mailList(accountId,folder,{text:search,unread:filter==="unread",flagged:view==="Starred"||filter==="starred"},list.items.length));setBusy(false);if(r.ok)setList((old)=>({items:[...old.items,...r.data.items.filter((m)=>!old.items.some((x)=>rowKey(x)===rowKey(m)))],total:r.data.total,error:null}));else notify(r.error);}
+  async function more(){
+    if(busy||loading)return;
+    const loadScope=scope,version=listVersion.current;
+    setBusy(true);
+    const r=await mailRequest(mailList(loadScope.accountId,loadScope.folder,{text:loadScope.search,unread:loadScope.filter==="unread",flagged:loadScope.view==="Starred"||loadScope.filter==="starred"},list.items.length));
+    setBusy(false);
+    setPage((old)=>{
+      if(old?.scope!==loadScope||listVersion.current!==version)return old;
+      if(!r.ok)return {...old,error:r.error};
+      const keys=new Set(old.items.map(rowKey));
+      const rows=r.data.items.map((row)=>({...row,accountId:loadScope.accountId})).filter((row)=>!keys.has(rowKey(row)));
+      return {...old,items:[...old.items,...rows],total:r.data.total,error:null};
+    });
+  }
   async function deleteSaved(d:SavedDraft){
     if(d.data.uploadIds.length&&!confirm("Delete this draft and its attachments? Attachments cannot be restored."))return;
     setSaved((rows)=>rows.filter((x)=>x.id!==d.id));
@@ -314,7 +358,8 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
   /* Layout */
   const newEmail=(email="")=>withDraftClosed(()=>setDraft({title:"New email",to:email,cc:"",subject:""}));
   const railItem=(name:View,icon:string,phone=true)=><button type="button" key={name} className="rail-item" data-phone={phone?"yes":"no"} aria-current={view===name?"page":undefined} onClick={()=>navigate(name)}><MailIcon name={icon}/><span>{name==="Mailboxes"?"Settings":name}</span>{name==="Inbox"&&unread>0&&<span className="badge">{unread}</span>}{name==="Drafts"&&saved.length>0&&<span className="badge quiet">{saved.length}</span>}</button>;
-  const composeView=draft&&account?<MailCompose ref={compose} key={draft.saved?.id??draft.subject+draft.title} accountId={accountId} from={account.email} draft={draft} signature={workspace?.signature} templates={workspace?.templates} modes={draft.title!=="New email"&&latest?{reply:draftFor("reply",latest),replyAll:draftFor("replyAll",latest),forward:draftFor("forward",latest)}:undefined} onClose={closeDraft} onHold={(cancel)=>notify("Sending in 5 seconds",cancel,"If this page closes before the hold ends, the saved message stays in Drafts unsent.")} onSent={()=>{setDraft(null);setDraftsTick((n)=>n+1);notify(demo?"Saved to sample Sent. No email was delivered.":"Sent");setTick((n)=>n+1);}}/>:null;
+  const replyAccountId=picked?.accountId??accountId;
+  const composeView=draft&&account?<MailCompose ref={compose} key={draft.saved?.id??draft.subject+draft.title} accountId={accountId} from={account.email} draft={draft} signature={workspace?.signature} templates={workspace?.templates} modes={draft.title!=="New email"&&latest?{reply:draftFor("reply",latest,replyAccountId),replyAll:draftFor("replyAll",latest,replyAccountId),forward:draftFor("forward",latest,replyAccountId)}:undefined} onClose={closeDraft} onHold={(cancel)=>notify("Sending in 5 seconds",cancel,"If this page closes before the hold ends, the saved message stays in Drafts unsent.")} onSent={()=>{setDraft(null);setDraftsTick((n)=>n+1);notify(demo?"Saved to sample Sent. No email was delivered.":"Sent");setTick((n)=>n+1);}}/>:null;
   const syncFailed=syncError||account?.last_error,checked=checkedAgo(account?.last_synced_at,new Date(clock));
   const filters=inbox?["all","unread","waiting","starred","snoozed"]:["all","unread","waiting","starred"];
   const resumable=latest?savedReply("reply",latest,picked?.accountId):undefined;
@@ -359,7 +404,7 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
       {setup?<section className="panel main"><div className="setup-wrap"><ConnectMailbox first demo={demo} onConnected={(a)=>updatedAccounts([a])}/></div></section>:view==="Mailboxes"?<MailSettings accounts={accounts} demo={demo} onAccounts={updatedAccounts} onSignature={(id,signature)=>{if(id===accountId)setWorkspace((w)=>w?{...w,signature}:w);}}/>:view==="Clients"?workspace?<ClientsView workspace={workspace} clientId={clientId} onClient={setClientId} onNote={saveNote} onNew={newEmail} onOpen={open}/>:<div className="panel empty-state">{workspaceError||"Loading clients"}</div>:view==="Templates"?workspace?<TemplatesView templates={workspace.templates} onUpdated={()=>setTick((n)=>n+1)}/>:<div className="panel empty-state">{workspaceError||"Loading templates"}</div>:<>
       <section className="panel list" aria-label="Conversations"><div className="list-head"><div className="list-title"><h1>{view==="Assigned"?"Assigned to you":view}</h1><label className="mb-switch"><i className={`dot ${syncError?"warn":""}`}/><span className="sr">Mailbox</span><select aria-label="Mailbox" value={accountId} onChange={(e)=>changeAccount(e.target.value)}>{accounts.map((a)=><option key={a.id} value={a.id}>{a.email}</option>)}</select></label><button type="button" className="list-refresh" title="Refresh mailbox" aria-label="Refresh mailbox" onClick={()=>setTick((n)=>n+1)}><MailIcon name="refresh" size="xs"/></button></div>{search&&<p className="search-note"><span>Results for &ldquo;{search}&rdquo;</span><button type="button" className="link" onClick={()=>setSearch("")}>Clear search</button></p>}
         {view!=="Drafts"&&<div className="filters">{selectedKeys.length?<div className="bulk" role="toolbar" aria-label="Selected conversations"><b>{selectedKeys.length} selected</b>{selectedKeys.length<conversations.length&&<button type="button" className="link" onClick={()=>setSelectedKeys(conversations.map(rowKey))}>Select all {conversations.length}</button>}<span className="bulk-actions"><button type="button" className="btn ghost" disabled={busy} onClick={()=>void bulk("archive")}>Archive</button><button type="button" className="btn ghost" disabled={busy} onClick={()=>void bulk("read")}>Mark read</button><button type="button" className="btn ghost icon" aria-label="Clear selection" onClick={()=>setSelectedKeys([])}><MailIcon name="x" size="xs"/></button></span></div>:<>{conversations.length>1&&<button type="button" className="sel-all" aria-label={`Select all ${conversations.length} conversations`} title="Select all. Shift-click a picture to select a range." onClick={()=>setSelectedKeys(conversations.map(rowKey))}><MailIcon name="check" size="xs"/></button>}<div className="seg" role="group" aria-label="Filter">{filters.map((f)=><button type="button" key={f} aria-pressed={filter===f} onClick={()=>{setFilter(f);setSelectedKeys([]);}}>{f[0].toUpperCase()+f.slice(1)}</button>)}</div></>}</div>}</div>
-      {view==="Drafts"?<div className="list-scroll">{draftsState.loading?<p className="list-end">Loading drafts</p>:draftsState.error?<p role="alert">{draftsState.error}</p>:!saved.length?<div className="empty-state"><div><b>No drafts</b><p>Replies you start and close are kept here until you send or delete them.</p></div></div>:saved.map((r)=><div className="row draft-row" key={r.id}><span className="av"><MailIcon name="drafts" size="sm"/></span><button type="button" className="row-main" onClick={()=>withDraftClosed(()=>setDraft({...r.data,saved:r}))}><span className="row-top"><span className="row-from">{r.data.subject||"(no subject)"}</span><time className="row-time mono">{listTime(r.updated_at)}</time></span><span className="row-snip">{r.data.to?`To ${r.data.to}`:"No recipient"}{r.data.body.trim()?` | ${r.data.body.trim().slice(0,120)}`:""}</span>{r.send_state!=="draft"&&<small>Check Sent before sending again</small>}</button>{r.send_state==="draft"&&<button type="button" className="btn ghost icon draft-del" aria-label={`Delete draft ${r.data.subject||"with no subject"}`} title="Delete draft" onClick={()=>void deleteSaved(r)}><MailIcon name="trash" size="sm"/></button>}</div>)}{!!saved.length&&<p className="list-end">Your personal drafts in this app. Mail-server drafts stay on the mail server.</p>}</div>:!folder&&view!=="Assigned"?<div className="empty-state">{boxes.length?`This mailbox has no ${view} folder.`:"Loading folders"}</div>:<MailList items={visibleItems} selected={selected?rowKey(selected):null} sentFolder={special==="sent"} inbox={inbox} waitingKeys={waitingKeys} loading={loading} error={list.error} hasMore={view!=="Assigned"&&list.items.length<list.total} empty={emptyList} onOpen={open} onMore={()=>void more()} onRetry={()=>setTick((n)=>n+1)} selectedKeys={selectedKeys} onSelect={select} onAct={(r,action)=>void actRow(r,action)} business={rowBusiness} party={rowParty} returned={returned} now={clock} marks={(r)=>({draft:draftKeys.has(conversation(r)),snoozedUntil:filter==="snoozed"?snoozedUntil(r):null})} assignment={(r)=>{const email=metaOf(r)?.assigned_email;return workspace?.people.find((p)=>p.email===email)?.name??email??"";}}/>}
+      {view==="Drafts"?<div className="list-scroll">{draftsState.loading?<p className="list-end">Loading drafts</p>:draftsState.error?<p role="alert">{draftsState.error}</p>:!saved.length?<div className="empty-state"><div><b>No drafts</b><p>Replies you start and close are kept here until you send or delete them.</p></div></div>:saved.map((r)=><div className="row draft-row" key={r.id}><span className="av"><MailIcon name="drafts" size="sm"/></span><button type="button" className="row-main" onClick={()=>withDraftClosed(()=>setDraft({...r.data,saved:r}))}><span className="row-top"><span className="row-from">{r.data.subject||"(no subject)"}</span><time className="row-time mono">{listTime(r.updated_at)}</time></span><span className="row-snip">{r.data.to?`To ${r.data.to}`:"No recipient"}{r.data.body.trim()?` | ${r.data.body.trim().slice(0,120)}`:""}</span>{r.send_state!=="draft"&&<small>Check Sent before sending again</small>}</button>{r.send_state==="draft"&&<button type="button" className="btn ghost icon draft-del" aria-label={`Delete draft ${r.data.subject||"with no subject"}`} title="Delete draft" onClick={()=>void deleteSaved(r)}><MailIcon name="trash" size="sm"/></button>}</div>)}{!!saved.length&&<p className="list-end">Your personal drafts in this app. Mail-server drafts stay on the mail server.</p>}</div>:!folder&&view!=="Assigned"?<div className="empty-state">{syncError || (checking ? "Loading folders" : `This mailbox has no ${view} folder.`)}</div>:<MailList items={visibleItems} selected={selected?rowKey(selected):null} sentFolder={special==="sent"} inbox={inbox} waitingKeys={waitingKeys} loading={loading} error={list.error} hasMore={view!=="Assigned"&&list.items.length<list.total} empty={emptyList} onOpen={open} onMore={()=>void more()} onRetry={()=>setTick((n)=>n+1)} selectedKeys={selectedKeys} onSelect={select} onAct={(r,action)=>void actRow(r,action)} business={rowBusiness} party={rowParty} returned={returned} now={clock} marks={(r)=>({draft:draftKeys.has(conversation(r)),snoozedUntil:filter==="snoozed"?snoozedUntil(r):null})} assignment={(r)=>{const email=metaOf(r)?.assigned_email;return workspace?.people.find((p)=>p.email===email)?.name??email??"";}}/>}
       </section><section className="panel main" aria-label={selected?"Conversation":"Morning brief"}>{!selected?<><button type="button" className="btn ghost back-btn" onClick={()=>setBriefOpen(false)}>Back to list</button><MorningBrief workspace={workspace} waiting={waiting} followUps={followUps} unread={totalUnread} onOpen={open}/></>:<MailReader accountId={picked!.accountId} special={boxes.find((b)=>b.path===selected.mailbox)?.special??special} messages={thread.messages} loading={thread.loading} error={thread.error} flagged={selected.flagged} onAct={(action)=>void actRow(selected,action)} onReply={reply} replyPrimary={!draft} onBack={()=>withDraftClosed(()=>{setPicked(null);openSequence.current++;})} onRetry={()=>open(selected)} onDone={()=>void markDone()} done={done} waiting={waits(selected)} onInspector={()=>setInspector((v)=>!v)} inspector={inspector} bookedSeconds={match.booking?.request.lengthSeconds}
         snoozedUntil={snoozedUntil(selected)} onSnooze={workspace&&picked?.accountId===accountId?(until)=>void snooze(selected,until):undefined}
         remindAt={selectedMeta?.remind_at&&Date.parse(selectedMeta.remind_at)>clock?selectedMeta.remind_at:null} noReply={noReply} onRemind={workspace&&picked?.accountId===accountId&&rowParty(selected)?(days)=>void remind(selected,days):undefined}
