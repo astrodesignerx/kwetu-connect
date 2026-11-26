@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import MailIcon from "./MailIcon";
+import MailIcon, { type MailIconName } from "./MailIcon";
 
 const choices = [
   ["light", "Light"],
@@ -86,7 +86,7 @@ export function MailAppearance({ children, className, initialGraphite }: {
   </Appearance.Provider>;
 }
 
-const icons: Record<Preference, string> = { light: "sun", dark: "moon", graphite: "graphite", system: "system" };
+const icons: Record<Preference, MailIconName> = { light: "sun", dark: "moon", graphite: "graphite", system: "system" };
 
 /** The appearance choices, shown inside the staff account menu. */
 export default function MailTheme() {

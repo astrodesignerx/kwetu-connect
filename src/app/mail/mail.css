@@ -75,11 +75,13 @@
 
 .mail-app .mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
 
-.mail-app .ic { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.mail-app .ic { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
 
-.mail-app .ic.sm { width: 15px; height: 15px; }
+.mail-app .ic.sm { width: 16px; height: 16px; }
 
-.mail-app .ic.xs { width: 13px; height: 13px; }
+.mail-app .ic.xs { width: 14px; height: 14px; }
+
+.mail-app .ic.ic-fill { fill: currentColor; }
 
 .mail-app .list-scroll, .mail-app .main-scroll, .mail-app .insp-scroll, .mail-app .pal-list, .mail-app .stage { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
 
@@ -697,6 +699,8 @@
 .mail-app .alert b { color: var(--bad); }
 
 .mail-app .fine { font-size: 12.5px; color: var(--muted); display: flex; gap: 8px; align-items: flex-start; }
+
+.mail-app .fine .ic { margin-top: 2px; }
 /* Templates */
 .mail-app .tpl-page { padding: 24px 26px; display: flex; flex-direction: column; gap: 12px; animation: rise var(--t3) var(--ease); }
 
@@ -987,7 +991,8 @@ to { transform: scaleX(0); }
 .mail-app .mg-mail-form { display:flex; flex-direction:column; gap:8px; }
 .mail-app .mg-mail-form > input, .mail-app .mg-mail-password input, .mail-app .mg-mail-server-grid input { min-width:0; width:100%; border:1px solid var(--control-line); border-radius:10px; background:var(--bg); height:40px; padding:0 12px; }
 .mail-app .mg-mail-password { display:flex; align-items:center; gap:8px; }
-.mail-app .mg-mail-password button { width:36px; height:36px; flex:none; }
+.mail-app .mg-mail-password button { width:36px; height:36px; flex:none; display:grid; place-items:center; border-radius:8px; color:var(--muted); }
+.mail-app .mg-mail-password button:hover { background:var(--raise); color:var(--fg); }
 .mail-app .mg-mail-servers { margin:6px 0; font-size:12.5px; }
 .mail-app .mg-mail-servers summary { cursor:pointer; }
 .mail-app .mg-mail-server-grid { display:grid; grid-template-columns:minmax(0,1fr) 80px; gap:10px; margin-top:10px; }
@@ -997,7 +1002,7 @@ to { transform: scaleX(0); }
 .mail-app .mg-mail-form-actions > button { border-radius:10px; padding:9px 14px; border:1px solid var(--line); }
 .mail-app .mg-mail-form-actions .mg-primary { background:var(--gold); color:var(--gold-ink); border-color:transparent; }
 .mail-app .mg-mail-note { display:flex; gap:8px; font-size:12px; color:var(--muted); }
-.mail-app .mg-mail-note svg { flex:none; }
+.mail-app .mg-mail-note svg { flex:none; margin-top:2px; }
 .mail-app .mg-eyebrow { display:none; }
 .mail-app .steps { list-style:none; padding:0; margin:6px 0; }
 .mail-app .servers { overflow-wrap:anywhere; }

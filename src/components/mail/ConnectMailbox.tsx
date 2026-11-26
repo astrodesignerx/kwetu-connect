@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useId, useState, useTransition } from "react";
-import { Eye, EyeSlash, LockSimple } from "@phosphor-icons/react";
 import { connectMailbox, mailDiscover, mailServerSettings } from "@/app/mail/actions";
 import { mailRequest } from "./mail-request";
 import MailIcon from "./MailIcon";
@@ -46,7 +45,7 @@ export default function ConnectMailbox({ onConnected, onCancel, first, demo = fa
       <label htmlFor={`${id}-password`}>Password</label>
       <div className="mg-mail-password">
         <input id={`${id}-password`} name="password" type={show ? "text" : "password"} required={!demo} autoComplete="current-password" maxLength={500} />
-        <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? "Hide password" : "Show password"} aria-pressed={show}>{show ? <EyeSlash size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}</button>
+        <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? "Hide password" : "Show password"} aria-pressed={show}><MailIcon name={show ? "eyeslash" : "eye"} size="sm" /></button>
       </div>
       <details className="mg-mail-servers" open={!!account}>
         <summary>Server settings</summary>
@@ -67,6 +66,6 @@ export default function ConnectMailbox({ onConnected, onCancel, first, demo = fa
         {onCancel && <button type="button" className="mg-pill" onClick={onCancel}>Cancel</button>}
       </div>
     </form>
-    <p className="mg-mail-note"><LockSimple size={13} aria-hidden="true" />Connect an address once, then share it with the colleagues who answer it. The password is stored encrypted.</p>
+    <p className="mg-mail-note"><MailIcon name="lock" size="xs" />Connect an address once, then share it with the colleagues who answer it. The password is stored encrypted.</p>
   </section>;
 }

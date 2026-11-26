@@ -3,7 +3,7 @@ import type { MailAction, ThreadMessage } from "@/app/mail/actions";
 import type { Special } from "@/lib/mail/client";
 import MessageFrame from "./MessageFrame";
 import AdvertAttachment from "./AdvertAttachment";
-import MailIcon from "./MailIcon";
+import MailIcon, { type MailIconName } from "./MailIcon";
 import { REMIND_DAYS, fileSize, fullTime, initials, senderName, shortWhen, snoozeChoices } from "./mail-format";
 
 /** Closes the open menu a button sits in. */
@@ -30,13 +30,13 @@ export default function MailReader({ accountId, special, messages, loading, erro
   const latest = messages.at(-1);
   if (error && !latest) return <div className="empty-state" role="alert"><div><p>{error}</p><button type="button" className="btn line" onClick={onRetry}>Try again</button></div></div>;
   if (!latest) return <div className="empty-state" aria-busy={loading}>{loading ? <div className="mg-mail-skeleton mg-mail-skeleton-reader"><span /><span /><span /></div> : <p>Choose a conversation to read it here.</p>}</div>;
-  const button = (icon: string, label: string, action: () => void, key?: string, extra = "") => <button type="button" className={`btn ghost icon ${extra}`} onClick={action} aria-label={label} title={label + (key ? `  ${key}` : "")}><MailIcon name={icon} /></button>;
+  const button = (icon: MailIconName, label: string, action: () => void, key?: string, extra = "", filled = false) => <button type="button" className={`btn ghost icon ${extra}`} onClick={action} aria-label={label} title={label + (key ? `  ${key}` : "")}><MailIcon name={icon} filled={filled} /></button>;
   const message = (m: ThreadMessage) => { const from = m.from[0] ?? {name:"",address:""}; return <div className="mail-message" key={`${m.mailbox}:${m.uid}`}>
     <div className="msg-head"><span className="av">{initials(from.name,from.address)}</span><div className="who"><b>{senderName(from)}</b><span>{from.address} to {m.to.map(senderName).join(", ")}{m.cc.length ? `, copy ${m.cc.map(senderName).join(", ")}` : ""}</span></div><time className="mono" dateTime={m.date ?? undefined}>{fullTime(m.date)}</time></div>
     <MessageFrame html={m.html} text={m.text} remoteContent={m.remoteContent} title={`Message from ${senderName(from)}`} />
     {m.attachments.some((a) => !a.inline) && <div className="atts"><span className="atts-h">{m.attachments.filter((a) => !a.inline).length === 1 ? "1 attachment" : `${m.attachments.filter((a) => !a.inline).length} attachments`}</span><div className="att-row">{m.attachments.filter((a) => !a.inline).map((a) => {
       const href = `/mail/attachment?${new URLSearchParams({account:accountId,mailbox:m.mailbox,uid:String(m.uid),i:String(a.index)})}`;
-      return <div key={a.index} className="mail-file"><a className="att" href={href} download={a.filename}><span className={`att-thumb ${a.contentType.startsWith("image/") ? "img" : ""}`}><MailIcon name={a.contentType.startsWith("video/") ? "play" : "image"} /></span><span><b>{a.filename}</b><span>{fileSize(a.size)}</span></span></a><AdvertAttachment href={href} filename={a.filename} type={a.contentType} size={a.size} seconds={bookedSeconds} /></div>;
+      return <div key={a.index} className="mail-file"><a className="att" href={href} download={a.filename}><span className={`att-thumb ${a.contentType.startsWith("image/") ? "img" : ""}`}><MailIcon name={a.contentType.startsWith("video/") ? "play" : a.contentType.startsWith("image/") ? "image" : "file"} /></span><span><b>{a.filename}</b><span>{fileSize(a.size)}</span></span></a><AdvertAttachment href={href} filename={a.filename} type={a.contentType} size={a.size} seconds={bookedSeconds} /></div>;
     })}</div></div>}
   </div>; };
   return <article className="mail-reader" aria-busy={loading} aria-labelledby="mail-subject">
@@ -46,7 +46,7 @@ export default function MailReader({ accountId, special, messages, loading, erro
       <button type="button" className="btn ghost sm" onClick={onDone} disabled={!onDone || done} aria-label={done ? "Done" : "Mark done"} title="Mark done  D"><MailIcon name="check" size="sm" /><span className="tb-hide-phone">{done ? "Done" : "Mark done"}</span></button>
       <span className="tb-sep tb-hide-phone" />
       {special === "inbox" ? button("archive","Archive",() => onAct("archive"),"E") : special !== "sent" && button("inbox","Move to inbox",() => onAct("inbox"))}
-      {button("star",flagged ? "Remove star" : "Star",() => onAct(flagged ? "unstar" : "star"),"S",flagged ? "tb-star star-on" : "tb-star")}
+      {button("star",flagged ? "Remove star" : "Star",() => onAct(flagged ? "unstar" : "star"),"S",flagged ? "tb-star star-on" : "tb-star",flagged)}
       {onSnooze && special === "inbox" && <SnoozeMenu until={snoozedUntil} onSnooze={onSnooze} />}
       <details className="menu-wrap"><summary className="btn ghost sm" aria-label="More conversation actions">
         <span className="tb-more-label">More</span>
@@ -57,7 +57,7 @@ export default function MailReader({ accountId, special, messages, loading, erro
           event.currentTarget.closest("details")?.removeAttribute("open");
           onAct(flagged ? "unstar" : "star");
         }}>
-          <MailIcon name="star" size="sm" />{flagged ? "Remove star" : "Star"}<kbd>S</kbd>
+          <MailIcon name="star" size="sm" filled={flagged} />{flagged ? "Remove star" : "Star"}<kbd>S</kbd>
         </button>
         {([["replyAll","replyall","Reply all","A"],["forward","forward","Forward","F"]] as const).map(([kind,icon,label,key]) => <button key={kind} type="button" role="menuitem" onClick={(e) => {e.currentTarget.closest("details")?.removeAttribute("open");onReply(kind,latest);}}><MailIcon name={icon} size="sm" />{label}<kbd>{key}</kbd></button>)}
         <button type="button" role="menuitem" onClick={(e) => { closeMenu(e); onAct("unread"); }}><MailIcon name="unread" size="sm" />Mark unread<kbd>U</kbd></button>

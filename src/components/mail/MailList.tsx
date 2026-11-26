@@ -1,6 +1,6 @@
 "use client";
 import type { MessageRow, MailAction } from "@/app/mail/actions";
-import MailIcon from "./MailIcon";
+import MailIcon, { type MailIconName } from "./MailIcon";
 import { conversationKey } from "@/lib/mail/kca";
 import { dayGroup, initials, listTime, senderName, shortWhen, waitingFor } from "./mail-format";
 export const rowKey = (m: Pick<MessageRow,"mailbox"|"uid"> & {accountId?:string}) => `${m.accountId ? m.accountId + ":" : ""}${m.mailbox}:${m.uid}`;
@@ -66,12 +66,12 @@ export default function MailList({items, selected, sentFolder, inbox, loading, e
           {mark.draft && <span className="pill info">Draft</span>}
           {mark.snoozedUntil && <span className="pill mute" aria-label={`Snoozed until ${shortWhen(mark.snoozedUntil)}`}><MailIcon name="snooze" size="xs" />{shortWhen(mark.snoozedUntil)}</span>}
           {m.thread > 1 && <span className="pill mute" aria-hidden="true">{m.thread}</span>}
-          {m.flagged && <span className="pill gold" aria-label="Starred"><MailIcon name="star" size="xs" /></span>}
+          {m.flagged && <span className="pill gold" aria-label="Starred"><MailIcon name="star" size="xs" filled /></span>}
           {waiting && <span className="pill ember" aria-label={`Waiting ${waiting} for a reply`}><MailIcon name="clock" size="xs" />{waiting}</span>}
           {assigned && <span className="assigned-avatar" title={assigned}>{initials(assigned, assigned)}</span>}
         </span>}
       </button>
-      {onAct&&<div className="row-tools" role="group" aria-label="Quick actions">{([["archive","Archive"],[m.flagged ? "unstar" : "star",m.flagged ? "Remove star" : "Star"],["unread","Mark unread"]] as [MailAction,string][]).map(([action,label])=><button key={action} type="button" aria-label={`${label}: ${m.subject}`} onClick={()=>onAct(m,action)}><MailIcon name={action==="unstar" ? "star" : action} size="sm"/></button>)}</div>}
+      {onAct&&<div className="row-tools" role="group" aria-label="Quick actions">{([["archive","archive","Archive"],[m.flagged ? "unstar" : "star","star",m.flagged ? "Remove star" : "Star"],["unread","unread","Mark unread"]] as [MailAction,MailIconName,string][]).map(([action,icon,label])=><button key={action} type="button" className={action==="unstar" ? "star-on" : undefined} aria-label={`${label}: ${m.subject}`} onClick={()=>onAct(m,action)}><MailIcon name={icon} size="sm" filled={action==="unstar"}/></button>)}</div>}
     </div>;
   })}</section>)}{error&&<p className="alert" role="alert">{error}</p>}{olderButton}</div>;
 }

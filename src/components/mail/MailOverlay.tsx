@@ -1,14 +1,14 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import type { ConversationRow } from "@/lib/mail/conversations";
-import MailIcon from "./MailIcon";
+import MailIcon, { type MailIconName } from "./MailIcon";
 import { SHORTCUTS } from "./shortcuts";
 export function MailModal({label,onClose,children,className=""}: {label:string;onClose:()=>void;children:React.ReactNode;className?:string}) {
   const ref=useRef<HTMLDialogElement>(null);
   useEffect(()=>{const el=ref.current;if(el&&!el.open) el.showModal();return ()=>{el?.close();};},[]);
   return <dialog ref={ref} className={`mail-modal ${className}`} aria-label={label} onCancel={(e)=>{e.preventDefault();onClose();}} onClick={(e)=>{if(e.target===e.currentTarget)onClose();}}>{children}</dialog>;
 }
-export type PaletteItem={id:string;group:string;icon:string;label:string;hint:string;run?:()=>void;row?:ConversationRow};
+export type PaletteItem={id:string;group:string;icon:MailIconName;label:string;hint:string;run?:()=>void;row?:ConversationRow};
 export function SearchPalette({items,errors,onClose,onConversation,onSearchMail}: {items:PaletteItem[];errors:string[];onClose:()=>void;onConversation:(row:ConversationRow)=>void;onSearchMail?:(text:string)=>void}) {
   const [query,setQuery]=useState(""),[index,setIndex]=useState(0);
   const words=query.toLowerCase().split(/\s+/).filter(Boolean),text=query.trim();

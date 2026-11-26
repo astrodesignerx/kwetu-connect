@@ -17,7 +17,7 @@ import MailCompose, {type Draft, type MailComposeHandle} from "./MailCompose";
 import MailList, {listGroups, rowKey} from "./MailList";
 import MailReader, {type ReplyKind} from "./MailReader";
 import MailSettings from "./MailSettings";
-import MailIcon, {KcaMark} from "./MailIcon";
+import MailIcon, {KcaMark, type MailIconName} from "./MailIcon";
 import MailTheme from "./MailTheme";
 import { mailRequest } from "./mail-request";
 import { checkedAgo, initials, listTime, quoteBlock, replyRecipients, replySubject, senderName, shortWhen, splitAddresses } from "./mail-format";
@@ -347,17 +347,17 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
   const clients=workspace?.directory?clientsFrom(workspace.directory,workspace.links):[];
   const goTo=(path:string)=>{window.location.assign(path);};
   const paletteItems:PaletteItem[]=[
-    ...recent.map((r)=>({id:`thread-${r.accountId}-${r.mailbox}-${r.uid}`,group:"Conversations",icon:"inbox",label:r.subject,hint:senderName(r.from),row:r})),
-    ...clients.map((c)=>({id:`client-${c.id}`,group:"Clients",icon:"clients",label:c.advertiser.business,hint:c.advertiser.name,run:()=>{navigate("Clients");setClientId(c.id);}})),
-    ...clients.flatMap((c)=>c.bookings.map((b)=>({id:`booking-${b.id}`,group:"Bookings",icon:"calendar",label:`${b.reference} | ${c.advertiser.business}`,hint:b.status,run:()=>goTo(bookingHref(b))}))),
-    ...accounts.map((a)=>({id:`mailbox-${a.id}`,group:"Mailboxes",icon:"inbox",label:`Switch to ${a.email}`,hint:a.last_error??"",run:()=>changeAccount(a.id)})),
-    ...[["Overview",""],["Bookings","/bookings"],["Advert desk","/adverts"],["Schedule","/schedule"],["Settings","/settings"]].map(([label,path])=>({id:`manager-${path}`,group:"Manager",icon:"manager",label:`Open ${label}`,hint:"/manage"+path,run:()=>goTo("/manage"+path)})),
-    {id:"shortcuts",group:"Actions",icon:"key",label:"Keyboard shortcuts",hint:"?",run:()=>setHelp(true)}
+    ...recent.map((r)=>({id:`thread-${r.accountId}-${r.mailbox}-${r.uid}`,group:"Conversations",icon:"inbox" as const,label:r.subject,hint:senderName(r.from),row:r})),
+    ...clients.map((c)=>({id:`client-${c.id}`,group:"Clients",icon:"clients" as const,label:c.advertiser.business,hint:c.advertiser.name,run:()=>{navigate("Clients");setClientId(c.id);}})),
+    ...clients.flatMap((c)=>c.bookings.map((b)=>({id:`booking-${b.id}`,group:"Bookings",icon:"calendar" as const,label:`${b.reference} | ${c.advertiser.business}`,hint:b.status,run:()=>goTo(bookingHref(b))}))),
+    ...accounts.map((a)=>({id:`mailbox-${a.id}`,group:"Mailboxes",icon:"inbox" as const,label:`Switch to ${a.email}`,hint:a.last_error??"",run:()=>changeAccount(a.id)})),
+    ...[["Overview",""],["Bookings","/bookings"],["Advert desk","/adverts"],["Schedule","/schedule"],["Settings","/settings"]].map(([label,path])=>({id:`manager-${path}`,group:"Manager",icon:"manager" as const,label:`Open ${label}`,hint:"/manage"+path,run:()=>goTo("/manage"+path)})),
+    {id:"shortcuts",group:"Actions",icon:"key" as const,label:"Keyboard shortcuts",hint:"?",run:()=>setHelp(true)}
   ];
 
   /* Layout */
   const newEmail=(email="")=>withDraftClosed(()=>setDraft({title:"New email",to:email,cc:"",subject:""}));
-  const railItem=(name:View,icon:string,phone=true)=><button type="button" key={name} className="rail-item" data-phone={phone?"yes":"no"} aria-current={view===name?"page":undefined} onClick={()=>navigate(name)}><MailIcon name={icon}/><span>{name==="Mailboxes"?"Settings":name}</span>{name==="Inbox"&&unread>0&&<span className="badge">{unread}</span>}{name==="Drafts"&&saved.length>0&&<span className="badge quiet">{saved.length}</span>}</button>;
+  const railItem=(name:View,icon:MailIconName,phone=true)=><button type="button" key={name} className="rail-item" data-phone={phone?"yes":"no"} aria-current={view===name?"page":undefined} onClick={()=>navigate(name)}><MailIcon name={icon}/><span>{name==="Mailboxes"?"Settings":name}</span>{name==="Inbox"&&unread>0&&<span className="badge">{unread}</span>}{name==="Drafts"&&saved.length>0&&<span className="badge quiet">{saved.length}</span>}</button>;
   const replyAccountId=picked?.accountId??accountId;
   const composeView=draft&&account?<MailCompose ref={compose} key={draft.saved?.id??draft.subject+draft.title} accountId={accountId} from={account.email} draft={draft} signature={workspace?.signature} templates={workspace?.templates} modes={draft.title!=="New email"&&latest?{reply:draftFor("reply",latest,replyAccountId),replyAll:draftFor("replyAll",latest,replyAccountId),forward:draftFor("forward",latest,replyAccountId)}:undefined} onClose={closeDraft} onHold={(cancel)=>notify("Sending in 5 seconds",cancel,"If this page closes before the hold ends, the saved message stays in Drafts unsent.")} onSent={()=>{setDraft(null);setDraftsTick((n)=>n+1);notify(demo?"Saved to sample Sent. No email was delivered.":"Sent");setTick((n)=>n+1);}}/>:null;
   const syncFailed=syncError||account?.last_error,checked=checkedAgo(account?.last_synced_at,new Date(clock));
@@ -394,7 +394,7 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
             <MailTheme/>
             <hr/>
             <button type="button" disabled={signingOut} onClick={() => withDraftClosed(() => startSignOut(signOut))}>
-              <MailIcon name="left" size="sm"/>{signingOut ? "Signing out..." : "Sign out"}
+              <MailIcon name="signout" size="sm"/>{signingOut ? "Signing out..." : "Sign out"}
             </button>
           </div>
         </details>

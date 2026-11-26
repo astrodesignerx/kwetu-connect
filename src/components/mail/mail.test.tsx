@@ -10,7 +10,9 @@ vi.mock("@/app/mail/kca-actions", () => ({
 }));
 vi.mock("@/app/manage/auth-actions", () => ({ signOut: vi.fn() }));
 
+import ConnectMailbox from "./ConnectMailbox";
 import MailDesk from "./MailDesk";
+import MailIcon from "./MailIcon";
 import MailList from "./MailList";
 import MailReader from "./MailReader";
 import MailTheme, { MailAppearance } from "./MailTheme";
@@ -131,5 +133,105 @@ describe("Mail page", () => {
     const bin = renderToStaticMarkup(<MailReader {...props} special="trash" />);
     expect(bin).toContain("Move to inbox");
     expect(bin).not.toContain("Move to bin");
+  });
+
+  it("renders Lucide icons at aligned sizes with stroke width 1.75 and explicit filled state", () => {
+    const def = renderToStaticMarkup(<MailIcon name="inbox" />);
+    expect(def).toContain("lucide-inbox");
+    expect(def).toContain('width="18"');
+    expect(def).toContain('height="18"');
+    expect(def).toContain('stroke-width="1.75"');
+    expect(def).toContain('aria-hidden="true"');
+    expect(def).not.toContain("ic-fill");
+
+    const sm = renderToStaticMarkup(<MailIcon name="star" size="sm" />);
+    expect(sm).toContain('width="16"');
+    expect(sm).toContain('class="lucide lucide-star ic sm"');
+    expect(sm).not.toContain("ic-fill");
+
+    const xsFilled = renderToStaticMarkup(<MailIcon name="star" size="xs" filled />);
+    expect(xsFilled).toContain('width="14"');
+    expect(xsFilled).toContain('class="lucide lucide-star ic xs ic-fill"');
+  });
+
+  it("uses Lucide icons in MailDesk and ConnectMailbox with semantic Sign out and Shortcuts icons", () => {
+    const desk = renderToStaticMarkup(<MailDesk initialAccounts={[]} initialQuery="" me="staff@example.test" />);
+    expect(desk).toContain("lucide-log-out");
+    expect(desk).not.toContain("lucide-chevron-left");
+    expect(desk).toContain("lucide-keyboard");
+    expect(desk).toContain("lucide-settings");
+    expect(desk).not.toContain('viewBox="0 0 20 20"');
+    expect(desk).not.toContain('viewBox="0 0 256 256"');
+
+    const connect = renderToStaticMarkup(<ConnectMailbox first onConnected={() => undefined} />);
+    expect(connect).toContain("lucide-eye");
+    expect(connect).toContain("lucide-lock");
+    expect(connect).not.toContain('viewBox="0 0 256 256"');
+  });
+
+  it("renders distinct Lucide attachment icons and filled starred states in MailReader", () => {
+    const message: ThreadMessage = {
+      uid: 2,
+      mailbox: "INBOX",
+      messageId: "<2@x>",
+      inReplyTo: null,
+      references: [],
+      subject: "Campaign files",
+      from: [{ name: "Brian", address: "brian@client.test" }],
+      to: [{ name: "", address: "sales@example.test" }],
+      cc: [],
+      date: "2026-11-17T12:00:00Z",
+      html: "<p>Hello</p>",
+      text: "Hello",
+      attachments: [
+        { index: 0, filename: "brief.pdf", size: 2048, contentType: "application/pdf", inline: false },
+        { index: 1, filename: "still.png", size: 4096, contentType: "image/png", inline: false },
+        { index: 2, filename: "spot.mp4", size: 8192, contentType: "video/mp4", inline: false },
+      ],
+      seen: true,
+      flagged: true,
+    };
+    const html = renderToStaticMarkup(
+      <MailReader
+        accountId="a"
+        special="inbox"
+        messages={[message]}
+        loading={false}
+        error={null}
+        flagged
+        onAct={() => undefined}
+        onReply={() => undefined}
+        onBack={() => undefined}
+        onRetry={() => undefined}
+      />,
+    );
+    expect(html).toContain("lucide-file-text");
+    expect(html).toContain("lucide-image");
+    expect(html).toContain("lucide-play");
+    expect(html).toContain("tb-star star-on");
+    expect(html).toContain("lucide-star ic ic-fill");
+    expect(html).toContain("lucide-star ic sm ic-fill");
+  });
+
+  it("renders filled gold stars for flagged rows and quick-action unstar buttons in MailList", () => {
+    const html = renderToStaticMarkup(
+      <MailList
+        items={[row({ uid: 7, flagged: true })]}
+        selected={null}
+        sentFolder={false}
+        inbox={false}
+        loading={false}
+        error={null}
+        hasMore={false}
+        onOpen={() => undefined}
+        onMore={() => undefined}
+        onRetry={() => undefined}
+        onAct={() => undefined}
+      />,
+    );
+    expect(html).toContain('aria-label="Starred"><svg');
+    expect(html).toContain("lucide-star ic xs ic-fill");
+    expect(html).toContain('class="star-on" aria-label="Remove star: Eldoret screen"');
+    expect(html).toContain("lucide-star ic sm ic-fill");
   });
 });
