@@ -13,7 +13,8 @@ const runtime = React as unknown as {
   addTransitionType?: (type: string) => void;
 };
 
-export type MotionType = "mail-view" | "mail-open" | "mail-close";
+/** mail-view: changing view. mail-open: opening a conversation. mail-step: J and K. mail-loaded: a thread arriving. */
+export type MotionType = "mail-view" | "mail-open" | "mail-step" | "mail-loaded";
 
 export function Motion(props: MotionProps) {
   const Native = runtime.ViewTransition;

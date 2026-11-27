@@ -21,10 +21,10 @@ function SnoozeMenu({ until, onSnooze }: { until?: string | null; onSnooze: (unt
 }
 
 export type ReplyKind = "reply" | "replyAll" | "forward";
-export default function MailReader({ accountId, special, messages, loading, error, flagged, onAct, onReply, replyPrimary = true, onBack, onRetry, children, chips, bookedSeconds, onDone, done, waiting, onInspector, inspector, snoozedUntil, onSnooze, remindAt, onRemind, noReply }: {
+export default function MailReader({ accountId, special, messages, loading, error, flagged, onAct, onReply, replyPrimary = true, onBack, onRetry, children, chips, hero, bookedSeconds, onDone, done, waiting, onInspector, inspector, snoozedUntil, onSnooze, remindAt, onRemind, noReply }: {
   accountId: string; special: Special; messages: ThreadMessage[]; loading: boolean; error: string | null; flagged: boolean;
   onAct: (action: MailAction) => void; onReply: (kind: ReplyKind, message: ThreadMessage) => void; onBack: () => void; onRetry: () => void;
-  replyPrimary?: boolean; children?: React.ReactNode; chips?: React.ReactNode; bookedSeconds?: number; onDone?: () => void; done?: boolean; waiting?: boolean; onInspector?: () => void; inspector?: boolean;
+  replyPrimary?: boolean; children?: React.ReactNode; chips?: React.ReactNode; hero?: React.ReactNode; bookedSeconds?: number; onDone?: () => void; done?: boolean; waiting?: boolean; onInspector?: () => void; inspector?: boolean;
   snoozedUntil?: string | null; onSnooze?: (until: string | null) => void; remindAt?: string | null; onRemind?: (days: number | null) => void; noReply?: boolean;
 }) {
   const latest = messages.at(-1);
@@ -70,7 +70,7 @@ export default function MailReader({ accountId, special, messages, loading, erro
     </header>
     <div className="main-scroll"><div className="read"><div className="subj"><h2 id="mail-subject">{latest.subject}</h2>{done ? <span className="pill ok">Done</span> : waiting ? <span className="pill ember">Needs reply</span> : null}
       {noReply ? <span className="pill ember"><MailIcon name="bell" size="xs" />No reply yet</span> : remindAt ? <span className="pill info" title="Listed under No reply yet if nothing arrives by then"><MailIcon name="bell" size="xs" />Reminder {shortWhen(remindAt)}</span> : null}
-      {snoozedUntil && <span className="pill mute"><MailIcon name="snooze" size="xs" />Snoozed until {shortWhen(snoozedUntil)}</span>}</div>{chips}
+      {snoozedUntil && <span className="pill mute"><MailIcon name="snooze" size="xs" />Snoozed until {shortWhen(snoozedUntil)}</span>}</div>{chips}{hero}
       {messages.length > 1 && <details className="earlier"><summary>{messages.length - 1} earlier message{messages.length > 2 ? "s" : ""}</summary>{messages.slice(0,-1).map((m) => <details key={`${m.mailbox}:${m.uid}`}><summary className="early-msg"><span className="av">{initials(m.from[0]?.name ?? "",m.from[0]?.address ?? "")}</span><span><b>{senderName(m.from[0] ?? {name:"",address:""})}</b>{m.text.slice(0,90)}</span><time className="mono">{fullTime(m.date)}</time></summary>{message(m)}</details>)}</details>}
       {message(latest)}
     </div></div>{children}
