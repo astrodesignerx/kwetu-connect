@@ -40,3 +40,15 @@ it("answers yes on the action button", async () => {
   expect(answers).toEqual([true]);
   expect(host.querySelector("dialog")).toBeNull();
 });
+
+it("hands Escape straight to the owner when the exit waits for it, as New email does", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  const { MailModal } = await import("./MailOverlay");
+  const host = document.createElement("div");document.body.appendChild(host);
+  const root = createRoot(host), onClose = vi.fn();
+  await act(async () => root.render(<MailModal label="Write an email" exitFirst={false} onClose={onClose}><form><input /></form></MailModal>));
+  await act(async () => { host.querySelector("dialog")!.dispatchEvent(new Event("cancel", { cancelable: true })); });
+  expect(onClose).toHaveBeenCalledTimes(1);
+  expect(host.querySelector("dialog")!.classList.contains("is-leaving")).toBe(false);
+  await act(async () => root.unmount());
+});

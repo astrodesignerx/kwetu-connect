@@ -1628,3 +1628,10 @@ html[data-mail-theming]::view-transition-new(root) { z-index: 1; }
 .mail-app .gate-panel .mg-mail-form > input, .mail-app .gate-panel .mg-mail-password input { height: 46px; padding: 0 14px; border-radius: 12px; background: var(--surface); font-size: 15px; transition: border-color var(--t1) var(--ease), box-shadow var(--t1) var(--ease); }
 .mail-app .gate-panel .mg-mail-form > input:focus, .mail-app .gate-panel .mg-mail-password input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
 .mail-app .gate-panel .mg-mail-form-actions .mg-primary { flex: 1; justify-content: center; height: 48px; border-radius: 12px; font-size: 15px; font-weight: 650; box-shadow: 0 10px 24px -12px rgb(237 179 71 / .8); }
+
+/* ===== Booking Desk: polish ===== */
+::view-transition-old(.mail-close-out) { animation: 140ms cubic-bezier(.4, 0, 1, 1) both mail-vt-close; }
+@keyframes mail-vt-close { to { opacity: 0; transform: translateX(10px); } }
+/* Focus rings: the brown focus colour disappears on the dark sidebar, card bar and undo bar, so those use gold. */
+.mail-app :is(.rail, .bk-next, .toast, .gate-brand) :focus-visible, .mail-app .bk-next:focus-visible { outline-color: var(--gold); }
+.mail-app .rail :focus-visible { outline-offset: -2px; }

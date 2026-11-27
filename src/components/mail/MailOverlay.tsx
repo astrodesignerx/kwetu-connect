@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { ConversationRow } from "@/lib/mail/conversations";
 import MailIcon, { type MailIconName } from "./MailIcon";
 import { SHORTCUTS } from "./shortcuts";
@@ -12,8 +12,11 @@ function awayFrom(panel:HTMLElement,from:DOMRect|null){
 /**
  * A modal dialog that grows out of the button that opened it and shrinks back into it, faster, when closed.
  * Escape, a click outside and any button marked data-modal-close all close it the same way.
+ * With exitFirst off, those hand straight to onClose, which may refuse (a draft that fails to save);
+ * the owner then plays the exit itself through the handle's leave() once it really closes.
  */
-export function MailModal({label,onClose,children,className="",role}: {label:string;onClose:()=>void;children:React.ReactNode;className?:string;role?:"alertdialog"}) {
+export type ModalHandle={leave:()=>Promise<void>};
+export function MailModal({label,onClose,children,className="",role,exitFirst=true,ref:handle}: {label:string;onClose:()=>void;children:React.ReactNode;className?:string;role?:"alertdialog";exitFirst?:boolean;ref?:React.Ref<ModalHandle>}) {
   const ref=useRef<HTMLDialogElement>(null),from=useRef<DOMRect|null>(null),leaving=useRef(false),done=useRef(onClose);
   useEffect(()=>{done.current=onClose;});
   useEffect(()=>{
@@ -24,12 +27,21 @@ export function MailModal({label,onClose,children,className="",role}: {label:str
     if(p instanceof HTMLElement&&motionAllowed()&&typeof p.animate==="function")p.animate([{transform:awayFrom(p,from.current),opacity:0},{transform:"none",opacity:1}],{duration:240,easing:"cubic-bezier(.2,0,0,1)"});
     return ()=>{el?.close();};
   },[]);
+  const exit=useRef<Promise<void>|null>(null);
+  /** Plays the exit and resolves when it ends. It never closes anything by itself. */
+  function leave(){
+    if(exit.current)return exit.current;
+    const el=ref.current,p=el?.firstElementChild;
+    if(!(p instanceof HTMLElement)||!motionAllowed()||typeof p.animate!=="function")return Promise.resolve();
+    leaving.current=true;el?.classList.add("is-leaving");
+    exit.current=p.animate([{transform:"none",opacity:1},{transform:awayFrom(p,from.current),opacity:0}],{duration:150,easing:"cubic-bezier(.4,0,1,1)",fill:"forwards"}).finished.then(()=>undefined,()=>undefined);
+    return exit.current;
+  }
+  useImperativeHandle(handle,()=>({leave}));
   function close(){
     if(leaving.current)return;
-    const el=ref.current,p=el?.firstElementChild;
-    if(!(p instanceof HTMLElement)||!motionAllowed()||typeof p.animate!=="function"){done.current();return;}
-    leaving.current=true;el?.classList.add("is-leaving");
-    p.animate([{transform:"none",opacity:1},{transform:awayFrom(p,from.current),opacity:0}],{duration:150,easing:"cubic-bezier(.4,0,1,1)",fill:"forwards"}).finished.then(()=>done.current(),()=>done.current());
+    if(!exitFirst){done.current();return;}
+    void leave().then(()=>done.current());
   }
   return <dialog ref={ref} role={role} className={`mail-modal ${className}`} aria-label={label} onCancel={(e)=>{e.preventDefault();close();}} onClick={(e)=>{if(e.target===e.currentTarget||(e.target as Element).closest?.("[data-modal-close]"))close();}}>{children}</dialog>;
 }
