@@ -22,7 +22,7 @@ import MailTheme from "./MailTheme";
 import { mailRequest } from "./mail-request";
 import { checkedAgo, initials, listTime, quoteBlock, replyRecipients, replySubject, senderName, shortWhen, splitAddresses } from "./mail-format";
 import { ClientsView, Inspector, MorningBrief, TemplatesView, type FollowUpResult, type WaitingResult, type Workspace } from "./KcaPanels";
-import { MailModal, SearchPalette, ShortcutsSheet, type PaletteItem } from "./MailOverlay";
+import { MailModal, SearchPalette, ShortcutsSheet, useConfirm, type PaletteItem } from "./MailOverlay";
 import { shortcut } from "./shortcuts";
 import { UNDO_MS } from "./send-hold";
 import { Motion, withMotion, type MotionType } from "./motion";
@@ -63,6 +63,7 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
   const [draft,setDraft]=useState<Draft|null>(null),[toast,setToast]=useState<Toast|null>(null),[busy,setBusy]=useState(false),[clock,setClock]=useState(()=>Date.now());
   const [signingOut, startSignOut] = useTransition();
   const [collapsed,setCollapsed]=useState(false),[narrow,setNarrow]=useState(false);
+  const [confirmDialog,ask]=useConfirm();
   const compose=useRef<MailComposeHandle>(null),afterClose=useRef<(()=>void)|null>(null),openSequence=useRef(0),listVersion=useRef(0),mutation=useRef(false),toastTimer=useRef<ReturnType<typeof setTimeout>|null>(null),anchor=useRef<string|null>(null),known=useRef({unread,accountId});
   const account=accounts.find((a)=>a.id===accountId),selected=picked?.row??null,special=SPECIAL[view]??"inbox";
   const folder=view==="Starred"?"__starred__":boxes.find((b)=>b.special===special)?.path??(special==="inbox"?"INBOX":"");
@@ -342,7 +343,7 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
     });
   }
   async function deleteSaved(d:SavedDraft){
-    if(d.data.uploadIds.length&&!confirm("Delete this draft and its attachments? Attachments cannot be restored."))return;
+    if(d.data.uploadIds.length&&!await ask({title:"Delete this draft?",text:"Its attachments are deleted too and cannot be restored.",action:"Delete draft"}))return;
     setSaved((rows)=>rows.filter((x)=>x.id!==d.id));
     const r=await mailRequest(mailDeleteDraft(d.id,d.row_version));
     if(!r.ok){setSaved((rows)=>[d,...rows]);notify(r.error);return;}
@@ -446,7 +447,7 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
       </>}
     </div></Motion>
     {draft&&(draft.title==="New email"||!selected)&&<MailModal label="Write an email" className="compose-modal" onClose={()=>compose.current?.close()}>{composeView}</MailModal>}
-    {palette&&<SearchPalette onConversation={open} onSearchMail={(text)=>withDraftClosed(()=>{openSequence.current++;setPicked(null);setBriefOpen(false);setSelectedKeys([]);if(!["Inbox","Sent","Archive","Starred","Spam","Bin"].includes(view))setView("Inbox");setSearch(text.slice(0,200));})} items={paletteItems} errors={[...(waiting?.ok?waiting.data.errors:waiting?[waiting.error]:[]),...(list.error?[list.error]:[])]} onClose={()=>setPalette(false)}/>}{help&&<ShortcutsSheet onClose={()=>setHelp(false)}/>}
+    {palette&&<SearchPalette onConversation={open} onSearchMail={(text)=>withDraftClosed(()=>{openSequence.current++;setPicked(null);setBriefOpen(false);setSelectedKeys([]);if(!["Inbox","Sent","Archive","Starred","Spam","Bin"].includes(view))setView("Inbox");setSearch(text.slice(0,200));})} items={paletteItems} errors={[...(waiting?.ok?waiting.data.errors:waiting?[waiting.error]:[]),...(list.error?[list.error]:[])]} onClose={()=>setPalette(false)}/>}{help&&<ShortcutsSheet onClose={()=>setHelp(false)}/>}{confirmDialog}
     {toast&&<div className="toast" role="status" key={toast.id}><span>{toast.text}</span>{toast.accessible&&<span className="sr">{toast.accessible}</span>}{toast.undo&&<button type="button" onClick={()=>void undo()}>Undo <kbd>Z</kbd></button>}<i className="bar" style={{animation:`mail-drain ${UNDO_MS}ms linear forwards`}}/></div>}{demo&&<span className="sample-label">Sample data. No email is delivered.</span>}
   </section>;
 }
