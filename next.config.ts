@@ -45,7 +45,8 @@ const nextConfig: NextConfig = {
   // The dev server would otherwise print every form action's arguments, mailbox passwords included.
   logging: { serverFunctions: false },
   turbopack: { root: __dirname },
-  experimental: { serverActions: { bodySizeLimit: "55mb" } },
+  // viewTransition lets /mail animate between views with React's <ViewTransition>.
+  experimental: { serverActions: { bodySizeLimit: "55mb" }, viewTransition: true },
   async headers() {
     const mailHeaders = securityHeaders.map((h) => (h.key === "Content-Security-Policy" ? { ...h, value: mailContentSecurityPolicy } : h));
     return [

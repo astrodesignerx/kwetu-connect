@@ -1229,3 +1229,97 @@ to { transform: scaleX(0); }
 .mail-app .filters { gap: 6px; }
 .mail-app .filters .seg button { padding: 0 5px; }
 .mail-app .sel-all { width: 24px; height: 24px; }
+
+/* ===== Booking Desk: sidebar shell ===== */
+.mail-app { --side: #1a140c; --side-2: #251d12; --side-3: #33291b; --side-fg: #f4eadb; --side-mute: #a8987f; --side-w: 236px; --side-time: 260ms; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .mail-app:not([data-mail-theme="graphite"]) { --side: #0f0d0b; --side-2: #221c16; --side-3: #342b22; --side-fg: #faf2e9; --side-mute: #b9ad9f; }
+}
+[data-theme="dark"] .mail-app:not([data-mail-theme="graphite"]) { --side: #0f0d0b; --side-2: #221c16; --side-3: #342b22; --side-fg: #faf2e9; --side-mute: #b9ad9f; }
+.mail-app[data-mail-theme="graphite"] { --side: #101114; --side-2: #1f2126; --side-3: #2f3339; --side-fg: #eceef0; --side-mute: #a6adb6; }
+
+.mail-app .side-head, .mail-app .side-new, .mail-app .side-label, .mail-app .side-foot { display: none; }
+
+@container app (min-width: 721px) {
+  .mail-app .app { grid-template-columns: var(--side-w) minmax(0, 1fr); transition: grid-template-columns var(--side-time) var(--ease); }
+  .mail-app .app[data-side="collapsed"] { --side-w: 72px; }
+  .mail-app .rail { align-items: stretch; gap: 0; padding: 14px 10px 10px; border-right: 0; background: var(--side); color: var(--side-fg); overflow-x: hidden; }
+  .mail-app .rail .rail-group { gap: 2px; }
+
+  .mail-app .side-head { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 2px 14px 4px; }
+  .mail-app .side-head .logo { width: 30px; height: 36px; margin: 0; flex: none; border-radius: 8px; }
+  .mail-app .side-head .logo svg { width: 26px; height: 31px; }
+  .mail-app .brand-text { min-width: 0; flex: 1; white-space: nowrap; }
+  .mail-app .brand-text b { display: block; font-size: 14.5px; line-height: 18px; font-weight: 650; letter-spacing: -.01em; }
+  .mail-app .brand-text small { display: block; font-size: 11.5px; line-height: 15px; color: var(--side-mute); }
+  .mail-app .side-toggle { flex: none; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; color: var(--side-mute); transition: background-color var(--t1) var(--ease), color var(--t1) var(--ease); }
+  .mail-app .side-toggle:hover { background: var(--side-2); color: var(--side-fg); }
+
+  .mail-app .side-new { display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; margin: 0 0 14px; border-radius: 12px; background: var(--side-2); color: var(--side-fg); font-weight: 600; white-space: nowrap; overflow: hidden; transition: background-color var(--t2) var(--ease), color var(--t2) var(--ease), box-shadow var(--t2) var(--ease), transform var(--t1) var(--ease); }
+  .mail-app .side-new:hover { background: var(--side-3); }
+  .mail-app .side-new.mg-primary { background: var(--gold); color: var(--gold-ink); box-shadow: 0 8px 20px -8px rgb(237 179 71 / .7); }
+  .mail-app .side-new.mg-primary:hover { background: #f2c060; }
+  .mail-app .side-new:active { transform: translateY(1px); }
+
+  .mail-app .rail .rail-item { flex-direction: row; justify-content: flex-start; gap: 11px; width: 100%; min-height: 36px; height: 36px; padding: 0 10px; border-radius: 10px; font-size: 13.5px; line-height: 18px; color: var(--side-fg); white-space: nowrap; opacity: .82; transition: background-color var(--t1) var(--ease), opacity var(--t1) var(--ease); }
+  .mail-app .rail .rail-item > span:not(.badge) { overflow: hidden; text-overflow: ellipsis; }
+  .mail-app .rail .rail-item:hover { background: var(--side-2); color: var(--side-fg); opacity: 1; }
+  .mail-app .rail .rail-item[aria-current="page"] { background: var(--side-3); color: var(--side-fg); opacity: 1; font-weight: 550; }
+  .mail-app .rail .rail-item[aria-current="page"] .ic { color: var(--gold); }
+  .mail-app .rail .rail-item .badge { position: static; margin-left: auto; min-width: 0; height: auto; padding: 0; background: none; color: var(--side-mute); font: 500 12px/18px var(--f-mono); }
+  .mail-app .rail .rail-item .badge:not(.quiet):not(.ember) { padding: 0 7px; border-radius: 99px; background: var(--gold); color: var(--gold-ink); line-height: 19px; }
+  .mail-app .rail .rail-item .badge.ember { color: var(--gold); }
+
+  .mail-app .side-label { display: block; margin: 14px 10px 6px; font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--side-mute); white-space: nowrap; overflow: hidden; }
+  .mail-app .rail-spacer { min-height: 14px; }
+
+  .mail-app .side-foot { display: block; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--side-3); }
+  .mail-app .staff-account-top { display: none; }
+  .mail-app .topbar .top-new { display: none; }
+  .mail-app .staff-account-side .avatar-me { width: 100%; height: auto; display: flex; align-items: center; gap: 10px; padding: 6px; border-radius: 10px; background: none; transition: background-color var(--t1) var(--ease); }
+  .mail-app .staff-account-side .avatar-me:hover, .mail-app .staff-account-side[open] > .avatar-me { background: var(--side-2); }
+  .mail-app .me-initials { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; flex: none; background: var(--side-3); color: var(--gold); font: 600 12px var(--f-mono); }
+  .mail-app .me-text { flex: 1; min-width: 0; text-align: left; }
+  .mail-app .me-text b, .mail-app .me-text small { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .mail-app .me-text b { font-size: 13px; line-height: 17px; font-weight: 600; }
+  .mail-app .me-text small { font-size: 11.5px; line-height: 15px; color: var(--side-mute); }
+  .mail-app .me-chevron { color: var(--side-mute); transition: transform var(--t2) var(--ease); }
+  .mail-app .staff-account-side[open] .me-chevron { transform: rotate(180deg); }
+  /* Fixed, so the sidebar's scroll edge never clips it. The trigger is always the last row: 10px padding, 44px tall. */
+  .mail-app .staff-account-side .menu { position: fixed; top: auto; bottom: 60px; left: 10px; right: auto; width: 232px; color: var(--fg); transform-origin: 20% 100%; animation: mail-menu-up var(--t2) var(--ease); }
+
+  .mail-app .side-boxes { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 4px 8px; }
+  .mail-app .side-boxes button { display: inline-flex; align-items: center; gap: 6px; height: 24px; max-width: 100%; padding: 0 9px; border-radius: 7px; background: var(--side-2); color: var(--side-fg); font-size: 11.5px; opacity: .78; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity var(--t1) var(--ease), box-shadow var(--t1) var(--ease); }
+  .mail-app .side-boxes button:hover { opacity: 1; }
+  .mail-app .side-boxes button[aria-pressed="true"] { opacity: 1; box-shadow: inset 0 0 0 1px var(--side-3); }
+  .mail-app .side-boxes i { width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--side-mute); }
+  .mail-app .side-boxes button[aria-pressed="true"] i { background: var(--gold); }
+
+  /* Icon-only sidebar */
+  .mail-app .app[data-side="collapsed"] .rail { padding-inline: 12px; }
+  .mail-app .app[data-side="collapsed"] .side-head { flex-direction: column; gap: 8px; padding: 0 0 12px; }
+  .mail-app .app[data-side="collapsed"] :is(.brand-text, .side-new > span, .rail-item > span:not(.badge), .me-text, .me-chevron, .side-boxes) { display: none; }
+  .mail-app .app[data-side="collapsed"] .side-new { width: 48px; padding: 0; }
+  .mail-app .app[data-side="collapsed"] .rail .rail-item { justify-content: center; padding: 0; position: relative; }
+  .mail-app .app[data-side="collapsed"] .rail .rail-item .badge { position: absolute; top: 3px; right: 3px; min-width: 8px; height: 8px; padding: 0; border-radius: 50%; font-size: 0; line-height: 0; background: var(--gold); }
+  .mail-app .app[data-side="collapsed"] .rail .rail-item .badge.quiet { background: var(--side-mute); }
+  .mail-app .app[data-side="collapsed"] .side-label { height: 1px; margin: 12px 8px; padding: 0; font-size: 0; background: var(--side-3); }
+  .mail-app .app[data-side="collapsed"] .staff-account-side .avatar-me { justify-content: center; padding: 6px 0; }
+}
+
+@keyframes mail-menu-up { from { opacity: 0; transform: translateY(4px) scale(.98); } }
+
+/* ===== Booking Desk: view transitions ===== */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 160ms; animation-timing-function: cubic-bezier(.2, 0, 0, 1); }
+::view-transition-group(.mail-view) { animation-duration: 260ms; }
+::view-transition-old(.mail-view) { animation: 120ms cubic-bezier(.4, 0, 1, 1) both mail-vt-out; }
+::view-transition-new(.mail-view) { animation: 200ms cubic-bezier(.2, 0, 0, 1) 60ms both mail-vt-in; }
+@keyframes mail-vt-out { to { opacity: 0; transform: translateY(-4px); } }
+@keyframes mail-vt-in { from { opacity: 0; transform: translateY(8px); } }
+/* Appearance change: the new look spreads out from the chosen option. Script drives the circle. */
+html[data-mail-theming]::view-transition-old(root), html[data-mail-theming]::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+html[data-mail-theming]::view-transition-new(root) { z-index: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .mail-app .app { transition: none; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation-duration: 1ms !important; animation-delay: 0s !important; }
+}

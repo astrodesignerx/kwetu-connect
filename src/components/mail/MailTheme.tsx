@@ -1,6 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type MouseEvent, type ReactNode } from "react";
+import { flushSync } from "react-dom";
+import { canAnimate } from "./motion";
 import MailIcon, { type MailIconName } from "./MailIcon";
 
 const choices = [
@@ -86,6 +88,18 @@ export function MailAppearance({ children, className, initialGraphite }: {
   </Appearance.Provider>;
 }
 
+/** Changes appearance with the new look spreading out in a circle from the option that was clicked. */
+function reveal(event: MouseEvent<HTMLButtonElement>, apply: () => void) {
+  if (!canAnimate()) return apply();
+  const box = event.currentTarget.getBoundingClientRect(), x = box.left + box.width / 2, y = box.top + box.height / 2;
+  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  const root = document.documentElement;
+  root.dataset.mailTheming = "";
+  const change = document.startViewTransition(() => flushSync(apply));
+  change.ready.then(() => root.animate({ clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] }, { duration: 420, easing: "cubic-bezier(.2, 0, 0, 1)", pseudoElement: "::view-transition-new(root)" })).catch(() => {});
+  change.finished.catch(() => {}).finally(() => delete root.dataset.mailTheming);
+}
+
 const icons: Record<Preference, MailIconName> = { light: "sun", dark: "moon", graphite: "graphite", system: "system" };
 
 /** The appearance choices, shown inside the staff account menu. */
@@ -94,7 +108,7 @@ export default function MailTheme() {
   if (!appearance) return null;
   return <div className="theme-options" role="group" aria-label="Appearance">
     <p className="menu-label">Appearance</p>
-    {choices.map(([value, label]) => <button key={value} type="button" aria-pressed={appearance.preference === value} disabled={!appearance.ready} onClick={() => appearance.change(value)}>
+    {choices.map(([value, label]) => <button key={value} type="button" aria-pressed={appearance.preference === value} disabled={!appearance.ready} onClick={(event) => appearance.preference !== value && reveal(event, () => appearance.change(value))}>
       <MailIcon name={icons[value]} size="sm" />{label}{appearance.preference === value && <MailIcon name="check" size="xs" className="theme-check" />}
     </button>)}
   </div>;
