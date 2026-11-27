@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { signOutOfMail } from "@/app/manage/auth-actions";
 import { mailAct, mailFolders, mailList, mailThread, mailDrafts, mailDeleteDraft, mailSaveDraft, mailMove, mailUndoMove, mailStatus, type MailAction, type MessageRow, type ThreadMessage } from "@/app/mail/actions";
-import { mailAssigned, mailWorkspace, mailWaiting, mailDone, mailUndoDone, mailSnooze, mailRemind, mailFollowUps } from "@/app/mail/kca-actions";
+import { mailAssign, mailAssigned, mailWorkspace, mailWaiting, mailDone, mailUndoDone, mailSnooze, mailRemind, mailFollowUps } from "@/app/mail/kca-actions";
 import type { AccountView } from "@/lib/mail/accounts";
 import type { SavedDraft } from "@/lib/mail/drafts";
 import type { MoveReceipt } from "@/lib/mail/moves";
@@ -20,7 +20,7 @@ import MailSettings from "./MailSettings";
 import MailIcon, {KcaMark, type MailIconName} from "./MailIcon";
 import MailTheme from "./MailTheme";
 import { mailRequest } from "./mail-request";
-import { checkedAgo, initials, listTime, quoteBlock, replyRecipients, replySubject, senderName, shortWhen, splitAddresses } from "./mail-format";
+import { avatarTone, checkedAgo, initials, listTime, quoteBlock, replyRecipients, replySubject, senderName, shortWhen, splitAddresses } from "./mail-format";
 import { ClientsView, Inspector, MorningBrief, TemplatesView, type FollowUpResult, type WaitingResult, type Workspace } from "./KcaPanels";
 import { MailModal, SearchPalette, ShortcutsSheet, useConfirm, type ModalHandle, type PaletteItem } from "./MailOverlay";
 import { shortcut } from "./shortcuts";
@@ -28,13 +28,14 @@ import { UNDO_MS } from "./send-hold";
 import { Motion, withMotion, type MotionType } from "./motion";
 import BookingHero from "./BookingHero";
 import MailGate from "./MailGate";
-const PRIMARY=["Inbox","Assigned","Drafts","Sent","Starred"] as const,LIBRARY=["Clients","Templates","Archive","Spam","Bin"] as const;
+const PRIMARY=["Today","Inbox","Assigned","Snoozed","Drafts","Sent","Starred"] as const,LIBRARY=["Clients","Templates","Archive","Spam","Bin"] as const;
 const SIDE_KEY="kca-mail-side";
-const RAIL=[["Inbox","inbox"],["Assigned","assigned"],["Drafts","drafts"],["Sent","sent"],["Archive","archive"],["Clients","clients"],["Templates","templates"],["Starred","star"],["Spam","spam"],["Bin","trash"]] as const;
+const RAIL=[["Today","sun"],["Inbox","inbox"],["Assigned","assigned"],["Snoozed","snooze"],["Drafts","drafts"],["Sent","sent"],["Archive","archive"],["Clients","clients"],["Templates","templates"],["Starred","star"],["Spam","spam"],["Bin","trash"]] as const;
 type View=typeof RAIL[number][0]|"Mailboxes";
 /** What the reader says in a folder before a conversation is opened. The Inbox shows the Morning brief instead. */
 const IDLE:Partial<Record<View,[string,string]>>={
   Assigned:["Assigned to you","Conversations land here when someone on the team assigns them to you. Open one to read it."],
+  Snoozed:["Snoozed mail","Snoozed conversations return to the top of the inbox at the time you picked, or sooner if the client replies."],
   Drafts:["Your drafts","Pick a draft to carry on writing."],
   Sent:["Sent mail","Open an email you sent to see the whole conversation."],
   Starred:["Starred","Conversations stay here until you remove the star."],
@@ -42,7 +43,7 @@ const IDLE:Partial<Record<View,[string,string]>>={
   Spam:["Spam","Open a message to check it. If it is genuine, use Move to inbox."],
   Bin:["Bin","Open a message and use Move to inbox to restore it."],
 };
-const SPECIAL:Partial<Record<View,Special>>={Inbox:"inbox",Sent:"sent",Archive:"archive",Spam:"spam",Bin:"trash"};
+const SPECIAL:Partial<Record<View,Special>>={Inbox:"inbox",Snoozed:"inbox",Sent:"sent",Archive:"archive",Spam:"spam",Bin:"trash"};
 const MOVES=["archive","trash","spam","inbox"] as const;
 type Move=typeof MOVES[number];
 type Picked={accountId:string;row:MessageRow};
@@ -63,30 +64,42 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
   const [clientId,setClientId]=useState(""),[inspector,setInspector]=useState(false),[briefOpen,setBriefOpen]=useState(false),[palette,setPalette]=useState(false),[help,setHelp]=useState(false);
   const [draft,setDraft]=useState<Draft|null>(null),[toast,setToast]=useState<Toast|null>(null),[busy,setBusy]=useState(false),[clock,setClock]=useState(()=>Date.now());
   const [signingOut, startSignOut] = useTransition();
-  const [collapsed,setCollapsed]=useState(false),[narrow,setNarrow]=useState(false);
+  const [collapsed,setCollapsed]=useState(false),[narrow,setNarrow]=useState(false),[phone,setPhone]=useState(false),[drawerOpen,setDrawerOpen]=useState(false);
   const [confirmDialog,ask]=useConfirm();
   const composeModal=useRef<ModalHandle>(null);
   const compose=useRef<MailComposeHandle>(null),afterClose=useRef<(()=>void)|null>(null),openSequence=useRef(0),listVersion=useRef(0),mutation=useRef(false),toastTimer=useRef<ReturnType<typeof setTimeout>|null>(null),anchor=useRef<string|null>(null),known=useRef({unread,accountId});
   const account=accounts.find((a)=>a.id===accountId),selected=picked?.row??null,special=SPECIAL[view]??"inbox";
   const folder=view==="Starred"?"__starred__":boxes.find((b)=>b.special===special)?.path??(special==="inbox"?"INBOX":"");
-  const nonMail=["Clients","Templates","Mailboxes"].includes(view),setup=!accounts.length;
+  const nonMail=["Today","Clients","Templates","Mailboxes"].includes(view),fullWork=nonMail||view==="Drafts",setup=!accounts.length;
   const scope=useMemo<MailScope>(()=>({accountId,view,folder,search,filter}),[accountId,view,folder,search,filter]);
   const loading=page?.scope!==scope;
   const list=page?.scope===scope?page:{items:[],total:0,error:null};
   const showInspector = selected && inspector && workspace && !thread.loading;
   useEffect(()=>{
-    const wide=typeof matchMedia==="function"?matchMedia("(min-width: 1100px)"):null;
-    const fit=()=>setInspector(wide?wide.matches:window.innerWidth>=1100),timer=setTimeout(fit,0);
-    wide?.addEventListener?.("change",fit);
-    return()=>{clearTimeout(timer);wide?.removeEventListener?.("change",fit);};
-  },[]);
-  useEffect(()=>{
     try{if(localStorage.getItem(SIDE_KEY)==="collapsed")queueMicrotask(()=>setCollapsed(true));}catch{}
     const small=typeof matchMedia==="function"?matchMedia("(max-width: 1100px)"):null;
-    const fit=()=>setNarrow(!!small?.matches);fit();small?.addEventListener?.("change",fit);
-    return()=>small?.removeEventListener?.("change",fit);
+    const mobile=typeof matchMedia==="function"?matchMedia("(max-width: 720px)"):null;
+    const fit=()=>{setNarrow(!!small?.matches);const isPhone=!!mobile?.matches;setPhone(isPhone);if(!isPhone)setDrawerOpen(false);};
+    fit();
+    small?.addEventListener?.("change",fit);
+    mobile?.addEventListener?.("change",fit);
+    return()=>{small?.removeEventListener?.("change",fit);mobile?.removeEventListener?.("change",fit);};
   },[]);
-  function toggleSide(){setCollapsed((was)=>{const next=!was;try{if(next)localStorage.setItem(SIDE_KEY,"collapsed");else localStorage.removeItem(SIDE_KEY);}catch{}return next;});}
+  // Close any open dropdown menu when clicking outside it.
+  useEffect(()=>{
+    const outside=(e:PointerEvent)=>{
+      const target=e.target as Element|null;
+      for(const menu of document.querySelectorAll(".mail-app .menu-wrap[open]")){
+        if(!target||!menu.contains(target))menu.removeAttribute("open");
+      }
+    };
+    document.addEventListener("pointerdown",outside);
+    return()=>document.removeEventListener("pointerdown",outside);
+  },[]);
+  function toggleSide(){
+    if(phone){setDrawerOpen((v)=>!v);return;}
+    setCollapsed((was)=>{const next=!was;try{if(next)localStorage.setItem(SIDE_KEY,"collapsed");else localStorage.removeItem(SIDE_KEY);}catch{}return next;});
+  }
   useEffect(()=>()=>{if(toastTimer.current)clearTimeout(toastTimer.current);},[]);
   useEffect(()=>{const timer=setInterval(()=>setClock(Date.now()),30_000);return()=>clearInterval(timer);},[]);
   function notify(text:string,undo?:Toast["undo"],accessible?:string) {
@@ -100,13 +113,13 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
   const afterModal=(fn:()=>void)=>{const m=composeModal.current;if(m)void m.leave().then(fn);else fn();};
   function closeReader(){withMotion("mail-close",()=>{setPicked(null);setBriefOpen(false);openSequence.current++;});}
   function withDraftClosed(fn:()=>void){if(draft){afterClose.current=fn;compose.current?.close();}else fn();}
-  function navigate(next:View){withDraftClosed(()=>withMotion("mail-view",()=>{openSequence.current++;setPicked(null);setView(next);setFilter("all");setSearch("");setSelectedKeys([]);setBriefOpen(false);}));}
+  function navigate(next:View,nextFilter="all"){setDrawerOpen(false);withDraftClosed(()=>withMotion("mail-view",()=>{openSequence.current++;setPicked(null);setView(next);setFilter(nextFilter);setSearch("");setSelectedKeys([]);setBriefOpen(false);}));}
   function selectMailbox(id:string) {
     if (id === accountId) return;
     setAccountId(id); setBoxes([]); setSelectedKeys([]); setSaved([]); setDraftsState({loading:true,error:null}); setWorkspace(null); setWorkspaceError(""); setSyncError("");
     setUnread(accounts.find((a)=>a.id===id)?.last_unread_count ?? 0); setChecking(true);
   }
-  function changeAccount(id:string){withDraftClosed(()=>withMotion("mail-view",()=>{openSequence.current++;setPicked(null);selectMailbox(id);setView("Inbox");setSearch("");setFilter("all");setSelectedKeys([]);}));}
+  function changeAccount(id:string){setDrawerOpen(false);withDraftClosed(()=>withMotion("mail-view",()=>{openSequence.current++;setPicked(null);selectMailbox(id);setView("Inbox");setSearch("");setFilter("all");setSelectedKeys([]);}));}
   function updatedAccounts(rows:AccountView[]){setAccounts(rows);if(!rows.some((a)=>a.id===accountId)){openSequence.current++;selectMailbox(rows[0]?.id??"");setPicked(null);}setTick((n)=>n+1);}
 
   /* Loading */
@@ -171,10 +184,11 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
   // Snoozed until a later time, unless the other party has written since it was snoozed.
   const snoozedUntil=(row:MessageRow)=>{const m=metaOf(row);if(!m?.snoozed_until||Date.parse(m.snoozed_until)<=clock)return null;if(!fromMe(row)&&row.date&&row.date>m.updated_at)return null;return m.snoozed_until;};
   const returned=(row:MessageRow)=>{const m=metaOf(row);if(!m?.snoozed_until)return false;const at=Date.parse(m.snoozed_until);return at<=clock&&clock-at<WEEK;};
+  const snoozedCount=workspace?.meta.filter((m)=>m.snoozed_until&&Date.parse(m.snoozed_until)>clock).length??0;
   const waitRows=waiting?.ok?waiting.data.items:[],quietRows=followUps?.ok?followUps.data.items:[];
   const waits=(row:MessageRow)=>waitRows.some((w)=>w.accountId===rowAccount(row)&&w.mailbox===row.mailbox&&w.uid===row.uid);
   const inbox=view==="Inbox";
-  const visibleItems=list.items.filter((r)=>(filter!=="waiting"||waits(r))&&(filter!=="unread"||!r.seen)&&(filter!=="starred"||r.flagged)&&(!inbox||(filter==="snoozed")===!!snoozedUntil(r)));
+  const visibleItems=list.items.filter((r)=>view==="Snoozed"?!!snoozedUntil(r):(filter!=="waiting"||waits(r))&&(filter!=="unread"||!r.seen)&&(filter!=="starred"||r.flagged)&&(!inbox||(filter==="snoozed")===!!snoozedUntil(r)));
   const waitingKeys=new Set(visibleItems.filter(waits).map(rowKey));
   // J, K and "open the next waiting one" follow the list exactly as it is shown: one row per conversation, in its groups.
   const conversations=listGroups(visibleItems,{inbox,waitingKeys,party:rowParty,returned,now:new Date(clock)}).flatMap(([,rows])=>rows);
@@ -183,9 +197,9 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
   const draftKeys=new Set(saved.filter((d)=>d.send_state==="draft").map(draftKey));
   const emptyList=search?{title:`Nothing in ${view} matches “${search}”`,detail:"Check the spelling, or clear the search to see everything."}
     :filter==="unread"?{title:"No unread conversations"}:filter==="waiting"?{title:"Nobody is waiting on a reply"}:filter==="starred"?{title:"No starred conversations"}
-    :filter==="snoozed"?{title:"Nothing is snoozed",detail:"Snooze a conversation from its toolbar to hide it until later."}
+    :filter==="snoozed"||view==="Snoozed"?{title:"Nothing is snoozed",detail:"Snooze a conversation from its toolbar to hide it until later."}
     :inbox?{title:"Inbox is clear",detail:"New mail appears here. Mail is checked every 2 minutes while this page is open."}
-    :view==="Assigned"?{title:"Nothing is assigned to you",detail:"Assign a conversation from the Team section of the inspector."}:{title:`${view} is empty`};
+    :view==="Assigned"?{title:"Nothing is assigned to you",detail:"Assign a conversation from its toolbar or the client panel."}:{title:`${view} is empty`};
   const directory=workspace?.directory,links=workspace?.links;
   const findMatch=useMemo(()=>directory?matchIndex(directory,links):null,[directory,links]);
   const match=useMemo(()=>findMatch?.({subject:thread.messages.map((m)=>m.subject).join("\n")||selected?.subject||"",text:thread.messages.map((m)=>m.text).join("\n"),html:thread.messages.map((m)=>m.html??"").join("\n"),addresses:thread.messages.length?thread.messages.flatMap((m)=>[...m.from,...m.to,...m.cc].map((a)=>a.address)):selected?[selected.from.address,...selected.to.map((a)=>a.address),...(selected.cc??[]).map((a)=>a.address)]:[]})??{client:null,booking:null,by:null},[findMatch,selected,thread.messages]);
@@ -194,9 +208,10 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
   const latest=selected?thread.messages.at(-1):undefined,done=!!latest&&selectedMeta?.done_message_id===messageIdentity(latest);
   const noReply=!!selected&&quietRows.some((r)=>sameConversation(r,selected));
   const newEmailPrimary = !!account && !draft && !(selected && latest) && !(view === "Clients" && clientId);
-  const rowBusiness = (row: MessageRow) => {
-    const hit = findMatch?.({ subject: row.subject, text: row.snippet, addresses: [] });
-    return hit?.by === "reference" ? hit.client?.advertiser.business ?? "" : "";
+  const rowContext = (row: MessageRow) => {
+    const hit = findMatch?.({ subject: row.subject, text: row.snippet, addresses: [row.from.address, ...row.to.map((a) => a.address)] });
+    if (!hit?.client && !hit?.booking) return null;
+    return { business: hit.client?.advertiser.business, stage: hit.booking?.status, priceKes: hit.booking?.priceKes };
   };
   function patchMeta(row:ThreadMeta){setWorkspace((w)=>w?{...w,meta:[...w.meta.filter((m)=>m.thread_key!==row.thread_key),row]}:w);}
 
@@ -294,6 +309,15 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
     if(until)notify(`Snoozed until ${shortWhen(until)}`,async()=>{const back=await mailRequest(mailSnooze(id,row.subject,p,null));if(!back.ok)throw new Error(back.error);patchMeta(back.data);});
     else notify("Back in your inbox");
   }
+  async function assignConversation(row:MessageRow,email:string|null){
+    const id=rowAccount(row),p=rowParty(row);
+    const r=await mailRequest(mailAssign(id,row.subject,email,p));
+    if(!r.ok){notify(r.error);return;}
+    patchMeta(r.data);
+    const name=workspace?.people.find((person)=>person.email===email)?.name??email;
+    notify(email?`Assigned to ${name}`:"Unassigned");
+    setTick((n)=>n+1);
+  }
   async function remind(row:MessageRow,days:number|null){
     const id=rowAccount(row),at=days?daysFromNow(days):null;
     const r=await mailRequest(mailRemind(id,row.subject,rowParty(row),at));
@@ -355,6 +379,7 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
     notify("Draft deleted",d.data.uploadIds.length?undefined:async()=>{const back=await mailRequest(mailSaveDraft(d.id,d.mailbox_id,0,d.data));if(!back.ok)throw new Error(back.error);setDraftsTick((n)=>n+1);});
   }
   function saveNote(note:ClientNote){setWorkspace((w)=>w?{...w,notes:[...w.notes.filter((n)=>n.advertiser_email!==note.advertiser_email),note]}:w);}
+  function newEmail(email=""){setDrawerOpen(false);withDraftClosed(()=>setDraft({title:"New email",to:email,cc:"",subject:""}));}
 
   /* Keyboard */
   useEffect(()=>{
@@ -362,8 +387,18 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
       if(palette||help)return;
       const key=shortcut(e);if(!key)return;
       if(key==="search"){e.preventDefault();setPalette(true);return;}if(key==="help"){e.preventDefault();setHelp(true);return;}if(key==="undo"){e.preventDefault();void undo();return;}
-      if(key==="escape"){const menu=document.querySelector('.mail-app .menu-wrap[open]');if(menu)menu.removeAttribute("open");else if(draft)compose.current?.close();else if(selectedKeys.length)setSelectedKeys([]);else if(inspector&&window.innerWidth<1100)setInspector(false);else closeReader();return;}
-      if(nonMail)return;
+      if(key==="compose"&&account&&!draft){e.preventDefault();newEmail();return;}
+      if(key==="escape"){
+        const menu=document.querySelector('.mail-app .menu-wrap[open]');
+        if(menu)menu.removeAttribute("open");
+        else if(drawerOpen)setDrawerOpen(false);
+        else if(draft)compose.current?.close();
+        else if(selectedKeys.length)setSelectedKeys([]);
+        else if(inspector)setInspector(false);
+        else closeReader();
+        return;
+      }
+      if(fullWork)return;
       const index=selected?conversations.findIndex((r)=>sameConversation(r,selected)):-1;
       if(key==="next"||key==="previous"){e.preventDefault();const row=conversations[Math.max(0,Math.min(conversations.length-1,index+(key==="next"?1:-1)))];if(row)open(row,false,"mail-step");return;}
       if(!selected)return;
@@ -383,76 +418,143 @@ export default function MailDesk({initialAccounts,initialQuery,demo=false,me="",
     ...clients.map((c)=>({id:`client-${c.id}`,group:"Clients",icon:"clients" as const,label:c.advertiser.business,hint:c.advertiser.name,run:()=>{navigate("Clients");setClientId(c.id);}})),
     ...clients.flatMap((c)=>c.bookings.map((b)=>({id:`booking-${b.id}`,group:"Bookings",icon:"calendar" as const,label:`${b.reference} | ${c.advertiser.business}`,hint:b.status,run:()=>goTo(bookingHref(b))}))),
     ...accounts.map((a)=>({id:`mailbox-${a.id}`,group:"Mailboxes",icon:"inbox" as const,label:`Switch to ${a.email}`,hint:a.last_error??"",run:()=>changeAccount(a.id)})),
+    {id:"view-Today",group:"Go to",icon:"sun" as const,label:"Today",hint:"View",run:()=>navigate("Today")},
+    {id:"view-Inbox",group:"Go to",icon:"inbox" as const,label:"Inbox",hint:"View",run:()=>navigate("Inbox")},
+    {id:"view-Clients",group:"Go to",icon:"clients" as const,label:"Clients",hint:"View",run:()=>navigate("Clients")},
+    {id:"view-Templates",group:"Go to",icon:"templates" as const,label:"Templates",hint:"View",run:()=>navigate("Templates")},
+    {id:"view-Mailboxes",group:"Go to",icon:"settings" as const,label:"Settings",hint:"View",run:()=>navigate("Mailboxes")},
     ...[["Overview",""],["Bookings","/bookings"],["Advert desk","/adverts"],["Schedule","/schedule"],["Settings","/settings"]].map(([label,path])=>({id:`manager-${path}`,group:"Manager",icon:"manager" as const,label:`Open ${label}`,hint:"/manage"+path,run:()=>goTo("/manage"+path)})),
     {id:"shortcuts",group:"Actions",icon:"key" as const,label:"Keyboard shortcuts",hint:"?",run:()=>setHelp(true)}
   ];
 
   /* Layout */
-  const newEmail=(email="")=>withDraftClosed(()=>setDraft({title:"New email",to:email,cc:"",subject:""}));
-  const iconOnly=collapsed||narrow;
-  const railItem=(name:View,icon:MailIconName,phone=true)=><button type="button" key={name} className="rail-item" data-phone={phone?"yes":"no"} aria-current={view===name?"page":undefined} title={iconOnly?(name==="Mailboxes"?"Settings":name):undefined} onClick={()=>navigate(name)}><MailIcon name={icon}/><span>{name==="Mailboxes"?"Settings":name}</span>{name==="Inbox"&&unread>0&&<span className="badge">{unread}</span>}{name==="Drafts"&&saved.length>0&&<span className="badge quiet">{saved.length}</span>}</button>;
+  const iconOnly=!phone&&(collapsed||narrow);
+  const sideExpanded=phone?drawerOpen:!iconOnly;
+  const sideToggleButton=<button type="button" className="side-toggle-btn" aria-expanded={sideExpanded} aria-label={sideExpanded?(phone?"Close sidebar":"Collapse sidebar"):(phone?"Open sidebar":"Expand sidebar")} title={sideExpanded?(phone?"Close sidebar":"Collapse sidebar"):(phone?"Open sidebar":"Expand sidebar")} onClick={toggleSide}><MailIcon name="sidebar" size="sm"/></button>;
+  const badgeFor=(name:View)=>{
+    if(name==="Inbox"&&unread>0)return <span className="badge">{unread}</span>;
+    if(name==="Snoozed"&&snoozedCount>0)return <span className="badge quiet">{snoozedCount}</span>;
+    if(name==="Drafts"&&saved.length>0)return <span className="badge quiet">{saved.length}</span>;
+    if(name==="Clients"&&clients.length>0)return <span className="badge quiet">{clients.length}</span>;
+    if(name==="Today"&&quietRows.length>0)return <span className="badge ember">{quietRows.length}</span>;
+    return null;
+  };
+  const railItem=(name:View,icon:MailIconName)=><button type="button" key={name} className="rail-item" aria-current={view===name?"page":undefined} title={iconOnly?(name==="Mailboxes"?"Settings":name):undefined} onClick={()=>navigate(name)}><MailIcon name={icon} size="sm"/><span className="lbl">{name==="Mailboxes"?"Settings":name}</span>{badgeFor(name)}</button>;
   const replyAccountId=picked?.accountId??accountId;
-  const composeView=draft&&account?<MailCompose ref={compose} key={draft.saved?.id??draft.subject+draft.title} accountId={accountId} from={account.email} draft={draft} signature={workspace?.signature} templates={workspace?.templates} modes={draft.title!=="New email"&&latest?{reply:draftFor("reply",latest,replyAccountId),replyAll:draftFor("replyAll",latest,replyAccountId),forward:draftFor("forward",latest,replyAccountId)}:undefined} onClose={()=>afterModal(closeDraft)} onHold={(cancel)=>notify("Sending in 5 seconds",cancel,"If this page closes before the hold ends, the saved message stays in Drafts unsent.")} onSent={()=>afterModal(()=>{setDraft(null);setDraftsTick((n)=>n+1);notify(demo?"Saved to sample Sent. No email was delivered.":"Sent");setTick((n)=>n+1);})}/>:null;
+  const composeView=draft&&account?<MailCompose ref={compose} key={draft.saved?.id??draft.subject+draft.title} accountId={accountId} from={account.email} draft={draft} signature={workspace?.signature} templates={workspace?.templates} clients={clients} modes={draft.title!=="New email"&&latest?{reply:draftFor("reply",latest,replyAccountId),replyAll:draftFor("replyAll",latest,replyAccountId),forward:draftFor("forward",latest,replyAccountId)}:undefined} onClose={()=>afterModal(closeDraft)} onHold={(cancel)=>notify("Sending in 5 seconds",cancel,"If this page closes before the hold ends, the saved message stays in Drafts unsent.")} onSent={()=>afterModal(()=>{setDraft(null);setDraftsTick((n)=>n+1);notify(demo?"Saved to sample Sent. No email was delivered.":"Sent");setTick((n)=>n+1);})}/>:null;
   const syncFailed=syncError||account?.last_error,checked=checkedAgo(account?.last_synced_at,new Date(clock));
-  const filters=inbox?["all","unread","waiting","starred","snoozed"]:["all","unread","waiting","starred"];
+  const filters=inbox?["all","unread","waiting","starred","snoozed"]:["Spam","Bin","Snoozed"].includes(view)?[]:["all","unread","starred"];
   const resumable=latest?savedReply("reply",latest,picked?.accountId):undefined;
   const icon=(name:View)=>RAIL.find(([n])=>n===name)![1];
-  const signOutButton=<button type="button" disabled={signingOut} onClick={() => withDraftClosed(() => startSignOut(signOutOfMail))}><MailIcon name="signout" size="sm"/>{signingOut ? "Signing out..." : "Sign out"}</button>;
+  const signOutButton=<button type="button" className="signout-btn" disabled={signingOut} onClick={() => withDraftClosed(() => startSignOut(signOutOfMail))}><MailIcon name="signout" size="sm"/>{signingOut ? "Signing out..." : "Sign out"}</button>;
   const accountMenu=(where:"side"|"top")=><details className={`menu-wrap staff-account staff-account-${where}`}>
     <summary className="avatar-me" aria-label="Staff account and appearance" title={me}><span className="me-initials">{initials("", me)}</span>{where==="side"&&<><span className="me-text"><b>{me.split("@")[0]||"Staff"}</b><small>{account?.email??"No mailbox yet"}</small></span><MailIcon name="down" size="xs" className="me-chevron"/></>}</summary>
     <div className="menu">{me && <p className="staff-account-email">{me}</p>}<MailTheme/><hr/>{signOutButton}</div>
   </details>;
   // First run: no mailbox yet, so the desk has nothing to show. Setup gets the whole screen.
-  if(setup)return <section className="mail-setup" aria-label="Set up mail"><h1 className="sr">Mail</h1><MailGate title="Welcome to Booking Desk." text="Connect the mailbox you answer from. You can add the team's other addresses later in Settings."
+  if(setup)return <section className="mail-setup" aria-label="Set up mail"><h1 className="sr">Mail</h1><MailGate wide title="Welcome to Booking Desk." text="Connect the mailbox you answer from. You can add the team's other addresses later in Settings."
     points={[["lock","Your password is stored encrypted"],["refresh","Mail stays on your mail server and is read live"],["clients","Share an address with the colleagues who answer it"]]} corner={accountMenu("top")}>
     <ConnectMailbox first demo={demo} onConnected={(a)=>withMotion("mail-view",()=>updatedAccounts([a]))}/>
   </MailGate></section>;
-  return <section className="app mail-shell" data-side={iconOnly?"collapsed":"open"}>
+  const folderAction = view==="Spam" ? { label:"Not spam", action:"inbox" as MailAction } : view==="Bin" ? { label:"Restore", action:"inbox" as MailAction } : undefined;
+  return <section className={`app mail-shell ${drawerOpen?"drawer-open":""}`} data-side={iconOnly?"collapsed":"open"}>
+    <h1 className="sr">Mail</h1>
+    <button type="button" className="side-scrim" tabIndex={-1} aria-hidden="true" onClick={()=>setDrawerOpen(false)}/>
     <nav className="rail" aria-label="Mail navigation">
-      <div className="side-head"><Link href="/mail" className="logo" aria-label="KCA Mail"><KcaMark/></Link><span className="brand-text"><b>Booking Desk</b><small>Kwetu Connect staff</small></span>{!narrow&&<button type="button" className="side-toggle" aria-expanded={!collapsed} aria-label={collapsed?"Expand sidebar":"Collapse sidebar"} title={collapsed?"Expand sidebar":"Collapse sidebar"} onClick={toggleSide}><MailIcon name="sidebar" size="sm"/></button>}</div>
-      <button type="button" className={`side-new ${newEmailPrimary?"mg-primary":""}`} disabled={!account} aria-label="New email" title={iconOnly?"New email":undefined} onClick={()=>newEmail()}><MailIcon name="compose" size="sm"/><span>New email</span></button>
-      <div className="rail-group">{PRIMARY.map((name)=>railItem(name,icon(name),name==="Inbox"))}</div>
-      <p className="side-label">Library</p>
-      <div className="rail-group">{LIBRARY.map((name)=>railItem(name,icon(name),name==="Clients"))}<button type="button" className="rail-item phone-only" onClick={()=>setPalette(true)}><MailIcon name="search"/><span>Search</span></button><details className="menu-wrap rail-phone-more phone-only"><summary className="rail-item"><MailIcon name="more"/><span>More</span></summary><div className="menu">{RAIL.filter(([name])=>name!=="Inbox"&&name!=="Clients").map(([name])=><button type="button" key={name} onClick={(e)=>{e.currentTarget.closest("details")?.removeAttribute("open");navigate(name);}}>{name}</button>)}<button type="button" onClick={(e)=>{e.currentTarget.closest("details")?.removeAttribute("open");setPicked(null);setBriefOpen(true);}}>Morning brief{quietRows.length?` (${quietRows.length} no reply yet)`:""}</button><button type="button" onClick={()=>setHelp(true)}>Keyboard shortcuts</button></div></details></div>
-      <div className="rail-spacer"/>
-      <div className="rail-group"><button type="button" className="rail-item" data-phone="no" title={iconOnly?"Brief":undefined} onClick={()=>{navigate("Inbox");setBriefOpen(true);}} aria-label={quietRows.length?`Brief, ${quietRows.length} with no reply yet`:"Brief"}><MailIcon name="bolt"/><span>Brief</span>{quietRows.length>0&&<span className="badge ember">{quietRows.length}</span>}</button><Link href="/manage" className="rail-item" title={iconOnly?"Manager":undefined}><MailIcon name="manager"/><span>Manager</span></Link>{railItem("Mailboxes","settings")}<button type="button" className="rail-item" data-phone="no" title={iconOnly?"Shortcuts":undefined} onClick={()=>setHelp(true)} aria-label="Keyboard shortcuts"><MailIcon name="key"/><span>Shortcuts</span></button></div>
-      <div className="side-foot">{accounts.length>1&&<div className="side-boxes" role="group" aria-label="Switch mailbox">{accounts.map((a)=><button type="button" key={a.id} aria-pressed={a.id===accountId} title={a.email} onClick={()=>changeAccount(a.id)}><i/>{a.label&&a.label!==a.email?a.label:a.email.split("@")[0]}</button>)}</div>}{accountMenu("side")}</div>
-    </nav>
-    <header className="topbar">
-      <h1 className="sr">Mail</h1>
-      <button type="button" className="search-btn" aria-label="Search mail, clients and bookings" onClick={() => setPalette(true)}>
-        <MailIcon name="search" size="sm"/>
-        <span className="search-label">Search mail, clients and bookings</span>
-        <span className="search-label-short">Search</span>
-        <kbd>Ctrl K</kbd>
-      </button>
-      <div className="top-right">
-        <button type="button" className="sync" aria-busy={checking} onClick={() => setTick((n) => n + 1)}
-          title={checking ? "Checking mail" : syncFailed || `${checked[0].toUpperCase()}${checked.slice(1)}. Click to check now.`}
-          aria-label={checking ? "Checking mail" : syncFailed || `${checked[0].toUpperCase()}${checked.slice(1)}. Check now`}>
-          <i className={`dot ${syncFailed ? "warn" : ""}`}/>
-          <span>{checking ? "Checking mail" : syncFailed ? "Check failed" : `${checked[0].toUpperCase()}${checked.slice(1)}`}</span>
-        </button>
-        {/password|sign-in|reconnect/i.test(syncFailed || "") && (
-          <button className="link" type="button" onClick={() => navigate("Mailboxes")}>Reconnect</button>
-        )}
-        <button type="button" className={`btn top-new ${newEmailPrimary ? "gold" : "line"}`} disabled={!account} aria-label="New email" onClick={() => newEmail()}>
-          <MailIcon name="plus" size="sm"/>
-          <span>New email</span>
-        </button>
-        {accountMenu("top")}
+      <div className="side-head">
+        <Link href="/mail" className="logo" aria-label="KCA Mail"><KcaMark/></Link>
+        <span className="brand-text"><b>Booking Desk</b><small>Kwetu Connect staff</small></span>
+        <button type="button" className="side-dismiss" aria-label="Close sidebar" onClick={()=>setDrawerOpen(false)}><MailIcon name="x" size="sm"/></button>
       </div>
-    </header>
-    <Motion update={{"mail-view":"mail-view",default:"none"}} default="none"><div id="mail-work" className={`work ${nonMail?"full-work":""}`} data-insp={showInspector?"open":"closed"} data-view={selected||briefOpen?"reader":"list"} aria-busy={busy}>
-      {view==="Mailboxes"?<MailSettings accounts={accounts} demo={demo} onAccounts={updatedAccounts} onSignature={(id,signature)=>{if(id===accountId)setWorkspace((w)=>w?{...w,signature}:w);}}/>:view==="Clients"?workspace?<ClientsView workspace={workspace} clientId={clientId} onClient={(id)=>withMotion("mail-open",()=>setClientId(id))} onNote={saveNote} onNew={newEmail} onOpen={open}/>:<div className="panel empty-state">{workspaceError||"Loading clients"}</div>:view==="Templates"?workspace?<TemplatesView templates={workspace.templates} onUpdated={()=>setTick((n)=>n+1)}/>:<div className="panel empty-state">{workspaceError||"Loading templates"}</div>:<>
-      <section className="panel list" aria-label="Conversations"><div className="list-head"><div className="list-title"><h1>{view==="Assigned"?"Assigned to you":view}</h1><label className="mb-switch"><i className={`dot ${syncError?"warn":""}`}/><span className="sr">Mailbox</span><select aria-label="Mailbox" value={accountId} onChange={(e)=>changeAccount(e.target.value)}>{accounts.map((a)=><option key={a.id} value={a.id}>{a.email}</option>)}</select></label><button type="button" className="list-refresh" title="Refresh mailbox" aria-label="Refresh mailbox" onClick={()=>setTick((n)=>n+1)}><MailIcon name="refresh" size="xs"/></button></div>{search&&<p className="search-note"><span>Results for &ldquo;{search}&rdquo;</span><button type="button" className="link" onClick={()=>setSearch("")}>Clear search</button></p>}
-        {view!=="Drafts"&&<div className="filters">{selectedKeys.length?<div className="bulk" role="toolbar" aria-label="Selected conversations"><b>{selectedKeys.length} selected</b>{selectedKeys.length<conversations.length&&<button type="button" className="link" onClick={()=>setSelectedKeys(conversations.map(rowKey))}>Select all {conversations.length}</button>}<span className="bulk-actions"><button type="button" className="btn ghost" disabled={busy} onClick={()=>void bulk("archive")}>Archive</button><button type="button" className="btn ghost" disabled={busy} onClick={()=>void bulk("read")}>Mark read</button><button type="button" className="btn ghost icon" aria-label="Clear selection" onClick={()=>setSelectedKeys([])}><MailIcon name="x" size="xs"/></button></span></div>:<>{conversations.length>1&&<button type="button" className="sel-all" aria-label={`Select all ${conversations.length} conversations`} title="Select all. Shift-click a picture to select a range." onClick={()=>setSelectedKeys(conversations.map(rowKey))}><MailIcon name="check" size="xs"/></button>}<div className="seg" role="group" aria-label="Filter">{filters.map((f)=><button type="button" key={f} aria-pressed={filter===f} onClick={()=>{setFilter(f);setSelectedKeys([]);}}>{f[0].toUpperCase()+f.slice(1)}</button>)}</div></>}</div>}</div>
-      {view==="Drafts"?<div className="list-scroll">{draftsState.loading?<p className="list-end">Loading drafts</p>:draftsState.error?<p role="alert">{draftsState.error}</p>:!saved.length?<div className="empty-state"><div><b>No drafts</b><p>Replies you start and close are kept here until you send or delete them.</p></div></div>:saved.map((r)=><div className="row draft-row" key={r.id}><span className="av"><MailIcon name="drafts" size="sm"/></span><button type="button" className="row-main" onClick={()=>withDraftClosed(()=>setDraft({...r.data,saved:r}))}><span className="row-top"><span className="row-from">{r.data.subject||"(no subject)"}</span><time className="row-time mono">{listTime(r.updated_at)}</time></span><span className="row-snip">{r.data.to?`To ${r.data.to}`:"No recipient"}{r.data.body.trim()?` | ${r.data.body.trim().slice(0,120)}`:""}</span>{r.send_state!=="draft"&&<small>Check Sent before sending again</small>}</button>{r.send_state==="draft"&&<button type="button" className="btn ghost icon draft-del" aria-label={`Delete draft ${r.data.subject||"with no subject"}`} title="Delete draft" onClick={()=>void deleteSaved(r)}><MailIcon name="trash" size="sm"/></button>}</div>)}{!!saved.length&&<p className="list-end">Your personal drafts in this app. Mail-server drafts stay on the mail server.</p>}</div>:!folder&&view!=="Assigned"?<div className="empty-state">{syncError || (checking ? "Loading folders" : `This mailbox has no ${view} folder.`)}</div>:<MailList items={visibleItems} selected={selected?rowKey(selected):null} sentFolder={special==="sent"} inbox={inbox} waitingKeys={waitingKeys} loading={loading} error={list.error} hasMore={view!=="Assigned"&&list.items.length<list.total} empty={emptyList} onOpen={open} onMore={()=>void more()} onRetry={()=>setTick((n)=>n+1)} selectedKeys={selectedKeys} onSelect={select} onAct={(r,action)=>void actRow(r,action)} business={rowBusiness} party={rowParty} returned={returned} now={clock} marks={(r)=>({draft:draftKeys.has(conversation(r)),snoozedUntil:filter==="snoozed"?snoozedUntil(r):null})} assignment={(r)=>{const email=metaOf(r)?.assigned_email;return workspace?.people.find((p)=>p.email===email)?.name??email??"";}}/>}
-      </section><section className="panel main" aria-label={selected?"Conversation":"Morning brief"}>{!selected&&!inbox&&!briefOpen&&IDLE[view]?<div className="reader-idle"><span className="idle-icon"><MailIcon name={icon(view)}/></span><h2>{IDLE[view]![0]}</h2><p>{IDLE[view]![1]}</p><button type="button" className="btn line sm" onClick={()=>withMotion("mail-view",()=>setBriefOpen(true))}><MailIcon name="bolt" size="sm"/>Open the morning brief</button></div>:!selected?<><button type="button" className="btn ghost back-btn" onClick={()=>setBriefOpen(false)}>Back to list</button><MorningBrief workspace={workspace} waiting={waiting} followUps={followUps} unread={totalUnread} onOpen={open}/></>:<Motion key={picked!.accountId+":"+rowKey(selected)} enter={{"mail-open":"mail-open","mail-step":"mail-step",default:"none"}} exit={{"mail-open":"mail-open-out","mail-step":"mail-step-out","mail-close":"mail-close-out",default:"none"}} update={{"mail-loaded":"mail-loaded",default:"none"}} default="none"><MailReader accountId={picked!.accountId} special={boxes.find((b)=>b.path===selected.mailbox)?.special??special} messages={thread.messages} loading={thread.loading} error={thread.error} flagged={selected.flagged} onAct={(action)=>void actRow(selected,action)} onReply={reply} replyPrimary={!draft} onBack={()=>withDraftClosed(closeReader)} onRetry={()=>open(selected)} onDone={()=>void markDone()} done={done} waiting={waits(selected)} onInspector={()=>setInspector((v)=>!v)} inspector={inspector} bookedSeconds={match.booking?.request.lengthSeconds}
+      <button type="button" className={`side-new ${newEmailPrimary?"mg-primary":""}`} disabled={!account} aria-label="New email" title={iconOnly?"New email":undefined} onClick={()=>newEmail()}><MailIcon name="compose" size="sm"/><span>New email</span></button>
+      <div className="rail-group">{PRIMARY.map((name)=>railItem(name,icon(name)))}</div>
+      <p className="side-label">Library</p>
+      <div className="rail-group">{LIBRARY.map((name)=>railItem(name,icon(name)))}</div>
+      <div className="rail-spacer"/>
+      <div className="rail-group">
+        <Link href="/manage" className="rail-item" title={iconOnly?"Manager":undefined}><MailIcon name="manager" size="sm"/><span className="lbl">Manager</span></Link>
+        {railItem("Mailboxes","settings")}
+        <button type="button" className="rail-item" title={iconOnly?"Shortcuts":undefined} onClick={()=>{setDrawerOpen(false);setHelp(true);}} aria-label="Keyboard shortcuts"><MailIcon name="key" size="sm"/><span className="lbl">Shortcuts</span></button>
+      </div>
+      <div className="side-foot">
+        {accountMenu("side")}
+        {accounts.length>1&&<div className="side-boxes" role="group" aria-label="Switch mailbox">{accounts.map((a)=><button type="button" key={a.id} aria-pressed={a.id===accountId} title={a.email} onClick={()=>changeAccount(a.id)}><i/>{a.label&&a.label!==a.email?a.label:a.email.split("@")[0]}</button>)}</div>}
+      </div>
+    </nav>
+    <Motion update={{"mail-view":"mail-view",default:"none"}} default="none"><div id="mail-work" className={`work ${fullWork?"full-work":""}`} data-insp={showInspector?"open":"closed"} data-view={selected||briefOpen?"reader":"list"} aria-busy={busy}>
+      {view==="Today"?<MorningBrief full workspace={workspace} waiting={waiting} followUps={followUps} unread={totalUnread} mailboxCount={accounts.length} me={me} onOpen={open} onGo={(target,f)=>navigate(target as View,f??"all")} headerStart={sideToggleButton} onSearchPalette={()=>setPalette(true)}/>
+      :view==="Mailboxes"?<MailSettings accounts={accounts} demo={demo} me={me} onAccounts={updatedAccounts} onSignature={(id,signature)=>{if(id===accountId)setWorkspace((w)=>w?{...w,signature}:w);}} headerStart={sideToggleButton} onSearchPalette={()=>setPalette(true)}/>
+      :view==="Clients"?workspace?<ClientsView workspace={workspace} clientId={clientId} onClient={(id)=>withMotion("mail-open",()=>setClientId(id))} onNote={saveNote} onNew={newEmail} onOpen={open} headerStart={sideToggleButton} onSearchPalette={()=>setPalette(true)}/>:<div className="panel empty-state">{workspaceError||"Loading clients"}</div>
+      :view==="Templates"?workspace?<TemplatesView templates={workspace.templates} onUpdated={()=>setTick((n)=>n+1)} headerStart={sideToggleButton} onSearchPalette={()=>setPalette(true)}/>:<div className="panel empty-state">{workspaceError||"Loading templates"}</div>
+      :view==="Drafts"?<section className="panel main split-view" aria-label="Drafts">
+        <header className="view-head">
+          {sideToggleButton}
+          <h1>Drafts <small>{saved.length} unsent</small></h1>
+          <span className="vh-sp"/>
+          <button type="button" className="vsearch" onClick={()=>setPalette(true)} aria-label="Search mail, clients and bookings"><MailIcon name="search" size="xs"/><span>Search mail, clients, bookings</span><kbd>/</kbd></button>
+        </header>
+        <div className="main-scroll"><div className="drafts-in">
+          {draftsState.loading?<p className="muted">Loading drafts...</p>:draftsState.error?<p className="alert" role="alert">{draftsState.error}</p>:<div className="dgrid">
+            {saved.map((r)=>(
+              <article className="draft-card" key={r.id}>
+                <div className="draft-to">
+                  <span className="av" data-tone={avatarTone(r.data.to || r.data.subject || "D")}>{initials(r.data.to || "", r.data.to || "D")}</span>
+                  <span>To <b>{r.data.to || "No recipient"}</b></span>
+                  <span className="pill mute" style={{marginLeft:"auto"}}>{r.data.title==="New email"?"New":r.data.title}</span>
+                </div>
+                <h3>{r.data.subject || "(no subject)"}</h3>
+                <p>{r.data.body.trim() || "Empty draft"}</p>
+                {r.send_state!=="draft"&&<small className="draft-warn">Check Sent before sending again</small>}
+                <div className="draft-foot">
+                  <small className="mono">Saved {listTime(r.updated_at)}</small>
+                  {r.send_state==="draft"&&<button type="button" className="btn ghost sm bad-btn" aria-label={`Delete draft ${r.data.subject||"with no subject"}`} onClick={()=>void deleteSaved(r)}><MailIcon name="trash" size="xs"/>Delete</button>}
+                  <button type="button" className="btn gold sm" onClick={()=>withDraftClosed(()=>setDraft({...r.data,saved:r}))}>Resume</button>
+                </div>
+              </article>
+            ))}
+            <button type="button" className="draft-card draft-add" disabled={!account} onClick={()=>newEmail()}>
+              <MailIcon name="compose"/>
+              <b>New email</b>
+              <span>Drafts save as you type</span>
+            </button>
+          </div>}
+          {!!saved.length&&<p className="muted" style={{fontSize:"12.5px",marginTop:16}}>Your personal drafts in this app. Mail-server drafts stay on the mail server.</p>}
+        </div></div>
+      </section>
+      :<>
+      <section className="panel list" aria-label="Conversations">
+        <div className="list-head">
+          <div className="list-title">
+            {sideToggleButton}
+            <h1>{view==="Assigned"?"Assigned to you":view}</h1>
+            <small className="lh-count">{conversations.length} {conversations.length===1?"conversation":"conversations"}</small>
+            <button type="button" className="list-refresh" aria-busy={checking} title={checking?"Checking mail":syncFailed||`${checked[0].toUpperCase()}${checked.slice(1)}. Click to check now.`} aria-label="Refresh mailbox" onClick={()=>setTick((n)=>n+1)}><i className={`dot ${syncFailed?"warn":""}`}/><MailIcon name="refresh" size="xs"/></button>
+          </div>
+          <div className="list-meta-row">
+            <label className="mb-switch"><span className="sr">Mailbox</span><select aria-label="Mailbox" value={accountId} onChange={(e)=>changeAccount(e.target.value)}>{accounts.map((a)=><option key={a.id} value={a.id}>{a.email}</option>)}</select></label>
+            {/password|sign-in|reconnect/i.test(syncFailed||"")&&<button className="link" type="button" onClick={()=>navigate("Mailboxes")}>Reconnect</button>}
+          </div>
+          <button type="button" className="find-btn" aria-label="Search mail, clients and bookings" onClick={()=>setPalette(true)}>
+            <MailIcon name="search" size="sm"/>
+            <span>Find a client, booking or email</span>
+            <kbd>/</kbd>
+          </button>
+          {search&&<p className="search-note"><span>Results for &ldquo;{search}&rdquo;</span><button type="button" className="link" onClick={()=>setSearch("")}>Clear search</button></p>}
+          {view==="Spam"&&<div className="folder-banner warn"><MailIcon name="spam" size="sm"/><div><b>Do not open links or attachments here.</b><span>If something real lands here, mark it Not spam to move it to the inbox.</span></div></div>}
+          {view==="Bin"&&<div className="folder-banner calm"><MailIcon name="clock" size="sm"/><div><b>Deleted mail can be restored here.</b><span>Use Restore to move a conversation back to your inbox.</span></div></div>}
+          {(filters.length>0||selectedKeys.length>0)&&<div className="filters">{selectedKeys.length?<div className="bulk" role="toolbar" aria-label="Selected conversations"><b>{selectedKeys.length} selected</b>{selectedKeys.length<conversations.length&&<button type="button" className="link" onClick={()=>setSelectedKeys(conversations.map(rowKey))}>Select all {conversations.length}</button>}<span className="bulk-actions"><button type="button" className="btn ghost" disabled={busy} onClick={()=>void bulk("archive")}>Archive</button><button type="button" className="btn ghost" disabled={busy} onClick={()=>void bulk("read")}>Mark read</button><button type="button" className="btn ghost icon" aria-label="Clear selection" onClick={()=>setSelectedKeys([])}><MailIcon name="x" size="xs"/></button></span></div>:<>{conversations.length>1&&<button type="button" className="sel-all" aria-label={`Select all ${conversations.length} conversations`} title="Select all. Shift-click a monogram to select a range." onClick={()=>setSelectedKeys(conversations.map(rowKey))}><MailIcon name="check" size="xs"/></button>}<div className="seg" role="group" aria-label="Filter">{filters.map((f)=><button type="button" key={f} aria-pressed={filter===f} onClick={()=>{setFilter(f);setSelectedKeys([]);}}>{f[0].toUpperCase()+f.slice(1)}</button>)}</div></>}</div>}
+        </div>
+        {!folder&&view!=="Assigned"?<div className="empty-state">{syncError || (checking ? "Loading folders" : `This mailbox has no ${view} folder.`)}</div>:<MailList items={visibleItems} selected={selected?rowKey(selected):null} sentFolder={special==="sent"} inbox={inbox} waitingKeys={waitingKeys} loading={loading} error={list.error} hasMore={view!=="Assigned"&&view!=="Snoozed"&&list.items.length<list.total} empty={emptyList} onOpen={open} onMore={()=>void more()} onRetry={()=>setTick((n)=>n+1)} selectedKeys={selectedKeys} onSelect={select} onAct={(r,action)=>void actRow(r,action)} rowContext={rowContext} folderAction={folderAction} party={rowParty} returned={returned} now={clock} marks={(r)=>({draft:draftKeys.has(conversation(r)),snoozedUntil:filter==="snoozed"||view==="Snoozed"?snoozedUntil(r):null})} assignment={(r)=>{const email=metaOf(r)?.assigned_email;return workspace?.people.find((p)=>p.email===email)?.name??email??"";}}/>}
+      </section>
+      <section className="panel main" aria-label={selected?"Conversation":"Morning brief"}>{!selected&&!inbox&&!briefOpen&&IDLE[view]?<div className="reader-idle"><span className="idle-icon"><MailIcon name={icon(view)}/></span><h2>{IDLE[view]![0]}</h2><p>{IDLE[view]![1]}</p><button type="button" className="btn line sm" onClick={()=>navigate("Today")}><MailIcon name="sun" size="sm"/>Open Today</button></div>:!selected?<><button type="button" className="btn ghost back-btn" onClick={()=>setBriefOpen(false)}>Back to list</button><MorningBrief workspace={workspace} waiting={waiting} followUps={followUps} unread={totalUnread} mailboxCount={accounts.length} me={me} onOpen={open} onGo={(target,f)=>navigate(target as View,f??"all")}/></>:<Motion key={picked!.accountId+":"+rowKey(selected)} enter={{"mail-open":"mail-open","mail-step":"mail-step",default:"none"}} exit={{"mail-open":"mail-open-out","mail-step":"mail-step-out","mail-close":"mail-close-out",default:"none"}} update={{"mail-loaded":"mail-loaded",default:"none"}} default="none"><MailReader accountId={picked!.accountId} mailboxEmail={accountEmail(picked!.accountId)} special={boxes.find((b)=>b.path===selected.mailbox)?.special??special} messages={thread.messages} loading={thread.loading} error={thread.error} flagged={selected.flagged} onAct={(action)=>void actRow(selected,action)} onReply={reply} replyPrimary={!draft&&!heroShown} onBack={()=>withDraftClosed(closeReader)} onRetry={()=>open(selected)} onDone={()=>void markDone()} done={done} waiting={waits(selected)} onInspector={()=>setInspector((v)=>!v)} inspector={inspector} bookedSeconds={match.booking?.request.lengthSeconds}
+        client={match.client?{id:match.client.id,business:match.client.advertiser.business}:null} onClient={(id)=>{navigate("Clients");setClientId(id);}}
+        people={workspace?.people} assignedEmail={selectedMeta?.assigned_email} me={workspace?.me} onAssign={workspace?(email)=>void assignConversation(selected,email):undefined}
         snoozedUntil={snoozedUntil(selected)} onSnooze={workspace&&picked?.accountId===accountId?(until)=>void snooze(selected,until):undefined}
         remindAt={selectedMeta?.remind_at&&Date.parse(selectedMeta.remind_at)>clock?selectedMeta.remind_at:null} noReply={noReply} onRemind={workspace&&picked?.accountId===accountId&&rowParty(selected)?(days)=>void remind(selected,days):undefined}
         chips={<div className="chips">{match.client&&!heroShown&&<button type="button" className="chip" onClick={()=>{navigate("Clients");setClientId(match.client!.id);}}><MailIcon name="clients" size="xs"/><span className="chip-text">{match.client.advertiser.business}</span></button>}{match.booking&&!heroShown&&<a className="chip" href={bookingHref(match.booking)} aria-label={`Open booking ${match.booking.reference}`}><MailIcon name="calendar" size="xs"/><span className="chip-text">{selected.subject.toUpperCase().includes(match.booking.reference.toUpperCase()) ? "Open booking" : match.booking.reference}</span></a>}{selectedMeta?.assigned_email&&<span className="chip"><MailIcon name="assigned" size="xs"/>{workspace?.people.find((p)=>p.email===selectedMeta.assigned_email)?.name??selectedMeta.assigned_email}</span>}</div>}
-        hero={match.booking&&workspace?.directory?<BookingHero booking={match.booking} client={match.client} data={workspace.directory} today={workspace.today} onClient={(id)=>{navigate("Clients");setClientId(id);}}/>:null}>{draft&&draft.title!=="New email"?composeView:latest&&<div className="dock"><button type="button" className="dock-closed" onClick={()=>reply("reply",latest)}><MailIcon name={resumable?"drafts":"reply"} size="sm"/><span>{resumable?"Continue your reply":"Reply"} to {senderName(latest.from[0]??{name:"",address:""})}</span><small>from {account?.email}</small><kbd>R</kbd></button></div>}</MailReader></Motion>}</section>
+        hero={match.booking&&workspace?.directory?<BookingHero booking={match.booking} client={match.client} data={workspace.directory} today={workspace.today} onClient={(id)=>{navigate("Clients");setClientId(id);}}/>:null}>
+        {draft&&draft.title!=="New email"?composeView:latest&&<div className="dock-wrap"><div className="dock"><button type="button" className="dock-closed" onClick={()=>reply("reply",latest)}><MailIcon name={resumable?"drafts":"reply"} size="sm"/><span>{resumable?"Continue your reply":"Reply"} to {senderName(latest.from[0]??{name:"",address:""})}...</span><small>from {account?.email}</small><kbd>R</kbd></button>{!!workspace?.templates.length&&<div className="dock-pills">{workspace.templates.slice(0,4).map((t)=><button key={t.id} type="button" className="pillb" onClick={()=>reply("reply",latest,t.body)}>{t.name}</button>)}</div>}</div></div>}
+      </MailReader></Motion>}</section>
       {showInspector&&<Inspector booking={false} match={match} workspace={workspace} accountId={picked!.accountId} subject={selected.subject} party={rowParty(selected)} onClose={()=>setInspector(false)} onClient={(id)=>{navigate("Clients");setClientId(id);}} onReplyText={replyText} onUpdated={()=>setTick((n)=>n+1)} onNote={saveNote}/>}
       </>}
     </div></Motion>

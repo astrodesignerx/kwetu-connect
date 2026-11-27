@@ -2,7 +2,7 @@
 import type { MessageRow, MailAction } from "@/app/mail/actions";
 import MailIcon, { type MailIconName } from "./MailIcon";
 import { conversationKey } from "@/lib/mail/kca";
-import { dayGroup, initials, listTime, senderName, shortWhen, waitingFor } from "./mail-format";
+import { avatarTone, dayGroup, initials, listTime, money, senderName, shortWhen, stageLabel, stageTone, waitingFor } from "./mail-format";
 export const rowKey = (m: Pick<MessageRow,"mailbox"|"uid"> & {accountId?:string}) => `${m.accountId ? m.accountId + ":" : ""}${m.mailbox}:${m.uid}`;
 type Party = (m: MessageRow) => string;
 const noParty: Party = () => "";
@@ -31,11 +31,13 @@ export function listGroups<T extends MessageRow>(items: T[], { inbox, waitingKey
   return [...groups].sort(([a], [b]) => rank(a) - rank(b));
 }
 export type RowMarks = { draft?: boolean; snoozedUntil?: string | null };
-export default function MailList({items, selected, sentFolder, inbox, loading, error, hasMore, onOpen, onMore, onRetry, selectedKeys = [], onSelect, onAct, business, assignment, waitingKeys, empty, party, returned, marks, now: clock}: {
+export type RowContext = { business?: string; stage?: string; priceKes?: number };
+export default function MailList({items, selected, sentFolder, inbox, loading, error, hasMore, onOpen, onMore, onRetry, selectedKeys = [], onSelect, onAct, business, rowContext, assignment, waitingKeys, empty, party, returned, marks, now: clock, folderAction}: {
   items:MessageRow[]; selected:string|null; sentFolder:boolean; inbox:boolean; loading:boolean; error:string|null; hasMore:boolean;
   onOpen:(m:MessageRow)=>void; onMore:()=>void; onRetry:()=>void; selectedKeys?:string[]; onSelect?:(m:MessageRow,range:boolean)=>void; onAct?:(m:MessageRow,action:MailAction)=>void;
-  business?:(m:MessageRow)=>string; assignment?:(m:MessageRow)=>string; waitingKeys?:Set<string>; empty?:{title:string;detail?:string};
+  business?:(m:MessageRow)=>string; rowContext?:(m:MessageRow)=>RowContext|null; assignment?:(m:MessageRow)=>string; waitingKeys?:Set<string>; empty?:{title:string;detail?:string};
   party?:Party; returned?:(m:MessageRow)=>boolean; marks?:(m:MessageRow)=>RowMarks; now?:number;
+  folderAction?: { label: string; action: MailAction };
 }) {
   const olderButton = hasMore && <button type="button" className="btn line mail-more" onClick={onMore} disabled={loading}>{loading ? "Loading" : "Show older"}</button>;
   if(error && !items.length) return <div className="empty-state" role="alert"><div><p>{error}</p><button type="button" className="btn line" onClick={onRetry}>Try again</button></div></div>;
@@ -45,33 +47,49 @@ export default function MailList({items, selected, sentFolder, inbox, loading, e
     const person=sentFolder ? m.to[0] ? senderName(m.to[0]) : "No recipient" : senderName(m.from), key=rowKey(m);
     const waiting=inbox && (!waitingKeys || waitingKeys.has(key)) ? waitingFor(m.date,m.answered,m.from.address,now) : null;
     const assigned = assignment?.(m);
-    const client = business?.(m);
+    const ctx = rowContext?.(m);
+    const client = ctx?.business || business?.(m) || "";
+    const stage = ctx?.stage;
+    const priceKes = ctx?.priceKes;
     const mark = marks?.(m) ?? {};
     const snippet = m.snippet?.trim();
     const recipients = [...m.to.map((recipient) => recipient.address), ...m.to.map(senderName)];
     const repeatsRecipient = snippet && [...recipients, m.to.map(senderName).join(", ")]
       .some((value) => value.trim().toLowerCase() === snippet.toLowerCase());
+    const avatarSeed = client || person || m.from.address;
+    const avatarText = client ? initials(client, "") : initials(sentFolder ? m.to[0]?.name ?? "" : m.from.name, sentFolder ? m.to[0]?.address ?? "" : m.from.address);
+    const hasMeta = !!(stage || priceKes || (!ctx?.business && client) || m.thread > 1 || m.flagged || waiting || assigned || mark.draft || mark.snoozedUntil || folderAction);
     return <div key={key} className={`row ${!m.seen ? "unread" : ""} ${selectedKeys.includes(key) ? "is-sel" : ""}`} data-unread={!m.seen||undefined} aria-current={selected===key}>
-      <button type="button" className="av av-btn" aria-label={`Select ${m.subject}`} title="Select. Shift-click selects a range." aria-pressed={selectedKeys.includes(key)} onClick={(e)=>onSelect?.(m,e.shiftKey)}>{initials(sentFolder ? m.to[0]?.name ?? "" : m.from.name,sentFolder ? m.to[0]?.address ?? "" : m.from.address)}<span className="tick"><MailIcon name="check" size="xs"/></span></button>
+      <button type="button" className="av av-btn" data-tone={avatarTone(avatarSeed)} aria-label={`Select ${m.subject}`} title="Select. Shift-click selects a range." aria-pressed={selectedKeys.includes(key)} onClick={(e)=>onSelect?.(m,e.shiftKey)}>{avatarText}<span className="tick"><MailIcon name="check" size="xs"/></span></button>
       <button type="button" className="row-main" onClick={(e) => e.shiftKey && onSelect ? onSelect(m,true) : onOpen(m)} aria-label={`${person}, ${m.subject}${m.seen ? "" : ", unread"}${m.thread > 1 ? `, ${m.thread} messages` : ""}${mark.draft ? ", draft saved" : ""}`}>
         <span className="row-top">
-          {!m.seen && <i className="udot" aria-hidden="true" />}
-          <span className="row-from">{sentFolder ? `To ${person}` : person}</span>
-          <time className="row-time mono" dateTime={m.date ?? undefined}>{listTime(m.date, now)}</time>
+          <span className="row-who">
+            {ctx?.business ? <>
+              <span className="row-from">{ctx.business}</span>
+              <span className="row-subwho">{sentFolder ? `To ${person}` : person}</span>
+            </> : <span className="row-from">{sentFolder ? `To ${person}` : person}</span>}
+          </span>
+          <time className="row-time mono" dateTime={m.date ?? undefined}>{!m.seen && <i className="udot" aria-hidden="true" />}{listTime(m.date, now)}</time>
         </span>
         <span className="row-subj">{m.subject} {m.hasAttachments && <MailIcon name="clip" size="xs" />}</span>
         {snippet && !repeatsRecipient && <span className="row-snip">{snippet}</span>}
-        {(client || m.thread > 1 || m.flagged || waiting || assigned || mark.draft || mark.snoozedUntil) && <span className="row-foot">
-          {client && <span className="row-biz">{client}</span>}
+        {hasMeta && <span className="row-foot">
+          {stage && <span className={`pill stage ${stageTone(stage)}`}>{stageLabel(stage)}</span>}
+          {priceKes ? <span className="pill mute mono">{money(priceKes)}</span> : null}
+          {!ctx?.business && client && <span className="row-biz">{client}</span>}
           {mark.draft && <span className="pill info">Draft</span>}
           {mark.snoozedUntil && <span className="pill mute" aria-label={`Snoozed until ${shortWhen(mark.snoozedUntil)}`}><MailIcon name="snooze" size="xs" />{shortWhen(mark.snoozedUntil)}</span>}
           {m.thread > 1 && <span className="pill mute" aria-hidden="true">{m.thread}</span>}
           {m.flagged && <span className="pill gold" aria-label="Starred"><MailIcon name="star" size="xs" filled /></span>}
-          {waiting && <span className="pill ember" aria-label={`Waiting ${waiting} for a reply`}><MailIcon name="clock" size="xs" />{waiting}</span>}
+          {waiting && <span className="pill ember" aria-label={`Waiting ${waiting} for a reply`}><MailIcon name="hourglass" size="xs" />{waiting}</span>}
           {assigned && <span className="assigned-avatar" title={assigned}>{initials(assigned, assigned)}</span>}
         </span>}
       </button>
-      {onAct&&<div className="row-tools" role="group" aria-label="Quick actions">{([["archive","archive","Archive"],[m.flagged ? "unstar" : "star","star",m.flagged ? "Remove star" : "Star"],["unread","unread","Mark unread"]] as [MailAction,MailIconName,string][]).map(([action,icon,label])=><button key={action} type="button" className={action==="unstar" ? "star-on" : undefined} aria-label={`${label}: ${m.subject}`} onClick={()=>onAct(m,action)}><MailIcon name={icon} size="sm" filled={action==="unstar"}/></button>)}</div>}
+      {onAct && folderAction ? (
+        <div className="row-folder-action">
+          <button type="button" className="btn line sm" onClick={() => onAct(m, folderAction.action)}><MailIcon name="inbox" size="xs" />{folderAction.label}</button>
+        </div>
+      ) : onAct && <div className="row-tools" role="group" aria-label="Quick actions">{([["archive","archive","Archive"],[m.flagged ? "unstar" : "star","star",m.flagged ? "Remove star" : "Star"],["unread","unread","Mark unread"]] as [MailAction,MailIconName,string][]).map(([action,icon,label])=><button key={action} type="button" className={action==="unstar" ? "star-on" : undefined} aria-label={`${label}: ${m.subject}`} onClick={()=>onAct(m,action)}><MailIcon name={icon} size="sm" filled={action==="unstar"}/></button>)}</div>}
     </div>;
   })}</section>)}{error&&<p className="alert" role="alert">{error}</p>}{olderButton}</div>;
 }

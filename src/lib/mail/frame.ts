@@ -21,9 +21,10 @@ html {
 }
 body {
 	margin: 0;
-	padding: 18px 20px;
-	font: 15px/1.6 "DM Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
-	color: light-dark(#2b2119, #eceef0);
+	padding: 2px 0;
+	font: 14.5px/1.62 "Archivo", -apple-system, "Segoe UI", Roboto, sans-serif;
+	color: light-dark(#1D160D, #FAF2E9);
+	background: transparent;
 	height: auto !important;
 	min-height: 0 !important;
 	overflow-wrap: anywhere;

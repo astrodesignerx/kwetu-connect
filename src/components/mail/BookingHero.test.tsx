@@ -58,4 +58,12 @@ describe("Booking card", () => {
     expect(video).toContain("Advert waiting for review");
     expect(render(booking())).toContain("No advert yet");
   });
+
+  it("renders the TV bezel, copy reference button, and separated next-step bar", () => {
+    const html = render(booking({ status: "Quote" }));
+    expect(html).toContain('class="bk-bezel"');
+    expect(html).toContain('aria-label="Copy booking reference"');
+    expect(html).toContain('class="bk-next"');
+    expect(html).toContain('class="bk-next-go"');
+  });
 });

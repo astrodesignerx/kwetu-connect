@@ -39,10 +39,10 @@ export default function MailSignIn({ demo, linkError }: { demo: boolean; linkErr
           </span>
         </label>}
         <button type="submit" className="gate-go" aria-busy={pending}>
-          {pending ? <><i className="gate-spin" aria-hidden="true" />{mode === "password" ? "Signing in" : "Sending"}</> : mode === "password" ? <>Sign in<MailIcon name="right" size="sm" /></> : mode === "link" ? "Send sign-in link" : "Email password setup link"}
+          {pending ? <><i className="gate-spin" aria-hidden="true" />{mode === "password" ? "Signing in" : "Sending"}</> : mode === "password" ? <>Sign in<MailIcon name="arrowRight" size="sm" /></> : mode === "link" ? "Send sign-in link" : "Email password setup link"}
         </button>
       </fieldset>
-      {status && <p key={status} className={sent ? "gate-note" : "gate-alert"} role={sent ? "status" : "alert"}>{sent ? <MailIcon name="check" size="xs" /> : <MailIcon name="x" size="xs" />}{status}</p>}
+      {status && <p key={status} className={sent ? "gate-note" : "gate-alert shake"} role={sent ? "status" : "alert"}>{sent ? <MailIcon name="check" size="xs" /> : <MailIcon name="x" size="xs" />}{status}</p>}
     </form>
     <div className="gate-links">{mode === "password"
       ? <><button type="button" onClick={() => switchMode("reset")}>Set or reset password</button><button type="button" onClick={() => switchMode("link")}>Email me a sign-in link</button></>

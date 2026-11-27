@@ -113,3 +113,27 @@ export default function MailTheme() {
     </button>)}
   </div>;
 }
+
+const MODE_META: [Preference, string, string, string, string, string][] = [
+  ["light", "Light", "Warm paper, for daylight", "#1A140C", "#FAF6EE", "#FFFFFF"],
+  ["dark", "Dark", "Warm brown, easy at night", "#100E0C", "#17130F", "#231D18"],
+  ["graphite", "Graphite", "Neutral grey, low glare", "#111215", "#151619", "#202227"],
+  ["system", "System", "Matches your device", "#1A140C", "linear-gradient(135deg,#FAF6EE 50%,#17130F 50%)", "#FFFFFF"],
+];
+
+/** Visual mini-preview appearance cards for the Settings screen. */
+export function MailThemeCards() {
+  const appearance = useContext(Appearance);
+  if (!appearance) return null;
+  return <div className="mode-cards" role="group" aria-label="Appearance">
+    {MODE_META.map(([value, label, desc, side, bg, card]) => (
+      <button key={value} type="button" className="mode-card" aria-pressed={appearance.preference === value} disabled={!appearance.ready}
+        onClick={(event) => appearance.preference !== value && reveal(event, () => appearance.change(value))}
+        style={{ "--mn": side, "--mb": bg, "--mc": card } as React.CSSProperties}>
+        <span className="mode-mini" aria-hidden="true"><i /><i /></span>
+        <b><MailIcon name={icons[value]} size="xs" />{label}{appearance.preference === value && <MailIcon name="check" size="xs" className="mode-check" />}</b>
+        <small>{desc}</small>
+      </button>
+    ))}
+  </div>;
+}

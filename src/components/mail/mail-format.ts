@@ -174,3 +174,25 @@ export function snoozeChoices(now = new Date()): { label: string; at: Date }[] {
   ];
 }
 export const REMIND_DAYS = [[1, "Tomorrow"], [3, "In 3 days"], [7, "In a week"]] as const;
+
+const AVATAR_TONES = ["amber", "blue", "violet", "sage", "rose", "ember"] as const;
+export type AvatarTone = typeof AVATAR_TONES[number];
+/** Deterministic soft monogram tint for a client or sender, matching the Booking Desk palette. */
+export function avatarTone(seed: string): AvatarTone {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+  return AVATAR_TONES[Math.abs(hash) % AVATAR_TONES.length];
+}
+
+/** Semantic stage badge tone matching the Booking Desk palette: Quote=blue, Approved=violet, Paid=amber, Live=green. */
+export const stageTone = (status: string) => ({ Quote: "stage-quote", Approved: "stage-approved", Paid: "stage-paid", Live: "stage-live", Cancelled: "stage-cancelled" }[status] ?? "stage-done");
+export const stageLabel = (status: string) => status === "Live" ? "On air" : status;
+
+/** Day number and short uppercase month for a calendar date tile ("1", "DEC"). */
+export function dayTile(iso: string): { day: string; month: string } {
+  const d = dateValue(iso);
+  return {
+    day: new Intl.DateTimeFormat("en-GB", { timeZone: ZONE, day: "numeric" }).format(d),
+    month: new Intl.DateTimeFormat("en-GB", { timeZone: ZONE, month: "short" }).format(d).toUpperCase(),
+  };
+}
