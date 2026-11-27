@@ -1446,3 +1446,48 @@ html[data-mail-theming]::view-transition-new(root) { z-index: 1; }
 @keyframes mail-vt-fade-in { from { opacity: 0; } }
 .mail-app .work > .list .list-scroll > .mg-mail-skeleton { gap: 9px; margin-bottom: 8px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
 .mail-app .chips:empty { display: none; }
+
+/* ===== Booking Desk: folders, clients, templates, settings ===== */
+.mail-app .reader-idle { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; height: 100%; padding: 32px; text-align: center; }
+.mail-app .idle-icon { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 6px; border-radius: 16px; background: var(--gold-soft); color: var(--gold-text); }
+.mail-app .reader-idle h2 { margin: 0; font-size: 20px; line-height: 26px; font-weight: 650; letter-spacing: -.02em; }
+.mail-app .reader-idle p { max-width: 38ch; margin: 0 0 12px; color: var(--muted); font-size: 13.5px; line-height: 20px; }
+
+/* Clients and Templates share the inbox's card list */
+.mail-app .cl-wrap > .panel.list { background: transparent; border: 0; border-radius: 0; }
+.mail-app .cl-wrap > .list .list-head { padding: 6px 4px 12px; border-bottom: 0; gap: 12px; }
+.mail-app .cl-wrap > .list .list-head h1 { font-size: 24px; line-height: 30px; font-weight: 650; letter-spacing: -.025em; }
+.mail-app .cl-wrap > .list .list-scroll { padding: 2px 2px 14px; }
+.mail-app .cl-wrap > .list .search-in { height: 40px; border-radius: 12px; background: var(--surface); transition: border-color var(--t1) var(--ease), box-shadow var(--t1) var(--ease); }
+.mail-app .cl-wrap > .list .search-in:focus-within { border-color: var(--control-line); box-shadow: 0 0 0 3px var(--gold-soft); }
+.mail-app .cl-wrap > .list :is(.cl-row, .row) { margin-bottom: 8px; padding: 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); box-shadow: 0 1px 2px rgb(29 16 6 / .04); transition: background-color var(--t1) var(--ease), border-color var(--t1) var(--ease), box-shadow var(--t2) var(--ease); }
+.mail-app .cl-wrap > .list :is(.cl-row, .row)::before { display: none; }
+.mail-app .cl-wrap > .list :is(.cl-row, .row):hover { background: var(--surface); border-color: color-mix(in srgb, var(--control-line) 55%, var(--line)); box-shadow: 0 6px 18px -10px rgb(29 16 6 / .28); }
+.mail-app .cl-wrap > .list :is(.cl-row, .row)[aria-current="true"] { background: color-mix(in srgb, var(--gold) 9%, var(--surface)); border-color: color-mix(in srgb, var(--gold) 70%, var(--line)); box-shadow: 0 0 0 3px var(--gold-soft); }
+.mail-app .cl-wrap > .list .cl-row .av, .mail-app .cl-wrap > .list .row .av { width: 34px; height: 34px; border-radius: 11px; }
+.mail-app .cl-wrap > .list .cl-row b { font-weight: 600; }
+.mail-app .cl-wrap > .list .template-row { width: 100%; text-align: left; grid-template-columns: 34px minmax(0, 1fr); }
+.mail-app .cl-wrap > .list .template-row .row-from { font-weight: 600; }
+
+/* Client page */
+.mail-app .cl-detail { gap: 16px; padding: 24px 28px 30px; container: read / inline-size; }
+.mail-app .cl-top .av { width: 56px; height: 56px; border-radius: 16px; font-size: 18px; font-weight: 650; }
+.mail-app .cl-top h2 { font-size: 26px; line-height: 32px; font-weight: 650; letter-spacing: -.025em; }
+.mail-app .stat { padding: 14px 16px; border-radius: 16px; background: var(--surface); box-shadow: 0 1px 2px rgb(29 16 6 / .04); }
+.mail-app .stat b { font-size: 20px; line-height: 28px; }
+.mail-app .cl-sub { margin: 4px 0 10px; font-size: 13px; font-weight: 600; color: var(--muted); letter-spacing: .01em; }
+.mail-app .cl-detail .card, .mail-app .tpl-page .tpl, .mail-app .mbx-page .form-card, .mail-app .mailbox-card { border-radius: 16px; background: var(--surface); box-shadow: 0 1px 2px rgb(29 16 6 / .04); }
+.mail-app .cl-detail .th-line { padding: 10px 6px; margin: 0 -6px; border-radius: 10px; transition: background-color var(--t1) var(--ease); }
+.mail-app .cl-detail .th-line:hover { background: var(--raise); }
+
+/* Templates and Settings */
+.mail-app :is(.tpl-page, .mbx-page) h2 { font-size: 24px; line-height: 30px; font-weight: 650; letter-spacing: -.025em; }
+.mail-app .tpl-page { gap: 14px; padding: 24px 28px 30px; }
+.mail-app .tpl-page .tpl { padding: 16px 18px; gap: 8px; transition: border-color var(--t1) var(--ease); }
+.mail-app .tpl-page .tpl:hover { border-color: color-mix(in srgb, var(--control-line) 55%, var(--line)); }
+.mail-app .tpl-page .tpl b { font-weight: 600; }
+.mail-app .tpl-page .form-card { border-color: color-mix(in srgb, var(--gold) 60%, var(--line)); box-shadow: 0 0 0 3px var(--gold-soft); }
+.mail-app .mbx-page { padding: 24px 28px 30px; gap: 16px; }
+.mail-app .mailbox-card .mbx .av { border-radius: 11px; background: var(--gold-soft); color: var(--gold-text); }
+@supports (view-transition-name: none) { .mail-app :is(.cl-detail, .tpl-page, .mbx-page) { animation: none; } }
+.mail-app .cl-row span.av { display: grid; place-items: center; color: var(--fg); font-size: 11.5px; font-weight: 600; }
