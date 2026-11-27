@@ -13,8 +13,18 @@ export async function authClient() {
     },
   });
 }
+/** The signed-in staff email, or null. Never redirects, so a sign-in page can send a signed-in person on. */
+export async function signedInStaff(): Promise<string | null> {
+  if (isMemoryMode()) return null;
+  try {
+    const { data: { user } } = await (await authClient()).auth.getUser();
+    return user?.email && (await getStore().isStaff(user.email)) ? user.email : null;
+  } catch {
+    return null;
+  }
+}
 export async function requireStaff(returnTo: "/manage" | "/mail" = "/manage"): Promise<{ email: string }> {
-  const signIn = returnTo === "/mail" ? "/manage/sign-in?next=/mail" : "/manage/sign-in";
+  const signIn = returnTo === "/mail" ? "/mail/sign-in" : "/manage/sign-in";
   if (isMemoryMode()) {
     if (returnTo === "/mail" && process.env.NODE_ENV === "development") return { email: "demo@kca.local" };
     if ((await cookies()).get("kca_demo")?.value !== "1") redirect(signIn);

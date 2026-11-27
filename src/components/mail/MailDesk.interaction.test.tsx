@@ -13,7 +13,7 @@ vi.mock("@/app/mail/actions", () => ({
 vi.mock("@/app/mail/kca-actions", () => ({
   mailAssigned:vi.fn(), mailDone:vi.fn(), mailFollowUps:vi.fn(), mailRemind:vi.fn(), mailSnooze:vi.fn(), mailUndoDone:vi.fn(), mailWaiting:vi.fn(), mailWorkspace:vi.fn(),
 }));
-vi.mock("@/app/manage/auth-actions", () => ({ signOut:vi.fn() }));
+vi.mock("@/app/manage/auth-actions", () => ({ signOut:vi.fn(), signOutOfMail:vi.fn() }));
 
 function message(subject:string, uid=1):MessageRow {
   return {subject, uid, mailbox:"INBOX", from:{name:"Ada", address:"ada@example.test"}, to:[],

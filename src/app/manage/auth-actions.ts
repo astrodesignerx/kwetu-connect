@@ -135,12 +135,22 @@ export async function updateStaffPassword(_state: { message: string }, form: For
   return { message: "" };
 }
 
-/** Sign out the current staff session and clear auth cookies. */
-export async function signOut() {
+async function endSession() {
   if (!isMemoryMode()) await (await authClient()).auth.signOut();
   const jar = await cookies();
   jar.set("kca_demo", "", { path: "/manage", maxAge: 0 });
   jar.set("kca_demo", "", { path: "/", maxAge: 0 });
   jar.set(AUTH_NEXT_COOKIE, "", { path: "/manage", maxAge: 0 });
+}
+
+/** Sign out the current staff session and clear auth cookies. */
+export async function signOut() {
+  await endSession();
   redirect("/manage/sign-in");
+}
+
+/** Sign out from staff mail, back to the mail sign-in page. */
+export async function signOutOfMail() {
+  await endSession();
+  redirect("/mail/sign-in");
 }

@@ -5,10 +5,10 @@ vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => mocks.cookie
 vi.mock("next/navigation", () => ({ redirect: mocks.redirect }));
 vi.mock("@/lib/store", () => ({ isMemoryMode: () => mocks.memory, getStore: () => ({ isStaff: async () => mocks.staff }) }));
 vi.mock("@supabase/ssr", () => ({ createServerClient: () => ({ auth: { getUser: async () => ({ data: { user: mocks.user }, error: null }) } }) }));
-import { requireStaff } from "@/lib/auth/server";
+import { requireStaff, signedInStaff } from "@/lib/auth/server";
 beforeEach(() => { mocks.memory = true; mocks.cookie = undefined; mocks.staff = true; mocks.user = { email: "staff@example.test" }; });
 afterEach(() => { vi.unstubAllEnvs(); vi.clearAllMocks(); });
-describe("mail shares the staff sign-in", () => {
+describe("mail has its own sign-in page on the staff accounts", () => {
   it("allows the local sample without granting access to the manager", async () => {
     vi.stubEnv("NODE_ENV", "development");
     expect(await requireStaff("/mail")).toEqual({ email: "demo@kca.local" });
@@ -17,15 +17,23 @@ describe("mail shares the staff sign-in", () => {
   it("never grants the mail demo bypass in production or tests", async () => {
     for (const env of ["production", "test"]) {
       vi.stubEnv("NODE_ENV", env);
-      await expect(requireStaff("/mail")).rejects.toThrow("redirect:/manage/sign-in?next=/mail");
+      await expect(requireStaff("/mail")).rejects.toThrow("redirect:/mail/sign-in");
     }
   });
   it("requires a real staff account when Supabase is configured", async () => {
     mocks.memory = false;
     expect(await requireStaff("/mail")).toEqual({ email: "staff@example.test" });
     mocks.staff = false;
-    await expect(requireStaff("/mail")).rejects.toThrow("redirect:/manage/sign-in?next=/mail");
+    await expect(requireStaff("/mail")).rejects.toThrow("redirect:/mail/sign-in");
     mocks.user = null;
-    await expect(requireStaff("/mail")).rejects.toThrow("redirect:/manage/sign-in?next=/mail");
+    await expect(requireStaff("/mail")).rejects.toThrow("redirect:/mail/sign-in");
+  });
+  it("tells the mail sign-in page who is already signed in, without redirecting", async () => {
+    expect(await signedInStaff()).toBeNull();
+    mocks.memory = false;
+    expect(await signedInStaff()).toBe("staff@example.test");
+    mocks.staff = false;
+    expect(await signedInStaff()).toBeNull();
+    expect(mocks.redirect).not.toHaveBeenCalled();
   });
 });

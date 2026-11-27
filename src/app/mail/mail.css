@@ -1541,3 +1541,90 @@ html[data-mail-theming]::view-transition-new(root) { z-index: 1; }
 .mail-app .toast kbd { border-color: rgb(255 255 255 / .18); color: var(--side-mute); }
 .mail-app .toast .bar { background: var(--gold); opacity: .8; }
 @keyframes mail-toast-in { from { opacity: 0; transform: translate(-50%, 12px) scale(.96); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* ===== Booking Desk: sign in and first run ===== */
+.mail-app .mail-setup { height: 100%; }
+.mail-app .gate { display: grid; grid-template-columns: minmax(380px, 1fr) minmax(0, 1.1fr); height: 100%; min-height: 0; }
+.mail-app .gate-brand { position: relative; overflow: hidden; isolation: isolate; display: flex; flex-direction: column; gap: 28px; padding: 36px 44px; background: var(--side); color: var(--side-fg); }
+.mail-app .gate-brand::before { content: ""; position: absolute; z-index: -1; top: -300px; left: -220px; width: 640px; height: 640px; border-radius: 50%; background: radial-gradient(circle, rgb(237 179 71 / .2), transparent 62%); pointer-events: none; }
+.mail-app .gate-logo { position: relative; display: flex; align-items: center; gap: 12px; }
+.mail-app .gate-logo .logo-mark svg { width: 28px; height: 34px; }
+.mail-app .gate-logo b { display: block; font-size: 16px; line-height: 20px; font-weight: 650; }
+.mail-app .gate-logo small { color: var(--side-mute); font-size: 12px; }
+.mail-app .gate-copy { position: relative; }
+.mail-app .gate-copy h1 { max-width: 12ch; margin: 0 0 12px; font-size: 40px; line-height: 1.05; font-weight: 700; letter-spacing: -.035em; }
+.mail-app .gate-copy p { max-width: 40ch; margin: 0 0 20px; color: var(--side-mute); font-size: 15px; line-height: 22px; }
+.mail-app .gate-copy ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.mail-app .gate-copy li { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.mail-app .gate-copy li .ic { color: var(--gold); }
+
+/* Conversations drifting past behind the copy */
+.mail-app .gate-stream { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.mail-app .gate-stream .tilt { position: absolute; left: -16%; right: -28%; top: 50%; height: 150%; display: flex; gap: 16px; transform: perspective(1200px) rotateX(32deg) rotateZ(-14deg); transform-origin: 50% 0; -webkit-mask: linear-gradient(180deg, transparent, #000 16%, #000 70%, transparent); mask: linear-gradient(180deg, transparent, #000 16%, #000 70%, transparent); }
+.mail-app .gate-stream .col { flex: 1; min-width: 0; }
+.mail-app .gate-stream .track { display: grid; gap: 14px; animation: mail-stream 52s linear infinite; will-change: transform; }
+.mail-app .gate-stream .col:nth-child(2) .track { animation-duration: 64s; animation-direction: reverse; }
+.mail-app .gate-stream .col:nth-child(3) .track { animation-duration: 58s; }
+@keyframes mail-stream { to { transform: translateY(-50%); } }
+.mail-app .gate-card-sample { display: grid; grid-template-columns: 28px 1fr; gap: 6px 10px; align-items: center; padding: 12px 14px; border: 1px solid var(--side-3); border-radius: 14px; background: var(--side-2); }
+.mail-app .gate-card-sample .av { grid-row: span 2; width: 28px; height: 28px; border-radius: 9px; color: #1a140c; font-size: 10.5px; font-weight: 700; }
+.mail-app .gate-card-sample b { overflow: hidden; font-size: 12.5px; font-weight: 650; white-space: nowrap; text-overflow: ellipsis; }
+.mail-app .gate-card-sample s { display: block; height: 5px; border-radius: 3px; background: var(--side-3); text-decoration: none; }
+.mail-app .gate-card-sample em { grid-column: 1 / -1; justify-self: start; padding: 3px 8px; border-radius: 6px; background: var(--side-3); color: var(--side-mute); font: 500 10.5px var(--f-mono); font-style: normal; }
+.mail-app .gate-card-sample.hot { border-color: rgb(237 179 71 / .6); box-shadow: 0 0 0 1px rgb(237 179 71 / .25), 0 14px 36px -12px rgb(237 179 71 / .5); }
+.mail-app .gate-card-sample.hot em { background: var(--gold); color: #1a140c; }
+.mail-app .gate-stream .scrim { position: absolute; inset: 0; background: linear-gradient(180deg, var(--side) 0%, color-mix(in srgb, var(--side) 88%, transparent) 44%, transparent 64%); }
+
+/* The task side */
+.mail-app .gate-main { position: relative; display: grid; place-items: center; min-height: 0; overflow: auto; padding: 32px 24px; }
+.mail-app .gate-corner { position: absolute; top: 16px; right: 16px; z-index: 5; }
+.mail-app .gate-corner .staff-account-top { display: block; }
+.mail-app .gate-panel { width: min(400px, 100%); }
+.mail-app .gate-panel.wide { width: min(520px, 100%); }
+.mail-app .mail-sign-in { animation: mail-gate-in 260ms cubic-bezier(.2, 0, 0, 1); }
+@keyframes mail-gate-in { from { opacity: 0; transform: translateY(8px); } }
+.mail-app .mail-sign-in h2 { margin: 0 0 4px; font-size: 30px; line-height: 1.1; font-weight: 700; letter-spacing: -.03em; }
+.mail-app .gate-lede { margin: 0 0 22px; color: var(--muted); font-size: 14px; line-height: 20px; }
+.mail-app .mail-sign-in fieldset { display: grid; gap: 14px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.mail-app .gate-field { display: grid; gap: 6px; font-size: 13px; font-weight: 600; }
+.mail-app .gate-field input { width: 100%; height: 46px; padding: 0 14px; border: 1px solid var(--control-line); border-radius: 12px; background: var(--surface); color: var(--fg); font-size: 15px; font-weight: 400; transition: border-color var(--t1) var(--ease), box-shadow var(--t1) var(--ease); }
+.mail-app .gate-field input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
+.mail-app .gate-password { position: relative; display: block; }
+.mail-app .gate-password input { padding-right: 48px; }
+.mail-app .gate-password button { position: absolute; top: 6px; right: 6px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; color: var(--muted); }
+.mail-app .gate-password button:hover { background: var(--raise); color: var(--fg); }
+.mail-app .gate-go { display: flex; align-items: center; justify-content: center; gap: 8px; height: 48px; margin-top: 6px; border-radius: 12px; background: var(--gold); color: var(--gold-ink); font-size: 15px; font-weight: 650; box-shadow: 0 10px 24px -12px rgb(237 179 71 / .8); transition: background-color var(--t1) var(--ease), transform var(--t1) var(--ease); }
+.mail-app .gate-go:hover { background: #f2c060; }
+.mail-app .gate-go:active { transform: translateY(1px); }
+.mail-app .gate-go .ic { transition: transform var(--t2) var(--ease); }
+.mail-app .gate-go:hover .ic { transform: translateX(3px); }
+.mail-app fieldset:disabled .gate-go { opacity: .75; cursor: progress; }
+.mail-app .gate-spin { width: 16px; height: 16px; border: 2px solid rgb(29 16 6 / .25); border-top-color: var(--gold-ink); border-radius: 50%; animation: spin .8s linear infinite; }
+.mail-app :is(.gate-alert, .gate-note) { display: flex; align-items: flex-start; gap: 8px; margin: 14px 0 0; padding: 10px 12px; border-radius: 11px; font-size: 13px; line-height: 19px; animation: mail-gate-in 220ms cubic-bezier(.2, 0, 0, 1); }
+.mail-app .gate-alert { background: var(--bad-soft); color: var(--bad); }
+.mail-app .gate-note { background: var(--ok-soft); color: var(--ok); }
+.mail-app :is(.gate-alert, .gate-note) .ic { margin-top: 3px; }
+.mail-app .mail-sign-in > .gate-alert { margin: -8px 0 16px; }
+.mail-app .gate-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 18px; margin-top: 20px; }
+.mail-app .gate-links button { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; color: var(--gold-text); font-size: 13px; font-weight: 500; }
+.mail-app .gate-links button:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* The connect form sits straight on the page here, not in a card */
+.mail-app .gate-panel .mg-mail-connect { padding: 0; border: 0; background: none; box-shadow: none; }
+.mail-app .gate-panel .mg-mail-connect h2 { font-size: 30px; line-height: 1.1; font-weight: 700; letter-spacing: -.03em; }
+
+@media (max-width: 1040px) {
+  .mail-app .gate { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .mail-app .gate-brand { gap: 14px; padding: 22px 20px; }
+  .mail-app :is(.gate-stream, .gate-copy p, .gate-copy ul) { display: none; }
+  .mail-app .gate-copy h1 { max-width: none; margin: 0; font-size: 26px; }
+  .mail-app .gate-corner { top: 12px; right: 12px; }
+}
+@media (max-width: 720px) {
+  .mail-app .gate-main { place-items: start center; padding: 24px 16px 32px; }
+  .mail-app .gate-corner { position: static; justify-self: end; margin-bottom: 8px; }
+  .mail-app .gate-field input, .mail-app .gate-go { height: 50px; }
+}
+@media (prefers-reduced-motion: reduce) { .mail-app .gate-stream .track { animation: none; } }
+.mail-app .gate-panel .mg-mail-form > input, .mail-app .gate-panel .mg-mail-password input { height: 46px; padding: 0 14px; border-radius: 12px; background: var(--surface); font-size: 15px; transition: border-color var(--t1) var(--ease), box-shadow var(--t1) var(--ease); }
+.mail-app .gate-panel .mg-mail-form > input:focus, .mail-app .gate-panel .mg-mail-password input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
+.mail-app .gate-panel .mg-mail-form-actions .mg-primary { flex: 1; justify-content: center; height: 48px; border-radius: 12px; font-size: 15px; font-weight: 650; box-shadow: 0 10px 24px -12px rgb(237 179 71 / .8); }

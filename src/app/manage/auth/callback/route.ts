@@ -50,5 +50,5 @@ export async function GET(request: NextRequest) {
   }
   clearAuthNextCookie(jar);
   const wantsMail = cookieNext === "/mail" || cookieNext === "/manage/password?next=/mail" || params.get("next") === "/mail";
-  return NextResponse.redirect(new URL(wantsMail ? "/manage/sign-in?error=link&next=/mail" : "/manage/sign-in?error=link", request.url));
+  return NextResponse.redirect(new URL(wantsMail ? "/mail/sign-in?error=link" : "/manage/sign-in?error=link", request.url));
 }

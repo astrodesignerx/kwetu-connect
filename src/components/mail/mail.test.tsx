@@ -8,7 +8,7 @@ vi.mock("@/app/mail/actions", () => ({
 vi.mock("@/app/mail/kca-actions", () => ({
   mailWorkspace: vi.fn(), mailAssigned: vi.fn(), mailWaiting: vi.fn(), mailClientConversations: vi.fn(), mailAssign: vi.fn(), mailSaveNote: vi.fn(), mailSaveTemplate: vi.fn(), mailDeleteTemplate: vi.fn(),
 }));
-vi.mock("@/app/manage/auth-actions", () => ({ signOut: vi.fn() }));
+vi.mock("@/app/manage/auth-actions", () => ({ signOut: vi.fn(), signOutOfMail: vi.fn() }));
 
 import ConnectMailbox from "./ConnectMailbox";
 import MailDesk from "./MailDesk";
@@ -155,8 +155,9 @@ describe("Mail page", () => {
   });
 
   it("uses Lucide icons in MailDesk and ConnectMailbox with semantic Sign out and Shortcuts icons", () => {
-    const desk = renderToStaticMarkup(<MailDesk initialAccounts={[]} initialQuery="" me="staff@example.test" />);
+    const desk = renderToStaticMarkup(<MailDesk initialAccounts={[{ id: "a", label: "sales@example.test", email: "sales@example.test" }]} initialQuery="" me="staff@example.test" />);
     expect(desk).toContain("lucide-log-out");
+    expect(renderToStaticMarkup(<MailDesk initialAccounts={[]} initialQuery="" me="staff@example.test" />)).toContain("lucide-log-out");
     expect(desk).not.toContain("lucide-chevron-left");
     expect(desk).toContain("lucide-keyboard");
     expect(desk).toContain("lucide-settings");

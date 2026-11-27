@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/app/mail/actions", () => ({}));
 vi.mock("@/app/mail/kca-actions", () => ({}));
-vi.mock("@/app/manage/auth-actions", () => ({ signOut: vi.fn() }));
+vi.mock("@/app/manage/auth-actions", () => ({ signOut: vi.fn(), signOutOfMail: vi.fn() }));
 import MailDesk from "./MailDesk";
 
 const accounts = [{ id: "a", label: "sales@example.test", email: "sales@example.test" }];

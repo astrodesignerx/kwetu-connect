@@ -38,7 +38,7 @@ vi.mock("@/lib/auth/server", () => ({
 }));
 
 import { AUTH_NEXT_COOKIE, passwordSetupPath, safeCallbackNext, safeSignInNext } from "@/lib/auth/next";
-import { signIn, signInWithPassword, updateStaffPassword } from "./auth-actions";
+import { signIn, signInWithPassword, signOut, signOutOfMail, updateStaffPassword } from "./auth-actions";
 
 function makeForm(entries: Record<string, string>) {
   const form = new FormData();
@@ -195,5 +195,14 @@ describe("updateStaffPassword", () => {
     mocks.memory = true;
     const result = await updateStaffPassword({ message: "" }, makeForm({ password: "validpassword1", confirm: "validpassword1" }));
     expect(result.message).toBe("Passwords are not saved in demo mode.");
+  });
+});
+
+describe("signing out", () => {
+  it("returns the manager to its sign-in page and mail to its own", async () => {
+    await expect(signOut()).rejects.toThrow("redirect:/manage/sign-in");
+    await expect(signOutOfMail()).rejects.toThrow("redirect:/mail/sign-in");
+    expect(mocks.signOut).toHaveBeenCalledTimes(2);
+    expect(mocks.cookieSet).toHaveBeenCalledWith("kca_demo", "", { path: "/", maxAge: 0 });
   });
 });

@@ -85,7 +85,7 @@ describe("staff auth callback", () => {
     const response = await GET(new NextRequest("https://example.test/manage/auth/callback?token_hash=bad&type=email"));
     expect(mocks.signOut).toHaveBeenCalledTimes(1);
     expect(mocks.cookieSet).toHaveBeenCalledWith("kca_auth_next", "", expect.objectContaining({ path: "/manage", maxAge: 0 }));
-    expect(response.headers.get("location")).toBe("https://example.test/manage/sign-in?error=link&next=/mail");
+    expect(response.headers.get("location")).toBe("https://example.test/mail/sign-in?error=link");
   });
 
   it("signs out non-staff accounts cleanly", async () => {
